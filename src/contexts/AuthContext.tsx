@@ -120,9 +120,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const continueAsGuest = () => {
     setAuthState({
       user: null,
-      role: null,
+      role: "editor", // Set guest users as editors with limited permissions
       isLoading: false
     });
+    toast.success("Continuing as guest");
     navigate("/");
   };
 

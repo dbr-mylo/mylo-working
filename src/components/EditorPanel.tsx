@@ -2,7 +2,7 @@
 import { RichTextEditor } from "@/components/RichTextEditor";
 import type { EditorPanelProps } from "@/lib/types";
 
-export const DesignPanel = ({ content, onContentChange, isEditable }: EditorPanelProps) => {
+export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPanelProps) => {
   return (
     <div className="w-1/2 p-8 border-r border-editor-border bg-editor-bg animate-slide-in">
       <div className="max-w-2xl mx-auto">

@@ -14,13 +14,13 @@ const queryClient = new QueryClient();
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, role } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>;
   }
   
-  if (!user) {
+  if (!user && !role) {
     return <Navigate to="/auth" />;
   }
   
@@ -29,13 +29,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Auth route wrapper (redirects to home if already authenticated)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, role } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>;
   }
   
-  if (user) {
+  if (user || role) {
     return <Navigate to="/" />;
   }
   

@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [content, setContent] = useState("");
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   
   return (
     <div className="min-h-screen bg-editor-bg">
@@ -16,7 +16,7 @@ const Index = () => {
         <EditorPanel 
           content={content}
           onContentChange={setContent}
-          isEditable={!role || role === "editor"}
+          isEditable={role === "editor"}
         />
         <DesignPanel 
           content={content}

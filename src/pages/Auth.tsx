@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, continueAsGuest } = useAuth();
 
   const handleSubmit = async (action: "signin" | "signup") => {
     try {
@@ -92,6 +92,25 @@ export default function Auth() {
               </form>
             </TabsContent>
           </Tabs>
+          <div className="mt-6 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or
+                </span>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={continueAsGuest}
+              className="mt-4 w-full"
+            >
+              Continue as Guest
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -9,6 +9,7 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  continueAsGuest: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -116,8 +117,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const continueAsGuest = () => {
+    setAuthState({
+      user: null,
+      role: null,
+      isLoading: false
+    });
+    navigate("/");
+  };
+
   return (
-    <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );

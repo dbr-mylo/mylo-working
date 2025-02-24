@@ -15,3 +15,14 @@ export interface DesignPanelProps {
 export interface EditorNavProps {
   currentRole: UserRole;
 }
+
+export interface Profile {
+  id: string;
+  display_name: string | null;
+}
+
+export interface AuthState {
+  user: Profile | null;
+  role: UserRole | null;
+  isLoading: boolean;
+}

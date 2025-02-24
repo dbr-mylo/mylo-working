@@ -3,24 +3,24 @@ import { useState } from "react";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
 import { EditorNav } from "@/components/EditorNav";
-import { UserRole } from "@/lib/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [content, setContent] = useState("");
-  const [currentRole] = useState<UserRole>("editor"); // In MVP, we'll hardcode the role
+  const { role } = useAuth();
   
   return (
     <div className="min-h-screen bg-editor-bg">
-      <EditorNav currentRole={currentRole} />
+      <EditorNav currentRole={role || "editor"} />
       <main className="flex min-h-[calc(100vh-4rem)] animate-fade-in">
         <EditorPanel 
           content={content}
           onContentChange={setContent}
-          isEditable={currentRole === "editor"}
+          isEditable={!role || role === "editor"}
         />
         <DesignPanel 
           content={content}
-          isEditable={currentRole === "designer"}
+          isEditable={role === "designer"}
         />
       </main>
     </div>

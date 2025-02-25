@@ -1,4 +1,3 @@
-
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -9,7 +8,7 @@ import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import { Extension } from '@tiptap/core';
-import type { Command } from '@tiptap/core';
+import type { Command, ChainedCommands } from '@tiptap/core';
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, 
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, AlignJustify,
@@ -24,6 +23,17 @@ const LINE_HEIGHTS = {
   '1.5': '1.5',
   'double': '2',
 };
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (fontSize: string) => ReturnType;
+    };
+    lineHeight: {
+      setLineHeight: (lineHeight: string) => ReturnType;
+    };
+  }
+}
 
 const FontSize = Extension.create({
   name: 'fontSize',
@@ -56,9 +66,13 @@ const FontSize = Extension.create({
 
   addCommands() {
     return {
-      setFontSize: (fontSize: string): Command => ({ chain }) => {
-        return chain().setMark('textStyle', { fontSize }).run();
-      },
+      setFontSize:
+        (fontSize: string): Command =>
+        ({ chain }) => {
+          return chain()
+            .setMark('textStyle', { fontSize })
+            .run();
+        },
     };
   },
 });
@@ -88,11 +102,13 @@ const LineHeight = Extension.create({
 
   addCommands() {
     return {
-      setLineHeight: (lineHeight: string): Command => ({ commands }) => {
-        return commands.updateAttributes(['paragraph', 'heading'], { 
-          lineHeight,
-        });
-      },
+      setLineHeight:
+        (lineHeight: string): Command =>
+        ({ commands }) => {
+          return commands.updateAttributes('paragraph', { 
+            lineHeight,
+          });
+        },
     };
   },
 });

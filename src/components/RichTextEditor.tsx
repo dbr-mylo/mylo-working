@@ -8,6 +8,7 @@ import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
+import { Extension } from '@tiptap/core';
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, 
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, AlignJustify,
@@ -23,6 +24,44 @@ const LINE_HEIGHTS = {
   'double': '2',
 };
 
+// Custom extension for line height
+const LineHeight = Extension.create({
+  name: 'lineHeight',
+  addAttributes() {
+    return {
+      lineHeight: {
+        default: '1.5',
+        parseHTML: element => element.style.lineHeight,
+        renderHTML: attributes => {
+          if (!attributes.lineHeight) return {};
+          return {
+            style: `line-height: ${attributes.lineHeight}`,
+          };
+        },
+      },
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading'],
+        attributes: {
+          lineHeight: {
+            default: '1.5',
+            parseHTML: element => element.style.lineHeight,
+            renderHTML: attributes => {
+              if (!attributes.lineHeight) return {};
+              return {
+                style: `line-height: ${attributes.lineHeight}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
+
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const editor = useEditor({
     extensions: [
@@ -36,6 +75,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       Highlight,
       Subscript,
       Superscript,
+      LineHeight,
     ],
     content: content,
     editable: isEditable,
@@ -219,7 +259,9 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
         <div className="flex items-center gap-1 border-r border-editor-border pr-2">
           <select
             className="h-9 rounded-md px-3 text-sm border border-input bg-background"
-            onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
+            onChange={(e) => {
+              editor.chain().focus().setStyle({ fontSize: e.target.value }).run();
+            }}
           >
             <option value="">Font Size</option>
             {FONT_SIZES.map((size) => (
@@ -231,7 +273,9 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
           <select
             className="h-9 rounded-md px-3 text-sm border border-input bg-background"
-            onChange={(e) => editor.chain().focus().setLineHeight(e.target.value).run()}
+            onChange={(e) => {
+              editor.chain().focus().setAttribute('lineHeight', e.target.value).run();
+            }}
           >
             <option value="">Line Height</option>
             {Object.entries(LINE_HEIGHTS).map(([name, value]) => (

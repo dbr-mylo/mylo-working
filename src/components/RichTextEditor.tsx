@@ -24,6 +24,16 @@ const LINE_HEIGHTS = {
   'double': '2',
 };
 
+const FontSize = TextStyle.extend({
+  addCommands() {
+    return {
+      setFontSize: (fontSize: string) => ({ chain }) => {
+        return chain().setMark('textStyle', { fontSize }).run();
+      },
+    };
+  },
+});
+
 // Custom extension for line height
 const LineHeight = Extension.create({
   name: 'lineHeight',
@@ -60,6 +70,15 @@ const LineHeight = Extension.create({
       },
     ];
   },
+  addCommands() {
+    return {
+      setLineHeight: (lineHeight: string) => ({ chain }) => {
+        return chain()
+          .setNodes({ lineHeight })
+          .run();
+      },
+    };
+  },
 });
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
@@ -70,7 +89,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      TextStyle,
+      FontSize,
       Color,
       Highlight,
       Subscript,
@@ -260,7 +279,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           <select
             className="h-9 rounded-md px-3 text-sm border border-input bg-background"
             onChange={(e) => {
-              editor.chain().focus().setStyle({ fontSize: e.target.value }).run();
+              editor.chain().focus().setFontSize(e.target.value).run();
             }}
           >
             <option value="">Font Size</option>
@@ -274,7 +293,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           <select
             className="h-9 rounded-md px-3 text-sm border border-input bg-background"
             onChange={(e) => {
-              editor.chain().focus().setAttribute('lineHeight', e.target.value).run();
+              editor.chain().focus().setLineHeight(e.target.value).run();
             }}
           >
             <option value="">Line Height</option>

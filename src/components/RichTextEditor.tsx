@@ -9,6 +9,7 @@ import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import { Extension } from '@tiptap/core';
+import type { Command } from '@tiptap/core';
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, 
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, AlignJustify,
@@ -24,40 +25,54 @@ const LINE_HEIGHTS = {
   'double': '2',
 };
 
-const FontSize = TextStyle.extend({
+const FontSize = Extension.create({
+  name: 'fontSize',
+
+  addOptions() {
+    return {
+      types: ['textStyle'],
+    };
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize,
+            renderHTML: attributes => {
+              if (!attributes.fontSize) return {};
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
   addCommands() {
     return {
-      setFontSize: (fontSize: string) => ({ chain }) => {
+      setFontSize: (fontSize: string): Command => ({ chain }) => {
         return chain().setMark('textStyle', { fontSize }).run();
       },
     };
   },
 });
 
-// Custom extension for line height
 const LineHeight = Extension.create({
   name: 'lineHeight',
-  addAttributes() {
-    return {
-      lineHeight: {
-        default: '1.5',
-        parseHTML: element => element.style.lineHeight,
-        renderHTML: attributes => {
-          if (!attributes.lineHeight) return {};
-          return {
-            style: `line-height: ${attributes.lineHeight}`,
-          };
-        },
-      },
-    };
-  },
+
   addGlobalAttributes() {
     return [
       {
         types: ['paragraph', 'heading'],
         attributes: {
           lineHeight: {
-            default: '1.5',
+            default: null,
             parseHTML: element => element.style.lineHeight,
             renderHTML: attributes => {
               if (!attributes.lineHeight) return {};
@@ -70,12 +85,13 @@ const LineHeight = Extension.create({
       },
     ];
   },
+
   addCommands() {
     return {
-      setLineHeight: (lineHeight: string) => ({ chain }) => {
-        return chain()
-          .setNodes({ lineHeight })
-          .run();
+      setLineHeight: (lineHeight: string): Command => ({ commands }) => {
+        return commands.updateAttributes(['paragraph', 'heading'], { 
+          lineHeight,
+        });
       },
     };
   },
@@ -89,6 +105,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      TextStyle,
       FontSize,
       Color,
       Highlight,

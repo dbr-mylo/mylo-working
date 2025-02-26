@@ -12,20 +12,14 @@ const CustomBulletList = BulletList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('bulletList')) {
-          this.editor.chain()
-            .focus()
-            .sinkListItem('listItem')
-            .run();
+          this.editor.commands.sinkListItem('listItem');
           return true;
         }
         return false;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('bulletList')) {
-          this.editor.chain()
-            .focus()
-            .liftListItem('listItem')
-            .run();
+          this.editor.commands.liftListItem('listItem');
           return true;
         }
         return false;
@@ -39,20 +33,14 @@ const CustomOrderedList = OrderedList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('orderedList')) {
-          this.editor.chain()
-            .focus()
-            .sinkListItem('listItem')
-            .run();
+          this.editor.commands.sinkListItem('listItem');
           return true;
         }
         return false;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('orderedList')) {
-          this.editor.chain()
-            .focus()
-            .liftListItem('listItem')
-            .run();
+          this.editor.commands.liftListItem('listItem');
           return true;
         }
         return false;

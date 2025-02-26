@@ -10,8 +10,20 @@ import { Button } from '@/components/ui/button';
 const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: () => this.editor.commands.sinkListItem('listItem'),
-      'Shift-Tab': () => this.editor.commands.liftListItem('listItem'),
+      Tab: ({ editor }) => {
+        // Only handle Tab if we're in a list
+        if (editor.isActive('bulletList')) {
+          return editor.commands.sinkListItem('listItem');
+        }
+        return false;
+      },
+      'Shift-Tab': ({ editor }) => {
+        // Only handle Shift+Tab if we're in a list
+        if (editor.isActive('bulletList')) {
+          return editor.commands.liftListItem('listItem');
+        }
+        return false;
+      },
     }
   },
 });
@@ -19,8 +31,20 @@ const CustomBulletList = BulletList.extend({
 const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: () => this.editor.commands.sinkListItem('listItem'),
-      'Shift-Tab': () => this.editor.commands.liftListItem('listItem'),
+      Tab: ({ editor }) => {
+        // Only handle Tab if we're in a list
+        if (editor.isActive('orderedList')) {
+          return editor.commands.sinkListItem('listItem');
+        }
+        return false;
+      },
+      'Shift-Tab': ({ editor }) => {
+        // Only handle Shift+Tab if we're in a list
+        if (editor.isActive('orderedList')) {
+          return editor.commands.liftListItem('listItem');
+        }
+        return false;
+      },
     }
   },
 });
@@ -62,6 +86,12 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           }
           .ProseMirror li p {
             margin: 0;
+          }
+          .ProseMirror ul ul, .ProseMirror ol ol, .ProseMirror ul ol, .ProseMirror ol ul {
+            margin-top: 4px;
+          }
+          .ProseMirror li > ul, .ProseMirror li > ol {
+            padding-left: 24px;
           }
         `}
       </style>

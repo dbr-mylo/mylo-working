@@ -10,16 +10,16 @@ import { Button } from '@/components/ui/button';
 const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: ({ editor }) => {
-        if (editor.isActive('bulletList')) {
-          editor.commands.sinkListItem('listItem');
+      Tab: () => {
+        if (this.editor.isActive('bulletList')) {
+          this.editor.commands.sinkListItem('listItem');
           return true;
         }
         return false;
       },
-      'Shift-Tab': ({ editor }) => {
-        if (editor.isActive('bulletList')) {
-          editor.commands.liftListItem('listItem');
+      'Shift-Tab': () => {
+        if (this.editor.isActive('bulletList')) {
+          this.editor.commands.liftListItem('listItem');
           return true;
         }
         return false;
@@ -31,16 +31,16 @@ const CustomBulletList = BulletList.extend({
 const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: ({ editor }) => {
-        if (editor.isActive('orderedList')) {
-          editor.commands.sinkListItem('listItem');
+      Tab: () => {
+        if (this.editor.isActive('orderedList')) {
+          this.editor.commands.sinkListItem('listItem');
           return true;
         }
         return false;
       },
-      'Shift-Tab': ({ editor }) => {
-        if (editor.isActive('orderedList')) {
-          editor.commands.liftListItem('listItem');
+      'Shift-Tab': () => {
+        if (this.editor.isActive('orderedList')) {
+          this.editor.commands.liftListItem('listItem');
           return true;
         }
         return false;
@@ -55,6 +55,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
+        listItem: false, // Disable default listItem to avoid duplication
       }),
       ListItem,
       CustomBulletList,

@@ -1,3 +1,4 @@
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
@@ -88,6 +89,11 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     <div className="prose prose-sm max-w-none [&_.ProseMirror]:min-h-[calc(100vh-16rem)] [&_.ProseMirror]:focus:outline-none">
       <style>
         {`
+          .ProseMirror p {
+            margin-top: 0;
+            margin-bottom: 4px;
+            line-height: 1.2;
+          }
           .ProseMirror ul, .ProseMirror ol {
             margin-top: 0;
             margin-bottom: 0;

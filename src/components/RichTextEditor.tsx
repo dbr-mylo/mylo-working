@@ -10,19 +10,23 @@ const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Create new nested bullet if we're on an empty line
-        if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
-          return editor.commands.sinkListItem('listItem');
-        }
-        // Otherwise just indent the existing bullet
+        // Always prevent default tab behavior when in a list
         if (editor.isActive('bulletList')) {
-          return editor.commands.sinkListItem('listItem');
+          // Create new nested bullet if we're on an empty line
+          if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
+            editor.commands.sinkListItem('listItem');
+            return true;
+          }
+          // Otherwise just indent the existing bullet
+          editor.commands.sinkListItem('listItem');
+          return true;
         }
         return false;
       },
       'Shift-Tab': ({ editor }) => {
         if (editor.isActive('bulletList')) {
-          return editor.commands.liftListItem('listItem');
+          editor.commands.liftListItem('listItem');
+          return true;
         }
         return false;
       },
@@ -34,19 +38,23 @@ const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Create new nested bullet if we're on an empty line
-        if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
-          return editor.commands.sinkListItem('listItem');
-        }
-        // Otherwise just indent the existing bullet
+        // Always prevent default tab behavior when in a list
         if (editor.isActive('orderedList')) {
-          return editor.commands.sinkListItem('listItem');
+          // Create new nested bullet if we're on an empty line
+          if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
+            editor.commands.sinkListItem('listItem');
+            return true;
+          }
+          // Otherwise just indent the existing bullet
+          editor.commands.sinkListItem('listItem');
+          return true;
         }
         return false;
       },
       'Shift-Tab': ({ editor }) => {
         if (editor.isActive('orderedList')) {
-          return editor.commands.liftListItem('listItem');
+          editor.commands.liftListItem('listItem');
+          return true;
         }
         return false;
       },

@@ -1,12 +1,41 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List } from 'lucide-react';
+import ListItem from '@tiptap/extension-list-item';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import { Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+const CustomBulletList = BulletList.extend({
+  addKeyboardShortcuts() {
+    return {
+      Tab: () => this.editor.commands.sinkListItem('listItem'),
+      'Shift-Tab': () => this.editor.commands.liftListItem('listItem'),
+    }
+  },
+});
+
+const CustomOrderedList = OrderedList.extend({
+  addKeyboardShortcuts() {
+    return {
+      Tab: () => this.editor.commands.sinkListItem('listItem'),
+      'Shift-Tab': () => this.editor.commands.liftListItem('listItem'),
+    }
+  },
+});
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+      }),
+      ListItem,
+      CustomBulletList,
+      CustomOrderedList,
+    ],
     content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
@@ -60,6 +89,14 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           className={editor.isActive('bulletList') ? 'bg-accent' : ''}
         >
           <List className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+        >
+          <ListOrdered className="h-4 w-4" />
         </Button>
       </div>
       <EditorContent editor={editor} />

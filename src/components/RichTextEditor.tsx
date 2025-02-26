@@ -12,15 +12,20 @@ const CustomBulletList = BulletList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('bulletList')) {
-          // Force indent the list item regardless of parent existence
-          this.editor.commands.sinkListItem('listItem');
+          this.editor.chain()
+            .focus()
+            .sinkListItem('listItem')
+            .run();
           return true;
         }
         return false;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('bulletList')) {
-          this.editor.commands.liftListItem('listItem');
+          this.editor.chain()
+            .focus()
+            .liftListItem('listItem')
+            .run();
           return true;
         }
         return false;
@@ -34,15 +39,20 @@ const CustomOrderedList = OrderedList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('orderedList')) {
-          // Force indent the list item regardless of parent existence
-          this.editor.commands.sinkListItem('listItem');
+          this.editor.chain()
+            .focus()
+            .sinkListItem('listItem')
+            .run();
           return true;
         }
         return false;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('orderedList')) {
-          this.editor.commands.liftListItem('listItem');
+          this.editor.chain()
+            .focus()
+            .liftListItem('listItem')
+            .run();
           return true;
         }
         return false;
@@ -59,9 +69,21 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
         orderedList: false,
         listItem: false,
       }),
-      ListItem,
-      CustomBulletList,
-      CustomOrderedList,
+      ListItem.configure({
+        HTMLAttributes: {
+          class: 'list-item',
+        },
+      }),
+      CustomBulletList.configure({
+        HTMLAttributes: {
+          class: 'bullet-list',
+        },
+      }),
+      CustomOrderedList.configure({
+        HTMLAttributes: {
+          class: 'ordered-list',
+        },
+      }),
     ],
     content: content,
     editable: isEditable,

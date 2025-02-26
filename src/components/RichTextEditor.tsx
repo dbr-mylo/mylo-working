@@ -19,7 +19,23 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   }
 
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm max-w-none [&_.ProseMirror]:min-h-[calc(100vh-16rem)] [&_.ProseMirror]:focus:outline-none">
+      <style>
+        {`
+          .ProseMirror ul, .ProseMirror ol {
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-left: 20px;
+          }
+          .ProseMirror li {
+            margin-bottom: 4px;
+            line-height: 1.2;
+          }
+          .ProseMirror li p {
+            margin: 0;
+          }
+        `}
+      </style>
       <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
         <Button
           variant="outline"
@@ -46,7 +62,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           <List className="h-4 w-4" />
         </Button>
       </div>
-      <EditorContent editor={editor} className="min-h-[calc(100vh-16rem)] focus:outline-none" />
+      <EditorContent editor={editor} />
     </div>
   );
 };

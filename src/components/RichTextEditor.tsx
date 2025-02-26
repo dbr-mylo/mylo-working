@@ -12,6 +12,7 @@ const CustomBulletList = BulletList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('bulletList')) {
+          // Force indent the list item regardless of parent existence
           this.editor.commands.sinkListItem('listItem');
           return true;
         }
@@ -33,6 +34,7 @@ const CustomOrderedList = OrderedList.extend({
     return {
       Tab: () => {
         if (this.editor.isActive('orderedList')) {
+          // Force indent the list item regardless of parent existence
           this.editor.commands.sinkListItem('listItem');
           return true;
         }
@@ -55,9 +57,12 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
-        listItem: false, // Disable default listItem to avoid duplication
+        listItem: false,
       }),
-      ListItem,
+      ListItem.configure({
+        keepMarks: true,
+        keepAttributes: true,
+      }),
       CustomBulletList,
       CustomOrderedList,
     ],

@@ -1,7 +1,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List, Heading } from 'lucide-react';
+import { Bold, Italic, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
@@ -44,14 +44,6 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           className={editor.isActive('bulletList') ? 'bg-accent' : ''}
         >
           <List className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading') ? 'bg-accent' : ''}
-        >
-          <Heading className="h-4 w-4" />
         </Button>
       </div>
       <EditorContent editor={editor} className="min-h-[calc(100vh-16rem)] focus:outline-none" />

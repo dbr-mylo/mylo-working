@@ -10,20 +10,20 @@ import { Button } from '@/components/ui/button';
 const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: () => {
-        if (this.editor.isActive('bulletList')) {
-          this.editor.commands.sinkListItem('listItem');
-          return true;
+      Tab: ({ editor }) => {
+        // If we're not in a list yet, create one and indent it
+        if (!editor.isActive('bulletList')) {
+          return editor.chain()
+            .toggleBulletList()
+            .sinkListItem('listItem')
+            .run();
         }
-        if (!this.editor.isActive('orderedList')) {
-          this.editor.commands.toggleBulletList();
-        }
-        return true;
+        // If we're already in a list, just indent
+        return editor.commands.sinkListItem('listItem');
       },
-      'Shift-Tab': () => {
-        if (this.editor.isActive('bulletList')) {
-          this.editor.commands.liftListItem('listItem');
-          return true;
+      'Shift-Tab': ({ editor }) => {
+        if (editor.isActive('bulletList')) {
+          return editor.commands.liftListItem('listItem');
         }
         return false;
       },
@@ -34,20 +34,20 @@ const CustomBulletList = BulletList.extend({
 const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
-      Tab: () => {
-        if (this.editor.isActive('orderedList')) {
-          this.editor.commands.sinkListItem('listItem');
-          return true;
+      Tab: ({ editor }) => {
+        // If we're not in a list yet, create one and indent it
+        if (!editor.isActive('orderedList')) {
+          return editor.chain()
+            .toggleOrderedList()
+            .sinkListItem('listItem')
+            .run();
         }
-        if (!this.editor.isActive('bulletList')) {
-          this.editor.commands.toggleOrderedList();
-        }
-        return true;
+        // If we're already in a list, just indent
+        return editor.commands.sinkListItem('listItem');
       },
-      'Shift-Tab': () => {
-        if (this.editor.isActive('orderedList')) {
-          this.editor.commands.liftListItem('listItem');
-          return true;
+      'Shift-Tab': ({ editor }) => {
+        if (editor.isActive('orderedList')) {
+          return editor.commands.liftListItem('listItem');
         }
         return false;
       },
@@ -61,23 +61,10 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
-        listItem: false,
       }),
-      ListItem.configure({
-        HTMLAttributes: {
-          class: 'list-item',
-        },
-      }),
-      CustomBulletList.configure({
-        HTMLAttributes: {
-          class: 'bullet-list',
-        },
-      }),
-      CustomOrderedList.configure({
-        HTMLAttributes: {
-          class: 'ordered-list',
-        },
-      }),
+      ListItem,
+      CustomBulletList,
+      CustomOrderedList,
     ],
     content: content,
     editable: isEditable,

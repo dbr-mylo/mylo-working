@@ -1,33 +1,12 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-import TextStyle from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
-import Highlight from '@tiptap/extension-highlight';
-import Subscript from '@tiptap/extension-subscript';
-import Superscript from '@tiptap/extension-superscript';
-import { FontSize } from './editor/extensions/font-size';
-import { LineHeight } from './editor/extensions/line-height';
-import { EditorToolbar } from './editor/toolbar/EditorToolbar';
+import { Bold, Italic, List, Heading } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      TextStyle,
-      FontSize,
-      Color,
-      Highlight,
-      Subscript,
-      Superscript,
-      LineHeight,
-    ],
+    extensions: [StarterKit],
     content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
@@ -41,7 +20,40 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
   return (
     <div className="prose prose-sm max-w-none">
-      <EditorToolbar editor={editor} />
+      <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'bg-accent' : ''}
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'bg-accent' : ''}
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={editor.isActive('heading') ? 'bg-accent' : ''}
+        >
+          <Heading className="h-4 w-4" />
+        </Button>
+      </div>
       <EditorContent editor={editor} className="min-h-[calc(100vh-16rem)] focus:outline-none" />
     </div>
   );

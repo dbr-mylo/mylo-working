@@ -11,14 +11,17 @@ const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Only handle Tab if we're in a list
-        if (editor.isActive('bulletList')) {
-          return editor.commands.sinkListItem('listItem');
+        // If we're not in a list yet, create one and indent it
+        if (!editor.isActive('bulletList')) {
+          return editor.chain()
+            .toggleBulletList()
+            .sinkListItem('listItem')
+            .run();
         }
-        return false;
+        // If we're already in a list, just indent
+        return editor.commands.sinkListItem('listItem');
       },
       'Shift-Tab': ({ editor }) => {
-        // Only handle Shift+Tab if we're in a list
         if (editor.isActive('bulletList')) {
           return editor.commands.liftListItem('listItem');
         }
@@ -32,14 +35,17 @@ const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Only handle Tab if we're in a list
-        if (editor.isActive('orderedList')) {
-          return editor.commands.sinkListItem('listItem');
+        // If we're not in a list yet, create one and indent it
+        if (!editor.isActive('orderedList')) {
+          return editor.chain()
+            .toggleOrderedList()
+            .sinkListItem('listItem')
+            .run();
         }
-        return false;
+        // If we're already in a list, just indent
+        return editor.commands.sinkListItem('listItem');
       },
       'Shift-Tab': ({ editor }) => {
-        // Only handle Shift+Tab if we're in a list
         if (editor.isActive('orderedList')) {
           return editor.commands.liftListItem('listItem');
         }

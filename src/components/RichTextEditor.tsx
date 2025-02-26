@@ -15,7 +15,9 @@ const CustomBulletList = BulletList.extend({
           this.editor.commands.sinkListItem('listItem');
           return true;
         }
-        return false;
+        this.editor.commands.toggleBulletList();
+        this.editor.commands.sinkListItem('listItem');
+        return true;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('bulletList')) {
@@ -36,7 +38,9 @@ const CustomOrderedList = OrderedList.extend({
           this.editor.commands.sinkListItem('listItem');
           return true;
         }
-        return false;
+        this.editor.commands.toggleOrderedList();
+        this.editor.commands.sinkListItem('listItem');
+        return true;
       },
       'Shift-Tab': () => {
         if (this.editor.isActive('orderedList')) {

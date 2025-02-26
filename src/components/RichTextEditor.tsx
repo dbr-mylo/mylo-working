@@ -1,3 +1,4 @@
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
@@ -10,14 +11,7 @@ const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Always prevent default tab behavior when in a list
         if (editor.isActive('bulletList')) {
-          // Create new nested bullet if we're on an empty line
-          if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
-            editor.commands.sinkListItem('listItem');
-            return true;
-          }
-          // Otherwise just indent the existing bullet
           editor.commands.sinkListItem('listItem');
           return true;
         }
@@ -38,14 +32,7 @@ const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Always prevent default tab behavior when in a list
         if (editor.isActive('orderedList')) {
-          // Create new nested bullet if we're on an empty line
-          if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
-            editor.commands.sinkListItem('listItem');
-            return true;
-          }
-          // Otherwise just indent the existing bullet
           editor.commands.sinkListItem('listItem');
           return true;
         }

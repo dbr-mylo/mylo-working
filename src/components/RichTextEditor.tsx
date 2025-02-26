@@ -59,10 +59,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
         orderedList: false,
         listItem: false,
       }),
-      ListItem.configure({
-        keepMarks: true,
-        keepAttributes: true,
-      }),
+      ListItem,
       CustomBulletList,
       CustomOrderedList,
     ],

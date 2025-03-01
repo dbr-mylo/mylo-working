@@ -17,7 +17,7 @@ export const EditorNav = ({
   currentRole, 
   onSave, 
   content, 
-  documentTitle = "Untitled Document", 
+  documentTitle = "", 
   onTitleChange,
   onLoadDocument 
 }: EditorNavProps) => {
@@ -75,7 +75,7 @@ export const EditorNav = ({
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value || "Untitled Document";
+    const newTitle = e.target.value;
     setTitle(newTitle);
     if (onTitleChange) {
       onTitleChange(newTitle);
@@ -83,17 +83,11 @@ export const EditorNav = ({
   };
 
   const handleTitleFocus = () => {
-    if (title === "Untitled Document") {
-      setTitle("");
-    }
   };
 
   const handleTitleBlur = () => {
-    if (!title.trim()) {
-      setTitle("Untitled Document");
-      if (onTitleChange) {
-        onTitleChange("Untitled Document");
-      }
+    if (onTitleChange && title !== documentTitle) {
+      onTitleChange(title);
     }
   };
 
@@ -127,7 +121,7 @@ export const EditorNav = ({
           .from('documents')
           .select('id')
           .eq('owner_id', user.id)
-          .eq('title', title)
+          .eq('title', title || titlePlaceholder)
           .limit(1);
         
         if (existingDocs && existingDocs.length > 0) {
@@ -135,7 +129,7 @@ export const EditorNav = ({
             .from('documents')
             .update({ 
               content: content,
-              title: title,
+              title: title || titlePlaceholder,
               updated_at: new Date().toISOString()
             })
             .eq('id', existingDocs[0].id)
@@ -150,7 +144,7 @@ export const EditorNav = ({
             .insert({
               content: content,
               owner_id: user.id,
-              title: title
+              title: title || titlePlaceholder
             })
             .select('id, title, content, updated_at')
             .single();
@@ -163,14 +157,14 @@ export const EditorNav = ({
       } else {
         const newDoc: Document = {
           id: Date.now().toString(),
-          title: title,
+          title: title || titlePlaceholder,
           content: content || '',
           updated_at: new Date().toISOString()
         };
         
         localStorage.setItem('guestDocument', JSON.stringify({
           content: content,
-          title: title,
+          title: title || titlePlaceholder,
           updated_at: new Date().toISOString()
         }));
         
@@ -179,7 +173,7 @@ export const EditorNav = ({
         
         if (storedDocs) {
           guestDocs = JSON.parse(storedDocs);
-          const existingIndex = guestDocs.findIndex(doc => doc.title === title);
+          const existingIndex = guestDocs.findIndex(doc => doc.title === (title || titlePlaceholder));
           
           if (existingIndex >= 0) {
             guestDocs[existingIndex] = newDoc;
@@ -229,7 +223,9 @@ export const EditorNav = ({
             placeholder={titlePlaceholder}
           />
         ) : (
-          <h1 className="text-lg font-medium text-editor-heading">{title}</h1>
+          <h1 className="text-lg font-medium text-editor-heading">
+            {title || titlePlaceholder}
+          </h1>
         )}
         {user && (
           <span className="text-sm text-editor-text opacity-50">

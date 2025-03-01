@@ -12,7 +12,7 @@ import type { Document } from "@/lib/types";
 
 const Index = () => {
   const [content, setContent] = useState("");
-  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+  const [documentTitle, setDocumentTitle] = useState("");
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   const { role, user } = useAuth();
   const { width } = useWindowSize();
@@ -21,18 +21,15 @@ const Index = () => {
   const { documentId } = useParams();
   const navigate = useNavigate();
   
-  // Determine which panel is editable based on the user's role
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
   
   useEffect(() => {
-    // If a document ID is provided in the URL, fetch that specific document
     if (documentId) {
       fetchDocument(documentId);
     } else {
-      // No document ID - start with a new document
       setContent("");
-      setDocumentTitle("Untitled Document");
+      setDocumentTitle("");
       setCurrentDocumentId(null);
     }
   }, [documentId, user]);
@@ -40,7 +37,6 @@ const Index = () => {
   const fetchDocument = async (id: string) => {
     try {
       if (user) {
-        // Logged in user - fetch from Supabase
         const { data, error } = await supabase
           .from('documents')
           .select('id, content, title, updated_at')
@@ -76,7 +72,6 @@ const Index = () => {
           });
         }
       } else if (role) {
-        // Guest user with a role - try to load from localStorage
         try {
           const localDocs = localStorage.getItem('guestDocuments');
           if (localDocs) {
@@ -85,7 +80,7 @@ const Index = () => {
             
             if (doc) {
               setContent(doc.content || "");
-              setDocumentTitle(doc.title || "Untitled Document");
+              setDocumentTitle(doc.title || "");
               setCurrentDocumentId(doc.id);
               
               toast({
@@ -139,7 +134,6 @@ const Index = () => {
       />
       
       {isMobile ? (
-        // Mobile view with tabs
         <main className="animate-fade-in p-4">
           <Tabs defaultValue="editor" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -162,7 +156,6 @@ const Index = () => {
           </Tabs>
         </main>
       ) : (
-        // Desktop view with side-by-side panels
         <main className="flex min-h-[calc(100vh-4rem)] animate-fade-in">
           <EditorPanel 
             content={content}

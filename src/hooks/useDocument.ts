@@ -192,6 +192,12 @@ export function useDocument(documentId: string | undefined) {
                   content: content,
                   updated_at: new Date().toISOString()
                 };
+                
+                // Ensure we're storing valid HTML content
+                if (typeof docs[existingIndex].content !== 'string') {
+                  docs[existingIndex].content = String(docs[existingIndex].content || "");
+                }
+                
                 localStorage.setItem('guestDocuments', JSON.stringify(docs));
                 savedDocument = docs[existingIndex];
                 console.log("Updated document in localStorage:", savedDocument);
@@ -253,8 +259,11 @@ export function useDocument(documentId: string | undefined) {
   };
 
   const loadDocument = (doc: Document) => {
-    setContent(doc.content || "");
-    setInitialContent(doc.content || "");
+    // Ensure content is always a string
+    const docContent = typeof doc.content === 'string' ? doc.content : String(doc.content || "");
+    
+    setContent(docContent);
+    setInitialContent(docContent);
     setDocumentTitle(doc.title || "");
     setCurrentDocumentId(doc.id);
   };

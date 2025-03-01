@@ -26,6 +26,9 @@ const Index = () => {
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
   
+  // Add a console log to track content changes
+  console.log("Current document content in Index:", content ? content.substring(0, 50) + "..." : "empty");
+  
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 

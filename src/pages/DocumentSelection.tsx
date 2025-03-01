@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,13 +47,33 @@ const DocumentSelection = () => {
         if (error) throw error;
         
         if (data) {
-          setDocuments(data);
+          // Deduplicate by title if needed
+          const uniqueDocuments = Array.from(
+            new Map(data.map(item => [item.id, item])).values()
+          );
+          setDocuments(uniqueDocuments);
         }
       } else if (role) {
         try {
           const localDocs = localStorage.getItem('guestDocuments');
           if (localDocs) {
-            setDocuments(JSON.parse(localDocs));
+            const parsedDocs = JSON.parse(localDocs);
+            
+            // Deduplicate by ID
+            const uniqueDocs = Array.from(
+              new Map(parsedDocs.map((item: Document) => [item.id, item])).values()
+            );
+            
+            setDocuments(uniqueDocs);
+            
+            // Also update the localStorage with deduplicated list
+            if (uniqueDocs.length !== parsedDocs.length) {
+              localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+              toast({
+                title: "Duplicate documents removed",
+                description: "We've cleaned up some duplicate documents for you.",
+              });
+            }
           }
         } catch (error) {
           console.error("Error loading local documents:", error);

@@ -143,7 +143,7 @@ export const EditorNav = ({
   };
 
   const handleSave = async () => {
-    if (!content) {
+    if (!content || !content.trim()) {
       toast({
         title: "Cannot save empty document",
         description: "Please add some content to your document.",
@@ -154,92 +154,12 @@ export const EditorNav = ({
     
     setIsSaving(true);
     try {
-      let result;
-      let savedDocument: Document | null = null;
-
-      if (user) {
-        const { data: existingDocs } = await supabase
-          .from('documents')
-          .select('id')
-          .eq('owner_id', user.id)
-          .eq('title', title || titlePlaceholder)
-          .limit(1);
-        
-        if (existingDocs && existingDocs.length > 0) {
-          const { data, error } = await supabase
-            .from('documents')
-            .update({ 
-              content: content,
-              title: title || titlePlaceholder,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingDocs[0].id)
-            .select('id, title, content, updated_at')
-            .single();
-          
-          if (error) throw new Error(error.message);
-          savedDocument = data;
-        } else {
-          const { data, error } = await supabase
-            .from('documents')
-            .insert({
-              content: content,
-              owner_id: user.id,
-              title: title || titlePlaceholder
-            })
-            .select('id, title, content, updated_at')
-            .single();
-          
-          if (error) throw new Error(error.message);
-          savedDocument = data;
-        }
-
-        fetchUserDocuments();
-      } else {
-        const newDoc: Document = {
-          id: Date.now().toString(),
-          title: title || titlePlaceholder,
-          content: content || '',
-          updated_at: new Date().toISOString()
-        };
-        
-        localStorage.setItem('guestDocument', JSON.stringify({
-          content: content,
-          title: title || titlePlaceholder,
-          updated_at: new Date().toISOString()
-        }));
-        
-        let guestDocs: Document[] = [];
-        const storedDocs = localStorage.getItem('guestDocuments');
-        
-        if (storedDocs) {
-          guestDocs = JSON.parse(storedDocs);
-          const existingIndex = guestDocs.findIndex(doc => doc.title === (title || titlePlaceholder));
-          
-          if (existingIndex >= 0) {
-            guestDocs[existingIndex] = newDoc;
-          } else {
-            guestDocs.unshift(newDoc);
-          }
-        } else {
-          guestDocs = [newDoc];
-        }
-        
-        localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
-        setDocuments(guestDocs);
-        savedDocument = newDoc;
-      }
-      
-      toast({
-        title: "Document saved",
-        description: "Your changes have been saved successfully.",
-      });
-      
       if (onSave) {
-        onSave();
+        await onSave();
+        fetchUserDocuments();
       }
     } catch (error) {
-      console.error("Error saving document:", error);
+      console.error("Error in handleSave:", error);
       toast({
         title: "Error saving document",
         description: "There was a problem saving your document. Please try again.",

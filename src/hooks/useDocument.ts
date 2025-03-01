@@ -120,6 +120,16 @@ export function useDocument(documentId: string | undefined) {
   const saveDocument = async () => {
     try {
       console.log("Saving document with content:", content);
+      
+      if (!content.trim()) {
+        toast({
+          title: "Cannot save empty document",
+          description: "Please add some content to your document before saving.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       let savedDocument: Document | null = null;
       
       if (user) {
@@ -165,40 +175,62 @@ export function useDocument(documentId: string | undefined) {
         }
       } else if (role) {
         // For guest users, save to localStorage
-        const newDoc: Document = {
-          id: currentDocumentId || Date.now().toString(),
-          title: documentTitle || "Untitled Document",
-          content: content,
-          updated_at: new Date().toISOString()
-        };
-        
-        console.log("Saving document to localStorage:", newDoc);
-        
-        // Update current document reference if it's a new document
-        if (!currentDocumentId) {
-          setCurrentDocumentId(newDoc.id);
-          navigate(`/editor/${newDoc.id}`, { replace: true });
-        }
-        
-        // Save to localStorage - both individually and in the documents collection
-        let guestDocs: Document[] = [];
-        const storedDocs = localStorage.getItem('guestDocuments');
-        
-        if (storedDocs) {
-          guestDocs = JSON.parse(storedDocs);
-          const existingIndex = guestDocs.findIndex(doc => doc.id === newDoc.id);
-          
-          if (existingIndex >= 0) {
-            guestDocs[existingIndex] = newDoc;
-          } else {
-            guestDocs.unshift(newDoc);
+        // Check if we're updating an existing document or creating a new one
+        if (currentDocumentId) {
+          // We're updating an existing document
+          try {
+            const localDocs = localStorage.getItem('guestDocuments');
+            if (localDocs) {
+              let docs = JSON.parse(localDocs);
+              const existingIndex = docs.findIndex((doc: Document) => doc.id === currentDocumentId);
+              
+              if (existingIndex >= 0) {
+                // Update existing document
+                docs[existingIndex] = {
+                  ...docs[existingIndex],
+                  title: documentTitle || "Untitled Document",
+                  content: content,
+                  updated_at: new Date().toISOString()
+                };
+                localStorage.setItem('guestDocuments', JSON.stringify(docs));
+                savedDocument = docs[existingIndex];
+                console.log("Updated document in localStorage:", savedDocument);
+              } else {
+                // Document ID exists but not found in storage - should not happen
+                throw new Error("Document not found in local storage");
+              }
+            }
+          } catch (error) {
+            console.error("Error updating local document:", error);
+            throw error;
           }
         } else {
-          guestDocs = [newDoc];
+          // We're creating a new document
+          const newDoc: Document = {
+            id: Date.now().toString(),
+            title: documentTitle || "Untitled Document",
+            content: content,
+            updated_at: new Date().toISOString()
+          };
+          
+          console.log("Saving document to localStorage:", newDoc);
+          
+          // Update current document reference
+          setCurrentDocumentId(newDoc.id);
+          navigate(`/editor/${newDoc.id}`, { replace: true });
+          
+          // Save to localStorage in the documents collection
+          let guestDocs: Document[] = [];
+          const storedDocs = localStorage.getItem('guestDocuments');
+          
+          if (storedDocs) {
+            guestDocs = JSON.parse(storedDocs);
+          }
+          
+          guestDocs.unshift(newDoc);
+          localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
+          savedDocument = newDoc;
         }
-        
-        localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
-        savedDocument = newDoc;
       }
       
       // Update the initialContent to match current content, indicating "saved" state

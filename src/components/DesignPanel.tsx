@@ -23,9 +23,13 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         {!isMobile && (
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-sm font-medium text-editor-text">Design Panel</h2>
-            {isEditable && (
+            {isEditable ? (
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                 Editable
+              </span>
+            ) : (
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                View Only
               </span>
             )}
           </div>

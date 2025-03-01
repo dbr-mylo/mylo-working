@@ -1,4 +1,3 @@
-
 import { useEditor, EditorContent, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
@@ -10,6 +9,7 @@ import { Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { FontPicker } from './FontPicker';
+import { ColorPicker } from './ColorPicker';
 
 const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
@@ -102,6 +102,7 @@ const FontFamily = Extension.create({
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const [currentFont, setCurrentFont] = useState('Inter');
+  const [currentColor, setCurrentColor] = useState('#000000');
   
   const editor = useEditor({
     extensions: [
@@ -129,6 +130,12 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     }
   }, [currentFont, editor]);
 
+  useEffect(() => {
+    if (editor && currentColor) {
+      editor.chain().focus().setColor(currentColor).run();
+    }
+  }, [currentColor, editor]);
+
   if (!editor) {
     return null;
   }
@@ -136,6 +143,11 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const handleFontChange = (font: string) => {
     setCurrentFont(font);
     editor.chain().focus().setMark('textStyle', { fontFamily: font }).run();
+  };
+
+  const handleColorChange = (color: string) => {
+    setCurrentColor(color);
+    editor.chain().focus().setColor(color).run();
   };
 
   return (
@@ -183,6 +195,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       </style>
       <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
         <FontPicker value={currentFont} onChange={handleFontChange} />
+        <ColorPicker value={currentColor} onChange={handleColorChange} />
         <Button
           variant="outline"
           size="sm"

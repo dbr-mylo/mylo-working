@@ -1,15 +1,35 @@
 
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { useState } from "react";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
+  const [designContent, setDesignContent] = useState(content);
+  
+  // Update local content when prop changes (for when editor updates content)
+  if (content !== designContent && !isEditable) {
+    setDesignContent(content);
+  }
+  
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDesignContent(e.target.value);
+  };
   
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
-        {!isMobile && <h2 className="text-sm font-medium text-editor-text mb-4">Design Panel</h2>}
+        {!isMobile && (
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-sm font-medium text-editor-text">Design Panel</h2>
+            {isEditable && (
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                Editable
+              </span>
+            )}
+          </div>
+        )}
         <div className="bg-editor-panel p-4 rounded-md">
           <div className="prose prose-sm max-w-none">
             <div 
@@ -42,7 +62,14 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   }
                 `}
               </style>
-              {content ? (
+              {isEditable ? (
+                <textarea
+                  value={designContent}
+                  onChange={handleContentChange}
+                  className="w-full h-full min-h-[10in] border border-gray-200 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your content here..."
+                />
+              ) : content ? (
                 <div dangerouslySetInnerHTML={{ __html: content }} />
               ) : (
                 <p className="text-editor-text opacity-50">

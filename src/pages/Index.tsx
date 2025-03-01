@@ -61,9 +61,14 @@ const Index = () => {
         }
         
         if (data) {
+          console.log("Loaded document from Supabase:", data);
           if (data.content) {
             setContent(data.content);
             setInitialContent(data.content);
+          } else {
+            // Set empty content if content is null
+            setContent("");
+            setInitialContent("");
           }
           if (data.title) {
             setDocumentTitle(data.title);
@@ -83,6 +88,7 @@ const Index = () => {
             const doc = parsedDocs.find((d: Document) => d.id === id);
             
             if (doc) {
+              console.log("Loaded document from localStorage:", doc);
               setContent(doc.content || "");
               setInitialContent(doc.content || "");
               setDocumentTitle(doc.title || "");
@@ -119,6 +125,7 @@ const Index = () => {
 
   const handleSaveDocument = async () => {
     try {
+      console.log("Saving document with content:", content);
       let savedDocument: Document | null = null;
       
       if (user) {
@@ -139,6 +146,7 @@ const Index = () => {
           
           if (error) throw error;
           savedDocument = data;
+          console.log("Updated document in Supabase:", data);
         } else {
           // Create new document
           const { data, error } = await supabase
@@ -153,6 +161,7 @@ const Index = () => {
           
           if (error) throw error;
           savedDocument = data;
+          console.log("Created document in Supabase:", data);
           
           // Update URL with new document ID without page reload
           if (data && data.id) {
@@ -168,6 +177,8 @@ const Index = () => {
           content: content,
           updated_at: new Date().toISOString()
         };
+        
+        console.log("Saving document to localStorage:", newDoc);
         
         // Update current document reference if it's a new document
         if (!currentDocumentId) {
@@ -216,9 +227,9 @@ const Index = () => {
   };
   
   const handleLoadDocument = (doc: Document) => {
-    setContent(doc.content);
-    setInitialContent(doc.content);
-    setDocumentTitle(doc.title);
+    setContent(doc.content || "");
+    setInitialContent(doc.content || "");
+    setDocumentTitle(doc.title || "");
     setCurrentDocumentId(doc.id);
   };
   

@@ -7,6 +7,11 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
   const { width } = useWindowSize();
   const isMobile = width < 1281;
   
+  const handleContentUpdate = (newContent: string) => {
+    console.log("Content updated in EditorPanel:", newContent);
+    onContentChange(newContent);
+  };
+  
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
@@ -27,7 +32,7 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
         <div className="bg-editor-bg p-4 rounded-md">
           <RichTextEditor 
             content={content} 
-            onUpdate={onContentChange}
+            onUpdate={handleContentUpdate}
             isEditable={isEditable}
             hideToolbar={!isEditable} // Hide toolbar if not editable
           />

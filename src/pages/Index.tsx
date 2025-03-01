@@ -13,6 +13,10 @@ const Index = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
   
+  // Determine which panel is editable based on the user's role
+  const isEditorEditable = role === "editor";
+  const isDesignEditable = role === "designer";
+  
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav currentRole={role || "editor"} />
@@ -29,13 +33,13 @@ const Index = () => {
               <EditorPanel 
                 content={content}
                 onContentChange={setContent}
-                isEditable={role === "editor"}
+                isEditable={isEditorEditable}
               />
             </TabsContent>
             <TabsContent value="design" className="mt-0">
               <DesignPanel 
                 content={content}
-                isEditable={role === "designer"}
+                isEditable={isDesignEditable}
               />
             </TabsContent>
           </Tabs>
@@ -46,11 +50,11 @@ const Index = () => {
           <EditorPanel 
             content={content}
             onContentChange={setContent}
-            isEditable={role === "editor"}
+            isEditable={isEditorEditable}
           />
           <DesignPanel 
             content={content}
-            isEditable={role === "designer"}
+            isEditable={isDesignEditable}
           />
         </main>
       )}

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share2, LogOut, Save, FolderOpen } from "lucide-react";
 import type { EditorNavProps, Document } from "@/lib/types";
@@ -28,14 +27,12 @@ export const EditorNav = ({
   const [title, setTitle] = useState(documentTitle);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  const [titlePlaceholder, setTitlePlaceholder] = useState("Document Title");
+  const [titlePlaceholder, setTitlePlaceholder] = useState("Create Document title");
 
-  // Update local title when documentTitle prop changes
   useEffect(() => {
     setTitle(documentTitle);
   }, [documentTitle]);
 
-  // Fetch user documents on mount
   useEffect(() => {
     fetchUserDocuments();
   }, [user]);
@@ -44,7 +41,6 @@ export const EditorNav = ({
     setIsLoadingDocs(true);
     try {
       if (user) {
-        // Fetch documents from Supabase
         const { data, error } = await supabase
           .from('documents')
           .select('id, title, content, updated_at')
@@ -57,7 +53,6 @@ export const EditorNav = ({
           setDocuments(data);
         }
       } else {
-        // Try to load from localStorage for guest users
         try {
           const localDocs = localStorage.getItem('guestDocuments');
           if (localDocs) {
@@ -88,14 +83,12 @@ export const EditorNav = ({
   };
 
   const handleTitleFocus = () => {
-    // Clear the title if it's the default "Untitled Document"
     if (title === "Untitled Document") {
       setTitle("");
     }
   };
 
   const handleTitleBlur = () => {
-    // If user leaves the field empty, revert to "Untitled Document"
     if (!title.trim()) {
       setTitle("Untitled Document");
       if (onTitleChange) {
@@ -126,12 +119,10 @@ export const EditorNav = ({
     
     setIsSaving(true);
     try {
-      // Check if user has an existing document
       let result;
       let savedDocument: Document | null = null;
 
       if (user) {
-        // User is logged in, save to their account
         const { data: existingDocs } = await supabase
           .from('documents')
           .select('id')
@@ -140,7 +131,6 @@ export const EditorNav = ({
           .limit(1);
         
         if (existingDocs && existingDocs.length > 0) {
-          // Update existing document
           const { data, error } = await supabase
             .from('documents')
             .update({ 
@@ -155,7 +145,6 @@ export const EditorNav = ({
           if (error) throw new Error(error.message);
           savedDocument = data;
         } else {
-          // Create new document
           const { data, error } = await supabase
             .from('documents')
             .insert({
@@ -170,10 +159,8 @@ export const EditorNav = ({
           savedDocument = data;
         }
 
-        // Refresh documents list
         fetchUserDocuments();
       } else {
-        // Guest user - use local storage
         const newDoc: Document = {
           id: Date.now().toString(),
           title: title,
@@ -181,20 +168,17 @@ export const EditorNav = ({
           updated_at: new Date().toISOString()
         };
         
-        // Update current document in localStorage
         localStorage.setItem('guestDocument', JSON.stringify({
           content: content,
           title: title,
           updated_at: new Date().toISOString()
         }));
         
-        // Also add to guestDocuments array for document history
         let guestDocs: Document[] = [];
         const storedDocs = localStorage.getItem('guestDocuments');
         
         if (storedDocs) {
           guestDocs = JSON.parse(storedDocs);
-          // Check if doc with same title exists and update it
           const existingIndex = guestDocs.findIndex(doc => doc.title === title);
           
           if (existingIndex >= 0) {

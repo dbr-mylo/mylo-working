@@ -4,6 +4,7 @@ import ListItem from '@tiptap/extension-list-item';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import TextStyle from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import { Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
@@ -80,7 +81,10 @@ const FontFamily = TextStyle.extend({
   addCommands() {
     return {
       setFontFamily: (fontFamily) => ({ chain }) => {
-        return chain().setMark(this.name, { fontFamily }).run();
+        return chain()
+          .focus()
+          .setMark('textStyle', { fontFamily })
+          .run();
       },
     };
   },
@@ -96,10 +100,10 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
         orderedList: false,
       }),
       TextStyle,
+      FontFamily,
       ListItem,
       CustomBulletList,
       CustomOrderedList,
-      FontFamily,
     ],
     content: content,
     editable: isEditable,
@@ -110,7 +114,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
   useEffect(() => {
     if (editor && currentFont) {
-      editor.chain().focus().setFontFamily(currentFont).run();
+      editor.chain().focus().setMark('textStyle', { fontFamily: currentFont }).run();
     }
   }, [currentFont, editor]);
 
@@ -120,7 +124,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
   const handleFontChange = (font: string) => {
     setCurrentFont(font);
-    editor.chain().focus().setFontFamily(font).run();
+    editor.chain().focus().setMark('textStyle', { fontFamily: font }).run();
   };
 
   return (

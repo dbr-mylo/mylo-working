@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, Clock } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 const DocumentSelection = () => {
@@ -111,9 +111,6 @@ const DocumentSelection = () => {
                 onClick={() => handleOpenDocument(doc.id)}
               >
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <FileText className="h-5 w-5 text-editor-text" />
-                  </div>
                   <div className="flex justify-between items-center mt-2">
                     <CardTitle className="text-md truncate">{doc.title}</CardTitle>
                     <div className="flex items-center text-xs text-gray-500 ml-2">
@@ -122,10 +119,7 @@ const DocumentSelection = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pb-4 flex-grow flex items-center justify-center">
-                  <div className="text-xs text-gray-400 italic text-center">
-                    Click to open
-                  </div>
+                <CardContent className="pb-4 flex-grow">
                 </CardContent>
               </Card>
             ))

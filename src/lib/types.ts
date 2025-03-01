@@ -10,12 +10,20 @@ export interface EditorPanelProps {
   isEditable?: boolean;
 }
 
+export interface Document {
+  id: string;
+  title: string;
+  content: string;
+  updated_at: string;
+}
+
 export interface EditorNavProps {
   currentRole: string;
   content?: string;
   documentTitle?: string;
   onTitleChange?: (title: string) => void;
   onSave?: () => void;
+  onLoadDocument?: (doc: Document) => void;
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';

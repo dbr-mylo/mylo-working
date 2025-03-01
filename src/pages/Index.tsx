@@ -8,10 +8,12 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Document } from "@/lib/types";
 
 const Index = () => {
   const [content, setContent] = useState("");
   const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+  const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   const { role, user } = useAuth();
   const { width } = useWindowSize();
   const { toast } = useToast();
@@ -29,7 +31,7 @@ const Index = () => {
         try {
           const { data, error } = await supabase
             .from('documents')
-            .select('content, title')
+            .select('id, content, title, updated_at')
             .eq('owner_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(1);
@@ -44,6 +46,9 @@ const Index = () => {
             }
             if (data[0].title) {
               setDocumentTitle(data[0].title);
+            }
+            if (data[0].id) {
+              setCurrentDocumentId(data[0].id);
             }
             
             toast({
@@ -89,6 +94,12 @@ const Index = () => {
     console.log("Document saved successfully");
   };
   
+  const handleLoadDocument = (doc: Document) => {
+    setContent(doc.content);
+    setDocumentTitle(doc.title);
+    setCurrentDocumentId(doc.id);
+  };
+  
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
@@ -97,6 +108,7 @@ const Index = () => {
         documentTitle={documentTitle}
         onTitleChange={setDocumentTitle}
         onSave={handleSaveDocument}
+        onLoadDocument={handleLoadDocument}
       />
       
       {isMobile ? (

@@ -1,11 +1,15 @@
 
 import type { DesignPanelProps } from "@/lib/types";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
+  const { width } = useWindowSize();
+  const isMobile = width < 1280;
+  
   return (
-    <div className="w-1/2 p-8 bg-editor-panel animate-slide-in overflow-auto">
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
-        <h2 className="text-sm font-medium text-editor-text mb-4">Design Panel</h2>
+        {!isMobile && <h2 className="text-sm font-medium text-editor-text mb-4">Design Panel</h2>}
         <div className="bg-editor-panel p-4 rounded-md">
           <div className="prose prose-sm max-w-none">
             <div 

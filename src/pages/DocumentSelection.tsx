@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -103,14 +104,16 @@ const DocumentSelection = () => {
                 onClick={() => handleOpenDocument(doc.id)}
               >
                 <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-center justify-between">
                     <FileText className="h-5 w-5 text-editor-text" />
-                    <div className="flex items-center text-xs text-gray-500">
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <CardTitle className="text-md truncate">{doc.title}</CardTitle>
+                    <div className="flex items-center text-xs text-gray-500 ml-2">
                       <Clock className="h-3 w-3 mr-1" />
                       {formatDate(doc.updated_at)}
                     </div>
                   </div>
-                  <CardTitle className="text-md truncate mt-2">{doc.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4 flex-grow flex items-center justify-center">
                   <div className="text-xs text-gray-400 italic text-center">

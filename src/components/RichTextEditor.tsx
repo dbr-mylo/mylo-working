@@ -86,9 +86,21 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   }
 
   return (
-    <div className="prose prose-sm max-w-none [&_.ProseMirror]:min-h-[calc(100vh-16rem)] [&_.ProseMirror]:focus:outline-none">
+    <div className="prose prose-sm max-w-none">
       <style>
         {`
+          .ProseMirror {
+            min-height: 11in;
+            width: 8.5in;
+            padding: 1in;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            overflow-y: auto;
+          }
+          .ProseMirror:focus {
+            outline: none;
+          }
           .ProseMirror p {
             margin-top: 0;
             margin-bottom: 4px;

@@ -1,24 +1,22 @@
-
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import { Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { FontPicker } from './FontPicker';
 
 const CustomBulletList = BulletList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Always prevent default tab behavior when in a list
         if (editor.isActive('bulletList')) {
-          // Create new nested bullet if we're on an empty line
           if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
             editor.commands.sinkListItem('listItem');
             return true;
           }
-          // Otherwise just indent the existing bullet
           editor.commands.sinkListItem('listItem');
           return true;
         }
@@ -39,14 +37,11 @@ const CustomOrderedList = OrderedList.extend({
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
-        // Always prevent default tab behavior when in a list
         if (editor.isActive('orderedList')) {
-          // Create new nested bullet if we're on an empty line
           if (editor.isActive('listItem') && editor.state.selection.empty && editor.state.doc.textBetween(editor.state.selection.from - 1, editor.state.selection.from) === '') {
             editor.commands.sinkListItem('listItem');
             return true;
           }
-          // Otherwise just indent the existing bullet
           editor.commands.sinkListItem('listItem');
           return true;
         }
@@ -63,7 +58,43 @@ const CustomOrderedList = OrderedList.extend({
   },
 });
 
+const FontFamily = Extension.create({
+  name: 'fontFamily',
+  
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontFamily: {
+            default: 'Inter',
+            parseHTML: element => element.style.fontFamily.replace(/['"]/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontFamily) return {};
+              return {
+                style: `font-family: ${attributes.fontFamily}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      setFontFamily: (fontFamily) => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontFamily })
+          .run();
+      },
+    };
+  },
+});
+
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
+  const [currentFont, setCurrentFont] = useState('Inter');
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -73,6 +104,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       ListItem,
       CustomBulletList,
       CustomOrderedList,
+      FontFamily,
     ],
     content: content,
     editable: isEditable,
@@ -81,14 +113,27 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     },
   });
 
+  useEffect(() => {
+    if (editor && currentFont) {
+      editor.chain().focus().setFontFamily(currentFont).run();
+    }
+  }, [currentFont, editor]);
+
   if (!editor) {
     return null;
   }
+
+  const handleFontChange = (font: string) => {
+    setCurrentFont(font);
+    editor.chain().focus().setFontFamily(font).run();
+  };
 
   return (
     <div className="prose prose-sm max-w-none">
       <style>
         {`
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+          
           .ProseMirror {
             min-height: 11in;
             width: 8.5in;
@@ -127,6 +172,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
         `}
       </style>
       <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
+        <FontPicker value={currentFont} onChange={handleFontChange} />
         <Button
           variant="outline"
           size="sm"

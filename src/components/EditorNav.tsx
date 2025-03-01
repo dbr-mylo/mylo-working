@@ -10,7 +10,13 @@ export const EditorNav = ({ currentRole }: EditorNavProps) => {
   const navigate = useNavigate();
 
   const handleExit = () => {
-    navigate("/auth");
+    // For guest users, simply redirect to auth page
+    // For logged in users, do a proper sign out
+    if (user) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
   };
 
   return (

@@ -5,7 +5,7 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { FontPicker } from './FontPicker';
@@ -58,6 +58,55 @@ const CustomOrderedList = OrderedList.extend({
         return false;
       },
     }
+  },
+});
+
+const IndentExtension = Extension.create({
+  name: 'indent',
+  
+  addAttributes() {
+    return {
+      indent: {
+        default: 0,
+        renderHTML: attributes => {
+          if (attributes.indent === 0) return {}
+          return {
+            style: `margin-left: ${attributes.indent}em;`,
+          }
+        },
+        parseHTML: element => {
+          const indent = element.style.marginLeft
+          if (!indent) return 0
+          const value = parseInt(indent.match(/(\d+)/)?.[1] || '0', 10)
+          return value || 0
+        },
+      },
+    }
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading'],
+        attributes: {
+          indent: {
+            default: 0,
+            renderHTML: attributes => {
+              if (attributes.indent === 0) return {}
+              return {
+                style: `margin-left: ${attributes.indent}em;`,
+              }
+            },
+            parseHTML: element => {
+              const indent = element.style.marginLeft
+              if (!indent) return 0
+              const value = parseInt(indent.match(/(\d+)/)?.[1] || '0', 10)
+              return value || 0
+            },
+          },
+        },
+      },
+    ]
   },
 });
 
@@ -116,6 +165,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       CustomBulletList,
       CustomOrderedList,
       Color,
+      IndentExtension,
     ],
     content: content,
     editable: isEditable,
@@ -136,10 +186,6 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     }
   }, [currentColor, editor]);
 
-  if (!editor) {
-    return null;
-  }
-
   const handleFontChange = (font: string) => {
     setCurrentFont(font);
     editor.chain().focus().setMark('textStyle', { fontFamily: font }).run();
@@ -149,6 +195,26 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     setCurrentColor(color);
     editor.chain().focus().setColor(color).run();
   };
+
+  const handleIndent = () => {
+    if (editor) {
+      editor.chain().focus().updateAttributes('paragraph', { 
+        indent: Math.min((editor.getAttributes('paragraph').indent || 0) + 1, 10)
+      }).run();
+    }
+  };
+
+  const handleOutdent = () => {
+    if (editor) {
+      editor.chain().focus().updateAttributes('paragraph', { 
+        indent: Math.max((editor.getAttributes('paragraph').indent || 0) - 1, 0)
+      }).run();
+    }
+  };
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div className="prose prose-sm max-w-none">
@@ -227,6 +293,22 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           className={editor.isActive('orderedList') ? 'bg-accent' : ''}
         >
           <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleIndent}
+          title="Indent paragraph"
+        >
+          <Indent className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOutdent}
+          title="Outdent paragraph"
+        >
+          <Outdent className="h-4 w-4" />
         </Button>
       </div>
       <EditorContent editor={editor} />

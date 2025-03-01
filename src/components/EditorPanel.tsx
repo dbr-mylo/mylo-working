@@ -29,6 +29,7 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
             content={content} 
             onUpdate={onContentChange}
             isEditable={isEditable}
+            hideToolbar={!isEditable} // Hide toolbar if not editable
           />
         </div>
       </div>

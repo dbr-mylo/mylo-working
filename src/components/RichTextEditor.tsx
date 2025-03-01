@@ -1,4 +1,3 @@
-
 import { useEditor, EditorContent, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
@@ -150,7 +149,7 @@ const FontFamily = Extension.create({
   },
 });
 
-export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
+export const RichTextEditor = ({ content, onUpdate, isEditable = true, hideToolbar = false }) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   
@@ -280,58 +279,60 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
           }
         `}
       </style>
-      <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
-        <FontPicker value={currentFont} onChange={handleFontChange} />
-        <ColorPicker value={currentColor} onChange={handleColorChange} />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-accent' : ''}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-accent' : ''}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-accent' : ''}
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'bg-accent' : ''}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleIndent}
-          title="Indent paragraph"
-        >
-          <Indent className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleOutdent}
-          title="Outdent paragraph"
-        >
-          <Outdent className="h-4 w-4" />
-        </Button>
-      </div>
+      {!hideToolbar && (
+        <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
+          <FontPicker value={currentFont} onChange={handleFontChange} />
+          <ColorPicker value={currentColor} onChange={handleColorChange} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive('bold') ? 'bg-accent' : ''}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive('italic') ? 'bg-accent' : ''}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleIndent}
+            title="Indent paragraph"
+          >
+            <Indent className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOutdent}
+            title="Outdent paragraph"
+          >
+            <Outdent className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
       <EditorContent editor={editor} />
     </div>
   );

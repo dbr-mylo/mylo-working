@@ -1,25 +1,74 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
 import { EditorNav } from "@/components/EditorNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [content, setContent] = useState("");
   const { role, user } = useAuth();
   const { width } = useWindowSize();
+  const { toast } = useToast();
   const isMobile = width < 1281;
   
   // Determine which panel is editable based on the user's role
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
   
+  useEffect(() => {
+    // Fetch the user's latest document when they log in
+    const fetchUserDocument = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('documents')
+          .select('content')
+          .eq('owner_id', user.id)
+          .order('updated_at', { ascending: false })
+          .limit(1);
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data && data.length > 0 && data[0].content) {
+          setContent(data[0].content);
+          toast({
+            title: "Document loaded",
+            description: "Your latest document has been loaded.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error);
+        toast({
+          title: "Error loading document",
+          description: "There was a problem loading your document.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    fetchUserDocument();
+  }, [user]);
+  
   return (
     <div className="min-h-screen bg-editor-bg">
-      <EditorNav currentRole={role || "editor"} />
+      <EditorNav 
+        currentRole={role || "editor"} 
+        content={content}
+        onSave={() => {
+          toast({
+            title: "Document saved",
+            description: "Your document has been saved successfully.",
+          });
+        }}
+      />
       
       {isMobile ? (
         // Mobile view with tabs

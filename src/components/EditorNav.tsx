@@ -1,11 +1,74 @@
 
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Share2, LogOut } from "lucide-react";
+import { FileText, Download, Share2, LogOut, Save } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-export const EditorNav = ({ currentRole }: EditorNavProps) => {
+export const EditorNav = ({ currentRole, onSave, content }: EditorNavProps) => {
   const { signOut, user } = useAuth();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!user || !content) return;
+    
+    setIsSaving(true);
+    try {
+      // Check if user has an existing document
+      const { data: existingDocs } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('owner_id', user.id)
+        .limit(1);
+      
+      let result;
+      
+      if (existingDocs && existingDocs.length > 0) {
+        // Update existing document
+        result = await supabase
+          .from('documents')
+          .update({ 
+            content: content,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingDocs[0].id);
+      } else {
+        // Create new document
+        result = await supabase
+          .from('documents')
+          .insert({
+            content: content,
+            owner_id: user.id,
+            title: 'Brand Document'
+          });
+      }
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      
+      toast({
+        title: "Document saved",
+        description: "Your changes have been saved successfully.",
+      });
+      
+      if (onSave) {
+        onSave();
+      }
+    } catch (error) {
+      console.error("Error saving document:", error);
+      toast({
+        title: "Error saving document",
+        description: "There was a problem saving your document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <nav className="h-16 border-b border-editor-border bg-white px-4 flex items-center justify-between">
@@ -19,6 +82,18 @@ export const EditorNav = ({ currentRole }: EditorNavProps) => {
         )}
       </div>
       <div className="flex items-center space-x-2">
+        {user && currentRole === "editor" && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            <Save className="w-4 h-4" />
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+        )}
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Share2 className="w-4 h-4" />
           Share

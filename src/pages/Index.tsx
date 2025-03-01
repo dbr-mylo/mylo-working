@@ -24,51 +24,69 @@ const Index = () => {
   useEffect(() => {
     // Fetch the user's latest document when they log in
     const fetchUserDocument = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('documents')
-          .select('content, title')
-          .eq('owner_id', user.id)
-          .order('updated_at', { ascending: false })
-          .limit(1);
-        
-        if (error) {
-          throw error;
-        }
-        
-        if (data && data.length > 0) {
-          if (data[0].content) {
-            setContent(data[0].content);
-          }
-          if (data[0].title) {
-            setDocumentTitle(data[0].title);
+      if (user) {
+        // Logged in user - fetch from Supabase
+        try {
+          const { data, error } = await supabase
+            .from('documents')
+            .select('content, title')
+            .eq('owner_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(1);
+          
+          if (error) {
+            throw error;
           }
           
+          if (data && data.length > 0) {
+            if (data[0].content) {
+              setContent(data[0].content);
+            }
+            if (data[0].title) {
+              setDocumentTitle(data[0].title);
+            }
+            
+            toast({
+              title: "Document loaded",
+              description: "Your latest document has been loaded.",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching document:", error);
           toast({
-            title: "Document loaded",
-            description: "Your latest document has been loaded.",
+            title: "Error loading document",
+            description: "There was a problem loading your document.",
+            variant: "destructive",
           });
         }
-      } catch (error) {
-        console.error("Error fetching document:", error);
-        toast({
-          title: "Error loading document",
-          description: "There was a problem loading your document.",
-          variant: "destructive",
-        });
+      } else if (role) {
+        // Guest user with a role - try to load from localStorage
+        try {
+          const savedDocument = localStorage.getItem('guestDocument');
+          if (savedDocument) {
+            const parsedDoc = JSON.parse(savedDocument);
+            if (parsedDoc.content) {
+              setContent(parsedDoc.content);
+            }
+            if (parsedDoc.title) {
+              setDocumentTitle(parsedDoc.title);
+            }
+            toast({
+              title: "Document loaded",
+              description: "Your local document has been loaded.",
+            });
+          }
+        } catch (error) {
+          console.error("Error loading local document:", error);
+        }
       }
     };
     
     fetchUserDocument();
-  }, [user]);
+  }, [user, role]);
 
   const handleSaveDocument = () => {
-    toast({
-      title: "Document saved",
-      description: "Your document has been saved successfully.",
-    });
+    console.log("Document saved successfully");
   };
   
   return (

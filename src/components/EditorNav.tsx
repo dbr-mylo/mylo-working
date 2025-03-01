@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Download, Share2, LogOut, Save } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,11 @@ export const EditorNav = ({ currentRole, onSave, content, documentTitle = "Untit
   const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState(documentTitle);
 
+  // Update local title when documentTitle prop changes
+  useEffect(() => {
+    setTitle(documentTitle);
+  }, [documentTitle]);
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value || "Untitled Document";
     setTitle(newTitle);
@@ -23,42 +28,59 @@ export const EditorNav = ({ currentRole, onSave, content, documentTitle = "Untit
   };
 
   const handleSave = async () => {
-    if (!user || !content) return;
+    if (!content) {
+      toast({
+        title: "Cannot save empty document",
+        description: "Please add some content to your document.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSaving(true);
     try {
       // Check if user has an existing document
-      const { data: existingDocs } = await supabase
-        .from('documents')
-        .select('id')
-        .eq('owner_id', user.id)
-        .limit(1);
-      
       let result;
-      
-      if (existingDocs && existingDocs.length > 0) {
-        // Update existing document
-        result = await supabase
-          .from('documents')
-          .update({ 
-            content: content,
-            title: title,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingDocs[0].id);
-      } else {
-        // Create new document
-        result = await supabase
-          .from('documents')
-          .insert({
-            content: content,
-            owner_id: user.id,
-            title: title
-          });
-      }
 
-      if (result.error) {
-        throw new Error(result.error.message);
+      if (user) {
+        // User is logged in, save to their account
+        const { data: existingDocs } = await supabase
+          .from('documents')
+          .select('id')
+          .eq('owner_id', user.id)
+          .limit(1);
+        
+        if (existingDocs && existingDocs.length > 0) {
+          // Update existing document
+          result = await supabase
+            .from('documents')
+            .update({ 
+              content: content,
+              title: title,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingDocs[0].id);
+        } else {
+          // Create new document
+          result = await supabase
+            .from('documents')
+            .insert({
+              content: content,
+              owner_id: user.id,
+              title: title
+            });
+        }
+
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+      } else {
+        // Guest user - use local storage
+        localStorage.setItem('guestDocument', JSON.stringify({
+          content: content,
+          title: title,
+          updated_at: new Date().toISOString()
+        }));
       }
       
       toast({
@@ -85,7 +107,7 @@ export const EditorNav = ({ currentRole, onSave, content, documentTitle = "Untit
     <nav className="h-16 border-b border-editor-border bg-white px-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
         <FileText className="w-6 h-6 text-editor-text" />
-        {user && currentRole === "editor" ? (
+        {currentRole === "editor" ? (
           <Input 
             className="h-8 w-48 text-editor-heading font-medium focus-visible:ring-1"
             value={title}

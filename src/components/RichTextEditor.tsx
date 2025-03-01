@@ -1,4 +1,3 @@
-
 import { useEditor, EditorContent, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
@@ -60,33 +59,28 @@ const CustomOrderedList = OrderedList.extend({
   },
 });
 
-const FontFamily = Extension.create({
+const FontFamily = TextStyle.extend({
   name: 'fontFamily',
   
-  addGlobalAttributes() {
-    return [
-      {
-        types: ['textStyle'],
-        attributes: {
-          fontFamily: {
-            default: 'Inter',
-            parseHTML: element => element.style.fontFamily.replace(/['"]/g, ''),
-            renderHTML: attributes => {
-              if (!attributes.fontFamily) return {};
-              return {
-                style: `font-family: ${attributes.fontFamily}`,
-              };
-            },
-          },
+  addAttributes() {
+    return {
+      fontFamily: {
+        default: 'Inter',
+        parseHTML: element => element.style.fontFamily?.replace(/['"]/g, ''),
+        renderHTML: attributes => {
+          if (!attributes.fontFamily) return {};
+          return {
+            style: `font-family: ${attributes.fontFamily}`,
+          };
         },
       },
-    ];
+    };
   },
 
   addCommands() {
     return {
-      setFontFamily: (fontFamily) => ({ commands }) => {
-        return commands.setMark('textStyle', { fontFamily });
+      setFontFamily: (fontFamily) => ({ chain }) => {
+        return chain().setMark(this.name, { fontFamily }).run();
       },
     };
   },
@@ -116,7 +110,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
   useEffect(() => {
     if (editor && currentFont) {
-      editor.commands.setFontFamily(currentFont);
+      editor.chain().focus().setFontFamily(currentFont).run();
     }
   }, [currentFont, editor]);
 
@@ -126,7 +120,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
 
   const handleFontChange = (font: string) => {
     setCurrentFont(font);
-    editor.commands.setFontFamily(font);
+    editor.chain().focus().setFontFamily(font).run();
   };
 
   return (

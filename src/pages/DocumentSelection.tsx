@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +7,7 @@ import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Plus, Clock } from "lucide-react";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 const DocumentSelection = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -15,6 +15,7 @@ const DocumentSelection = () => {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { width } = useWindowSize();
 
   useEffect(() => {
     fetchUserDocuments();
@@ -69,6 +70,12 @@ const DocumentSelection = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  const getGridColumns = () => {
+    if (width < 640) return 1;
+    if (width < 1024) return 2;
+    return 3;
+  };
+
   return (
     <div className="min-h-screen bg-editor-bg p-8">
       <div className="max-w-5xl mx-auto">
@@ -77,8 +84,8 @@ const DocumentSelection = () => {
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         
-        <div className="flex flex-wrap gap-4">
-          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48 w-48"
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
+          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48"
                 onClick={handleCreateNewDocument}>
             <CardContent className="flex flex-col items-center justify-center h-full pt-6 pb-0">
               <Button 
@@ -93,14 +100,14 @@ const DocumentSelection = () => {
           </Card>
 
           {isLoading ? (
-            <p className="text-editor-text text-center py-12 w-full">Loading your documents...</p>
+            <p className="text-editor-text text-center py-12 col-span-full">Loading your documents...</p>
           ) : documents.length === 0 ? (
-            <p className="text-editor-text text-center py-12 w-full">No documents found. Create your first document!</p>
+            <p className="text-editor-text text-center py-12 col-span-full">No documents found. Create your first document!</p>
           ) : (
             documents.map((doc) => (
               <Card 
                 key={doc.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 w-48 flex flex-col"
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 flex flex-col"
                 onClick={() => handleOpenDocument(doc.id)}
               >
                 <CardHeader className="pb-2">

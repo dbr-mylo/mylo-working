@@ -79,11 +79,12 @@ export const EditorNav = ({
     navigateToDocumentList();
   };
   
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     if (onSave) {
       await onSave();
-      loadDocuments();
+      await loadDocuments();
     }
+    return Promise.resolve();
   };
 
   const handleTitleChange = (newTitle: string) => {

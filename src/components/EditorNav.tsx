@@ -28,6 +28,7 @@ export const EditorNav = ({
   const [title, setTitle] = useState(documentTitle);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [titlePlaceholder, setTitlePlaceholder] = useState("Document Title");
 
   // Update local title when documentTitle prop changes
   useEffect(() => {
@@ -83,6 +84,23 @@ export const EditorNav = ({
     setTitle(newTitle);
     if (onTitleChange) {
       onTitleChange(newTitle);
+    }
+  };
+
+  const handleTitleFocus = () => {
+    // Clear the title if it's the default "Untitled Document"
+    if (title === "Untitled Document") {
+      setTitle("");
+    }
+  };
+
+  const handleTitleBlur = () => {
+    // If user leaves the field empty, revert to "Untitled Document"
+    if (!title.trim()) {
+      setTitle("Untitled Document");
+      if (onTitleChange) {
+        onTitleChange("Untitled Document");
+      }
     }
   };
 
@@ -222,7 +240,9 @@ export const EditorNav = ({
             className="h-8 w-48 text-editor-heading font-medium focus-visible:ring-1"
             value={title}
             onChange={handleTitleChange}
-            placeholder="Document Title"
+            onFocus={handleTitleFocus}
+            onBlur={handleTitleBlur}
+            placeholder={titlePlaceholder}
           />
         ) : (
           <h1 className="text-lg font-medium text-editor-heading">{title}</h1>

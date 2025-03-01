@@ -27,7 +27,7 @@ export const EditorNav = ({
   const [title, setTitle] = useState(documentTitle);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  const [titlePlaceholder, setTitlePlaceholder] = useState("Create Document title");
+  const [titlePlaceholder, setTitlePlaceholder] = useState("CREATE DOCUMENT TITLE");
 
   useEffect(() => {
     setTitle(documentTitle);

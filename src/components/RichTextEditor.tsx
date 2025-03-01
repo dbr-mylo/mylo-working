@@ -60,7 +60,7 @@ const CustomOrderedList = OrderedList.extend({
   },
 });
 
-const FontFamily = TextStyle.extend({
+const FontFamily = Extension.create({
   name: 'fontFamily',
   
   addAttributes() {
@@ -78,15 +78,24 @@ const FontFamily = TextStyle.extend({
     };
   },
 
-  addCommands() {
-    return {
-      setFontFamily: (fontFamily) => ({ chain }) => {
-        return chain()
-          .focus()
-          .setMark('textStyle', { fontFamily })
-          .run();
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontFamily: {
+            default: 'Inter',
+            parseHTML: element => element.style.fontFamily?.replace(/['"]/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontFamily) return {};
+              return {
+                style: `font-family: ${attributes.fontFamily}`,
+              };
+            },
+          },
+        },
       },
-    };
+    ];
   },
 });
 
@@ -104,6 +113,7 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
       ListItem,
       CustomBulletList,
       CustomOrderedList,
+      Color,
     ],
     content: content,
     editable: isEditable,

@@ -11,7 +11,7 @@ const Index = () => {
   const [content, setContent] = useState("");
   const { role, user } = useAuth();
   const { width } = useWindowSize();
-  const isMobile = width < 1280;
+  const isMobile = width < 1281;
   
   return (
     <div className="min-h-screen bg-editor-bg">

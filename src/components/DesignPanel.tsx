@@ -4,7 +4,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
-  const isMobile = width < 1280;
+  const isMobile = width < 1281;
   
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>

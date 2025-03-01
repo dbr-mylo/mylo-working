@@ -5,7 +5,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 
 export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPanelProps) => {
   const { width } = useWindowSize();
-  const isMobile = width < 1280;
+  const isMobile = width < 1281;
   
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>

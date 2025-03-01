@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,19 +103,20 @@ const DocumentSelection = () => {
             documents.map((doc) => (
               <Card 
                 key={doc.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 flex flex-col"
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-44 flex flex-col"
                 onClick={() => handleOpenDocument(doc.id)}
               >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center mt-2">
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex justify-between items-start">
                     <CardTitle className="text-md truncate">{doc.title}</CardTitle>
-                    <div className="flex items-center text-xs text-gray-500 ml-2">
+                    <div className="flex items-center text-xs text-gray-500">
                       <Clock className="h-3 w-3 mr-1" />
                       {formatDate(doc.updated_at)}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pb-4 flex-grow">
+                <CardContent className="p-4 pt-2 flex-grow">
+                  {/* Card content area */}
                 </CardContent>
               </Card>
             ))

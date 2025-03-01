@@ -109,8 +109,8 @@ const DocumentSelection = () => {
                 <CardHeader className="p-4 pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-md truncate">{doc.title}</CardTitle>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
+                    <div className="flex items-center text-md text-gray-500 leading-none">
+                      <Clock className="h-4 w-4 mr-1" />
                       {formatDate(doc.updated_at)}
                     </div>
                   </div>

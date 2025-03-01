@@ -102,7 +102,7 @@ export const EditorNav = ({ currentRole, onSave, content, documentTitle = "Untit
         )}
       </div>
       <div className="flex items-center space-x-2">
-        {user && currentRole === "editor" && (
+        {currentRole === "editor" && (
           <Button 
             variant="outline" 
             size="sm" 

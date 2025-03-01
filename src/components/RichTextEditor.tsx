@@ -102,6 +102,7 @@ const FontFamily = Extension.create({
 
 export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
   const [currentFont, setCurrentFont] = useState('Inter');
+  const [editorHtml, setEditorHtml] = useState(content);
   
   const editor = useEditor({
     extensions: [
@@ -119,7 +120,10 @@ export const RichTextEditor = ({ content, onUpdate, isEditable = true }) => {
     content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
-      onUpdate(editor.getHTML());
+      const html = editor.getHTML();
+      setEditorHtml(html);
+      // We pass the HTML without any design panel-specific styling
+      onUpdate(html);
     },
   });
 

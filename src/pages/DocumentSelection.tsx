@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -105,7 +106,7 @@ const DocumentSelection = () => {
                 className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col"
                 onClick={() => handleOpenDocument(doc.id)}
               >
-                <CardHeader className="p-4 pb-2">
+                <CardHeader className="p-4">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-md truncate">{doc.title}</CardTitle>
                     <div className="flex items-center text-md text-gray-500">

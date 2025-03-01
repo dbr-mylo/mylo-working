@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import DocumentSelection from "./pages/DocumentSelection";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -45,7 +46,9 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => (
   <Routes>
     <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-    <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+    <Route path="/" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
+    <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+    <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

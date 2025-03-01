@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
 import { EditorNav } from "@/components/EditorNav";
@@ -18,79 +18,106 @@ const Index = () => {
   const { width } = useWindowSize();
   const { toast } = useToast();
   const isMobile = width < 1281;
+  const { documentId } = useParams();
+  const navigate = useNavigate();
   
   // Determine which panel is editable based on the user's role
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
   
   useEffect(() => {
-    // Fetch the user's latest document when they log in
-    const fetchUserDocument = async () => {
+    // If a document ID is provided in the URL, fetch that specific document
+    if (documentId) {
+      fetchDocument(documentId);
+    } else {
+      // No document ID - start with a new document
+      setContent("");
+      setDocumentTitle("Untitled Document");
+      setCurrentDocumentId(null);
+    }
+  }, [documentId, user]);
+
+  const fetchDocument = async (id: string) => {
+    try {
       if (user) {
         // Logged in user - fetch from Supabase
-        try {
-          const { data, error } = await supabase
-            .from('documents')
-            .select('id, content, title, updated_at')
-            .eq('owner_id', user.id)
-            .order('updated_at', { ascending: false })
-            .limit(1);
-          
-          if (error) {
-            throw error;
-          }
-          
-          if (data && data.length > 0) {
-            if (data[0].content) {
-              setContent(data[0].content);
-            }
-            if (data[0].title) {
-              setDocumentTitle(data[0].title);
-            }
-            if (data[0].id) {
-              setCurrentDocumentId(data[0].id);
-            }
-            
+        const { data, error } = await supabase
+          .from('documents')
+          .select('id, content, title, updated_at')
+          .eq('id', id)
+          .eq('owner_id', user.id)
+          .single();
+        
+        if (error) {
+          if (error.code === 'PGRST116') {
             toast({
-              title: "Document loaded",
-              description: "Your latest document has been loaded.",
+              title: "Document not found",
+              description: "This document doesn't exist or you don't have access to it.",
+              variant: "destructive",
             });
+            navigate('/');
+            return;
           }
-        } catch (error) {
-          console.error("Error fetching document:", error);
+          throw error;
+        }
+        
+        if (data) {
+          if (data.content) {
+            setContent(data.content);
+          }
+          if (data.title) {
+            setDocumentTitle(data.title);
+          }
+          setCurrentDocumentId(data.id);
+          
           toast({
-            title: "Error loading document",
-            description: "There was a problem loading your document.",
-            variant: "destructive",
+            title: "Document loaded",
+            description: "Your document has been loaded.",
           });
         }
       } else if (role) {
         // Guest user with a role - try to load from localStorage
         try {
-          const savedDocument = localStorage.getItem('guestDocument');
-          if (savedDocument) {
-            const parsedDoc = JSON.parse(savedDocument);
-            if (parsedDoc.content) {
-              setContent(parsedDoc.content);
+          const localDocs = localStorage.getItem('guestDocuments');
+          if (localDocs) {
+            const parsedDocs = JSON.parse(localDocs);
+            const doc = parsedDocs.find((d: Document) => d.id === id);
+            
+            if (doc) {
+              setContent(doc.content || "");
+              setDocumentTitle(doc.title || "Untitled Document");
+              setCurrentDocumentId(doc.id);
+              
+              toast({
+                title: "Document loaded",
+                description: "Your local document has been loaded.",
+              });
+            } else {
+              toast({
+                title: "Document not found",
+                description: "This document doesn't exist in your local storage.",
+                variant: "destructive",
+              });
+              navigate('/');
             }
-            if (parsedDoc.title) {
-              setDocumentTitle(parsedDoc.title);
-            }
-            toast({
-              title: "Document loaded",
-              description: "Your local document has been loaded.",
-            });
           }
         } catch (error) {
           console.error("Error loading local document:", error);
+          navigate('/');
         }
       }
-    };
-    
-    fetchUserDocument();
-  }, [user, role]);
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      toast({
+        title: "Error loading document",
+        description: "There was a problem loading your document.",
+        variant: "destructive",
+      });
+      navigate('/');
+    }
+  };
 
-  const handleSaveDocument = () => {
+  const handleSaveDocument = async () => {
     console.log("Document saved successfully");
   };
   

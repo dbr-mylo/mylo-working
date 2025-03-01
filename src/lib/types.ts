@@ -24,6 +24,7 @@ export interface EditorNavProps {
   onTitleChange?: (title: string) => void;
   onSave?: () => void;
   onLoadDocument?: (doc: Document) => void;
+  initialContent?: string;
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';

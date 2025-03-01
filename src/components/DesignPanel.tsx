@@ -2,6 +2,7 @@
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -13,8 +14,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     setDesignContent(content);
   }
   
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDesignContent(e.target.value);
+  const handleContentChange = (newContent: string) => {
+    setDesignContent(newContent);
   };
   
   return (
@@ -67,11 +68,11 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 `}
               </style>
               {isEditable ? (
-                <textarea
-                  value={designContent}
-                  onChange={handleContentChange}
-                  className="w-full h-full min-h-[10in] border border-gray-200 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your content here..."
+                <RichTextEditor
+                  content={designContent}
+                  onUpdate={handleContentChange}
+                  isEditable={true}
+                  hideToolbar={false}
                 />
               ) : content ? (
                 <div dangerouslySetInnerHTML={{ __html: content }} />

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
@@ -78,13 +79,13 @@ const DocumentSelection = () => {
 
   return (
     <div className="min-h-screen bg-editor-bg p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto flex flex-col items-center">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         
-        <div className="mb-6 flex justify-start">
+        <div className="mb-6">
           <Button 
             onClick={handleCreateNewDocument}
             className="text-base"
@@ -93,29 +94,31 @@ const DocumentSelection = () => {
           </Button>
         </div>
 
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
+        <div className="w-1/2 mx-auto">
           {isLoading ? (
-            <p className="text-editor-text text-center py-12 col-span-full">Loading your documents...</p>
+            <p className="text-editor-text text-center py-12">Loading your documents...</p>
           ) : documents.length === 0 ? (
-            <p className="text-editor-text text-center py-12 col-span-full">No documents found. Create your first document!</p>
+            <p className="text-editor-text text-center py-12">No documents found. Create your first document!</p>
           ) : (
-            documents.map((doc) => (
-              <Card 
-                key={doc.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleOpenDocument(doc.id)}
-              >
-                <CardHeader className="p-3">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-md truncate">{doc.title}</CardTitle>
-                    <div className="flex items-center text-md text-gray-500">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatDate(doc.updated_at)}
+            <div className="space-y-4">
+              {documents.map((doc) => (
+                <Card 
+                  key={doc.id} 
+                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer w-full"
+                  onClick={() => handleOpenDocument(doc.id)}
+                >
+                  <CardHeader className="p-3">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-md truncate">{doc.title}</CardTitle>
+                      <div className="flex items-center text-md text-gray-500">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {formatDate(doc.updated_at)}
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       </div>

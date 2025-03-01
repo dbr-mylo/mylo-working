@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [content, setContent] = useState("");
+  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
   const { role, user } = useAuth();
   const { width } = useWindowSize();
   const { toast } = useToast();
@@ -28,7 +29,7 @@ const Index = () => {
       try {
         const { data, error } = await supabase
           .from('documents')
-          .select('content')
+          .select('content, title')
           .eq('owner_id', user.id)
           .order('updated_at', { ascending: false })
           .limit(1);
@@ -37,8 +38,14 @@ const Index = () => {
           throw error;
         }
         
-        if (data && data.length > 0 && data[0].content) {
-          setContent(data[0].content);
+        if (data && data.length > 0) {
+          if (data[0].content) {
+            setContent(data[0].content);
+          }
+          if (data[0].title) {
+            setDocumentTitle(data[0].title);
+          }
+          
           toast({
             title: "Document loaded",
             description: "Your latest document has been loaded.",
@@ -56,18 +63,22 @@ const Index = () => {
     
     fetchUserDocument();
   }, [user]);
+
+  const handleSaveDocument = () => {
+    toast({
+      title: "Document saved",
+      description: "Your document has been saved successfully.",
+    });
+  };
   
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
         currentRole={role || "editor"} 
         content={content}
-        onSave={() => {
-          toast({
-            title: "Document saved",
-            description: "Your document has been saved successfully.",
-          });
-        }}
+        documentTitle={documentTitle}
+        onTitleChange={setDocumentTitle}
+        onSave={handleSaveDocument}
       />
       
       {isMobile ? (

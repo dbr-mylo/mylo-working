@@ -13,6 +13,8 @@ export interface EditorPanelProps {
 export interface EditorNavProps {
   currentRole: string;
   content?: string;
+  documentTitle?: string;
+  onTitleChange?: (title: string) => void;
   onSave?: () => void;
 }
 

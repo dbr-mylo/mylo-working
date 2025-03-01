@@ -6,11 +6,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
 
-export const EditorNav = ({ currentRole, onSave, content }: EditorNavProps) => {
+export const EditorNav = ({ currentRole, onSave, content, documentTitle = "Untitled Document", onTitleChange }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [title, setTitle] = useState(documentTitle);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value || "Untitled Document";
+    setTitle(newTitle);
+    if (onTitleChange) {
+      onTitleChange(newTitle);
+    }
+  };
 
   const handleSave = async () => {
     if (!user || !content) return;
@@ -32,6 +42,7 @@ export const EditorNav = ({ currentRole, onSave, content }: EditorNavProps) => {
           .from('documents')
           .update({ 
             content: content,
+            title: title,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingDocs[0].id);
@@ -42,7 +53,7 @@ export const EditorNav = ({ currentRole, onSave, content }: EditorNavProps) => {
           .insert({
             content: content,
             owner_id: user.id,
-            title: 'Brand Document'
+            title: title
           });
       }
 
@@ -74,7 +85,16 @@ export const EditorNav = ({ currentRole, onSave, content }: EditorNavProps) => {
     <nav className="h-16 border-b border-editor-border bg-white px-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
         <FileText className="w-6 h-6 text-editor-text" />
-        <h1 className="text-lg font-medium text-editor-heading">Brand Document</h1>
+        {user && currentRole === "editor" ? (
+          <Input 
+            className="h-8 w-48 text-editor-heading font-medium focus-visible:ring-1"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="Document Title"
+          />
+        ) : (
+          <h1 className="text-lg font-medium text-editor-heading">{title}</h1>
+        )}
         {user && (
           <span className="text-sm text-editor-text opacity-50">
             ({currentRole})

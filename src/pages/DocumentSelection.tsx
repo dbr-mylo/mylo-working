@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 const DocumentSelection = () => {
@@ -85,25 +84,16 @@ const DocumentSelection = () => {
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
-          <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 flex flex-col"
-                onClick={handleCreateNewDocument}>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center mt-2">
-                <CardTitle className="text-md">Create New</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="pb-4 flex-grow flex items-center justify-center">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="w-10 h-10 rounded-full"
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="mb-6 flex justify-start">
+          <Button 
+            onClick={handleCreateNewDocument}
+            className="text-base"
+          >
+            Create New
+          </Button>
+        </div>
 
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
           {isLoading ? (
             <p className="text-editor-text text-center py-12 col-span-full">Loading your documents...</p>
           ) : documents.length === 0 ? (

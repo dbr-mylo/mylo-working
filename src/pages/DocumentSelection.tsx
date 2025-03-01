@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,9 +86,14 @@ const DocumentSelection = () => {
         </header>
         
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
-          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48"
+          <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 flex flex-col"
                 onClick={handleCreateNewDocument}>
-            <CardContent className="flex flex-col items-center justify-center h-full pt-6 pb-0">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center mt-2">
+                <CardTitle className="text-md">Create New</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4 flex-grow flex items-center justify-center">
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -95,7 +101,6 @@ const DocumentSelection = () => {
               >
                 <Plus className="h-5 w-5" />
               </Button>
-              <CardTitle className="mt-2 text-lg text-center">Create New</CardTitle>
             </CardContent>
           </Card>
 

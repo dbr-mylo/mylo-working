@@ -1,6 +1,6 @@
 
 import { useParams } from "react-router-dom";
-import { EditorNav } from "@/components/EditorNav";
+import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useDocument } from "@/hooks/useDocument";

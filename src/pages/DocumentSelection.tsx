@@ -115,11 +115,11 @@ const DocumentSelection = () => {
                       {formatDate(doc.updated_at)}
                     </div>
                   </div>
-                  <CardTitle className="text-xl truncate">{doc.title}</CardTitle>
+                  <CardTitle className="text-xl">{doc.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="pb-0 flex-grow">
-                  <div className="text-sm text-editor-text line-clamp-6 overflow-hidden">
-                    {doc.content ? doc.content : "No content"}
+                <CardContent className="pb-0 flex-grow flex items-center justify-center">
+                  <div className="text-sm text-gray-400 italic">
+                    Click to edit this document
                   </div>
                 </CardContent>
                 <CardFooter className="pt-2 pb-4">

@@ -103,7 +103,7 @@ const DocumentSelection = () => {
             documents.map((doc) => (
               <Card 
                 key={doc.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-44 flex flex-col"
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col"
                 onClick={() => handleOpenDocument(doc.id)}
               >
                 <CardHeader className="p-4 pb-2">
@@ -115,7 +115,7 @@ const DocumentSelection = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-4 pt-2 flex-grow">
+                <CardContent className="p-4 pt-0">
                   {/* Card content area */}
                 </CardContent>
               </Card>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { EditorPanel } from "@/components/EditorPanel";
@@ -12,6 +13,7 @@ import type { Document } from "@/lib/types";
 
 const Index = () => {
   const [content, setContent] = useState("");
+  const [initialContent, setInitialContent] = useState("");
   const [documentTitle, setDocumentTitle] = useState("");
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   const { role, user } = useAuth();
@@ -29,6 +31,7 @@ const Index = () => {
       fetchDocument(documentId);
     } else {
       setContent("");
+      setInitialContent("");
       setDocumentTitle("");
       setCurrentDocumentId(null);
     }
@@ -60,6 +63,7 @@ const Index = () => {
         if (data) {
           if (data.content) {
             setContent(data.content);
+            setInitialContent(data.content);
           }
           if (data.title) {
             setDocumentTitle(data.title);
@@ -80,6 +84,7 @@ const Index = () => {
             
             if (doc) {
               setContent(doc.content || "");
+              setInitialContent(doc.content || "");
               setDocumentTitle(doc.title || "");
               setCurrentDocumentId(doc.id);
               
@@ -113,11 +118,13 @@ const Index = () => {
   };
 
   const handleSaveDocument = async () => {
+    setInitialContent(content);
     console.log("Document saved successfully");
   };
   
   const handleLoadDocument = (doc: Document) => {
     setContent(doc.content);
+    setInitialContent(doc.content);
     setDocumentTitle(doc.title);
     setCurrentDocumentId(doc.id);
   };
@@ -131,6 +138,7 @@ const Index = () => {
         onTitleChange={setDocumentTitle}
         onSave={handleSaveDocument}
         onLoadDocument={handleLoadDocument}
+        initialContent={initialContent}
       />
       
       {isMobile ? (
@@ -173,3 +181,4 @@ const Index = () => {
 };
 
 export default Index;
+

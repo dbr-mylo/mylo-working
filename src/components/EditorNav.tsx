@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Share2, LogOut, Save, FolderOpen } from "lucide-react";
+import { FileText, Download, Share2, LogOut, Save, FolderOpen, X } from "lucide-react";
 import type { EditorNavProps, Document } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
@@ -12,6 +12,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "react-router-dom";
 
 export const EditorNav = ({ 
   currentRole, 
@@ -19,7 +30,8 @@ export const EditorNav = ({
   content, 
   documentTitle = "", 
   onTitleChange,
-  onLoadDocument 
+  onLoadDocument,
+  initialContent = "" 
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const { toast } = useToast();
@@ -28,6 +40,8 @@ export const EditorNav = ({
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [titlePlaceholder, setTitlePlaceholder] = useState("Create Document Title");
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTitle(documentTitle);
@@ -72,6 +86,33 @@ export const EditorNav = ({
     } finally {
       setIsLoadingDocs(false);
     }
+  };
+
+  const hasUnsavedChanges = () => {
+    return content !== initialContent || title !== documentTitle;
+  };
+
+  const handleCloseDocument = () => {
+    if (hasUnsavedChanges()) {
+      setShowCloseDialog(true);
+    } else {
+      navigateToDocumentList();
+    }
+  };
+
+  const navigateToDocumentList = () => {
+    navigate('/');
+  };
+
+  const handleCloseWithoutSaving = () => {
+    setShowCloseDialog(false);
+    navigateToDocumentList();
+  };
+
+  const handleSaveAndClose = async () => {
+    setShowCloseDialog(false);
+    await handleSave();
+    navigateToDocumentList();
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,6 +329,15 @@ export const EditorNav = ({
           <Download className="w-4 h-4" />
           Export
         </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleCloseDocument}
+          title="Close document"
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </Button>
         {user && (
           <Button 
             variant="outline" 
@@ -300,6 +350,22 @@ export const EditorNav = ({
           </Button>
         )}
       </div>
+
+      <AlertDialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Do you want to save before closing this document?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCloseDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCloseWithoutSaving} className="bg-destructive text-destructive-foreground">Discard Changes</AlertDialogAction>
+            <AlertDialogAction onClick={handleSaveAndClose}>Save & Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 };

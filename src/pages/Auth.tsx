@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, signUp, continueAsGuest } = useAuth();
+  const { signIn, signUp, continueAsGuestEditor, continueAsGuestDesigner } = useAuth();
 
   const handleSubmit = async (action: "signin" | "signup") => {
     try {
@@ -99,17 +99,26 @@ export default function Auth() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  Or
+                  Or continue as guest
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              onClick={continueAsGuest}
-              className="mt-4 w-full"
-            >
-              Continue as Guest
-            </Button>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                onClick={continueAsGuestEditor}
+                className="w-full"
+              >
+                Editor (user 1)
+              </Button>
+              <Button
+                variant="outline"
+                onClick={continueAsGuestDesigner}
+                className="w-full"
+              >
+                Designer (user 2)
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

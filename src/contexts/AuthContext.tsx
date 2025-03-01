@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,8 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  continueAsGuest: () => void;
+  continueAsGuestEditor: () => void;
+  continueAsGuestDesigner: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         fetchUserData(session.user.id);
@@ -32,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -48,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -57,7 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (profileError) throw profileError;
 
-      // Fetch role
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
@@ -117,18 +113,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const continueAsGuest = () => {
+  const continueAsGuestEditor = () => {
     setAuthState({
       user: null,
-      role: "editor", // Set guest users as editors with limited permissions
+      role: "editor",
       isLoading: false
     });
-    toast.success("Continuing as guest");
+    toast.success("Continuing as Editor");
+    navigate("/");
+  };
+
+  const continueAsGuestDesigner = () => {
+    setAuthState({
+      user: null,
+      role: "designer",
+      isLoading: false
+    });
+    toast.success("Continuing as Designer");
     navigate("/");
   };
 
   return (
-    <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, continueAsGuest }}>
+    <AuthContext.Provider value={{ 
+      ...authState, 
+      signIn, 
+      signUp, 
+      signOut, 
+      continueAsGuestEditor, 
+      continueAsGuestDesigner 
+    }}>
       {children}
     </AuthContext.Provider>
   );

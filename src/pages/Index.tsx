@@ -118,8 +118,101 @@ const Index = () => {
   };
 
   const handleSaveDocument = async () => {
-    setInitialContent(content);
-    console.log("Document saved successfully");
+    try {
+      let savedDocument: Document | null = null;
+      
+      if (user) {
+        // If the user is logged in, save to Supabase
+        if (currentDocumentId) {
+          // Update existing document
+          const { data, error } = await supabase
+            .from('documents')
+            .update({ 
+              content: content,
+              title: documentTitle || "Untitled Document",
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', currentDocumentId)
+            .eq('owner_id', user.id)
+            .select('id, title, content, updated_at')
+            .single();
+          
+          if (error) throw error;
+          savedDocument = data;
+        } else {
+          // Create new document
+          const { data, error } = await supabase
+            .from('documents')
+            .insert({
+              content: content,
+              owner_id: user.id,
+              title: documentTitle || "Untitled Document"
+            })
+            .select('id, title, content, updated_at')
+            .single();
+          
+          if (error) throw error;
+          savedDocument = data;
+          
+          // Update URL with new document ID without page reload
+          if (data && data.id) {
+            setCurrentDocumentId(data.id);
+            navigate(`/editor/${data.id}`, { replace: true });
+          }
+        }
+      } else if (role) {
+        // For guest users, save to localStorage
+        const newDoc: Document = {
+          id: currentDocumentId || Date.now().toString(),
+          title: documentTitle || "Untitled Document",
+          content: content,
+          updated_at: new Date().toISOString()
+        };
+        
+        // Update current document reference if it's a new document
+        if (!currentDocumentId) {
+          setCurrentDocumentId(newDoc.id);
+          navigate(`/editor/${newDoc.id}`, { replace: true });
+        }
+        
+        // Save to localStorage - both individually and in the documents collection
+        let guestDocs: Document[] = [];
+        const storedDocs = localStorage.getItem('guestDocuments');
+        
+        if (storedDocs) {
+          guestDocs = JSON.parse(storedDocs);
+          const existingIndex = guestDocs.findIndex(doc => doc.id === newDoc.id);
+          
+          if (existingIndex >= 0) {
+            guestDocs[existingIndex] = newDoc;
+          } else {
+            guestDocs.unshift(newDoc);
+          }
+        } else {
+          guestDocs = [newDoc];
+        }
+        
+        localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
+        savedDocument = newDoc;
+      }
+      
+      // Update the initialContent to match current content, indicating "saved" state
+      setInitialContent(content);
+      
+      toast({
+        title: "Document saved",
+        description: "Your changes have been saved successfully.",
+      });
+      
+      console.log("Document saved successfully", savedDocument);
+    } catch (error) {
+      console.error("Error saving document:", error);
+      toast({
+        title: "Error saving document",
+        description: "There was a problem saving your document.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleLoadDocument = (doc: Document) => {
@@ -181,4 +274,3 @@ const Index = () => {
 };
 
 export default Index;
-

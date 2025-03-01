@@ -80,18 +80,18 @@ const DocumentSelection = () => {
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* New Document Card */}
-          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-64">
+          {/* New Document Card - Reduced size */}
+          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48">
             <CardContent className="flex flex-col items-center justify-center h-full pt-6 pb-0">
               <Button 
                 variant="ghost" 
-                size="lg"
-                className="w-16 h-16 rounded-full"
+                size="sm"
+                className="w-10 h-10 rounded-full"
                 onClick={handleCreateNewDocument}
               >
-                <Plus className="h-8 w-8" />
+                <Plus className="h-5 w-5" />
               </Button>
-              <CardTitle className="mt-4 text-xl">Create New Document</CardTitle>
+              <CardTitle className="mt-2 text-lg">Create New Document</CardTitle>
             </CardContent>
           </Card>
 

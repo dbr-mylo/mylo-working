@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Plus, Clock } from "lucide-react";
 
 const DocumentSelection = () => {
@@ -24,7 +23,6 @@ const DocumentSelection = () => {
     setIsLoading(true);
     try {
       if (user) {
-        // Fetch documents from Supabase for authenticated users
         const { data, error } = await supabase
           .from('documents')
           .select('id, title, content, updated_at')
@@ -37,7 +35,6 @@ const DocumentSelection = () => {
           setDocuments(data);
         }
       } else if (role) {
-        // Try to load from localStorage for guest users
         try {
           const localDocs = localStorage.getItem('guestDocuments');
           if (localDocs) {
@@ -79,61 +76,47 @@ const DocumentSelection = () => {
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* New Document Card - Reduced size */}
-          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48">
+        <div className="flex flex-wrap gap-4">
+          <Card className="border-2 border-dashed border-gray-300 hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center h-48 w-48"
+                onClick={handleCreateNewDocument}>
             <CardContent className="flex flex-col items-center justify-center h-full pt-6 pb-0">
               <Button 
                 variant="ghost" 
                 size="sm"
                 className="w-10 h-10 rounded-full"
-                onClick={handleCreateNewDocument}
               >
                 <Plus className="h-5 w-5" />
               </Button>
-              <CardTitle className="mt-2 text-lg">Create New Document</CardTitle>
+              <CardTitle className="mt-2 text-lg text-center">Create New</CardTitle>
             </CardContent>
           </Card>
 
-          {/* Document Cards */}
           {isLoading ? (
-            <p className="text-editor-text col-span-3 text-center py-12">Loading your documents...</p>
+            <p className="text-editor-text text-center py-12 w-full">Loading your documents...</p>
           ) : documents.length === 0 ? (
-            <p className="text-editor-text col-span-3 text-center py-12">No documents found. Create your first document!</p>
+            <p className="text-editor-text text-center py-12 w-full">No documents found. Create your first document!</p>
           ) : (
             documents.map((doc) => (
               <Card 
                 key={doc.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-64 flex flex-col"
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-48 w-48 flex flex-col"
                 onClick={() => handleOpenDocument(doc.id)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <FileText className="h-6 w-6 text-editor-text mb-2" />
+                    <FileText className="h-5 w-5 text-editor-text" />
                     <div className="flex items-center text-xs text-gray-500">
                       <Clock className="h-3 w-3 mr-1" />
                       {formatDate(doc.updated_at)}
                     </div>
                   </div>
-                  <CardTitle className="text-xl">{doc.title}</CardTitle>
+                  <CardTitle className="text-md truncate mt-2">{doc.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="pb-0 flex-grow flex items-center justify-center">
-                  <div className="text-sm text-gray-400 italic">
-                    Click to edit this document
+                <CardContent className="pb-4 flex-grow flex items-center justify-center">
+                  <div className="text-xs text-gray-400 italic text-center">
+                    Click to open
                   </div>
                 </CardContent>
-                <CardFooter className="pt-2 pb-4">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenDocument(doc.id);
-                    }}
-                  >
-                    Open Document
-                  </Button>
-                </CardFooter>
               </Card>
             ))
           )}

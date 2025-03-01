@@ -59,9 +59,34 @@ const DocumentSelection = () => {
           if (localDocs) {
             const parsedDocs = JSON.parse(localDocs);
             
+            // Validate and ensure each document conforms to the Document type
+            const validDocuments: Document[] = [];
+            
+            // Check if parsedDocs is an array
+            if (Array.isArray(parsedDocs)) {
+              parsedDocs.forEach((item: any) => {
+                // Validate that each item has the required Document properties
+                if (
+                  item && 
+                  typeof item === 'object' &&
+                  'id' in item && 
+                  'title' in item && 
+                  'content' in item && 
+                  'updated_at' in item
+                ) {
+                  validDocuments.push({
+                    id: String(item.id),
+                    title: String(item.title),
+                    content: String(item.content),
+                    updated_at: String(item.updated_at)
+                  });
+                }
+              });
+            }
+            
             // Deduplicate by ID
             const uniqueDocs = Array.from(
-              new Map(parsedDocs.map((item: Document) => [item.id, item])).values()
+              new Map(validDocuments.map(item => [item.id, item])).values()
             );
             
             setDocuments(uniqueDocs);
@@ -77,6 +102,7 @@ const DocumentSelection = () => {
           }
         } catch (error) {
           console.error("Error loading local documents:", error);
+          setDocuments([]); // Set empty array on error
         }
       }
     } catch (error) {
@@ -86,6 +112,7 @@ const DocumentSelection = () => {
         description: "There was a problem loading your documents.",
         variant: "destructive",
       });
+      setDocuments([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }

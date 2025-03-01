@@ -109,14 +109,14 @@ export default function Auth() {
                 onClick={continueAsGuestEditor}
                 className="w-full"
               >
-                Editor (user 1)
+                Editor
               </Button>
               <Button
                 variant="outline"
                 onClick={continueAsGuestDesigner}
                 className="w-full"
               >
-                Designer (user 2)
+                Designer
               </Button>
             </div>
           </div>

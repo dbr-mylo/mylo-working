@@ -29,13 +29,19 @@ const Index = () => {
   // Add a console log to track content changes
   console.log("Current document content in Index:", content ? content.substring(0, 50) + "..." : "empty");
   
+  // Create a Promise-returning wrapper for setDocumentTitle
+  const handleTitleChange = async (title: string): Promise<void> => {
+    setDocumentTitle(title);
+    return Promise.resolve();
+  };
+  
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
         currentRole={role || "editor"} 
         content={content}
         documentTitle={documentTitle}
-        onTitleChange={setDocumentTitle}
+        onTitleChange={handleTitleChange}
         onSave={saveDocument}
         onLoadDocument={loadDocument}
         initialContent={initialContent}

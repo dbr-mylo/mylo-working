@@ -1,6 +1,8 @@
 
 import type { UserRole } from "@/lib/types";
 
+export type { UserRole };
+
 export interface AuthState {
   user: any | null;
   role: UserRole | null;

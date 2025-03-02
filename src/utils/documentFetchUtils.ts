@@ -72,3 +72,14 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
     throw error;
   }
 }
+
+export function loadDocument(doc: Document) {
+  const docContent = typeof doc.content === 'string' ? doc.content : String(doc.content || "");
+  
+  return {
+    content: docContent,
+    initialContent: docContent,
+    documentTitle: doc.title || "",
+    currentDocumentId: doc.id
+  };
+}

@@ -3,11 +3,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import type { Document } from "@/lib/types";
-import { fetchDocumentFromSupabase, fetchDocumentFromLocalStorage } from "@/utils/documentFetchUtils";
-import { saveDocumentToSupabase, saveDocumentToLocalStorage } from "@/utils/documentSaveUtils";
+import type { Document, UseDocumentReturn } from "@/lib/types";
+import { 
+  fetchDocumentFromSupabase, 
+  fetchDocumentFromLocalStorage,
+  loadDocument as loadDocumentUtil
+} from "@/utils/documentFetchUtils";
+import { 
+  saveDocumentToSupabase, 
+  saveDocumentToLocalStorage 
+} from "@/utils/documentSaveUtils";
 
-export function useDocument(documentId: string | undefined) {
+export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const [content, setContent] = useState("");
   const [initialContent, setInitialContent] = useState("");
   const [documentTitle, setDocumentTitle] = useState("");
@@ -144,12 +151,12 @@ export function useDocument(documentId: string | undefined) {
   };
 
   const loadDocument = (doc: Document) => {
-    const docContent = typeof doc.content === 'string' ? doc.content : String(doc.content || "");
+    const loadedDoc = loadDocumentUtil(doc);
     
-    setContent(docContent);
-    setInitialContent(docContent);
-    setDocumentTitle(doc.title || "");
-    setCurrentDocumentId(doc.id);
+    setContent(loadedDoc.content);
+    setInitialContent(loadedDoc.initialContent);
+    setDocumentTitle(loadedDoc.documentTitle);
+    setCurrentDocumentId(loadedDoc.currentDocumentId);
   };
 
   return {

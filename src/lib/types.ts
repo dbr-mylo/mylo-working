@@ -17,6 +17,18 @@ export interface Document {
   updated_at: string;
 }
 
+export interface UseDocumentReturn {
+  content: string;
+  setContent: React.Dispatch<React.SetStateAction<string>>;
+  initialContent: string;
+  documentTitle: string;
+  setDocumentTitle: React.Dispatch<React.SetStateAction<string>>;
+  currentDocumentId: string | null;
+  isLoading: boolean;
+  saveDocument: () => Promise<void>;
+  loadDocument: (doc: Document) => void;
+}
+
 export interface EditorNavProps {
   currentRole: string;
   content?: string;

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Document } from "@/lib/types";
 
@@ -39,24 +38,8 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
     
     if (!localDocs) {
       console.log("No documents found in localStorage");
-      
-      // Create a default document if none exist
-      const defaultDoc: Document = {
-        id: Date.now().toString(),
-        title: "Welcome Document",
-        content: "<p>Welcome to your editor! This is a sample document.</p>",
-        updated_at: new Date().toISOString()
-      };
-      
-      // Save the default document to localStorage
-      try {
-        localStorage.setItem('guestDocuments', JSON.stringify([defaultDoc]));
-        console.log("Created a default document in localStorage");
-        return [defaultDoc];
-      } catch (storageError) {
-        console.error("Failed to create default document:", storageError);
-        return [];
-      }
+      // Return empty array instead of creating a default document
+      return [];
     }
     
     try {

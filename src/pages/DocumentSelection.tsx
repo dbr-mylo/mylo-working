@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,39 +48,16 @@ const DocumentSelection = () => {
           if (typeof window !== 'undefined' && window.localStorage) {
             const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
             console.log("Documents fetched from localStorage:", uniqueDocs.length);
+            setDocuments(uniqueDocs);
             
-            // Only create a default document if NO documents exist at all
-            if (uniqueDocs.length === 0) {
-              console.log("No documents found in localStorage - creating a sample document");
-              // Create a default document if none exist
-              const defaultDoc: Document = {
-                id: Date.now().toString(),
-                title: "Welcome Document",
-                content: "<p>Welcome to your editor! This is a sample document.</p>",
-                updated_at: new Date().toISOString()
-              };
-              
-              // Save the default document to localStorage
-              try {
-                localStorage.setItem('guestDocuments', JSON.stringify([defaultDoc]));
-                console.log("Created a default document in localStorage");
-                setDocuments([defaultDoc]);
-              } catch (storageError) {
-                console.error("Failed to create default document:", storageError);
-                setDocuments([]);
-              }
-            } else {
-              setDocuments(uniqueDocs);
-              
-              // Check if we need to clean up duplicates
-              const localDocs = localStorage.getItem('guestDocuments');
-              if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-                localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
-                toast({
-                  title: "Duplicate documents removed",
-                  description: "We've cleaned up some duplicate documents for you.",
-                });
-              }
+            // Check if we need to clean up duplicates
+            const localDocs = localStorage.getItem('guestDocuments');
+            if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
+              localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+              toast({
+                title: "Duplicate documents removed",
+                description: "We've cleaned up some duplicate documents for you.",
+              });
             }
           } else {
             console.warn("localStorage is not available in this context");

@@ -11,11 +11,12 @@ export async function saveDocumentToSupabase(
   toast: ReturnType<typeof useToast>["toast"]
 ): Promise<Document | null> {
   try {
-    console.log("Saving to Supabase. Content:", content ? content.substring(0, 50) + "..." : "empty");
+    console.log("Saving to Supabase. Content length:", content.length);
     
     let savedDocument: Document | null = null;
     
     if (documentId) {
+      // Update existing document
       const { data, error } = await supabase
         .from('documents')
         .update({ 
@@ -28,10 +29,14 @@ export async function saveDocumentToSupabase(
         .select('id, title, content, updated_at')
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
       savedDocument = data;
-      console.log("Updated document in Supabase:", data);
+      console.log("Updated document in Supabase:", data?.id);
     } else {
+      // Create new document
       const { data, error } = await supabase
         .from('documents')
         .insert({
@@ -42,9 +47,12 @@ export async function saveDocumentToSupabase(
         .select('id, title, content, updated_at')
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
       savedDocument = data;
-      console.log("Created document in Supabase:", data);
+      console.log("Created document in Supabase:", data?.id);
     }
     
     return savedDocument;
@@ -61,12 +69,13 @@ export function saveDocumentToLocalStorage(
   toast: ReturnType<typeof useToast>["toast"]
 ): Document | null {
   try {
-    console.log("Saving to localStorage. Content:", content ? content.substring(0, 50) + "..." : "empty");
+    console.log("Saving to localStorage. Content length:", content.length);
     
     const docTitle = title || "Untitled Document";
     let savedDocument: Document | null = null;
     
     if (documentId) {
+      // Update existing document
       const localDocs = localStorage.getItem('guestDocuments');
       let docs = localDocs ? JSON.parse(localDocs) : [];
       
@@ -89,8 +98,9 @@ export function saveDocumentToLocalStorage(
         
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
         savedDocument = docs[existingIndex];
-        console.log("Updated document in localStorage:", savedDocument);
+        console.log("Updated document in localStorage:", savedDocument?.id);
       } else {
+        // Document with ID not found, create new
         const newDoc: Document = {
           id: documentId,
           title: docTitle,
@@ -101,9 +111,10 @@ export function saveDocumentToLocalStorage(
         docs.unshift(newDoc);
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
         savedDocument = newDoc;
-        console.log("Created new document in localStorage with existing ID:", savedDocument);
+        console.log("Created new document in localStorage with existing ID:", savedDocument?.id);
       }
     } else {
+      // Create new document
       const newDoc: Document = {
         id: Date.now().toString(),
         title: docTitle,
@@ -127,6 +138,7 @@ export function saveDocumentToLocalStorage(
       guestDocs.unshift(newDoc);
       localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
       savedDocument = newDoc;
+      console.log("Created new document in localStorage:", savedDocument?.id);
     }
     
     return savedDocument;

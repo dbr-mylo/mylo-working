@@ -58,9 +58,14 @@ export const EditorNav = ({
   };
 
   const handleCloseDocument = (): Promise<void> => {
+    console.log("Close document triggered. Content length:", content?.length);
+    console.log("Initial content length:", initialContent?.length);
+    
     if (hasUnsavedChanges(content, initialContent, title, documentTitle)) {
+      console.log("Unsaved changes detected, showing dialog");
       setShowCloseDialog(true);
     } else {
+      console.log("No unsaved changes, navigating to document list");
       navigateToDocumentList();
     }
     return Promise.resolve();
@@ -72,19 +77,29 @@ export const EditorNav = ({
   };
 
   const handleCloseWithoutSaving = async (): Promise<void> => {
+    console.log("Closing without saving");
     setShowCloseDialog(false);
     await navigateToDocumentList();
     return Promise.resolve();
   };
 
   const handleSaveAndClose = async (): Promise<void> => {
+    console.log("Saving and closing");
     setShowCloseDialog(false);
-    await handleSave();
+    
+    if (onSave) {
+      console.log("Calling onSave");
+      await onSave();
+      console.log("Save completed");
+    }
+    
+    console.log("Navigating away");
     await navigateToDocumentList();
     return Promise.resolve();
   };
   
   const handleSave = async (): Promise<void> => {
+    console.log("Save triggered from nav");
     if (onSave) {
       await onSave();
       await loadDocuments();

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,7 +82,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
 
   const saveDocument = async (): Promise<void> => {
     try {
-      console.log("Saving document with content:", content);
+      console.log("Saving document with content length:", content.length);
       
       if (!content || !content.trim()) {
         toast({
@@ -97,6 +96,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       let savedDocument: Document | null = null;
       
       if (user) {
+        console.log("Saving document for authenticated user:", user.id);
         savedDocument = await saveDocumentToSupabase(
           currentDocumentId, 
           content, 
@@ -104,23 +104,14 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           user.id,
           toast
         );
-        
-        if (savedDocument && !currentDocumentId) {
-          setCurrentDocumentId(savedDocument.id);
-          navigate(`/editor/${savedDocument.id}`, { replace: true });
-        }
       } else if (role) {
+        console.log("Saving document for guest user with role:", role);
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
           documentTitle,
           toast
         );
-        
-        if (savedDocument && !currentDocumentId) {
-          setCurrentDocumentId(savedDocument.id);
-          navigate(`/editor/${savedDocument.id}`, { replace: true });
-        }
       } else {
         toast({
           title: "Authentication required",
@@ -130,14 +121,20 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
         return;
       }
       
-      setInitialContent(content);
+      if (savedDocument) {
+        console.log("Document saved successfully with ID:", savedDocument.id);
+        if (!currentDocumentId) {
+          setCurrentDocumentId(savedDocument.id);
+          navigate(`/editor/${savedDocument.id}`, { replace: true });
+        }
+        setInitialContent(content);
+      }
       
       toast({
         title: "Document saved",
         description: "Your changes have been saved successfully.",
       });
       
-      console.log("Document saved successfully", savedDocument);
       return;
     } catch (error) {
       console.error("Error saving document:", error);

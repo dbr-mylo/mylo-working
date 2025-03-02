@@ -12,6 +12,7 @@ export async function saveDocumentToSupabase(
 ): Promise<Document | null> {
   try {
     console.log("Saving to Supabase. Content length:", content.length);
+    console.log("Content preview:", content.substring(0, 100));
     
     let savedDocument: Document | null = null;
     
@@ -33,8 +34,11 @@ export async function saveDocumentToSupabase(
         console.error("Supabase update error:", error);
         throw error;
       }
+      
+      console.log("Document updated in Supabase:", data?.id);
+      console.log("Retrieved content length:", data?.content?.length || 0);
+      
       savedDocument = data;
-      console.log("Updated document in Supabase:", data?.id);
     } else {
       // Create new document
       const { data, error } = await supabase
@@ -51,8 +55,11 @@ export async function saveDocumentToSupabase(
         console.error("Supabase insert error:", error);
         throw error;
       }
+      
+      console.log("Document created in Supabase:", data?.id);
+      console.log("Saved content length:", data?.content?.length || 0);
+      
       savedDocument = data;
-      console.log("Created document in Supabase:", data?.id);
     }
     
     return savedDocument;
@@ -70,6 +77,7 @@ export function saveDocumentToLocalStorage(
 ): Document | null {
   try {
     console.log("Saving to localStorage. Content length:", content.length);
+    console.log("Content preview:", content.substring(0, 100));
     
     const docTitle = title || "Untitled Document";
     let savedDocument: Document | null = null;
@@ -86,19 +94,17 @@ export function saveDocumentToLocalStorage(
       const existingIndex = docs.findIndex((doc: Document) => doc.id === documentId);
       
       if (existingIndex >= 0) {
-        // Make sure to properly stringify content if it's an object
-        const sanitizedContent = typeof content === 'object' ? JSON.stringify(content) : content;
-        
         docs[existingIndex] = {
           ...docs[existingIndex],
           title: docTitle,
-          content: sanitizedContent,
+          content: content,
           updated_at: new Date().toISOString()
         };
         
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
         savedDocument = docs[existingIndex];
         console.log("Updated document in localStorage:", savedDocument?.id);
+        console.log("Saved content length:", savedDocument?.content?.length || 0);
       } else {
         // Document with ID not found, create new
         const newDoc: Document = {
@@ -112,6 +118,7 @@ export function saveDocumentToLocalStorage(
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
         savedDocument = newDoc;
         console.log("Created new document in localStorage with existing ID:", savedDocument?.id);
+        console.log("Saved content length:", savedDocument?.content?.length || 0);
       }
     } else {
       // Create new document
@@ -139,6 +146,7 @@ export function saveDocumentToLocalStorage(
       localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
       savedDocument = newDoc;
       console.log("Created new document in localStorage:", savedDocument?.id);
+      console.log("Saved content length:", savedDocument?.content?.length || 0);
     }
     
     return savedDocument;

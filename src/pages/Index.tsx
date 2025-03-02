@@ -6,6 +6,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useDocument } from "@/hooks/useDocument";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
+import { useEffect } from "react";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -27,7 +28,9 @@ const Index = () => {
   const isDesignEditable = role === "designer";
   
   // Add a console log to track content changes
-  console.log("Current document content in Index:", content ? content.substring(0, 50) + "..." : "empty");
+  useEffect(() => {
+    console.log("Current document content in Index:", content ? `Length: ${content.length}, Preview: ${content.substring(0, 50)}...` : "empty");
+  }, [content]);
   
   // Create a Promise-returning wrapper for setDocumentTitle
   const handleTitleChange = async (title: string): Promise<void> => {

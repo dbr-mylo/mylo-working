@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +24,12 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Debug log whenever content changes
+  useEffect(() => {
+    console.log("Content updated in useDocument hook:", content.substring(0, 100));
+    console.log("Content length:", content.length);
+  }, [content]);
+
   useEffect(() => {
     if (documentId) {
       fetchDocument(documentId);
@@ -38,16 +45,24 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const fetchDocument = async (id: string) => {
     setIsLoading(true);
     try {
+      console.log("Fetching document with ID:", id);
+      
       if (user) {
+        console.log("Fetching for authenticated user:", user.id);
         const data = await fetchDocumentFromSupabase(id, user.id, toast);
         if (data) {
+          console.log("Document fetched from Supabase:", data.id);
+          console.log("Content length from Supabase:", data.content?.length || 0);
+          
           if (data.content) {
             setContent(data.content);
             setInitialContent(data.content);
           } else {
+            console.warn("Document has no content!");
             setContent("");
             setInitialContent("");
           }
+          
           if (data.title) {
             setDocumentTitle(data.title);
           }
@@ -57,8 +72,12 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           return;
         }
       } else if (role) {
+        console.log("Fetching for guest user with role:", role);
         const doc = fetchDocumentFromLocalStorage(id, toast);
         if (doc) {
+          console.log("Document fetched from localStorage:", doc.id);
+          console.log("Content length from localStorage:", doc.content?.length || 0);
+          
           setContent(doc.content || "");
           setInitialContent(doc.content || "");
           setDocumentTitle(doc.title || "");
@@ -83,6 +102,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const saveDocument = async (): Promise<void> => {
     try {
       console.log("Saving document with content length:", content.length);
+      console.log("Content preview:", content.substring(0, 100));
       
       if (!content || !content.trim()) {
         toast({
@@ -123,11 +143,15 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       
       if (savedDocument) {
         console.log("Document saved successfully with ID:", savedDocument.id);
+        console.log("Saved content length:", savedDocument.content.length);
+        
+        // Update initialContent to mark that we've saved the current state
+        setInitialContent(content);
+        
         if (!currentDocumentId) {
           setCurrentDocumentId(savedDocument.id);
           navigate(`/editor/${savedDocument.id}`, { replace: true });
         }
-        setInitialContent(content);
       }
       
       toast({
@@ -148,7 +172,12 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   };
 
   const loadDocument = (doc: Document) => {
+    console.log("Loading document:", doc.id);
+    console.log("Content length from document:", doc.content?.length || 0);
+    
     const loadedDoc = loadDocumentUtil(doc);
+    
+    console.log("Processed content length:", loadedDoc.content.length);
     
     setContent(loadedDoc.content);
     setInitialContent(loadedDoc.initialContent);

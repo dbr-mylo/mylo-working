@@ -17,6 +17,11 @@ export interface Document {
   updated_at: string;
 }
 
+export interface SaveDocumentResult {
+  success: boolean;
+  documentId?: string;
+}
+
 export interface UseDocumentReturn {
   content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
@@ -25,7 +30,7 @@ export interface UseDocumentReturn {
   setDocumentTitle: React.Dispatch<React.SetStateAction<string>>;
   currentDocumentId: string | null;
   isLoading: boolean;
-  saveDocument: () => Promise<void>;
+  saveDocument: () => Promise<SaveDocumentResult>;
   loadDocument: (doc: Document) => void;
 }
 
@@ -34,7 +39,7 @@ export interface EditorNavProps {
   content?: string;
   documentTitle?: string;
   onTitleChange?: (title: string) => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: () => Promise<SaveDocumentResult>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
 }

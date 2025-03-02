@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import type { Document, UseDocumentReturn } from "@/lib/types";
+import type { Document, UseDocumentReturn, SaveDocumentResult } from "@/lib/types";
 import { useDocumentState } from "./document/useDocumentState";
 import { useDocumentFetch } from "./document/useDocumentFetch";
 import { useDocumentSave } from "./document/useDocumentSave";

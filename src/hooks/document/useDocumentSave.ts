@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { SaveDocumentResult } from "@/lib/types";
 import { 
   saveDocumentToSupabase, 
   saveDocumentToLocalStorage 
@@ -19,7 +20,7 @@ export function useDocumentSave(
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const saveDocument = useCallback(async () => {
+  const saveDocument = useCallback(async (): Promise<SaveDocumentResult> => {
     if (!content) {
       console.warn("Cannot save empty content");
       toast({

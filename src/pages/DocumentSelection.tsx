@@ -31,7 +31,7 @@ const DocumentSelection = () => {
     console.log("DocumentSelection component mounted, fetching documents");
     console.log("Auth state:", { user: user?.id, role });
     fetchUserDocuments();
-  }, [user]);
+  }, [user, role]); // Added role as a dependency to re-fetch when role changes
 
   const fetchUserDocuments = async () => {
     setIsLoading(true);
@@ -45,24 +45,46 @@ const DocumentSelection = () => {
       } else if (role) {
         console.log("Fetching documents for guest user with role:", role);
         try {
-          const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
-          console.log("Documents fetched from localStorage:", uniqueDocs.length);
-          
-          if (uniqueDocs.length === 0) {
-            console.log("No documents found in localStorage - checking if we need to create a sample document");
-            // If this is the first time and no documents exist, we could create a sample one
-            // but we'll leave that for a separate feature request
-          }
-          
-          setDocuments(uniqueDocs);
-          
-          const localDocs = localStorage.getItem('guestDocuments');
-          if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-            localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
-            toast({
-              title: "Duplicate documents removed",
-              description: "We've cleaned up some duplicate documents for you.",
-            });
+          // Check if we're in a context where localStorage is available
+          if (typeof window !== 'undefined' && window.localStorage) {
+            const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
+            console.log("Documents fetched from localStorage:", uniqueDocs.length);
+            
+            if (uniqueDocs.length === 0) {
+              console.log("No documents found in localStorage - creating a sample document");
+              // Create a default document if none exist
+              const defaultDoc: Document = {
+                id: Date.now().toString(),
+                title: "Welcome Document",
+                content: "<p>Welcome to your editor! This is a sample document.</p>",
+                updated_at: new Date().toISOString()
+              };
+              
+              // Save the default document to localStorage
+              try {
+                localStorage.setItem('guestDocuments', JSON.stringify([defaultDoc]));
+                console.log("Created a default document in localStorage");
+                setDocuments([defaultDoc]);
+              } catch (storageError) {
+                console.error("Failed to create default document:", storageError);
+                setDocuments([]);
+              }
+            } else {
+              setDocuments(uniqueDocs);
+              
+              // Check if we need to clean up duplicates
+              const localDocs = localStorage.getItem('guestDocuments');
+              if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
+                localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+                toast({
+                  title: "Duplicate documents removed",
+                  description: "We've cleaned up some duplicate documents for you.",
+                });
+              }
+            }
+          } else {
+            console.warn("localStorage is not available in this context");
+            setDocuments([]);
           }
         } catch (error) {
           console.error("Error loading local documents:", error);

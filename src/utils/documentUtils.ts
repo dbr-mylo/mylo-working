@@ -27,12 +27,36 @@ export const deleteDocumentFromSupabase = async (documentId: string, userId: str
 export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
   try {
     console.log("Fetching guest documents from localStorage");
+    
+    // Safely check if localStorage is available in this context
+    if (typeof localStorage === 'undefined') {
+      console.warn("localStorage is not available in this context");
+      return [];
+    }
+    
     const localDocs = localStorage.getItem('guestDocuments');
     console.log("Raw localStorage data:", localDocs);
     
     if (!localDocs) {
       console.log("No documents found in localStorage");
-      return [];
+      
+      // Create a default document if none exist
+      const defaultDoc: Document = {
+        id: Date.now().toString(),
+        title: "Welcome Document",
+        content: "<p>Welcome to your editor! This is a sample document.</p>",
+        updated_at: new Date().toISOString()
+      };
+      
+      // Save the default document to localStorage
+      try {
+        localStorage.setItem('guestDocuments', JSON.stringify([defaultDoc]));
+        console.log("Created a default document in localStorage");
+        return [defaultDoc];
+      } catch (storageError) {
+        console.error("Failed to create default document:", storageError);
+        return [];
+      }
     }
     
     try {
@@ -79,7 +103,7 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
       );
       
       console.log("Unique documents to return:", uniqueDocs.length);
-      return uniqueDocs;
+      return uniqueDocs.length > 0 ? uniqueDocs : [];
     } catch (parseError) {
       console.error("Error parsing JSON from localStorage:", parseError);
       

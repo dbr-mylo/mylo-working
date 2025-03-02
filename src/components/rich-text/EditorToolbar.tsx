@@ -3,8 +3,8 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FontPicker } from '../FontPicker';
-import { ColorPicker } from '../ColorPicker';
+import { FontPicker } from './FontPicker';
+import { ColorPicker } from './ColorPicker';
 
 interface EditorToolbarProps {
   editor: Editor | null;

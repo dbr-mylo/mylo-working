@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DocumentList } from "@/components/document/DocumentList";
 import { DeleteDocumentDialog } from "@/components/document/DeleteDocumentDialog";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { ExternalActions } from "@/components/editor-nav/ExternalActions";
 import {
   fetchUserDocumentsFromSupabase,
   fetchGuestDocumentsFromLocalStorage,
@@ -21,7 +21,7 @@ const DocumentSelection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const { user, role } = useAuth();
+  const { user, role, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { width } = useWindowSize();
@@ -136,10 +136,21 @@ const DocumentSelection = () => {
     }
   };
 
+  const handleReturnToLogin = () => {
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-editor-bg p-8">
       <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
-        <header className="mb-8 text-center">
+        <header className="mb-8 text-center relative w-full">
+          <div className="absolute right-0 top-0">
+            <ExternalActions
+              onSignOut={signOut}
+              isAuthenticated={!!user}
+              onReturnToLogin={handleReturnToLogin}
+            />
+          </div>
           <p className="text-sm uppercase tracking-wider text-editor-text mb-1 font-medium">
             {isDesigner ? "Designer" : "Editor"}
           </p>

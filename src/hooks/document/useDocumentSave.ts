@@ -35,6 +35,7 @@ export function useDocumentSave(
       console.log("Saving document with title:", documentTitle);
       console.log("Content length:", content.length);
       console.log("Current document ID:", currentDocumentId);
+      console.log("Current role:", role);
       
       let savedDoc;
       if (user) {

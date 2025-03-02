@@ -141,6 +141,9 @@ export function saveDocumentToLocalStorage(
     console.log("Content preview:", content ? content.substring(0, 100) : "empty");
     
     const docTitle = title || "Untitled Document";
+    const storageKey = `${role}Documents`;
+    
+    console.log(`Using storage key: ${storageKey}`);
     
     if (documentId) {
       return updateExistingDocumentInLocalStorage(documentId, content, docTitle, role);

@@ -42,7 +42,9 @@ export const EditorNav = ({
   const loadDocuments = async (): Promise<void> => {
     setIsLoadingDocs(true);
     try {
-      const docs = await fetchUserDocuments(user?.id);
+      console.log(`Fetching documents for role: ${currentRole}`);
+      const docs = await fetchUserDocuments(user?.id, currentRole);
+      console.log(`Fetched ${docs.length} documents`);
       setDocuments(docs);
     } catch (error) {
       console.error("Error loading documents:", error);

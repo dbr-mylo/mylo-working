@@ -23,6 +23,7 @@ export function useDocumentFetch(
   useEffect(() => {
     if (documentId) {
       console.log("DocumentId changed, fetching document:", documentId);
+      console.log("Current role:", role);
       fetchDocument(documentId);
     } else {
       // Reset content state when no document ID is provided
@@ -39,6 +40,7 @@ export function useDocumentFetch(
     setIsLoading(true);
     try {
       console.log("Fetching document with ID:", id);
+      console.log("Current role:", role);
       
       if (user) {
         console.log("Fetching for authenticated user:", user.id);

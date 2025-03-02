@@ -77,7 +77,7 @@ export function useDocumentFetch(
             
             // Double-check state after setting
             setTimeout(() => {
-              console.log("Verify content was set:", content ? content.substring(0, 100) : "empty");
+              console.log("Verify content was set correctly");
             }, 100);
           } else {
             console.warn("Document from localStorage has no content!");

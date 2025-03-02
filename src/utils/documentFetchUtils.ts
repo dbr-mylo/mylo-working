@@ -51,6 +51,13 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
       if (doc) {
         console.log("Loaded document from localStorage:", doc);
         
+        // Ensure content is a string
+        if (doc.content && typeof doc.content === 'object') {
+          doc.content = JSON.stringify(doc.content);
+        } else if (doc.content === null || doc.content === undefined) {
+          doc.content = "";
+        }
+        
         toast({
           title: "Document loaded",
           description: "Your local document has been loaded.",
@@ -74,7 +81,19 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
 }
 
 export function loadDocument(doc: Document) {
-  const docContent = typeof doc.content === 'string' ? doc.content : String(doc.content || "");
+  // Make sure content is always a string
+  let docContent = "";
+  
+  if (doc.content) {
+    if (typeof doc.content === 'string') {
+      docContent = doc.content;
+    } else {
+      // If not a string, convert to string (e.g., if it's an object)
+      docContent = JSON.stringify(doc.content);
+    }
+  }
+  
+  console.log("Loading document content:", docContent ? docContent.substring(0, 50) + "..." : "empty");
   
   return {
     content: docContent,

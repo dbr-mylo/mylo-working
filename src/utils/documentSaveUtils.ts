@@ -11,6 +11,8 @@ export async function saveDocumentToSupabase(
   toast: ReturnType<typeof useToast>["toast"]
 ): Promise<Document | null> {
   try {
+    console.log("Saving to Supabase. Content:", content ? content.substring(0, 50) + "..." : "empty");
+    
     let savedDocument: Document | null = null;
     
     if (documentId) {
@@ -59,6 +61,8 @@ export function saveDocumentToLocalStorage(
   toast: ReturnType<typeof useToast>["toast"]
 ): Document | null {
   try {
+    console.log("Saving to localStorage. Content:", content ? content.substring(0, 50) + "..." : "empty");
+    
     const docTitle = title || "Untitled Document";
     let savedDocument: Document | null = null;
     
@@ -73,16 +77,15 @@ export function saveDocumentToLocalStorage(
       const existingIndex = docs.findIndex((doc: Document) => doc.id === documentId);
       
       if (existingIndex >= 0) {
+        // Make sure to properly stringify content if it's an object
+        const sanitizedContent = typeof content === 'object' ? JSON.stringify(content) : content;
+        
         docs[existingIndex] = {
           ...docs[existingIndex],
           title: docTitle,
-          content: content,
+          content: sanitizedContent,
           updated_at: new Date().toISOString()
         };
-        
-        if (typeof docs[existingIndex].content !== 'string') {
-          docs[existingIndex].content = String(docs[existingIndex].content || "");
-        }
         
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
         savedDocument = docs[existingIndex];

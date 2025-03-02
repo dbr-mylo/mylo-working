@@ -117,7 +117,7 @@ const DocumentSelection = () => {
 
   return (
     <div className="min-h-screen bg-editor-bg p-8">
-      <div className="max-w-5xl mx-auto flex flex-col items-center">
+      <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
           <p className="text-editor-text">Select a document to edit or create a new one</p>
@@ -132,7 +132,7 @@ const DocumentSelection = () => {
           </Button>
         </div>
 
-        <div className="w-1/2 mx-auto">
+        <div className="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto">
           <DocumentList
             documents={documents}
             isLoading={isLoading}

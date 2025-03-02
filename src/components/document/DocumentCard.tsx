@@ -23,9 +23,9 @@ export const DocumentCard = ({ document, onDelete, onSelect }: DocumentCardProps
       onClick={() => onSelect(document.id)}
     >
       <CardHeader className="p-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-md truncate">{document.title}</CardTitle>
-          <div className="flex items-center gap-3">
+        <div className="flex justify-between items-center gap-2">
+          <CardTitle className="text-md break-words overflow-hidden">{document.title}</CardTitle>
+          <div className="flex items-center gap-3 shrink-0">
             <div className="text-xs text-gray-500 flex items-center">
               {formatDate(document.updated_at)}
             </div>

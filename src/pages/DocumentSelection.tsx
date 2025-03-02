@@ -27,6 +27,9 @@ const DocumentSelection = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
 
+  // Determine if the user is a designer to customize the UI
+  const isDesigner = role === "designer";
+
   useEffect(() => {
     console.log("DocumentSelection component mounted, fetching documents");
     console.log("Auth state:", { user: user?.id, role });
@@ -138,10 +141,14 @@ const DocumentSelection = () => {
       <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
         <header className="mb-8 text-center">
           <p className="text-sm uppercase tracking-wider text-editor-text mb-1 font-medium">
-            {role === "designer" ? "Designer" : "Editor"}
+            {isDesigner ? "Designer" : "Editor"}
           </p>
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
-          <p className="text-editor-text">Select a document to edit or create a new one</p>
+          <h1 className="text-3xl font-bold text-editor-heading mb-2">
+            {isDesigner ? "Your Templates" : "Your Documents"}
+          </h1>
+          <p className="text-editor-text">
+            Select a {isDesigner ? "template" : "document"} to edit or create a new one
+          </p>
         </header>
         
         <div className="mb-6">

@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 
 interface ExternalActionsProps {
   onSignOut?: () => void;
@@ -26,6 +27,21 @@ export const ExternalActions = ({
   onClose,
   onOpen
 }: ExternalActionsProps) => {
+  const navigate = useNavigate();
+  
+  const handleReturnToLogin = () => {
+    if (isAuthenticated && onSignOut) {
+      // If authenticated, sign out first
+      onSignOut();
+    } else if (onReturnToLogin) {
+      // Use the provided handler if available
+      onReturnToLogin();
+    } else {
+      // Fallback: directly navigate to auth page
+      navigate("/auth");
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -54,12 +70,10 @@ export const ExternalActions = ({
         
         <DropdownMenuSeparator />
         
-        {onReturnToLogin && (
-          <DropdownMenuItem onClick={onReturnToLogin} className="cursor-pointer">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Return to Login</span>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem onClick={handleReturnToLogin} className="cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Return to Login</span>
+        </DropdownMenuItem>
         
         {isAuthenticated && onSignOut && (
           <DropdownMenuItem onClick={onSignOut} className="cursor-pointer">

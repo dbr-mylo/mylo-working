@@ -42,23 +42,24 @@ export async function fetchDocumentFromSupabase(id: string, userId: string, toas
   }
 }
 
-export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<typeof useToast>["toast"]) {
+export function fetchDocumentFromLocalStorage(id: string, role: string, toast: ReturnType<typeof useToast>["toast"]) {
   try {
-    const localDocs = localStorage.getItem('guestDocuments');
+    const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+    const localDocs = localStorage.getItem(storageKey);
     if (localDocs) {
       const parsedDocs = JSON.parse(localDocs);
-      console.log("All localStorage documents:", parsedDocs);
+      console.log(`All localStorage ${role} documents:`, parsedDocs);
       
       if (!Array.isArray(parsedDocs)) {
-        console.warn("localStorage documents is not an array:", parsedDocs);
+        console.warn(`localStorage ${role} documents is not an array:`, parsedDocs);
         return null;
       }
       
       const doc = parsedDocs.find((d: Document) => d.id === id);
       
       if (doc) {
-        console.log("Found document in localStorage:", doc);
-        console.log("Document content from localStorage:", doc.content ? doc.content.substring(0, 100) : "empty");
+        console.log(`Found ${role} document in localStorage:`, doc);
+        console.log(`Document content from localStorage:`, doc.content ? doc.content.substring(0, 100) : "empty");
         
         // Ensure content is a string
         if (doc.content && typeof doc.content === 'object') {
@@ -74,7 +75,7 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
         
         return doc;
       } else {
-        console.warn("Document not found in localStorage. ID:", id);
+        console.warn(`Document not found in localStorage. ID: ${id}`);
         console.log("Available document IDs:", parsedDocs.map((d: Document) => d.id));
         
         toast({
@@ -85,11 +86,11 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
         return null;
       }
     } else {
-      console.warn("No documents found in localStorage");
+      console.warn(`No ${role} documents found in localStorage`);
     }
     return null;
   } catch (error) {
-    console.error("Error loading local document:", error);
+    console.error(`Error loading local ${role} document:`, error);
     throw error;
   }
 }

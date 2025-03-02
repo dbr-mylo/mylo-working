@@ -2,9 +2,9 @@
 import { Document } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchUserDocuments = async (userId: string | undefined): Promise<Document[]> => {
+export const fetchUserDocuments = async (userId: string | undefined, role: string | null): Promise<Document[]> => {
   if (!userId) {
-    return loadLocalDocuments();
+    return loadLocalDocuments(role);
   }
   
   try {
@@ -23,14 +23,15 @@ export const fetchUserDocuments = async (userId: string | undefined): Promise<Do
   }
 };
 
-export const loadLocalDocuments = (): Document[] => {
+export const loadLocalDocuments = (role: string | null): Document[] => {
   try {
-    const localDocs = localStorage.getItem('guestDocuments');
+    const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+    const localDocs = localStorage.getItem(storageKey);
     if (localDocs) {
       return JSON.parse(localDocs);
     }
   } catch (error) {
-    console.error("Error loading local documents:", error);
+    console.error(`Error loading ${role} documents:`, error);
   }
   return [];
 };

@@ -41,7 +41,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       setCurrentDocumentId(null);
       setIsLoading(false);
     }
-  }, [documentId, user]);
+  }, [documentId, user, role]);
 
   const fetchDocument = async (id: string) => {
     setIsLoading(true);
@@ -74,10 +74,10 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           return;
         }
       } else if (role) {
-        console.log("Fetching for guest user with role:", role);
-        const doc = fetchDocumentFromLocalStorage(id, toast);
+        console.log(`Fetching for ${role} user`);
+        const doc = fetchDocumentFromLocalStorage(id, role, toast);
         if (doc) {
-          console.log("Document fetched from localStorage:", doc.id);
+          console.log(`Document fetched from localStorage for ${role}:`, doc.id);
           console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
           console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
           
@@ -90,7 +90,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
               console.log("Verify content was set:", content ? content.substring(0, 100) : "empty");
             }, 100);
           } else {
-            console.warn("Document from localStorage has no content!");
+            console.warn(`Document from localStorage for ${role} has no content!`);
             setContent("");
             setInitialContent("");
           }
@@ -98,7 +98,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           setDocumentTitle(doc.title || "");
           setCurrentDocumentId(doc.id);
         } else {
-          console.error("Document not found in localStorage, redirecting to home");
+          console.error(`Document not found in localStorage for ${role}, redirecting to home`);
           navigate('/');
         }
       }
@@ -141,11 +141,12 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           toast
         );
       } else if (role) {
-        console.log("Saving document for guest user with role:", role);
+        console.log(`Saving document for ${role} user`);
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
           documentTitle,
+          role,
           toast
         );
       } else {

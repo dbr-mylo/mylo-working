@@ -26,7 +26,7 @@ const DocumentSelection = () => {
 
   useEffect(() => {
     fetchUserDocuments();
-  }, [user]);
+  }, [user, role]);
 
   const fetchUserDocuments = async () => {
     setIsLoading(true);
@@ -37,20 +37,21 @@ const DocumentSelection = () => {
         setDocuments(uniqueDocuments);
       } else if (role) {
         try {
-          const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
+          const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
           setDocuments(uniqueDocs);
           
           // Also update the localStorage with deduplicated list if needed
-          const localDocs = localStorage.getItem('guestDocuments');
+          const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+          const localDocs = localStorage.getItem(storageKey);
           if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-            localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+            localStorage.setItem(storageKey, JSON.stringify(uniqueDocs));
             toast({
               title: "Duplicate documents removed",
               description: "We've cleaned up some duplicate documents for you.",
             });
           }
         } catch (error) {
-          console.error("Error loading local documents:", error);
+          console.error(`Error loading ${role} documents:`, error);
           setDocuments([]);
         }
       }
@@ -92,7 +93,7 @@ const DocumentSelection = () => {
       if (user) {
         await deleteDocumentFromSupabase(documentToDelete, user.id);
       } else if (role) {
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete);
+        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, role);
         setDocuments(updatedDocs);
       }
       
@@ -119,7 +120,7 @@ const DocumentSelection = () => {
     <div className="min-h-screen bg-editor-bg p-8">
       <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
+          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your {role?.charAt(0).toUpperCase() + role?.slice(1)} Documents</h1>
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         

@@ -24,9 +24,10 @@ export const deleteDocumentFromSupabase = async (documentId: string, userId: str
   if (error) throw error;
 };
 
-export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
+export const fetchGuestDocumentsFromLocalStorage = (role: string): Document[] => {
   try {
-    const localDocs = localStorage.getItem('guestDocuments');
+    const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+    const localDocs = localStorage.getItem(storageKey);
     if (!localDocs) return [];
     
     const parsedDocs = JSON.parse(localDocs);
@@ -63,23 +64,24 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
     
     return uniqueDocs;
   } catch (error) {
-    console.error("Error loading local documents:", error);
+    console.error(`Error loading ${role} documents:`, error);
     return [];
   }
 };
 
-export const deleteDocumentFromLocalStorage = (documentId: string): Document[] => {
+export const deleteDocumentFromLocalStorage = (documentId: string, role: string): Document[] => {
   try {
-    const localDocs = localStorage.getItem('guestDocuments');
+    const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+    const localDocs = localStorage.getItem(storageKey);
     if (!localDocs) return [];
     
     const docs = JSON.parse(localDocs);
     const updatedDocs = docs.filter((doc: Document) => doc.id !== documentId);
-    localStorage.setItem('guestDocuments', JSON.stringify(updatedDocs));
+    localStorage.setItem(storageKey, JSON.stringify(updatedDocs));
     
     return updatedDocs;
   } catch (error) {
-    console.error("Error deleting local document:", error);
+    console.error(`Error deleting local ${role} document:`, error);
     throw error;
   }
 };

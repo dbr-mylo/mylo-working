@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -136,6 +137,9 @@ const DocumentSelection = () => {
     <div className="min-h-screen bg-editor-bg p-8">
       <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
         <header className="mb-8 text-center">
+          <p className="text-sm uppercase tracking-wider text-editor-text mb-1 font-medium">
+            {role === "designer" ? "Designer" : "Editor"}
+          </p>
           <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
           <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>

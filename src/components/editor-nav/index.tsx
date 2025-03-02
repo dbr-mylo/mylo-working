@@ -91,10 +91,10 @@ export const EditorNav = ({
     return Promise.resolve();
   };
 
-  const handleTitleChange = (newTitle: string): Promise<void> => {
+  const handleTitleChange = async (newTitle: string): Promise<void> => {
     setTitle(newTitle);
     if (onTitleChange) {
-      onTitleChange(newTitle);
+      await Promise.resolve(onTitleChange(newTitle));
     }
     return Promise.resolve();
   };

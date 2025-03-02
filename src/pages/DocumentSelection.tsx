@@ -27,14 +27,13 @@ const DocumentSelection = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
 
-  // Determine if the user is a designer to customize the UI
   const isDesigner = role === "designer";
 
   useEffect(() => {
     console.log("DocumentSelection component mounted, fetching documents");
     console.log("Auth state:", { user: user?.id, role });
     fetchUserDocuments();
-  }, [user, role]); // Added role as a dependency to re-fetch when role changes
+  }, [user, role]);
 
   const fetchUserDocuments = async () => {
     setIsLoading(true);
@@ -48,13 +47,11 @@ const DocumentSelection = () => {
       } else if (role) {
         console.log("Fetching documents for guest user with role:", role);
         try {
-          // Check if we're in a context where localStorage is available
           if (typeof window !== 'undefined' && window.localStorage) {
             const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
             console.log(`Documents fetched from localStorage for ${role}:`, uniqueDocs.length);
             setDocuments(uniqueDocs);
             
-            // Check if we need to clean up duplicates
             const localDocs = localStorage.getItem(`${role}Documents`);
             if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
               localStorage.setItem(`${role}Documents`, JSON.stringify(uniqueDocs));
@@ -137,7 +134,11 @@ const DocumentSelection = () => {
   };
 
   const handleReturnToLogin = () => {
-    navigate("/auth");
+    if (user && signOut) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
   };
 
   return (

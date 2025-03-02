@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
+import { fetchDocumentFromSupabase, fetchDocumentFromLocalStorage } from "@/utils/documentFetchUtils";
+import { saveDocumentToSupabase, saveDocumentToLocalStorage } from "@/utils/documentSaveUtils";
 
 export function useDocument(documentId: string | undefined) {
   const [content, setContent] = useState("");
@@ -31,28 +33,8 @@ export function useDocument(documentId: string | undefined) {
     setIsLoading(true);
     try {
       if (user) {
-        const { data, error } = await supabase
-          .from('documents')
-          .select('id, content, title, updated_at')
-          .eq('id', id)
-          .eq('owner_id', user.id)
-          .single();
-        
-        if (error) {
-          if (error.code === 'PGRST116') {
-            toast({
-              title: "Document not found",
-              description: "This document doesn't exist or you don't have access to it.",
-              variant: "destructive",
-            });
-            navigate('/');
-            return;
-          }
-          throw error;
-        }
-        
+        const data = await fetchDocumentFromSupabase(id, user.id, toast);
         if (data) {
-          console.log("Loaded document from Supabase:", data);
           if (data.content) {
             setContent(data.content);
             setInitialContent(data.content);
@@ -64,41 +46,18 @@ export function useDocument(documentId: string | undefined) {
             setDocumentTitle(data.title);
           }
           setCurrentDocumentId(data.id);
-          
-          toast({
-            title: "Document loaded",
-            description: "Your document has been loaded.",
-          });
+        } else {
+          navigate('/');
+          return;
         }
       } else if (role) {
-        try {
-          const localDocs = localStorage.getItem('guestDocuments');
-          if (localDocs) {
-            const parsedDocs = JSON.parse(localDocs);
-            const doc = parsedDocs.find((d: Document) => d.id === id);
-            
-            if (doc) {
-              console.log("Loaded document from localStorage:", doc);
-              setContent(doc.content || "");
-              setInitialContent(doc.content || "");
-              setDocumentTitle(doc.title || "");
-              setCurrentDocumentId(doc.id);
-              
-              toast({
-                title: "Document loaded",
-                description: "Your local document has been loaded.",
-              });
-            } else {
-              toast({
-                title: "Document not found",
-                description: "This document doesn't exist in your local storage.",
-                variant: "destructive",
-              });
-              navigate('/');
-            }
-          }
-        } catch (error) {
-          console.error("Error loading local document:", error);
+        const doc = fetchDocumentFromLocalStorage(id, toast);
+        if (doc) {
+          setContent(doc.content || "");
+          setInitialContent(doc.content || "");
+          setDocumentTitle(doc.title || "");
+          setCurrentDocumentId(doc.id);
+        } else {
           navigate('/');
         }
       }
@@ -131,115 +90,29 @@ export function useDocument(documentId: string | undefined) {
       let savedDocument: Document | null = null;
       
       if (user) {
-        if (currentDocumentId) {
-          const { data, error } = await supabase
-            .from('documents')
-            .update({ 
-              content: content,
-              title: documentTitle || "Untitled Document",
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', currentDocumentId)
-            .eq('owner_id', user.id)
-            .select('id, title, content, updated_at')
-            .single();
-          
-          if (error) throw error;
-          savedDocument = data;
-          console.log("Updated document in Supabase:", data);
-        } else {
-          const { data, error } = await supabase
-            .from('documents')
-            .insert({
-              content: content,
-              owner_id: user.id,
-              title: documentTitle || "Untitled Document"
-            })
-            .select('id, title, content, updated_at')
-            .single();
-          
-          if (error) throw error;
-          savedDocument = data;
-          console.log("Created document in Supabase:", data);
-          
-          if (data && data.id) {
-            setCurrentDocumentId(data.id);
-            navigate(`/editor/${data.id}`, { replace: true });
-          }
+        savedDocument = await saveDocumentToSupabase(
+          currentDocumentId, 
+          content, 
+          documentTitle, 
+          user.id,
+          toast
+        );
+        
+        if (savedDocument && !currentDocumentId) {
+          setCurrentDocumentId(savedDocument.id);
+          navigate(`/editor/${savedDocument.id}`, { replace: true });
         }
       } else if (role) {
-        try {
-          const docTitle = documentTitle || "Untitled Document";
-          
-          if (currentDocumentId) {
-            const localDocs = localStorage.getItem('guestDocuments');
-            let docs = localDocs ? JSON.parse(localDocs) : [];
-            
-            if (!Array.isArray(docs)) {
-              docs = [];
-            }
-            
-            const existingIndex = docs.findIndex((doc: Document) => doc.id === currentDocumentId);
-            
-            if (existingIndex >= 0) {
-              docs[existingIndex] = {
-                ...docs[existingIndex],
-                title: docTitle,
-                content: content,
-                updated_at: new Date().toISOString()
-              };
-              
-              if (typeof docs[existingIndex].content !== 'string') {
-                docs[existingIndex].content = String(docs[existingIndex].content || "");
-              }
-              
-              localStorage.setItem('guestDocuments', JSON.stringify(docs));
-              savedDocument = docs[existingIndex];
-              console.log("Updated document in localStorage:", savedDocument);
-            } else {
-              const newDoc: Document = {
-                id: currentDocumentId,
-                title: docTitle,
-                content: content,
-                updated_at: new Date().toISOString()
-              };
-              
-              docs.unshift(newDoc);
-              localStorage.setItem('guestDocuments', JSON.stringify(docs));
-              savedDocument = newDoc;
-              console.log("Created new document in localStorage with existing ID:", savedDocument);
-            }
-          } else {
-            const newDoc: Document = {
-              id: Date.now().toString(),
-              title: docTitle,
-              content: content,
-              updated_at: new Date().toISOString()
-            };
-            
-            setCurrentDocumentId(newDoc.id);
-            navigate(`/editor/${newDoc.id}`, { replace: true });
-            
-            let guestDocs: Document[] = [];
-            const storedDocs = localStorage.getItem('guestDocuments');
-            
-            if (storedDocs) {
-              try {
-                const parsed = JSON.parse(storedDocs);
-                guestDocs = Array.isArray(parsed) ? parsed : [];
-              } catch (e) {
-                console.error("Error parsing stored docs:", e);
-                guestDocs = [];
-              }
-            }
-            
-            guestDocs.unshift(newDoc);
-            localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
-            savedDocument = newDoc;
-          }
-        } catch (error) {
-          console.error("Error saving to localStorage:", error);
-          throw error;
+        savedDocument = saveDocumentToLocalStorage(
+          currentDocumentId,
+          content,
+          documentTitle,
+          toast
+        );
+        
+        if (savedDocument && !currentDocumentId) {
+          setCurrentDocumentId(savedDocument.id);
+          navigate(`/editor/${savedDocument.id}`, { replace: true });
         }
       } else {
         toast({
@@ -258,6 +131,7 @@ export function useDocument(documentId: string | undefined) {
       });
       
       console.log("Document saved successfully", savedDocument);
+      return;
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -265,6 +139,7 @@ export function useDocument(documentId: string | undefined) {
         description: "There was a problem saving your document.",
         variant: "destructive",
       });
+      return;
     }
   };
 

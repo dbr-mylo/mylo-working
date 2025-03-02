@@ -1,4 +1,5 @@
 
+
 export interface DesignPanelProps {
   content: string;
   isEditable?: boolean;
@@ -34,3 +35,4 @@ export interface AuthState {
   role: UserRole | null;
   isLoading: boolean;
 }
+

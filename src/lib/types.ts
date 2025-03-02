@@ -1,7 +1,6 @@
-
 export interface DesignPanelProps {
   content: string;
-  isEditable?: boolean;
+  isEditable: boolean;
 }
 
 export interface EditorPanelProps {
@@ -45,4 +44,11 @@ export interface AuthState {
   user: any | null;
   role: UserRole | null;
   isLoading: boolean;
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  styles: string;
+  owner_id?: string;
 }

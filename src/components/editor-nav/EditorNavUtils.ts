@@ -2,7 +2,7 @@
 import { Document } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchUserDocuments = async (userId: string | undefined, role: string | null): Promise<Document[]> => {
+export const fetchUserDocuments = async (userId: string | undefined, role: string | null = null): Promise<Document[]> => {
   if (!userId) {
     return loadLocalDocuments(role);
   }

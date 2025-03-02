@@ -2,9 +2,12 @@
 import { Document } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchUserDocuments = async (userId: string | undefined): Promise<Document[]> => {
+export const fetchUserDocuments = async (userId: string | undefined, role: string | undefined): Promise<Document[]> => {
+  console.log(`Fetching documents for userId: ${userId} with role: ${role}`);
+  
   if (!userId) {
-    return loadLocalDocuments();
+    console.log(`Loading local documents for role: ${role}`);
+    return loadLocalDocuments(role);
   }
   
   try {
@@ -16,6 +19,7 @@ export const fetchUserDocuments = async (userId: string | undefined): Promise<Do
       
     if (error) throw error;
     
+    console.log(`Fetched ${data?.length || 0} documents from Supabase`);
     return data || [];
   } catch (error) {
     console.error("Error fetching documents:", error);
@@ -23,15 +27,22 @@ export const fetchUserDocuments = async (userId: string | undefined): Promise<Do
   }
 };
 
-export const loadLocalDocuments = (): Document[] => {
+export const loadLocalDocuments = (role: string | undefined): Document[] => {
   try {
-    const localDocs = localStorage.getItem('guestDocuments');
+    console.log(`Loading local documents for role: ${role}`);
+    const storageKey = `${role}Documents`;
+    const localDocs = localStorage.getItem(storageKey);
+    console.log(`Raw localStorage data for ${role}:`, localDocs);
+    
     if (localDocs) {
-      return JSON.parse(localDocs);
+      const docs = JSON.parse(localDocs);
+      console.log(`Parsed ${docs.length} documents from localStorage for ${role}`);
+      return docs;
     }
   } catch (error) {
-    console.error("Error loading local documents:", error);
+    console.error(`Error loading local documents for ${role}:`, error);
   }
+  console.log(`No documents found in localStorage for ${role}`);
   return [];
 };
 

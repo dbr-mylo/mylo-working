@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,34 +27,53 @@ const DocumentSelection = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
 
+  // Determine if the user is a designer to customize the UI
+  const isDesigner = role === "designer";
+
   useEffect(() => {
+    console.log("DocumentSelection component mounted, fetching documents");
+    console.log("Auth state:", { user: user?.id, role });
     fetchUserDocuments();
-  }, [user]);
+  }, [user, role]); // Added role as a dependency to re-fetch when role changes
 
   const fetchUserDocuments = async () => {
     setIsLoading(true);
     try {
       if (user) {
+        console.log("Fetching documents for authenticated user:", user.id);
         const data = await fetchUserDocumentsFromSupabase(user.id);
+        console.log("Documents fetched from Supabase:", data.length);
         const uniqueDocuments = deduplicateDocuments(data);
         setDocuments(uniqueDocuments);
       } else if (role) {
+        console.log("Fetching documents for guest user with role:", role);
         try {
-          const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
-          setDocuments(uniqueDocs);
-          
-          const localDocs = localStorage.getItem('guestDocuments');
-          if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-            localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
-            toast({
-              title: "Duplicate documents removed",
-              description: "We've cleaned up some duplicate documents for you.",
-            });
+          // Check if we're in a context where localStorage is available
+          if (typeof window !== 'undefined' && window.localStorage) {
+            const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
+            console.log(`Documents fetched from localStorage for ${role}:`, uniqueDocs.length);
+            setDocuments(uniqueDocs);
+            
+            // Check if we need to clean up duplicates
+            const localDocs = localStorage.getItem(`${role}Documents`);
+            if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
+              localStorage.setItem(`${role}Documents`, JSON.stringify(uniqueDocs));
+              toast({
+                title: "Duplicate documents removed",
+                description: "We've cleaned up some duplicate documents for you.",
+              });
+            }
+          } else {
+            console.warn("localStorage is not available in this context");
+            setDocuments([]);
           }
         } catch (error) {
           console.error("Error loading local documents:", error);
           setDocuments([]);
         }
+      } else {
+        console.log("No authenticated user or guest role found");
+        setDocuments([]);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -93,7 +113,7 @@ const DocumentSelection = () => {
       if (user) {
         await deleteDocumentFromSupabase(documentToDelete, user.id);
       } else if (role) {
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete);
+        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, role);
         setDocuments(updatedDocs);
       }
       
@@ -120,8 +140,15 @@ const DocumentSelection = () => {
     <div className="min-h-screen bg-editor-bg p-8">
       <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
-          <p className="text-editor-text">Select a document to edit or create a new one</p>
+          <p className="text-sm uppercase tracking-wider text-editor-text mb-1 font-medium">
+            {isDesigner ? "Designer" : "Editor"}
+          </p>
+          <h1 className="text-3xl font-bold text-editor-heading mb-2">
+            {isDesigner ? "Your Templates" : "Your Documents"}
+          </h1>
+          <p className="text-editor-text">
+            Select a {isDesigner ? "template" : "document"} to edit or create a new one
+          </p>
         </header>
         
         <div className="mb-6">

@@ -1,4 +1,3 @@
-
 export interface DesignPanelProps {
   content: string;
   isEditable?: boolean;
@@ -42,6 +41,7 @@ export interface EditorNavProps {
   onSave?: () => Promise<SaveDocumentResult>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
+  onReturnToLogin?: () => void;
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';

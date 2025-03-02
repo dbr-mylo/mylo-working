@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps, SaveDocumentResult } from "@/lib/types";
@@ -20,7 +19,8 @@ export const EditorNav = ({
   documentTitle = "", 
   onTitleChange,
   onLoadDocument,
-  initialContent = "" 
+  initialContent = "",
+  onReturnToLogin
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const { toast } = useToast();
@@ -151,6 +151,7 @@ export const EditorNav = ({
         <ExternalActions 
           onSignOut={signOut} 
           isAuthenticated={!!user}
+          onReturnToLogin={onReturnToLogin}
         />
         
         <Button 

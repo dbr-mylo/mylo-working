@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/auth/AuthProvider";
@@ -71,19 +70,8 @@ const Index = () => {
         onSave={saveDocument}
         onLoadDocument={loadDocument}
         initialContent={initialContent}
+        onReturnToLogin={handleReturnToLogin}
       />
-      
-      <div className="fixed top-4 right-4 z-50">
-        <Button 
-          variant="secondary" 
-          size="sm"
-          onClick={handleReturnToLogin}
-          className="flex items-center gap-2 font-medium shadow-md"
-        >
-          <LogOut className="w-4 h-4" />
-          Return to Login
-        </Button>
-      </div>
       
       {isMobile ? (
         <MobileEditor

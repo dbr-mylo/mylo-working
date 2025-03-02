@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,6 +6,7 @@ import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { DocumentList } from "@/components/document/DocumentList";
 import { DeleteDocumentDialog } from "@/components/document/DeleteDocumentDialog";
+import { useWindowSize } from "@/hooks/useWindowSize";
 import {
   fetchUserDocumentsFromSupabase,
   fetchGuestDocumentsFromLocalStorage,
@@ -23,6 +23,8 @@ const DocumentSelection = () => {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { width } = useWindowSize();
+  const isMobile = width < 1281;
 
   useEffect(() => {
     fetchUserDocuments();
@@ -40,7 +42,6 @@ const DocumentSelection = () => {
           const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
           setDocuments(uniqueDocs);
           
-          // Also update the localStorage with deduplicated list if needed
           const localDocs = localStorage.getItem('guestDocuments');
           if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
             localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
@@ -117,7 +118,7 @@ const DocumentSelection = () => {
 
   return (
     <div className="min-h-screen bg-editor-bg p-8">
-      <div className="max-w-5xl mx-auto flex flex-col items-center">
+      <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
           <p className="text-editor-text">Select a document to edit or create a new one</p>
@@ -132,7 +133,7 @@ const DocumentSelection = () => {
           </Button>
         </div>
 
-        <div className="w-1/2 mx-auto">
+        <div className={`${isMobile ? 'w-full' : 'w-1/2'} mx-auto`}>
           <DocumentList
             documents={documents}
             isLoading={isLoading}

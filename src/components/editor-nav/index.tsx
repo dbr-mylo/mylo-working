@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { FileText, X } from "lucide-react";
+import { FileText } from "lucide-react";
 import type { EditorNavProps, SaveDocumentResult } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
@@ -120,6 +121,14 @@ export const EditorNav = ({
     return Promise.resolve();
   };
 
+  const handleOpenDocument = () => {
+    // This will open the document dropdown
+    const openDropdownButton = document.querySelector('[data-document-controls-open-button]');
+    if (openDropdownButton instanceof HTMLElement) {
+      openDropdownButton.click();
+    }
+  };
+
   return (
     <nav className="h-16 border-b border-editor-border bg-white px-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -145,6 +154,7 @@ export const EditorNav = ({
             documents={documents}
             isLoadingDocs={isLoadingDocs}
             content={content}
+            setOpenButtonRef={btn => btn?.setAttribute('data-document-controls-open-button', '')}
           />
         )}
         
@@ -152,17 +162,10 @@ export const EditorNav = ({
           onSignOut={signOut} 
           isAuthenticated={!!user}
           onReturnToLogin={onReturnToLogin}
+          onSave={onSave ? handleSave : undefined}
+          onClose={handleCloseDocument}
+          onOpen={currentRole === "editor" ? handleOpenDocument : undefined}
         />
-        
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleCloseDocument}
-          title="Close document"
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <X className="w-5 h-5" />
-        </Button>
       </div>
 
       <CloseDocumentDialog

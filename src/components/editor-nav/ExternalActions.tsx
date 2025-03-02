@@ -1,43 +1,83 @@
 
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, FileText, Save, X, Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 
 interface ExternalActionsProps {
   onSignOut?: () => void;
   isAuthenticated: boolean;
   onReturnToLogin?: () => void;
+  onSave?: () => Promise<void>;
+  onClose?: () => Promise<void>;
+  onOpen?: () => void;
 }
 
 export const ExternalActions = ({ 
   onSignOut, 
   isAuthenticated,
-  onReturnToLogin
+  onReturnToLogin,
+  onSave,
+  onClose,
+  onOpen
 }: ExternalActionsProps) => {
   return (
-    <>
-      {onReturnToLogin && (
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          className="flex items-center gap-2 font-medium shadow-sm"
-          onClick={onReturnToLogin}
-        >
-          <LogOut className="w-4 h-4" />
-          Return to Login
-        </Button>
-      )}
-      
-      {isAuthenticated && onSignOut && (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          size="sm" 
-          className="flex items-center gap-2"
-          onClick={onSignOut}
+          size="icon"
+          className="h-9 w-9"
         >
-          <LogOut className="w-4 h-4" />
-          Sign Out
+          <Menu className="h-5 w-5" />
         </Button>
-      )}
-    </>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {onOpen && (
+          <DropdownMenuItem onClick={onOpen} className="cursor-pointer">
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Open</span>
+          </DropdownMenuItem>
+        )}
+        
+        {onSave && (
+          <DropdownMenuItem onClick={onSave} className="cursor-pointer">
+            <Save className="mr-2 h-4 w-4" />
+            <span>Save</span>
+          </DropdownMenuItem>
+        )}
+        
+        <DropdownMenuSeparator />
+        
+        {onReturnToLogin && (
+          <DropdownMenuItem onClick={onReturnToLogin} className="cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Return to Login</span>
+          </DropdownMenuItem>
+        )}
+        
+        {isAuthenticated && onSignOut && (
+          <DropdownMenuItem onClick={onSignOut} className="cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign Out</span>
+          </DropdownMenuItem>
+        )}
+        
+        {onClose && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onClose} className="cursor-pointer text-destructive">
+              <X className="mr-2 h-4 w-4" />
+              <span>Close</span>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

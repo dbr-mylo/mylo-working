@@ -8,6 +8,7 @@ import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -72,12 +73,14 @@ const Index = () => {
         initialContent={initialContent}
       />
       
-      <div className="absolute top-4 right-4 z-10">
+      <div className="fixed top-4 right-4 z-50">
         <Button 
-          variant="outline" 
+          variant="secondary" 
           size="sm"
           onClick={handleReturnToLogin}
+          className="flex items-center gap-2 font-medium shadow-md"
         >
+          <LogOut className="w-4 h-4" />
           Return to Login
         </Button>
       </div>

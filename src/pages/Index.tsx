@@ -21,7 +21,8 @@ const Index = () => {
     documentTitle,
     setDocumentTitle,
     saveDocument,
-    loadDocument
+    loadDocument,
+    isLoading
   } = useDocument(documentId);
   
   const isEditorEditable = role === "editor";
@@ -37,6 +38,20 @@ const Index = () => {
     setDocumentTitle(title);
     return Promise.resolve();
   };
+  
+  // Log on initial render
+  useEffect(() => {
+    console.log("Index component rendered with documentId:", documentId);
+    console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
+  }, []);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-editor-bg flex items-center justify-center">
+        <div className="animate-pulse text-lg">Loading document...</div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-editor-bg">

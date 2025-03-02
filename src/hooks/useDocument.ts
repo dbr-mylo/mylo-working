@@ -26,12 +26,13 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
 
   // Debug log whenever content changes
   useEffect(() => {
-    console.log("Content updated in useDocument hook:", content.substring(0, 100));
-    console.log("Content length:", content.length);
+    console.log("Content updated in useDocument hook:", content ? content.substring(0, 100) : "empty");
+    console.log("Content length:", content ? content.length : 0);
   }, [content]);
 
   useEffect(() => {
     if (documentId) {
+      console.log("DocumentId changed, fetching document:", documentId);
       fetchDocument(documentId);
     } else {
       setContent("");
@@ -52,7 +53,8 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
         const data = await fetchDocumentFromSupabase(id, user.id, toast);
         if (data) {
           console.log("Document fetched from Supabase:", data.id);
-          console.log("Content length from Supabase:", data.content?.length || 0);
+          console.log("Content length from Supabase:", data.content ? data.content.length : 0);
+          console.log("Content preview:", data.content ? data.content.substring(0, 100) : "empty");
           
           if (data.content) {
             setContent(data.content);
@@ -76,13 +78,27 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
         const doc = fetchDocumentFromLocalStorage(id, toast);
         if (doc) {
           console.log("Document fetched from localStorage:", doc.id);
-          console.log("Content length from localStorage:", doc.content?.length || 0);
+          console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
+          console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
           
-          setContent(doc.content || "");
-          setInitialContent(doc.content || "");
+          if (doc.content) {
+            setContent(doc.content);
+            setInitialContent(doc.content);
+            
+            // Double-check state after setting
+            setTimeout(() => {
+              console.log("Verify content was set:", content ? content.substring(0, 100) : "empty");
+            }, 100);
+          } else {
+            console.warn("Document from localStorage has no content!");
+            setContent("");
+            setInitialContent("");
+          }
+          
           setDocumentTitle(doc.title || "");
           setCurrentDocumentId(doc.id);
         } else {
+          console.error("Document not found in localStorage, redirecting to home");
           navigate('/');
         }
       }
@@ -101,8 +117,8 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
 
   const saveDocument = async (): Promise<void> => {
     try {
-      console.log("Saving document with content length:", content.length);
-      console.log("Content preview:", content.substring(0, 100));
+      console.log("Saving document with content length:", content ? content.length : 0);
+      console.log("Content preview:", content ? content.substring(0, 100) : "empty");
       
       if (!content || !content.trim()) {
         toast({
@@ -143,7 +159,8 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       
       if (savedDocument) {
         console.log("Document saved successfully with ID:", savedDocument.id);
-        console.log("Saved content length:", savedDocument.content.length);
+        console.log("Saved content length:", savedDocument.content ? savedDocument.content.length : 0);
+        console.log("Saved content preview:", savedDocument.content ? savedDocument.content.substring(0, 100) : "empty");
         
         // Update initialContent to mark that we've saved the current state
         setInitialContent(content);
@@ -173,16 +190,23 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
 
   const loadDocument = (doc: Document) => {
     console.log("Loading document:", doc.id);
-    console.log("Content length from document:", doc.content?.length || 0);
+    console.log("Content length from document:", doc.content ? doc.content.length : 0);
+    console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
     
     const loadedDoc = loadDocumentUtil(doc);
     
-    console.log("Processed content length:", loadedDoc.content.length);
+    console.log("Processed content length:", loadedDoc.content ? loadedDoc.content.length : 0);
+    console.log("Processed content preview:", loadedDoc.content ? loadedDoc.content.substring(0, 100) : "empty");
     
     setContent(loadedDoc.content);
     setInitialContent(loadedDoc.initialContent);
     setDocumentTitle(loadedDoc.documentTitle);
     setCurrentDocumentId(loadedDoc.currentDocumentId);
+    
+    // Verify content is set correctly
+    setTimeout(() => {
+      console.log("Verification - content after setting:", content);
+    }, 100);
   };
 
   return {

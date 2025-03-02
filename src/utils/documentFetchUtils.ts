@@ -26,6 +26,7 @@ export async function fetchDocumentFromSupabase(id: string, userId: string, toas
     
     if (data) {
       console.log("Loaded document from Supabase:", data);
+      console.log("Content from Supabase:", data.content ? data.content.substring(0, 100) : "empty");
       
       toast({
         title: "Document loaded",
@@ -46,10 +47,18 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
     const localDocs = localStorage.getItem('guestDocuments');
     if (localDocs) {
       const parsedDocs = JSON.parse(localDocs);
+      console.log("All localStorage documents:", parsedDocs);
+      
+      if (!Array.isArray(parsedDocs)) {
+        console.warn("localStorage documents is not an array:", parsedDocs);
+        return null;
+      }
+      
       const doc = parsedDocs.find((d: Document) => d.id === id);
       
       if (doc) {
-        console.log("Loaded document from localStorage:", doc);
+        console.log("Found document in localStorage:", doc);
+        console.log("Document content from localStorage:", doc.content ? doc.content.substring(0, 100) : "empty");
         
         // Ensure content is a string
         if (doc.content && typeof doc.content === 'object') {
@@ -65,6 +74,9 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
         
         return doc;
       } else {
+        console.warn("Document not found in localStorage. ID:", id);
+        console.log("Available document IDs:", parsedDocs.map((d: Document) => d.id));
+        
         toast({
           title: "Document not found",
           description: "This document doesn't exist in your local storage.",
@@ -72,6 +84,8 @@ export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<type
         });
         return null;
       }
+    } else {
+      console.warn("No documents found in localStorage");
     }
     return null;
   } catch (error) {

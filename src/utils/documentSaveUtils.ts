@@ -11,8 +11,8 @@ export async function saveDocumentToSupabase(
   toast: ReturnType<typeof useToast>["toast"]
 ): Promise<Document | null> {
   try {
-    console.log("Saving to Supabase. Content length:", content.length);
-    console.log("Content preview:", content.substring(0, 100));
+    console.log("Saving to Supabase. Content length:", content ? content.length : 0);
+    console.log("Content preview:", content ? content.substring(0, 100) : "empty");
     
     let savedDocument: Document | null = null;
     
@@ -37,6 +37,7 @@ export async function saveDocumentToSupabase(
       
       console.log("Document updated in Supabase:", data?.id);
       console.log("Retrieved content length:", data?.content?.length || 0);
+      console.log("Content preview from update:", data?.content ? data.content.substring(0, 100) : "empty");
       
       savedDocument = data;
     } else {
@@ -58,6 +59,7 @@ export async function saveDocumentToSupabase(
       
       console.log("Document created in Supabase:", data?.id);
       console.log("Saved content length:", data?.content?.length || 0);
+      console.log("Content preview from create:", data?.content ? data.content.substring(0, 100) : "empty");
       
       savedDocument = data;
     }
@@ -76,8 +78,8 @@ export function saveDocumentToLocalStorage(
   toast: ReturnType<typeof useToast>["toast"]
 ): Document | null {
   try {
-    console.log("Saving to localStorage. Content length:", content.length);
-    console.log("Content preview:", content.substring(0, 100));
+    console.log("Saving to localStorage. Content length:", content ? content.length : 0);
+    console.log("Content preview:", content ? content.substring(0, 100) : "empty");
     
     const docTitle = title || "Untitled Document";
     let savedDocument: Document | null = null;
@@ -94,6 +96,7 @@ export function saveDocumentToLocalStorage(
       const existingIndex = docs.findIndex((doc: Document) => doc.id === documentId);
       
       if (existingIndex >= 0) {
+        // Create a new object with updated properties, preserving existing ones
         docs[existingIndex] = {
           ...docs[existingIndex],
           title: docTitle,
@@ -101,7 +104,20 @@ export function saveDocumentToLocalStorage(
           updated_at: new Date().toISOString()
         };
         
+        // Log the document before saving
+        console.log("About to update document in localStorage:", docs[existingIndex]);
+        console.log("Updated content preview:", docs[existingIndex].content ? 
+          docs[existingIndex].content.substring(0, 100) : "empty");
+        
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
+        
+        // Verify the document was saved correctly
+        const verifyDocs = JSON.parse(localStorage.getItem('guestDocuments') || '[]');
+        const verifyDoc = verifyDocs.find((d: Document) => d.id === documentId);
+        console.log("Verification - document after save:", verifyDoc);
+        console.log("Verification - content after save:", verifyDoc?.content ? 
+          verifyDoc.content.substring(0, 100) : "empty");
+        
         savedDocument = docs[existingIndex];
         console.log("Updated document in localStorage:", savedDocument?.id);
         console.log("Saved content length:", savedDocument?.content?.length || 0);
@@ -116,6 +132,12 @@ export function saveDocumentToLocalStorage(
         
         docs.unshift(newDoc);
         localStorage.setItem('guestDocuments', JSON.stringify(docs));
+        
+        // Verify the document was saved correctly
+        const verifyDocs = JSON.parse(localStorage.getItem('guestDocuments') || '[]');
+        const verifyDoc = verifyDocs.find((d: Document) => d.id === documentId);
+        console.log("Verification - new document after save:", verifyDoc);
+        
         savedDocument = newDoc;
         console.log("Created new document in localStorage with existing ID:", savedDocument?.id);
         console.log("Saved content length:", savedDocument?.content?.length || 0);
@@ -144,6 +166,12 @@ export function saveDocumentToLocalStorage(
       
       guestDocs.unshift(newDoc);
       localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
+      
+      // Verify the document was saved correctly
+      const verifyDocs = JSON.parse(localStorage.getItem('guestDocuments') || '[]');
+      const verifyDoc = verifyDocs.find((d: Document) => d.id === newDoc.id);
+      console.log("Verification - brand new document after save:", verifyDoc);
+      
       savedDocument = newDoc;
       console.log("Created new document in localStorage:", savedDocument?.id);
       console.log("Saved content length:", savedDocument?.content?.length || 0);

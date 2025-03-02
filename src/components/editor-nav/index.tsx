@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
@@ -85,7 +86,7 @@ export const EditorNav = ({
   
   const handleSave = async (): Promise<void> => {
     if (onSave) {
-      await onSave();
+      await Promise.resolve(onSave());
       await loadDocuments();
     }
     return Promise.resolve();

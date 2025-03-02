@@ -1,19 +1,18 @@
 
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
-  const [designContent, setDesignContent] = useState(content || "");
+  const [designContent, setDesignContent] = useState(content);
   
-  // Make sure designContent always updates when prop content changes
-  useEffect(() => {
-    console.log("DesignPanel content prop changed:", content ? content.substring(0, 50) + "..." : "empty");
-    setDesignContent(content || "");
-  }, [content]);
+  // Update local content when prop changes (for when editor updates content)
+  if (content !== designContent && !isEditable) {
+    setDesignContent(content);
+  }
   
   const handleContentChange = (newContent: string) => {
     setDesignContent(newContent);
@@ -75,11 +74,11 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   isEditable={true}
                   hideToolbar={false}
                 />
-              ) : designContent ? (
-                <div dangerouslySetInnerHTML={{ __html: designContent }} />
+              ) : content ? (
+                <div dangerouslySetInnerHTML={{ __html: content }} />
               ) : (
                 <p className="text-editor-text opacity-50">
-                  No content available
+                  Content from the editor will appear here with brand styling
                 </p>
               )}
             </div>

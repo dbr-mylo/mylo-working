@@ -30,10 +30,6 @@ export const DocumentControls = ({
   const { toast } = useToast();
 
   const handleLoadDocument = (doc: Document) => {
-    console.log("Loading document from DocumentControls:", doc.id);
-    console.log("Document title:", doc.title);
-    console.log("Content length:", doc.content ? doc.content.length : 0);
-    
     if (onLoadDocument) {
       onLoadDocument(doc);
       toast({

@@ -7,7 +7,6 @@ import type { Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { DocumentList } from "@/components/document/DocumentList";
 import { DeleteDocumentDialog } from "@/components/document/DeleteDocumentDialog";
-import { useWindowSize } from "@/hooks/useWindowSize";
 import {
   fetchUserDocumentsFromSupabase,
   fetchGuestDocumentsFromLocalStorage,
@@ -24,56 +23,36 @@ const DocumentSelection = () => {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { width } = useWindowSize();
-  const isMobile = width < 1281;
-
-  // Determine if the user is a designer to customize the UI
-  const isDesigner = role === "designer";
 
   useEffect(() => {
-    console.log("DocumentSelection component mounted, fetching documents");
-    console.log("Auth state:", { user: user?.id, role });
     fetchUserDocuments();
-  }, [user, role]); // Added role as a dependency to re-fetch when role changes
+  }, [user]);
 
   const fetchUserDocuments = async () => {
     setIsLoading(true);
     try {
       if (user) {
-        console.log("Fetching documents for authenticated user:", user.id);
         const data = await fetchUserDocumentsFromSupabase(user.id);
-        console.log("Documents fetched from Supabase:", data.length);
         const uniqueDocuments = deduplicateDocuments(data);
         setDocuments(uniqueDocuments);
       } else if (role) {
-        console.log("Fetching documents for guest user with role:", role);
         try {
-          // Check if we're in a context where localStorage is available
-          if (typeof window !== 'undefined' && window.localStorage) {
-            const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
-            console.log(`Documents fetched from localStorage for ${role}:`, uniqueDocs.length);
-            setDocuments(uniqueDocs);
-            
-            // Check if we need to clean up duplicates
-            const localDocs = localStorage.getItem(`${role}Documents`);
-            if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-              localStorage.setItem(`${role}Documents`, JSON.stringify(uniqueDocs));
-              toast({
-                title: "Duplicate documents removed",
-                description: "We've cleaned up some duplicate documents for you.",
-              });
-            }
-          } else {
-            console.warn("localStorage is not available in this context");
-            setDocuments([]);
+          const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
+          setDocuments(uniqueDocs);
+          
+          // Also update the localStorage with deduplicated list if needed
+          const localDocs = localStorage.getItem('guestDocuments');
+          if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
+            localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+            toast({
+              title: "Duplicate documents removed",
+              description: "We've cleaned up some duplicate documents for you.",
+            });
           }
         } catch (error) {
           console.error("Error loading local documents:", error);
           setDocuments([]);
         }
-      } else {
-        console.log("No authenticated user or guest role found");
-        setDocuments([]);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -113,7 +92,7 @@ const DocumentSelection = () => {
       if (user) {
         await deleteDocumentFromSupabase(documentToDelete, user.id);
       } else if (role) {
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, role);
+        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete);
         setDocuments(updatedDocs);
       }
       
@@ -138,17 +117,10 @@ const DocumentSelection = () => {
 
   return (
     <div className="min-h-screen bg-editor-bg p-8">
-      <div className={`mx-auto flex flex-col items-center ${isMobile ? 'w-full' : 'max-w-5xl'}`}>
+      <div className="max-w-5xl mx-auto flex flex-col items-center">
         <header className="mb-8 text-center">
-          <p className="text-sm uppercase tracking-wider text-editor-text mb-1 font-medium">
-            {isDesigner ? "Designer" : "Editor"}
-          </p>
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">
-            {isDesigner ? "Your Templates" : "Your Documents"}
-          </h1>
-          <p className="text-editor-text">
-            Select a {isDesigner ? "template" : "document"} to edit or create a new one
-          </p>
+          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your Documents</h1>
+          <p className="text-editor-text">Select a document to edit or create a new one</p>
         </header>
         
         <div className="mb-6">
@@ -160,7 +132,7 @@ const DocumentSelection = () => {
           </Button>
         </div>
 
-        <div className={`${isMobile ? 'w-full' : 'w-1/2'} mx-auto`}>
+        <div className="w-1/2 mx-auto">
           <DocumentList
             documents={documents}
             isLoading={isLoading}

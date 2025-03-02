@@ -24,47 +24,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // First check if there's a guest role in localStorage
-    const storedRole = localStorage.getItem('guestRole');
-    
-    if (storedRole) {
-      console.log("Found stored guest role:", storedRole);
-      // If there's a stored role, use it
-      setAuthState(state => ({ 
-        ...state, 
-        role: storedRole as UserRole,
-        isLoading: false 
-      }));
-    } else {
-      // If no stored role, check Supabase session
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          fetchUserData(session.user.id);
-        } else {
-          setAuthState(state => ({ ...state, isLoading: false }));
-        }
-      });
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchUserData(session.user.id);
+      } else {
+        setAuthState(state => ({ ...state, isLoading: false }));
+      }
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
         await fetchUserData(session.user.id);
-        // Clear any stored guest role when authenticated with Supabase
-        localStorage.removeItem('guestRole');
       } else {
-        // Check if there's a guest role when no Supabase session exists
-        const storedRole = localStorage.getItem('guestRole');
-        if (storedRole) {
-          setAuthState({ 
-            user: null, 
-            role: storedRole as UserRole, 
-            isLoading: false 
-          });
-        } else {
-          setAuthState({ user: null, role: null, isLoading: false });
-        }
+        setAuthState({ user: null, role: null, isLoading: false });
       }
     });
 
@@ -108,9 +82,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       if (error) throw error;
-      
-      // Clear any stored guest role when authenticated with Supabase
-      localStorage.removeItem('guestRole');
       navigate("/");
     } catch (error: any) {
       toast.error(error.message);
@@ -136,14 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      // Clear the guest role from localStorage when signing out
-      localStorage.removeItem('guestRole');
-      setAuthState({
-        user: null,
-        role: null,
-        isLoading: false,
-      });
       navigate("/auth");
     } catch (error: any) {
       toast.error(error.message);
@@ -152,12 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestEditor = () => {
-    const role = "editor";
-    // Store the guest role in localStorage for persistence
-    localStorage.setItem('guestRole', role);
     setAuthState({
       user: null,
-      role: role,
+      role: "editor",
       isLoading: false
     });
     toast.success("Continuing as Editor");
@@ -165,12 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestDesigner = () => {
-    const role = "designer";
-    // Store the guest role in localStorage for persistence
-    localStorage.setItem('guestRole', role);
     setAuthState({
       user: null,
-      role: role,
+      role: "designer",
       isLoading: false
     });
     toast.success("Continuing as Designer");

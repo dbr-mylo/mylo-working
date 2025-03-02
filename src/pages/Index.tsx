@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWindowSize } from "@/hooks/useWindowSize";
@@ -6,13 +7,11 @@ import { useDocument } from "@/hooks/useDocument";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { documentId } = useParams();
-  const { role, signOut } = useAuth();
+  const { role } = useAuth();
   const { width } = useWindowSize();
-  const navigate = useNavigate();
   const isMobile = width < 1281;
   
   const {
@@ -29,27 +28,22 @@ const Index = () => {
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
   
+  // Add a console log to track content changes
   useEffect(() => {
     console.log("Current document content in Index:", content ? `Length: ${content.length}, Preview: ${content.substring(0, 50)}...` : "empty");
   }, [content]);
   
+  // Create a Promise-returning wrapper for setDocumentTitle
   const handleTitleChange = async (title: string): Promise<void> => {
     setDocumentTitle(title);
     return Promise.resolve();
   };
   
+  // Log on initial render
   useEffect(() => {
     console.log("Index component rendered with documentId:", documentId);
     console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
   }, []);
-  
-  const handleReturnToLogin = () => {
-    if (role) {
-      signOut();
-    } else {
-      navigate("/auth");
-    }
-  };
   
   if (isLoading) {
     return (
@@ -60,7 +54,7 @@ const Index = () => {
   }
   
   return (
-    <div className="min-h-screen bg-editor-bg flex flex-col">
+    <div className="min-h-screen bg-editor-bg">
       <EditorNav 
         currentRole={role || "editor"} 
         content={content}
@@ -70,16 +64,6 @@ const Index = () => {
         onLoadDocument={loadDocument}
         initialContent={initialContent}
       />
-      
-      <div className="absolute top-4 right-4 z-10">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleReturnToLogin}
-        >
-          Return to Login
-        </Button>
-      </div>
       
       {isMobile ? (
         <MobileEditor

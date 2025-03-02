@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
-import type { EditorNavProps, SaveDocumentResult } from "@/lib/types";
+import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -42,9 +42,7 @@ export const EditorNav = ({
   const loadDocuments = async (): Promise<void> => {
     setIsLoadingDocs(true);
     try {
-      console.log(`Fetching documents for role: ${currentRole}`);
-      const docs = await fetchUserDocuments(user?.id, currentRole);
-      console.log(`Fetched ${docs.length} documents`);
+      const docs = await fetchUserDocuments(user?.id);
       setDocuments(docs);
     } catch (error) {
       console.error("Error loading documents:", error);
@@ -91,8 +89,8 @@ export const EditorNav = ({
     
     if (onSave) {
       console.log("Calling onSave");
-      const saveResult = await onSave();
-      console.log("Save completed", saveResult);
+      await onSave();
+      console.log("Save completed");
     }
     
     console.log("Navigating away");
@@ -103,11 +101,8 @@ export const EditorNav = ({
   const handleSave = async (): Promise<void> => {
     console.log("Save triggered from nav");
     if (onSave) {
-      const saveResult = await onSave();
-      console.log("Save result:", saveResult);
-      if (saveResult.success) {
-        await loadDocuments();
-      }
+      await onSave();
+      await loadDocuments();
     }
     return Promise.resolve();
   };
@@ -140,7 +135,7 @@ export const EditorNav = ({
       <div className="flex items-center space-x-2">
         {currentRole === "editor" && (
           <DocumentControls
-            onSave={onSave ? handleSave : undefined}
+            onSave={onSave}
             onLoadDocument={onLoadDocument}
             documents={documents}
             isLoadingDocs={isLoadingDocs}

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
@@ -57,28 +56,30 @@ export const EditorNav = ({
     return Promise.resolve();
   };
 
-  const handleCloseDocument = () => {
+  const handleCloseDocument = (): Promise<void> => {
     if (hasUnsavedChanges(content, initialContent, title, documentTitle)) {
       setShowCloseDialog(true);
     } else {
       navigateToDocumentList();
     }
+    return Promise.resolve();
   };
 
-  const navigateToDocumentList = () => {
+  const navigateToDocumentList = (): Promise<void> => {
     navigate('/');
+    return Promise.resolve();
   };
 
   const handleCloseWithoutSaving = async (): Promise<void> => {
     setShowCloseDialog(false);
-    navigateToDocumentList();
+    await navigateToDocumentList();
     return Promise.resolve();
   };
 
   const handleSaveAndClose = async (): Promise<void> => {
     setShowCloseDialog(false);
     await handleSave();
-    navigateToDocumentList();
+    await navigateToDocumentList();
     return Promise.resolve();
   };
   
@@ -90,11 +91,12 @@ export const EditorNav = ({
     return Promise.resolve();
   };
 
-  const handleTitleChange = (newTitle: string) => {
+  const handleTitleChange = (newTitle: string): Promise<void> => {
     setTitle(newTitle);
     if (onTitleChange) {
       onTitleChange(newTitle);
     }
+    return Promise.resolve();
   };
 
   return (

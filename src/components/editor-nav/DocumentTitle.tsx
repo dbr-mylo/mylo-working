@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 interface DocumentTitleProps {
   title: string;
-  onTitleChange?: (title: string) => void;
+  onTitleChange?: (title: string) => Promise<void> | void;
   isEditable: boolean;
   placeholder: string;
 }

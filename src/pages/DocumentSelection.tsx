@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +28,8 @@ const DocumentSelection = () => {
   const isMobile = width < 1281;
 
   useEffect(() => {
+    console.log("DocumentSelection component mounted, fetching documents");
+    console.log("Auth state:", { user: user?.id, role });
     fetchUserDocuments();
   }, [user]);
 
@@ -34,12 +37,23 @@ const DocumentSelection = () => {
     setIsLoading(true);
     try {
       if (user) {
+        console.log("Fetching documents for authenticated user:", user.id);
         const data = await fetchUserDocumentsFromSupabase(user.id);
+        console.log("Documents fetched from Supabase:", data.length);
         const uniqueDocuments = deduplicateDocuments(data);
         setDocuments(uniqueDocuments);
       } else if (role) {
+        console.log("Fetching documents for guest user with role:", role);
         try {
           const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
+          console.log("Documents fetched from localStorage:", uniqueDocs.length);
+          
+          if (uniqueDocs.length === 0) {
+            console.log("No documents found in localStorage - checking if we need to create a sample document");
+            // If this is the first time and no documents exist, we could create a sample one
+            // but we'll leave that for a separate feature request
+          }
+          
           setDocuments(uniqueDocs);
           
           const localDocs = localStorage.getItem('guestDocuments');
@@ -54,6 +68,9 @@ const DocumentSelection = () => {
           console.error("Error loading local documents:", error);
           setDocuments([]);
         }
+      } else {
+        console.log("No authenticated user or guest role found");
+        setDocuments([]);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);

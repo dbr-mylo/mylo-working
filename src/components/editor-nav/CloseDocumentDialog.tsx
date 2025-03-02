@@ -13,8 +13,8 @@ import {
 interface CloseDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClose: () => void;
-  onSaveAndClose: () => void;
+  onClose: () => Promise<void>;
+  onSaveAndClose: () => Promise<void>;
 }
 
 export const CloseDocumentDialog = ({
@@ -44,4 +44,4 @@ export const CloseDocumentDialog = ({
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}

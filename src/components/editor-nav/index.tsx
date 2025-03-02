@@ -69,15 +69,17 @@ export const EditorNav = ({
     navigate('/');
   };
 
-  const handleCloseWithoutSaving = () => {
+  const handleCloseWithoutSaving = async (): Promise<void> => {
     setShowCloseDialog(false);
     navigateToDocumentList();
+    return Promise.resolve();
   };
 
-  const handleSaveAndClose = async () => {
+  const handleSaveAndClose = async (): Promise<void> => {
     setShowCloseDialog(false);
     await handleSave();
     navigateToDocumentList();
+    return Promise.resolve();
   };
   
   const handleSave = async (): Promise<void> => {

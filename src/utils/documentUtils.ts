@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Document } from "@/lib/types";
 
@@ -23,9 +24,9 @@ export const deleteDocumentFromSupabase = async (documentId: string, userId: str
   if (error) throw error;
 };
 
-export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
+export const fetchGuestDocumentsFromLocalStorage = (role: string): Document[] => {
   try {
-    console.log("Fetching guest documents from localStorage");
+    console.log(`Fetching guest documents from localStorage for role: ${role}`);
     
     // Safely check if localStorage is available in this context
     if (typeof localStorage === 'undefined') {
@@ -33,22 +34,22 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
       return [];
     }
     
-    const localDocs = localStorage.getItem('guestDocuments');
-    console.log("Raw localStorage data:", localDocs);
+    const storageKey = `${role}Documents`;
+    const localDocs = localStorage.getItem(storageKey);
+    console.log(`Raw localStorage data for ${role}:`, localDocs);
     
     if (!localDocs) {
-      console.log("No documents found in localStorage");
-      // Return empty array instead of creating a default document
+      console.log(`No documents found in localStorage for ${role}`);
       return [];
     }
     
     try {
       const parsedDocs = JSON.parse(localDocs);
-      console.log("Parsed localStorage documents:", parsedDocs);
+      console.log(`Parsed localStorage documents for ${role}:`, parsedDocs);
       
       // Check if parsedDocs is an array
       if (!Array.isArray(parsedDocs)) {
-        console.warn("localStorage 'guestDocuments' is not an array:", parsedDocs);
+        console.warn(`localStorage '${storageKey}' is not an array:`, parsedDocs);
         return [];
       }
       
@@ -78,24 +79,24 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
         }
       });
       
-      console.log("Valid documents found:", validDocuments.length);
+      console.log(`Valid documents found for ${role}:`, validDocuments.length);
       
       // Deduplicate by ID
       const uniqueDocs = Array.from(
         new Map(validDocuments.map(item => [item.id, item])).values()
       );
       
-      console.log("Unique documents to return:", uniqueDocs.length);
+      console.log(`Unique documents to return for ${role}:`, uniqueDocs.length);
       return uniqueDocs.length > 0 ? uniqueDocs : [];
     } catch (parseError) {
-      console.error("Error parsing JSON from localStorage:", parseError);
+      console.error(`Error parsing JSON from localStorage for ${role}:`, parseError);
       
       // Attempt to fix corrupted JSON if possible
       if (localDocs) {
         try {
           // Try to initialize localStorage with an empty array if parsing failed
-          localStorage.setItem('guestDocuments', JSON.stringify([]));
-          console.log("Reset guestDocuments in localStorage to empty array");
+          localStorage.setItem(storageKey, JSON.stringify([]));
+          console.log(`Reset ${storageKey} in localStorage to empty array`);
         } catch (resetError) {
           console.error("Failed to reset localStorage:", resetError);
         }
@@ -109,20 +110,21 @@ export const fetchGuestDocumentsFromLocalStorage = (): Document[] => {
   }
 };
 
-export const deleteDocumentFromLocalStorage = (documentId: string): Document[] => {
+export const deleteDocumentFromLocalStorage = (documentId: string, role: string): Document[] => {
   try {
-    console.log("Deleting document from localStorage:", documentId);
-    const localDocs = localStorage.getItem('guestDocuments');
+    console.log(`Deleting document from localStorage for role ${role}:`, documentId);
+    const storageKey = `${role}Documents`;
+    const localDocs = localStorage.getItem(storageKey);
     if (!localDocs) return [];
     
     const docs = JSON.parse(localDocs);
     const updatedDocs = docs.filter((doc: Document) => doc.id !== documentId);
-    localStorage.setItem('guestDocuments', JSON.stringify(updatedDocs));
+    localStorage.setItem(storageKey, JSON.stringify(updatedDocs));
     
-    console.log("Updated documents after deletion:", updatedDocs.length);
+    console.log(`Updated documents after deletion for ${role}:`, updatedDocs.length);
     return updatedDocs;
   } catch (error) {
-    console.error("Error deleting local document:", error);
+    console.error(`Error deleting local document for ${role}:`, error);
     throw error;
   }
 };

@@ -47,14 +47,14 @@ const DocumentSelection = () => {
         try {
           // Check if we're in a context where localStorage is available
           if (typeof window !== 'undefined' && window.localStorage) {
-            const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
-            console.log("Documents fetched from localStorage:", uniqueDocs.length);
+            const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
+            console.log(`Documents fetched from localStorage for ${role}:`, uniqueDocs.length);
             setDocuments(uniqueDocs);
             
             // Check if we need to clean up duplicates
-            const localDocs = localStorage.getItem('guestDocuments');
+            const localDocs = localStorage.getItem(`${role}Documents`);
             if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-              localStorage.setItem('guestDocuments', JSON.stringify(uniqueDocs));
+              localStorage.setItem(`${role}Documents`, JSON.stringify(uniqueDocs));
               toast({
                 title: "Duplicate documents removed",
                 description: "We've cleaned up some duplicate documents for you.",
@@ -110,7 +110,7 @@ const DocumentSelection = () => {
       if (user) {
         await deleteDocumentFromSupabase(documentToDelete, user.id);
       } else if (role) {
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete);
+        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, role);
         setDocuments(updatedDocs);
       }
       

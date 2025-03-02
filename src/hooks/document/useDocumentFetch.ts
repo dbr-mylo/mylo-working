@@ -33,7 +33,7 @@ export function useDocumentFetch(
       setCurrentDocumentId(null);
       setIsLoading(false);
     }
-  }, [documentId, user]);
+  }, [documentId, user, role]); // Added role as dependency
 
   const fetchDocument = async (id: string) => {
     setIsLoading(true);
@@ -66,9 +66,9 @@ export function useDocumentFetch(
         }
       } else if (role) {
         console.log("Fetching for guest user with role:", role);
-        const doc = fetchDocumentFromLocalStorage(id, toast);
+        const doc = fetchDocumentFromLocalStorage(id, role, toast);
         if (doc) {
-          console.log("Document fetched from localStorage:", doc.id);
+          console.log(`Document fetched from localStorage for ${role}:`, doc.id);
           console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
           console.log("Document title from localStorage:", doc.title || "");
           

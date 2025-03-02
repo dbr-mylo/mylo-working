@@ -1,15 +1,15 @@
 
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { 
   saveDocumentToSupabase, 
   saveDocumentToLocalStorage 
 } from "@/utils/documentSaveUtils";
-import type { Document } from "@/lib/types";
 
 export function useDocumentSave(
-  content: string,
+  content: string | undefined,
   documentTitle: string,
   currentDocumentId: string | null,
   setInitialContent: (content: string) => void,
@@ -19,25 +19,26 @@ export function useDocumentSave(
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const saveDocument = async (): Promise<void> => {
+  const saveDocument = useCallback(async () => {
+    if (!content) {
+      console.warn("Cannot save empty content");
+      toast({
+        title: "Cannot save",
+        description: "The document cannot be empty.",
+        variant: "destructive",
+      });
+      return { success: false };
+    }
+
     try {
-      console.log("Saving document with content length:", content ? content.length : 0);
-      console.log("Content preview:", content ? content.substring(0, 100) : "empty");
+      console.log("Saving document with title:", documentTitle);
+      console.log("Content length:", content.length);
+      console.log("Current document ID:", currentDocumentId);
       
-      if (!content || !content.trim()) {
-        toast({
-          title: "Cannot save empty document",
-          description: "Please add some content to your document before saving.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      let savedDocument: Document | null = null;
-      
+      let savedDoc;
       if (user) {
         console.log("Saving document for authenticated user:", user.id);
-        savedDocument = await saveDocumentToSupabase(
+        savedDoc = await saveDocumentToSupabase(
           currentDocumentId, 
           content, 
           documentTitle, 
@@ -46,41 +47,47 @@ export function useDocumentSave(
         );
       } else if (role) {
         console.log("Saving document for guest user with role:", role);
-        savedDocument = saveDocumentToLocalStorage(
-          currentDocumentId,
-          content,
+        savedDoc = saveDocumentToLocalStorage(
+          currentDocumentId, 
+          content, 
           documentTitle,
+          role,
           toast
         );
       } else {
+        console.error("No authenticated user or guest role found");
         toast({
-          title: "Authentication required",
-          description: "Please log in or continue as a guest to save documents.",
+          title: "Error saving document",
+          description: "You need to be signed in or continue as a guest to save documents.",
           variant: "destructive",
         });
-        return;
+        return { success: false };
       }
       
-      if (savedDocument) {
-        console.log("Document saved successfully with ID:", savedDocument.id);
-        console.log("Saved content length:", savedDocument.content ? savedDocument.content.length : 0);
-        console.log("Saved content preview:", savedDocument.content ? savedDocument.content.substring(0, 100) : "empty");
+      if (savedDoc) {
+        console.log("Document saved successfully:", savedDoc.id);
+        console.log("Saved content length:", savedDoc.content ? savedDoc.content.length : 0);
         
-        // Update initialContent to mark that we've saved the current state
         setInitialContent(content);
         
         if (!currentDocumentId) {
-          setCurrentDocumentId(savedDocument.id);
-          navigate(`/editor/${savedDocument.id}`, { replace: true });
+          console.log("Redirecting to saved document:", savedDoc.id);
+          setCurrentDocumentId(savedDoc.id);
+          navigate(`/editor/${savedDoc.id}`, { replace: true });
         }
+        
+        toast({
+          title: "Document saved",
+          description: "Your document has been successfully saved.",
+        });
+        
+        return { 
+          success: true, 
+          documentId: savedDoc.id 
+        };
+      } else {
+        throw new Error("Failed to save document");
       }
-      
-      toast({
-        title: "Document saved",
-        description: "Your changes have been saved successfully.",
-      });
-      
-      return;
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -88,9 +95,9 @@ export function useDocumentSave(
         description: "There was a problem saving your document.",
         variant: "destructive",
       });
-      return;
+      return { success: false };
     }
-  };
+  }, [content, documentTitle, currentDocumentId, user, role, toast, navigate, setInitialContent, setCurrentDocumentId]);
 
   return { saveDocument };
 }

@@ -115,6 +115,7 @@ async function createNewDocumentInSupabase(
  * @param documentId Document ID (null for new document)
  * @param content Document content
  * @param title Document title
+ * @param role User role (editor or designer)
  * @param toast Toast notification function
  * @returns Saved document or null if failed
  */
@@ -122,6 +123,7 @@ export function saveDocumentToLocalStorage(
   documentId: string | null, 
   content: string, 
   title: string,
+  role: string,
   toast: ReturnType<typeof useToast>["toast"]
 ): Document | null {
   try {
@@ -135,18 +137,18 @@ export function saveDocumentToLocalStorage(
       throw new Error("localStorage is not available");
     }
     
-    console.log("Saving to localStorage. Content length:", content ? content.length : 0);
+    console.log(`Saving to localStorage for ${role}. Content length:`, content ? content.length : 0);
     console.log("Content preview:", content ? content.substring(0, 100) : "empty");
     
     const docTitle = title || "Untitled Document";
     
     if (documentId) {
-      return updateExistingDocumentInLocalStorage(documentId, content, docTitle);
+      return updateExistingDocumentInLocalStorage(documentId, content, docTitle, role);
     } else {
-      return createNewDocumentInLocalStorage(content, docTitle);
+      return createNewDocumentInLocalStorage(content, docTitle, role);
     }
   } catch (error) {
-    console.error("Error saving to localStorage:", error);
+    console.error(`Error saving to localStorage for ${role}:`, error);
     throw error;
   }
 }
@@ -156,14 +158,17 @@ export function saveDocumentToLocalStorage(
  * @param documentId Document ID
  * @param content Document content
  * @param title Document title
+ * @param role User role (editor or designer)
  * @returns Updated document or null if failed
  */
 function updateExistingDocumentInLocalStorage(
   documentId: string, 
   content: string, 
-  title: string
+  title: string,
+  role: string
 ): Document | null {
-  const localDocs = localStorage.getItem('guestDocuments');
+  const storageKey = `${role}Documents`;
+  const localDocs = localStorage.getItem(storageKey);
   let docs = localDocs ? JSON.parse(localDocs) : [];
   
   if (!Array.isArray(docs)) {
@@ -194,12 +199,12 @@ function updateExistingDocumentInLocalStorage(
   }
   
   // Save to localStorage
-  localStorage.setItem('guestDocuments', JSON.stringify(docs));
+  localStorage.setItem(storageKey, JSON.stringify(docs));
   
   // Verify the document was saved correctly
-  const verifyDocs = JSON.parse(localStorage.getItem('guestDocuments') || '[]');
+  const verifyDocs = JSON.parse(localStorage.getItem(storageKey) || '[]');
   const verifyDoc = verifyDocs.find((d: Document) => d.id === documentId);
-  console.log("Verification - document after save:", verifyDoc);
+  console.log(`Verification - document after save for ${role}:`, verifyDoc);
   
   return updatedDoc;
 }
@@ -208,11 +213,13 @@ function updateExistingDocumentInLocalStorage(
  * Creates a new document in localStorage
  * @param content Document content
  * @param title Document title
+ * @param role User role (editor or designer)
  * @returns Created document or null if failed
  */
 function createNewDocumentInLocalStorage(
   content: string, 
-  title: string
+  title: string,
+  role: string
 ): Document {
   const newDoc: Document = {
     id: Date.now().toString(),
@@ -221,26 +228,27 @@ function createNewDocumentInLocalStorage(
     updated_at: new Date().toISOString()
   };
   
-  let guestDocs: Document[] = [];
-  const storedDocs = localStorage.getItem('guestDocuments');
+  const storageKey = `${role}Documents`;
+  let roleDocs: Document[] = [];
+  const storedDocs = localStorage.getItem(storageKey);
   
   if (storedDocs) {
     try {
       const parsed = JSON.parse(storedDocs);
-      guestDocs = Array.isArray(parsed) ? parsed : [];
+      roleDocs = Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-      console.error("Error parsing stored docs:", e);
-      guestDocs = [];
+      console.error(`Error parsing stored docs for ${role}:`, e);
+      roleDocs = [];
     }
   }
   
-  guestDocs.unshift(newDoc);
-  localStorage.setItem('guestDocuments', JSON.stringify(guestDocs));
+  roleDocs.unshift(newDoc);
+  localStorage.setItem(storageKey, JSON.stringify(roleDocs));
   
   // Verify the document was saved correctly
-  const verifyDocs = JSON.parse(localStorage.getItem('guestDocuments') || '[]');
+  const verifyDocs = JSON.parse(localStorage.getItem(storageKey) || '[]');
   const verifyDoc = verifyDocs.find((d: Document) => d.id === newDoc.id);
-  console.log("Verification - brand new document after save:", verifyDoc);
+  console.log(`Verification - brand new document after save for ${role}:`, verifyDoc);
   
   return newDoc;
 }

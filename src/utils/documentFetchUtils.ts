@@ -55,11 +55,13 @@ export async function fetchDocumentFromSupabase(
 /**
  * Fetches a document from localStorage for a guest user
  * @param id Document ID
+ * @param role User role (editor or designer)
  * @param toast Toast notification function
  * @returns Document object or null if not found
  */
 export function fetchDocumentFromLocalStorage(
-  id: string, 
+  id: string,
+  role: string,
   toast: ReturnType<typeof useToast>["toast"]
 ): Document | null {
   try {
@@ -69,24 +71,27 @@ export function fetchDocumentFromLocalStorage(
       throw new Error("localStorage is not available");
     }
 
-    const localDocs = localStorage.getItem('guestDocuments');
+    const storageKey = `${role}Documents`;
+    console.log(`Fetching document from ${storageKey} with ID:`, id);
+    
+    const localDocs = localStorage.getItem(storageKey);
     if (!localDocs) {
-      console.warn("No documents found in localStorage");
+      console.warn(`No documents found in localStorage for ${role}`);
       return null;
     }
     
     const parsedDocs = JSON.parse(localDocs);
-    console.log("All localStorage documents:", parsedDocs);
+    console.log(`All localStorage documents for ${role}:`, parsedDocs);
     
     if (!Array.isArray(parsedDocs)) {
-      console.warn("localStorage documents is not an array:", parsedDocs);
+      console.warn(`localStorage ${storageKey} is not an array:`, parsedDocs);
       return null;
     }
     
     const doc = parsedDocs.find((d: Document) => d.id === id);
     
     if (!doc) {
-      console.warn("Document not found in localStorage. ID:", id);
+      console.warn(`Document not found in localStorage for ${role}. ID:`, id);
       console.log("Available document IDs:", parsedDocs.map((d: Document) => d.id));
       
       toast({
@@ -97,7 +102,7 @@ export function fetchDocumentFromLocalStorage(
       return null;
     }
     
-    console.log("Found document in localStorage:", doc);
+    console.log(`Found document in localStorage for ${role}:`, doc);
     console.log("Document content from localStorage:", doc.content ? doc.content.substring(0, 100) : "empty");
     
     // Ensure content is a string

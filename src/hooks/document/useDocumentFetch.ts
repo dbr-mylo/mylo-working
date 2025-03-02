@@ -25,6 +25,8 @@ export function useDocumentFetch(
       console.log("DocumentId changed, fetching document:", documentId);
       fetchDocument(documentId);
     } else {
+      // Reset content state when no document ID is provided
+      console.log("No document ID provided, resetting content state");
       setContent("");
       setInitialContent("");
       setDocumentTitle("");
@@ -70,17 +72,14 @@ export function useDocumentFetch(
           console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
           console.log("Document title from localStorage:", doc.title || "");
           
-          if (doc.content) {
-            setContent(doc.content);
-            setInitialContent(doc.content);
-          } else {
-            console.warn("Document from localStorage has no content!");
-            setContent("");
-            setInitialContent("");
-          }
-          
+          // Ensure we're correctly setting content from the fetched document
+          setContent(doc.content || "");
+          setInitialContent(doc.content || "");
           setDocumentTitle(doc.title || "");
           setCurrentDocumentId(doc.id);
+          
+          // Log to verify content is being set correctly
+          console.log("Content set in state:", doc.content ? doc.content.substring(0, 50) + "..." : "empty");
         } else {
           console.error("Document not found in localStorage, redirecting to home");
           navigate('/');

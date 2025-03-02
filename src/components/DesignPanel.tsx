@@ -9,11 +9,10 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const isMobile = width < 1281;
   const [designContent, setDesignContent] = useState(content || "");
   
-  // Update local content whenever the prop changes
+  // Make sure designContent always updates when prop content changes
   useEffect(() => {
-    if (content !== designContent) {
-      setDesignContent(content || "");
-    }
+    console.log("DesignPanel content prop changed:", content ? content.substring(0, 50) + "..." : "empty");
+    setDesignContent(content || "");
   }, [content]);
   
   const handleContentChange = (newContent: string) => {
@@ -80,7 +79,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 <div dangerouslySetInnerHTML={{ __html: designContent }} />
               ) : (
                 <p className="text-editor-text opacity-50">
-                  Content from the editor will appear here with brand styling
+                  No content available
                 </p>
               )}
             </div>

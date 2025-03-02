@@ -39,7 +39,7 @@ export const EditorNav = ({
     loadDocuments();
   }, [user]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = async (): Promise<void> => {
     setIsLoadingDocs(true);
     try {
       const docs = await fetchUserDocuments(user?.id);
@@ -54,6 +54,7 @@ export const EditorNav = ({
     } finally {
       setIsLoadingDocs(false);
     }
+    return Promise.resolve();
   };
 
   const handleCloseDocument = () => {

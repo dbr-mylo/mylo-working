@@ -24,7 +24,7 @@ export const templateStore = {
       if (session.session?.user) {
         const { data, error } = await supabase
           .from('design_templates')
-          .select('*');
+          .select('id, name, styles');
           
         if (error) {
           console.error('Error fetching templates from Supabase:', error);

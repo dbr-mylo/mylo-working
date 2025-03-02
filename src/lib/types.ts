@@ -1,3 +1,4 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable?: boolean;
@@ -16,11 +17,6 @@ export interface Document {
   updated_at: string;
 }
 
-export interface SaveDocumentResult {
-  success: boolean;
-  documentId?: string;
-}
-
 export interface UseDocumentReturn {
   content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
@@ -29,7 +25,7 @@ export interface UseDocumentReturn {
   setDocumentTitle: React.Dispatch<React.SetStateAction<string>>;
   currentDocumentId: string | null;
   isLoading: boolean;
-  saveDocument: () => Promise<SaveDocumentResult>;
+  saveDocument: () => Promise<void>;
   loadDocument: (doc: Document) => void;
 }
 
@@ -38,10 +34,9 @@ export interface EditorNavProps {
   content?: string;
   documentTitle?: string;
   onTitleChange?: (title: string) => Promise<void>;
-  onSave?: () => Promise<SaveDocumentResult>;
+  onSave?: () => Promise<void>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
-  onReturnToLogin?: () => void;
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
-import type { EditorNavProps, SaveDocumentResult } from "@/lib/types";
+import { FileText, X } from "lucide-react";
+import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,8 +20,7 @@ export const EditorNav = ({
   documentTitle = "", 
   onTitleChange,
   onLoadDocument,
-  initialContent = "",
-  onReturnToLogin
+  initialContent = "" 
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const { toast } = useToast();
@@ -43,9 +42,7 @@ export const EditorNav = ({
   const loadDocuments = async (): Promise<void> => {
     setIsLoadingDocs(true);
     try {
-      console.log(`Fetching documents for role: ${currentRole}`);
-      const docs = await fetchUserDocuments(user?.id, currentRole);
-      console.log(`Fetched ${docs.length} documents`);
+      const docs = await fetchUserDocuments(user?.id);
       setDocuments(docs);
     } catch (error) {
       console.error("Error loading documents:", error);
@@ -92,8 +89,8 @@ export const EditorNav = ({
     
     if (onSave) {
       console.log("Calling onSave");
-      const saveResult = await onSave();
-      console.log("Save completed", saveResult);
+      await onSave();
+      console.log("Save completed");
     }
     
     console.log("Navigating away");
@@ -104,11 +101,8 @@ export const EditorNav = ({
   const handleSave = async (): Promise<void> => {
     console.log("Save triggered from nav");
     if (onSave) {
-      const saveResult = await onSave();
-      console.log("Save result:", saveResult);
-      if (saveResult.success) {
-        await loadDocuments();
-      }
+      await onSave();
+      await loadDocuments();
     }
     return Promise.resolve();
   };
@@ -119,14 +113,6 @@ export const EditorNav = ({
       await onTitleChange(newTitle);
     }
     return Promise.resolve();
-  };
-
-  const handleOpenDocument = () => {
-    // This will open the document dropdown
-    const openDropdownButton = document.querySelector('[data-document-controls-open-button]');
-    if (openDropdownButton instanceof HTMLElement) {
-      openDropdownButton.click();
-    }
   };
 
   return (
@@ -149,23 +135,28 @@ export const EditorNav = ({
       <div className="flex items-center space-x-2">
         {currentRole === "editor" && (
           <DocumentControls
-            onSave={onSave ? handleSave : undefined}
+            onSave={onSave}
             onLoadDocument={onLoadDocument}
             documents={documents}
             isLoadingDocs={isLoadingDocs}
             content={content}
-            setOpenButtonRef={btn => btn?.setAttribute('data-document-controls-open-button', '')}
           />
         )}
         
         <ExternalActions 
           onSignOut={signOut} 
           isAuthenticated={!!user}
-          onReturnToLogin={onReturnToLogin}
-          onSave={onSave ? handleSave : undefined}
-          onClose={handleCloseDocument}
-          onOpen={currentRole === "editor" ? handleOpenDocument : undefined}
         />
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleCloseDocument}
+          title="Close document"
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </Button>
       </div>
 
       <CloseDocumentDialog

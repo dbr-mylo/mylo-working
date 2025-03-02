@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
+import { Clock, Trash2 } from "lucide-react";
 import type { Document } from "@/lib/types";
 
 interface DocumentCardProps {
@@ -23,10 +23,11 @@ export const DocumentCard = ({ document, onDelete, onSelect }: DocumentCardProps
       onClick={() => onSelect(document.id)}
     >
       <CardHeader className="p-3">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <CardTitle className="text-md break-words">{document.title}</CardTitle>
-          <div className="flex items-center gap-3 ml-auto">
-            <div className="text-xs text-gray-500 self-center">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-md truncate">{document.title}</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center text-md text-gray-500">
+              <Clock className="h-4 w-4 mr-1" />
               {formatDate(document.updated_at)}
             </div>
             <Button 

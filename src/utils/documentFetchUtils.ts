@@ -3,18 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 
-/**
- * Fetches a document from Supabase for an authenticated user
- * @param id Document ID
- * @param userId User ID
- * @param toast Toast notification function
- * @returns Document object or null if not found
- */
-export async function fetchDocumentFromSupabase(
-  id: string, 
-  userId: string, 
-  toast: ReturnType<typeof useToast>["toast"]
-): Promise<Document | null> {
+export async function fetchDocumentFromSupabase(id: string, userId: string, toast: ReturnType<typeof useToast>["toast"]) {
   try {
     const { data, error } = await supabase
       .from('documents')
@@ -35,121 +24,88 @@ export async function fetchDocumentFromSupabase(
       throw error;
     }
     
-    if (!data) return null;
-    
-    console.log("Loaded document from Supabase:", data);
-    console.log("Content from Supabase:", data.content ? data.content.substring(0, 100) : "empty");
-    
-    toast({
-      title: "Document loaded",
-      description: "Your document has been loaded.",
-    });
-    
-    return data;
+    if (data) {
+      console.log("Loaded document from Supabase:", data);
+      console.log("Content from Supabase:", data.content ? data.content.substring(0, 100) : "empty");
+      
+      toast({
+        title: "Document loaded",
+        description: "Your document has been loaded.",
+      });
+      
+      return data;
+    }
+    return null;
   } catch (error) {
     console.error("Error fetching document from Supabase:", error);
     throw error;
   }
 }
 
-/**
- * Fetches a document from localStorage for a guest user
- * @param id Document ID
- * @param role User role (editor or designer)
- * @param toast Toast notification function
- * @returns Document object or null if not found
- */
-export function fetchDocumentFromLocalStorage(
-  id: string,
-  role: string,
-  toast: ReturnType<typeof useToast>["toast"]
-): Document | null {
+export function fetchDocumentFromLocalStorage(id: string, toast: ReturnType<typeof useToast>["toast"]) {
   try {
-    // Check if localStorage is available
-    if (typeof localStorage === 'undefined') {
-      console.warn("localStorage is not available in this context");
-      throw new Error("localStorage is not available");
-    }
-
-    const storageKey = `${role}Documents`;
-    console.log(`Fetching document from ${storageKey} with ID:`, id);
-    
-    const localDocs = localStorage.getItem(storageKey);
-    if (!localDocs) {
-      console.warn(`No documents found in localStorage for ${role}`);
-      return null;
-    }
-    
-    const parsedDocs = JSON.parse(localDocs);
-    console.log(`All localStorage documents for ${role}:`, parsedDocs);
-    
-    if (!Array.isArray(parsedDocs)) {
-      console.warn(`localStorage ${storageKey} is not an array:`, parsedDocs);
-      return null;
-    }
-    
-    const doc = parsedDocs.find((d: Document) => d.id === id);
-    
-    if (!doc) {
-      console.warn(`Document not found in localStorage for ${role}. ID:`, id);
-      console.log("Available document IDs:", parsedDocs.map((d: Document) => d.id));
+    const localDocs = localStorage.getItem('guestDocuments');
+    if (localDocs) {
+      const parsedDocs = JSON.parse(localDocs);
+      console.log("All localStorage documents:", parsedDocs);
       
-      toast({
-        title: "Document not found",
-        description: "This document doesn't exist in your local storage.",
-        variant: "destructive",
-      });
-      return null;
+      if (!Array.isArray(parsedDocs)) {
+        console.warn("localStorage documents is not an array:", parsedDocs);
+        return null;
+      }
+      
+      const doc = parsedDocs.find((d: Document) => d.id === id);
+      
+      if (doc) {
+        console.log("Found document in localStorage:", doc);
+        console.log("Document content from localStorage:", doc.content ? doc.content.substring(0, 100) : "empty");
+        
+        // Ensure content is a string
+        if (doc.content && typeof doc.content === 'object') {
+          doc.content = JSON.stringify(doc.content);
+        } else if (doc.content === null || doc.content === undefined) {
+          doc.content = "";
+        }
+        
+        toast({
+          title: "Document loaded",
+          description: "Your local document has been loaded.",
+        });
+        
+        return doc;
+      } else {
+        console.warn("Document not found in localStorage. ID:", id);
+        console.log("Available document IDs:", parsedDocs.map((d: Document) => d.id));
+        
+        toast({
+          title: "Document not found",
+          description: "This document doesn't exist in your local storage.",
+          variant: "destructive",
+        });
+        return null;
+      }
+    } else {
+      console.warn("No documents found in localStorage");
     }
-    
-    console.log(`Found document in localStorage for ${role}:`, doc);
-    console.log("Document content from localStorage:", doc.content ? doc.content.substring(0, 100) : "empty");
-    
-    // Ensure content is a string
-    const safeDoc = ensureDocumentContentIsString(doc);
-    
-    toast({
-      title: "Document loaded",
-      description: "Your local document has been loaded.",
-    });
-    
-    return safeDoc;
+    return null;
   } catch (error) {
     console.error("Error loading local document:", error);
     throw error;
   }
 }
 
-/**
- * Ensures document content is a string
- * @param doc Document object
- * @returns Document with string content
- */
-function ensureDocumentContentIsString(doc: Document): Document {
-  if (!doc.content) {
-    return { ...doc, content: "" };
-  }
-  
-  if (typeof doc.content === 'string') {
-    return doc;
-  }
-  
-  // Convert object content to string
-  return { 
-    ...doc, 
-    content: JSON.stringify(doc.content) 
-  };
-}
-
-/**
- * Prepares a document for loading into the editor
- * @param doc Document object
- * @returns Processed document ready for editor
- */
 export function loadDocument(doc: Document) {
-  // First ensure document content is a string
-  const safeDoc = ensureDocumentContentIsString(doc);
-  const docContent = safeDoc.content || "";
+  // Make sure content is always a string
+  let docContent = "";
+  
+  if (doc.content) {
+    if (typeof doc.content === 'string') {
+      docContent = doc.content;
+    } else {
+      // If not a string, convert to string (e.g., if it's an object)
+      docContent = JSON.stringify(doc.content);
+    }
+  }
   
   console.log("Loading document content:", docContent ? docContent.substring(0, 50) + "..." : "empty");
   

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Save, FolderOpen } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Document } from "@/lib/types";
 import {
@@ -17,7 +17,6 @@ interface DocumentControlsProps {
   documents: Document[];
   isLoadingDocs: boolean;
   content?: string;
-  setOpenButtonRef?: (ref: HTMLButtonElement | null) => void;
 }
 
 export const DocumentControls = ({
@@ -25,18 +24,12 @@ export const DocumentControls = ({
   onLoadDocument,
   documents,
   isLoadingDocs,
-  content,
-  setOpenButtonRef
+  content
 }: DocumentControlsProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  const openButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleLoadDocument = (doc: Document) => {
-    console.log("Loading document from DocumentControls:", doc.id);
-    console.log("Document title:", doc.title);
-    console.log("Content length:", doc.content ? doc.content.length : 0);
-    
     if (onLoadDocument) {
       onLoadDocument(doc);
       toast({
@@ -74,7 +67,7 @@ export const DocumentControls = ({
   };
 
   return (
-    <div className="hidden">
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
@@ -82,10 +75,6 @@ export const DocumentControls = ({
             size="sm" 
             className="flex items-center gap-2"
             disabled={isLoadingDocs}
-            ref={btn => {
-              if (openButtonRef) openButtonRef.current = btn;
-              if (setOpenButtonRef) setOpenButtonRef(btn);
-            }}
           >
             <FolderOpen className="w-4 h-4" />
             {isLoadingDocs ? "Loading..." : "Open"}
@@ -99,7 +88,7 @@ export const DocumentControls = ({
               <DropdownMenuItem 
                 key={doc.id} 
                 onClick={() => handleLoadDocument(doc)}
-                className="flex flex-col items-start cursor-pointer"
+                className="flex flex-col items-start"
               >
                 <span className="font-medium">{doc.title}</span>
                 <span className="text-xs opacity-70">
@@ -121,6 +110,6 @@ export const DocumentControls = ({
         <Save className="w-4 h-4" />
         {isSaving ? "Saving..." : "Save"}
       </Button>
-    </div>
+    </>
   );
 };

@@ -21,8 +21,8 @@ export interface EditorNavProps {
   currentRole: string;
   content?: string;
   documentTitle?: string;
-  onTitleChange?: (title: string) => void;
-  onSave?: () => void;
+  onTitleChange?: (title: string) => Promise<void> | void;
+  onSave?: () => Promise<void> | void;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
 }

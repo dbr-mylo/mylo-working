@@ -50,6 +50,7 @@ const DocumentSelection = () => {
             const uniqueDocs = fetchGuestDocumentsFromLocalStorage();
             console.log("Documents fetched from localStorage:", uniqueDocs.length);
             
+            // Only create a default document if NO documents exist at all
             if (uniqueDocs.length === 0) {
               console.log("No documents found in localStorage - creating a sample document");
               // Create a default document if none exist

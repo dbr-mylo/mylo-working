@@ -44,7 +44,6 @@ export function useDocumentFetch(
         if (data) {
           console.log("Document fetched from Supabase:", data.id);
           console.log("Content length from Supabase:", data.content ? data.content.length : 0);
-          console.log("Content preview:", data.content ? data.content.substring(0, 100) : "empty");
           
           if (data.content) {
             setContent(data.content);
@@ -69,16 +68,11 @@ export function useDocumentFetch(
         if (doc) {
           console.log("Document fetched from localStorage:", doc.id);
           console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
-          console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
+          console.log("Document title from localStorage:", doc.title || "");
           
           if (doc.content) {
             setContent(doc.content);
             setInitialContent(doc.content);
-            
-            // Double-check state after setting
-            setTimeout(() => {
-              console.log("Verify content was set correctly");
-            }, 100);
           } else {
             console.warn("Document from localStorage has no content!");
             setContent("");

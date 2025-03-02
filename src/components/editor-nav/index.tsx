@@ -86,7 +86,7 @@ export const EditorNav = ({
   
   const handleSave = async (): Promise<void> => {
     if (onSave) {
-      await Promise.resolve(onSave());
+      await onSave();
       await loadDocuments();
     }
     return Promise.resolve();
@@ -95,7 +95,7 @@ export const EditorNav = ({
   const handleTitleChange = async (newTitle: string): Promise<void> => {
     setTitle(newTitle);
     if (onTitleChange) {
-      await Promise.resolve(onTitleChange(newTitle));
+      await onTitleChange(newTitle);
     }
     return Promise.resolve();
   };

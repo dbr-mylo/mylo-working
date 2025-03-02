@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 interface DocumentTitleProps {
   title: string;
-  onTitleChange?: (title: string) => Promise<void> | void;
+  onTitleChange?: (title: string) => Promise<void>;
   isEditable: boolean;
   placeholder: string;
 }
@@ -24,14 +24,11 @@ export const DocumentTitle = ({
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setLocalTitle(newTitle);
-    if (onTitleChange) {
-      onTitleChange(newTitle);
-    }
   };
 
-  const handleTitleBlur = () => {
+  const handleTitleBlur = async () => {
     if (onTitleChange && localTitle !== title) {
-      onTitleChange(localTitle);
+      await onTitleChange(localTitle);
     }
   };
 

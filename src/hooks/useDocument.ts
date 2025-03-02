@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,7 +57,6 @@ export function useDocument(documentId: string | undefined) {
             setContent(data.content);
             setInitialContent(data.content);
           } else {
-            // Set empty content if content is null
             setContent("");
             setInitialContent("");
           }
@@ -117,7 +115,7 @@ export function useDocument(documentId: string | undefined) {
     }
   };
 
-  const saveDocument = async () => {
+  const saveDocument = async (): Promise<void> => {
     try {
       console.log("Saving document with content:", content);
       
@@ -133,9 +131,7 @@ export function useDocument(documentId: string | undefined) {
       let savedDocument: Document | null = null;
       
       if (user) {
-        // If the user is logged in, save to Supabase
         if (currentDocumentId) {
-          // Update existing document
           const { data, error } = await supabase
             .from('documents')
             .update({ 
@@ -152,7 +148,6 @@ export function useDocument(documentId: string | undefined) {
           savedDocument = data;
           console.log("Updated document in Supabase:", data);
         } else {
-          // Create new document
           const { data, error } = await supabase
             .from('documents')
             .insert({
@@ -167,24 +162,19 @@ export function useDocument(documentId: string | undefined) {
           savedDocument = data;
           console.log("Created document in Supabase:", data);
           
-          // Update URL with new document ID without page reload
           if (data && data.id) {
             setCurrentDocumentId(data.id);
             navigate(`/editor/${data.id}`, { replace: true });
           }
         }
       } else if (role) {
-        // For guest users, save to localStorage
         try {
-          // Use a safe title
           const docTitle = documentTitle || "Untitled Document";
           
           if (currentDocumentId) {
-            // We're updating an existing document
             const localDocs = localStorage.getItem('guestDocuments');
             let docs = localDocs ? JSON.parse(localDocs) : [];
             
-            // Check if docs is an array, if not make it an array
             if (!Array.isArray(docs)) {
               docs = [];
             }
@@ -192,7 +182,6 @@ export function useDocument(documentId: string | undefined) {
             const existingIndex = docs.findIndex((doc: Document) => doc.id === currentDocumentId);
             
             if (existingIndex >= 0) {
-              // Update existing document
               docs[existingIndex] = {
                 ...docs[existingIndex],
                 title: docTitle,
@@ -200,7 +189,6 @@ export function useDocument(documentId: string | undefined) {
                 updated_at: new Date().toISOString()
               };
               
-              // Ensure we're storing valid content
               if (typeof docs[existingIndex].content !== 'string') {
                 docs[existingIndex].content = String(docs[existingIndex].content || "");
               }
@@ -209,8 +197,6 @@ export function useDocument(documentId: string | undefined) {
               savedDocument = docs[existingIndex];
               console.log("Updated document in localStorage:", savedDocument);
             } else {
-              // Document ID exists but not found in storage
-              // Create a new entry instead of throwing an error
               const newDoc: Document = {
                 id: currentDocumentId,
                 title: docTitle,
@@ -224,7 +210,6 @@ export function useDocument(documentId: string | undefined) {
               console.log("Created new document in localStorage with existing ID:", savedDocument);
             }
           } else {
-            // We're creating a new document
             const newDoc: Document = {
               id: Date.now().toString(),
               title: docTitle,
@@ -232,13 +217,9 @@ export function useDocument(documentId: string | undefined) {
               updated_at: new Date().toISOString()
             };
             
-            console.log("Saving document to localStorage:", newDoc);
-            
-            // Update current document reference
             setCurrentDocumentId(newDoc.id);
             navigate(`/editor/${newDoc.id}`, { replace: true });
             
-            // Save to localStorage in the documents collection
             let guestDocs: Document[] = [];
             const storedDocs = localStorage.getItem('guestDocuments');
             
@@ -261,7 +242,6 @@ export function useDocument(documentId: string | undefined) {
           throw error;
         }
       } else {
-        // No user or role defined
         toast({
           title: "Authentication required",
           description: "Please log in or continue as a guest to save documents.",
@@ -270,7 +250,6 @@ export function useDocument(documentId: string | undefined) {
         return;
       }
       
-      // Update the initialContent to match current content, indicating "saved" state
       setInitialContent(content);
       
       toast({
@@ -279,7 +258,6 @@ export function useDocument(documentId: string | undefined) {
       });
       
       console.log("Document saved successfully", savedDocument);
-      return savedDocument;
     } catch (error) {
       console.error("Error saving document:", error);
       toast({
@@ -291,7 +269,6 @@ export function useDocument(documentId: string | undefined) {
   };
 
   const loadDocument = (doc: Document) => {
-    // Ensure content is always a string
     const docContent = typeof doc.content === 'string' ? doc.content : String(doc.content || "");
     
     setContent(docContent);

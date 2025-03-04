@@ -27,16 +27,19 @@ const fonts = [
 interface FontPickerProps {
   value: string;
   onChange: (value: string) => void;
+  className?: string;
 }
 
-export const FontPicker = ({ value, onChange }: FontPickerProps) => {
+export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   return (
-    <div className="flex items-center">
+    <div className={`flex items-center ${className || ''}`}>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-8 w-[180px] bg-white">
+        <SelectTrigger className="h-9 w-[180px] bg-white">
           <div className="flex items-center gap-2">
             <Type className="h-3.5 w-3.5" />
-            <SelectValue placeholder="Font" />
+            <span style={{ fontFamily: value }}>
+              {value || 'Select Font'}
+            </span>
           </div>
         </SelectTrigger>
         <SelectContent>
@@ -54,3 +57,4 @@ export const FontPicker = ({ value, onChange }: FontPickerProps) => {
     </div>
   );
 };
+

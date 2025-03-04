@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TemplateControls } from "@/components/design/TemplateControls";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
+import { TextStyleManager } from "@/components/design/TextStyleManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -45,7 +47,20 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         )}
         
         {role === "designer" && (
-          <TemplateControls onStylesChange={handleStylesChange} />
+          <Tabs defaultValue="textStyles" className="mb-6">
+            <TabsList className="mb-4">
+              <TabsTrigger value="textStyles">Text Styles</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="textStyles">
+              <TextStyleManager onStylesChange={handleStylesChange} />
+            </TabsContent>
+            
+            <TabsContent value="templates">
+              <TemplateControls onStylesChange={handleStylesChange} />
+            </TabsContent>
+          </Tabs>
         )}
         
         <DocumentPreview 
@@ -58,3 +73,4 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     </div>
   );
 };
+

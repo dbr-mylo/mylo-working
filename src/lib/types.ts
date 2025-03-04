@@ -1,3 +1,4 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -52,3 +53,17 @@ export interface Template {
   styles: string;
   owner_id?: string;
 }
+
+export interface TextStyle {
+  id: string;
+  name: string;
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  color: string;
+  lineHeight: string;
+  letterSpacing: string;
+  selector: string;
+  description?: string;
+}
+

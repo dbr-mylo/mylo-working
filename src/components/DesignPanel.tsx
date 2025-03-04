@@ -12,6 +12,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const { role } = useAuth();
   const isMobile = width < 1281;
+  const isStandalone = role === "designer";
   const [designContent, setDesignContent] = useState(content);
   const [customStyles, setCustomStyles] = useState<string>("");
   
@@ -29,7 +30,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   };
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
         {!isMobile && (
           <div className="flex justify-between items-center mb-4">
@@ -73,4 +74,3 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     </div>
   );
 };
-

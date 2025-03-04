@@ -6,6 +6,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useDocument } from "@/hooks/useDocument";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
+import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -53,19 +54,18 @@ const Index = () => {
     );
   }
   
-  return (
-    <div className="min-h-screen bg-editor-bg">
-      <EditorNav 
-        currentRole={role || "editor"} 
-        content={content}
-        documentTitle={documentTitle}
-        onTitleChange={handleTitleChange}
-        onSave={saveDocument}
-        onLoadDocument={loadDocument}
-        initialContent={initialContent}
-      />
-      
-      {isMobile ? (
+  // Render different layouts based on user role
+  const renderContent = () => {
+    if (role === "designer") {
+      return (
+        <DesignPanel 
+          content={content}
+          isEditable={isDesignEditable}
+        />
+      );
+    } else {
+      // For editor role, render the split view
+      return isMobile ? (
         <MobileEditor
           content={content}
           onContentChange={setContent}
@@ -79,7 +79,25 @@ const Index = () => {
           isEditorEditable={isEditorEditable}
           isDesignEditable={isDesignEditable}
         />
-      )}
+      );
+    }
+  };
+  
+  return (
+    <div className="min-h-screen bg-editor-bg">
+      <EditorNav 
+        currentRole={role || "editor"} 
+        content={content}
+        documentTitle={documentTitle}
+        onTitleChange={handleTitleChange}
+        onSave={saveDocument}
+        onLoadDocument={loadDocument}
+        initialContent={initialContent}
+      />
+      
+      <main className="animate-fade-in">
+        {renderContent()}
+      </main>
     </div>
   );
 };

@@ -95,7 +95,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   return (
     <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
-        {role === "designer" && (
+        {isStandalone && (
           <TypographyPanel 
             selectedElement={selectedElement} 
             onStyleChange={handleStyleChange}

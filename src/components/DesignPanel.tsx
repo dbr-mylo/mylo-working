@@ -69,7 +69,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   };
   
   return (
-    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-2/3'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} flex`}>
+    <div className={`h-full bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} flex`}>
       <div className={`flex-1 p-4 md:p-8 overflow-auto`}>
         <div className="mx-auto">
           {!isMobile && (

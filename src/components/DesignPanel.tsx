@@ -7,6 +7,7 @@ import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { useToast } from "@/hooks/use-toast";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
+import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -68,6 +69,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     return (
       <div className="w-full flex">
         <div className="flex-1 p-4 md:p-8 bg-editor-panel overflow-auto">
+          {isEditable && <ToolSettingsMenuBar />}
           <div className="mx-auto">
             <DocumentPreview 
               content={designContent}
@@ -85,6 +87,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   
   return (
     <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+      {isEditable && <ToolSettingsMenuBar />}
       <div className="mx-auto">
         <DocumentPreview 
           content={designContent}

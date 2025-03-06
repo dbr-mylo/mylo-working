@@ -30,7 +30,7 @@ export const RichTextEditor = ({
   }
 
   return (
-    <div className="w-full bg-white rounded-lg overflow-hidden">
+    <div className="w-full bg-white">
       <EditorStyles />
       {!hideToolbar && (
         <EditorToolbar 
@@ -41,19 +41,17 @@ export const RichTextEditor = ({
           onColorChange={handleColorChange}
         />
       )}
-      <div className="border rounded-lg mt-2">
-        <EditorContent 
-          editor={editor} 
-          className="prose max-w-none"
-          style={{
-            width: '8.5in',
-            minHeight: '11in',
-            margin: '0 auto',
-            padding: '1in',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
-          }}
-        />
-      </div>
+      <EditorContent 
+        editor={editor} 
+        className="prose max-w-none"
+        style={{
+          width: '8.5in',
+          minHeight: '11in',
+          margin: '0 auto',
+          padding: '1in',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+        }}
+      />
     </div>
   );
 };

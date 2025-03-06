@@ -72,7 +72,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       <div className="mx-auto">
         {!isMobile && (
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-medium text-editor-text">Design Panel</h2>
             {isEditable ? (
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                 Editable

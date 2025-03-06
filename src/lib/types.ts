@@ -1,4 +1,3 @@
-
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -66,4 +65,3 @@ export interface TextStyle {
   selector: string;
   description?: string;
 }
-

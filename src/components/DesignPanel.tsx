@@ -6,15 +6,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TemplateControls } from "@/components/design/TemplateControls";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { TextStyleManager } from "@/components/design/TextStyleManager";
+import { TypographyPanel } from "@/components/design/TypographyPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { textStyleStore } from "@/stores/textStyleStore";
+import { useToast } from "@/hooks/use-toast";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const { role } = useAuth();
+  const { toast } = useToast();
   const isMobile = width < 1281;
   const isStandalone = role === "designer";
   const [designContent, setDesignContent] = useState(content);
   const [customStyles, setCustomStyles] = useState<string>("");
+  const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   
   // Update local content when prop changes (for when editor updates content)
   if (content !== designContent && !isEditable) {
@@ -27,6 +32,42 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   
   const handleStylesChange = (styles: string) => {
     setCustomStyles(styles);
+  };
+
+  const handleElementSelect = (element: HTMLElement | null) => {
+    setSelectedElement(element);
+  };
+  
+  const handleStyleChange = (styles: Record<string, string>) => {
+    if (!selectedElement) return;
+    
+    // Apply styles to the selected element
+    Object.entries(styles).forEach(([property, value]) => {
+      selectedElement.style[property as any] = value;
+    });
+  };
+
+  const handleSaveStyle = async (styleData: any) => {
+    try {
+      await textStyleStore.saveTextStyle(styleData);
+      
+      // Refresh styles
+      const styles = await textStyleStore.getTextStyles();
+      const css = textStyleStore.generateCSSFromTextStyles(styles);
+      setCustomStyles(css);
+      
+      toast({
+        title: "Style saved",
+        description: "Text style has been saved to your collection.",
+      });
+    } catch (error) {
+      console.error("Error saving text style:", error);
+      toast({
+        title: "Error saving style",
+        description: "There was a problem saving your text style.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -48,11 +89,20 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         )}
         
         {role === "designer" && (
-          <Tabs defaultValue="textStyles" className="mb-6">
+          <Tabs defaultValue="typography" className="mb-6">
             <TabsList className="mb-4">
+              <TabsTrigger value="typography">Typography</TabsTrigger>
               <TabsTrigger value="textStyles">Text Styles</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="typography">
+              <TypographyPanel 
+                selectedElement={selectedElement} 
+                onStyleChange={handleStyleChange}
+                onSaveStyle={handleSaveStyle}
+              />
+            </TabsContent>
             
             <TabsContent value="textStyles">
               <TextStyleManager onStylesChange={handleStylesChange} />
@@ -69,6 +119,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           customStyles={customStyles}
           isEditable={isEditable}
           onContentChange={handleContentChange}
+          onElementSelect={handleElementSelect}
         />
       </div>
     </div>

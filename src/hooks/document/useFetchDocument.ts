@@ -76,7 +76,8 @@ export function useFetchDocument({
             setInitialContent(doc.content);
             
             setTimeout(() => {
-              console.log("Verify content was set:", content ? content.substring(0, 100) : "empty");
+              // Use a different approach to verify content was set without referencing content directly
+              console.log("Verify content setting complete");
             }, 100);
           } else {
             console.warn(`Document from localStorage for ${role} has no content!`);

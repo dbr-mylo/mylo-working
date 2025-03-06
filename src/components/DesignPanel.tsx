@@ -3,10 +3,8 @@ import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { TemplateControls } from "@/components/design/TemplateControls";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { TypographyPanel } from "@/components/design/TypographyPanel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { useToast } from "@/hooks/use-toast";
 
@@ -88,25 +86,12 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         )}
         
         {role === "designer" && (
-          <Tabs defaultValue="typography" className="mb-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="typography">Typography</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="typography">
-              <TypographyPanel 
-                selectedElement={selectedElement} 
-                onStyleChange={handleStyleChange}
-                onSaveStyle={handleSaveStyle}
-                onStylesChange={handleStylesChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="templates">
-              <TemplateControls onStylesChange={handleStylesChange} />
-            </TabsContent>
-          </Tabs>
+          <TypographyPanel 
+            selectedElement={selectedElement} 
+            onStyleChange={handleStyleChange}
+            onSaveStyle={handleSaveStyle}
+            onStylesChange={handleStylesChange}
+          />
         )}
         
         <DocumentPreview 

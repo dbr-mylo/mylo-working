@@ -54,8 +54,11 @@ export const RichTextEditor = ({
     };
   }, [editor]);
 
+  // Always show at least a loading indicator when editor is initializing
   if (!editor) {
-    return null;
+    return <div className="flex items-center justify-center p-4 h-[11in] w-[8.5in] mx-auto bg-white">
+      <p className="text-gray-400">Editor is loading...</p>
+    </div>;
   }
 
   return (
@@ -85,6 +88,14 @@ export const RichTextEditor = ({
             margin-left: auto;
             margin-right: auto;
           }
+          
+          /* Ensure ProseMirror is always visible */
+          .ProseMirror {
+            display: block !important;
+            visibility: visible !important;
+            min-height: 11in;
+            background-color: white;
+          }
         `}
       </style>
       {!hideToolbar && (
@@ -98,7 +109,7 @@ export const RichTextEditor = ({
           />
         </div>
       )}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="editor-content" />
     </div>
   );
 };

@@ -98,6 +98,10 @@ export const DocumentPreview = ({
               outline: 2px solid #6366f1;
               background-color: rgba(99, 102, 241, 0.1);
             }
+            .ProseMirror, .editor-content {
+              display: block !important;
+              visibility: visible !important;
+            }
             ${customStyles}
           `}
         </style>
@@ -126,7 +130,7 @@ export const DocumentPreview = ({
               ref={previewRef} 
               onClick={handlePreviewClick}
               dangerouslySetInnerHTML={{ __html: content }} 
-              className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto" 
+              className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white" 
             />
           ) : (
             <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
@@ -140,9 +144,9 @@ export const DocumentPreview = ({
           )
         ) : (
           isDesigner ? (
-            <p className="text-editor-text opacity-50 min-h-[11in] w-[8.5in] p-[1in] mx-auto">
-              Content from the editor will appear here with brand styling
-            </p>
+            <div className="text-editor-text opacity-50 min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white">
+              <p>Content from the editor will appear here with brand styling</p>
+            </div>
           ) : (
             <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
               <p className="text-editor-text opacity-50">

@@ -60,12 +60,6 @@ export const RichTextEditor = ({
             padding-bottom: 0.5rem;
             margin-bottom: 0.5rem;
           }
-          
-          /* Remove top margin for designer role toolbar */
-          .designer-editor .fixed-toolbar {
-            margin-top: 0;
-            padding-top: 0;
-          }
         `}
       </style>
       {!hideToolbar && (

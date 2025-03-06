@@ -17,7 +17,7 @@ export const DocumentPreview = ({
   isEditable, 
   onContentChange,
   onElementSelect,
-  showToolbar = true
+  showToolbar = false
 }: DocumentPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
@@ -107,7 +107,7 @@ export const DocumentPreview = ({
               content={content}
               onUpdate={handleContentChange}
               isEditable={true}
-              hideToolbar={!showToolbar}
+              hideToolbar={true}
               fixedToolbar={false}
             />
           ) : (
@@ -116,7 +116,7 @@ export const DocumentPreview = ({
                 content={content}
                 onUpdate={handleContentChange}
                 isEditable={true}
-                hideToolbar={false}
+                hideToolbar={!showToolbar}
               />
             </div>
           )

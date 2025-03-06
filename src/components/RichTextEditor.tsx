@@ -35,18 +35,21 @@ export const RichTextEditor = ({
   // Add this effect to make the editor instance available globally
   useEffect(() => {
     if (editor) {
-      const editorElement = document.querySelector('.ProseMirror');
-      if (editorElement) {
-        // @ts-ignore - Adding custom property to DOM element
-        editorElement.tiptapEditor = editor;
-      }
+      // Wait for the DOM to be updated
+      setTimeout(() => {
+        const editorElement = document.querySelector('.ProseMirror');
+        if (editorElement) {
+          // Use a type assertion to add the custom property
+          (editorElement as any).tiptapEditor = editor;
+        }
+      }, 0);
     }
     
     return () => {
       const editorElement = document.querySelector('.ProseMirror');
       if (editorElement) {
-        // @ts-ignore - Removing custom property from DOM element
-        delete editorElement.tiptapEditor;
+        // Type assertion to remove the custom property
+        delete (editorElement as any).tiptapEditor;
       }
     };
   }, [editor]);

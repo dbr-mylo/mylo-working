@@ -1,15 +1,44 @@
 
 import React from 'react';
 import { EditorToolbar } from '@/components/rich-text/EditorToolbar';
-import { useEditorSetup } from '@/components/rich-text/useEditor';
+import { Editor } from '@tiptap/react';
 
 interface ToolSettingsMenuBarProps {
   children?: React.ReactNode;
 }
 
 export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({ children }) => {
-  // Get the global editor instance (this will need to be implemented with a context)
-  const activeEditor = document.querySelector('.ProseMirror')?.tiptapEditor;
+  // Get the global editor instance using a safer approach
+  const [activeEditor, setActiveEditor] = React.useState<Editor | null>(null);
+  
+  React.useEffect(() => {
+    // Find the editor element
+    const editorElement = document.querySelector('.ProseMirror');
+    
+    if (editorElement) {
+      // Access the custom property with a proper type assertion
+      const editor = (editorElement as any).tiptapEditor as Editor | undefined;
+      setActiveEditor(editor || null);
+    }
+    
+    // Setup a mutation observer to watch for editor changes
+    const observer = new MutationObserver(() => {
+      const editorEl = document.querySelector('.ProseMirror');
+      if (editorEl) {
+        const editor = (editorEl as any).tiptapEditor as Editor | undefined;
+        setActiveEditor(editor || null);
+      }
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
   
   return (
     <div className="w-full bg-slate-50 border-b border-slate-200">

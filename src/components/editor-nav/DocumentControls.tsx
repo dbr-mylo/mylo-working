@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DocumentControlsProps {
   onSave: (() => Promise<void>) | undefined;
@@ -28,12 +29,16 @@ export const DocumentControls = ({
 }: DocumentControlsProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { role } = useAuth();
+  
+  const isDesigner = role === "designer";
+  const itemType = isDesigner ? "template" : "document";
 
   const handleLoadDocument = (doc: Document) => {
     if (onLoadDocument) {
       onLoadDocument(doc);
       toast({
-        title: "Document loaded",
+        title: `${isDesigner ? "Template" : "Document"} loaded`,
         description: `"${doc.title}" has been loaded.`,
       });
     }
@@ -42,8 +47,8 @@ export const DocumentControls = ({
   const handleSave = async () => {
     if (!content || !content.trim()) {
       toast({
-        title: "Cannot save empty document",
-        description: "Please add some content to your document.",
+        title: `Cannot save empty ${itemType}`,
+        description: `Please add some content to your ${itemType}.`,
         variant: "destructive",
       });
       return;
@@ -57,8 +62,8 @@ export const DocumentControls = ({
     } catch (error) {
       console.error("Error in handleSave:", error);
       toast({
-        title: "Error saving document",
-        description: "There was a problem saving your document. Please try again.",
+        title: `Error saving ${itemType}`,
+        description: `There was a problem saving your ${itemType}. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -82,7 +87,7 @@ export const DocumentControls = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
           {documents.length === 0 ? (
-            <DropdownMenuItem disabled>No documents found</DropdownMenuItem>
+            <DropdownMenuItem disabled>No {isDesigner ? "templates" : "documents"} found</DropdownMenuItem>
           ) : (
             documents.map((doc) => (
               <DropdownMenuItem 

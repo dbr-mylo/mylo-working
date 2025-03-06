@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,8 +22,9 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isDesigner = role === "designer";
+  const itemType = isDesigner ? "template" : "document";
 
-  // Debug log whenever content changes
   useEffect(() => {
     console.log("Content updated in useDocument hook:", content ? content.substring(0, 100) : "empty");
     console.log("Content length:", content ? content.length : 0);
@@ -46,13 +46,13 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const fetchDocument = async (id: string) => {
     setIsLoading(true);
     try {
-      console.log("Fetching document with ID:", id);
+      console.log(`Fetching ${itemType} with ID:`, id);
       
       if (user) {
         console.log("Fetching for authenticated user:", user.id);
         const data = await fetchDocumentFromSupabase(id, user.id, toast);
         if (data) {
-          console.log("Document fetched from Supabase:", data.id);
+          console.log(`${isDesigner ? "Template" : "Document"} fetched from Supabase:`, data.id);
           console.log("Content length from Supabase:", data.content ? data.content.length : 0);
           console.log("Content preview:", data.content ? data.content.substring(0, 100) : "empty");
           
@@ -60,7 +60,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
             setContent(data.content);
             setInitialContent(data.content);
           } else {
-            console.warn("Document has no content!");
+            console.warn(`${isDesigner ? "Template" : "Document"} has no content!`);
             setContent("");
             setInitialContent("");
           }
@@ -77,7 +77,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
         console.log(`Fetching for ${role} user`);
         const doc = fetchDocumentFromLocalStorage(id, role, toast);
         if (doc) {
-          console.log(`Document fetched from localStorage for ${role}:`, doc.id);
+          console.log(`${isDesigner ? "Template" : "Document"} fetched from localStorage for ${role}:`, doc.id);
           console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
           console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
           
@@ -85,7 +85,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
             setContent(doc.content);
             setInitialContent(doc.content);
             
-            // Double-check state after setting
             setTimeout(() => {
               console.log("Verify content was set:", content ? content.substring(0, 100) : "empty");
             }, 100);
@@ -98,15 +97,15 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           setDocumentTitle(doc.title || "");
           setCurrentDocumentId(doc.id);
         } else {
-          console.error(`Document not found in localStorage for ${role}, redirecting to home`);
+          console.error(`${isDesigner ? "Template" : "Document"} not found in localStorage for ${role}, redirecting to home`);
           navigate('/');
         }
       }
     } catch (error) {
-      console.error("Error fetching document:", error);
+      console.error(`Error fetching ${itemType}:`, error);
       toast({
-        title: "Error loading document",
-        description: "There was a problem loading your document.",
+        title: `Error loading ${itemType}`,
+        description: `There was a problem loading your ${itemType}.`,
         variant: "destructive",
       });
       navigate('/');
@@ -117,13 +116,13 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
 
   const saveDocument = async (): Promise<void> => {
     try {
-      console.log("Saving document with content length:", content ? content.length : 0);
+      console.log(`Saving ${itemType} with content length:`, content ? content.length : 0);
       console.log("Content preview:", content ? content.substring(0, 100) : "empty");
       
       if (!content || !content.trim()) {
         toast({
-          title: "Cannot save empty document",
-          description: "Please add some content to your document before saving.",
+          title: `Cannot save empty ${itemType}`,
+          description: `Please add some content to your ${itemType} before saving.`,
           variant: "destructive",
         });
         return;
@@ -132,7 +131,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       let savedDocument: Document | null = null;
       
       if (user) {
-        console.log("Saving document for authenticated user:", user.id);
+        console.log(`Saving ${itemType} for authenticated user:`, user.id);
         savedDocument = await saveDocumentToSupabase(
           currentDocumentId, 
           content, 
@@ -141,7 +140,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
           toast
         );
       } else if (role) {
-        console.log(`Saving document for ${role} user`);
+        console.log(`Saving ${itemType} for ${role} user`);
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
@@ -152,18 +151,17 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       } else {
         toast({
           title: "Authentication required",
-          description: "Please log in or continue as a guest to save documents.",
+          description: `Please log in or continue as a guest to save ${isDesigner ? "templates" : "documents"}.`,
           variant: "destructive",
         });
         return;
       }
       
       if (savedDocument) {
-        console.log("Document saved successfully with ID:", savedDocument.id);
+        console.log(`${isDesigner ? "Template" : "Document"} saved successfully with ID:`, savedDocument.id);
         console.log("Saved content length:", savedDocument.content ? savedDocument.content.length : 0);
         console.log("Saved content preview:", savedDocument.content ? savedDocument.content.substring(0, 100) : "empty");
         
-        // Update initialContent to mark that we've saved the current state
         setInitialContent(content);
         
         if (!currentDocumentId) {
@@ -173,16 +171,16 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       }
       
       toast({
-        title: "Document saved",
+        title: `${isDesigner ? "Template" : "Document"} saved`,
         description: "Your changes have been saved successfully.",
       });
       
       return;
     } catch (error) {
-      console.error("Error saving document:", error);
+      console.error(`Error saving ${itemType}:`, error);
       toast({
-        title: "Error saving document",
-        description: "There was a problem saving your document.",
+        title: `Error saving ${itemType}`,
+        description: `There was a problem saving your ${itemType}.`,
         variant: "destructive",
       });
       return;
@@ -190,7 +188,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   };
 
   const loadDocument = (doc: Document) => {
-    console.log("Loading document:", doc.id);
+    console.log(`Loading ${itemType}:`, doc.id);
     console.log("Content length from document:", doc.content ? doc.content.length : 0);
     console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
     
@@ -204,7 +202,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setDocumentTitle(loadedDoc.documentTitle);
     setCurrentDocumentId(loadedDoc.currentDocumentId);
     
-    // Verify content is set correctly
     setTimeout(() => {
       console.log("Verification - content after setting:", content);
     }, 100);

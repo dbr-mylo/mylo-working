@@ -15,21 +15,25 @@ interface CloseDocumentDialogProps {
   onOpenChange: (open: boolean) => void;
   onClose: () => Promise<void>;
   onSaveAndClose: () => Promise<void>;
+  isDesigner?: boolean;
 }
 
 export const CloseDocumentDialog = ({
   open,
   onOpenChange,
   onClose,
-  onSaveAndClose
+  onSaveAndClose,
+  isDesigner = false
 }: CloseDocumentDialogProps) => {
+  const itemType = isDesigner ? "template" : "document";
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
           <AlertDialogDescription>
-            You have unsaved changes. Do you want to save before closing this document?
+            You have unsaved changes. Do you want to save before closing this {itemType}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

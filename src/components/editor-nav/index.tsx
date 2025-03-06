@@ -27,7 +27,9 @@ export const EditorNav = ({
   const [title, setTitle] = useState(documentTitle);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  const [titlePlaceholder, setTitlePlaceholder] = useState("Create Document Title");
+  const [titlePlaceholder, setTitlePlaceholder] = useState(
+    currentRole === "designer" ? "Create Template Title" : "Create Document Title"
+  );
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const navigate = useNavigate();
 
@@ -39,6 +41,11 @@ export const EditorNav = ({
     loadDocuments();
   }, [user]);
 
+  useEffect(() => {
+    // Update placeholder based on role
+    setTitlePlaceholder(currentRole === "designer" ? "Create Template Title" : "Create Document Title");
+  }, [currentRole]);
+
   const loadDocuments = async (): Promise<void> => {
     setIsLoadingDocs(true);
     try {
@@ -47,8 +54,8 @@ export const EditorNav = ({
     } catch (error) {
       console.error("Error loading documents:", error);
       toast({
-        title: "Error loading documents",
-        description: "There was a problem loading your documents.",
+        title: `Error loading ${currentRole === "designer" ? "templates" : "documents"}`,
+        description: `There was a problem loading your ${currentRole === "designer" ? "templates" : "documents"}.`,
         variant: "destructive",
       });
     } finally {
@@ -122,7 +129,7 @@ export const EditorNav = ({
         <DocumentTitle 
           title={title}
           onTitleChange={handleTitleChange}
-          isEditable={currentRole === "editor"}
+          isEditable={currentRole === "editor" || currentRole === "designer"}
           placeholder={titlePlaceholder}
         />
         {user && (
@@ -152,7 +159,7 @@ export const EditorNav = ({
           variant="ghost" 
           size="icon" 
           onClick={handleCloseDocument}
-          title="Close document"
+          title={`Close ${currentRole === "designer" ? "template" : "document"}`}
           className="text-gray-500 hover:text-gray-700"
         >
           <X className="w-5 h-5" />
@@ -164,6 +171,7 @@ export const EditorNav = ({
         onOpenChange={setShowCloseDialog}
         onClose={handleCloseWithoutSaving}
         onSaveAndClose={handleSaveAndClose}
+        isDesigner={currentRole === "designer"}
       />
     </nav>
   );

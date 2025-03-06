@@ -7,20 +7,25 @@ interface DocumentListProps {
   isLoading: boolean;
   onDeleteDocument: (e: React.MouseEvent, documentId: string) => void;
   onSelectDocument: (documentId: string) => void;
+  isDesigner?: boolean;
 }
 
 export const DocumentList = ({ 
   documents, 
   isLoading, 
   onDeleteDocument, 
-  onSelectDocument 
+  onSelectDocument,
+  isDesigner = false
 }: DocumentListProps) => {
+  const itemType = isDesigner ? "template" : "document";
+  const itemTypePlural = isDesigner ? "templates" : "documents";
+  
   if (isLoading) {
-    return <p className="text-editor-text text-center py-12">Loading your documents...</p>;
+    return <p className="text-editor-text text-center py-12">Loading your {itemTypePlural}...</p>;
   }
 
   if (documents.length === 0) {
-    return <p className="text-editor-text text-center py-12">No documents found. Create your first document!</p>;
+    return <p className="text-editor-text text-center py-12">No {itemTypePlural} found. Create your first {itemType}!</p>;
   }
 
   return (
@@ -31,6 +36,7 @@ export const DocumentList = ({
           document={doc}
           onDelete={onDeleteDocument}
           onSelect={onSelectDocument}
+          isDesigner={isDesigner}
         />
       ))}
     </div>

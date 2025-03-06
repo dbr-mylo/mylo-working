@@ -15,6 +15,7 @@ interface DeleteDocumentDialogProps {
   isDeleting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  isDesigner?: boolean;
 }
 
 export const DeleteDocumentDialog = ({
@@ -22,22 +23,25 @@ export const DeleteDocumentDialog = ({
   isDeleting,
   onCancel,
   onConfirm,
+  isDesigner = false,
 }: DeleteDocumentDialogProps) => {
+  const itemType = isDesigner ? "template" : "document";
+  
   return (
-    <AlertDialog open={isOpen} onOpenChange={onCancel}>
+    <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete {isDesigner ? "Template" : "Document"}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your document and remove it from our servers.
+            Are you sure you want to delete this {itemType}? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={onConfirm} 
+          <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
             disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive text-destructive-foreground"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>

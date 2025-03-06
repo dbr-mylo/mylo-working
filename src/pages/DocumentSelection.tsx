@@ -23,6 +23,10 @@ const DocumentSelection = () => {
   const { user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const isDesigner = role === "designer";
+  const itemType = isDesigner ? "template" : "document";
+  const itemTypePlural = isDesigner ? "templates" : "documents";
 
   useEffect(() => {
     fetchUserDocuments();
@@ -46,20 +50,20 @@ const DocumentSelection = () => {
           if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
             localStorage.setItem(storageKey, JSON.stringify(uniqueDocs));
             toast({
-              title: "Duplicate documents removed",
-              description: "We've cleaned up some duplicate documents for you.",
+              title: `Duplicate ${itemTypePlural} removed`,
+              description: `We've cleaned up some duplicate ${itemTypePlural} for you.`,
             });
           }
         } catch (error) {
-          console.error(`Error loading ${role} documents:`, error);
+          console.error(`Error loading ${role} ${itemTypePlural}:`, error);
           setDocuments([]);
         }
       }
     } catch (error) {
-      console.error("Error fetching documents:", error);
+      console.error(`Error fetching ${itemTypePlural}:`, error);
       toast({
-        title: "Error loading documents",
-        description: "There was a problem loading your documents.",
+        title: `Error loading ${itemTypePlural}`,
+        description: `There was a problem loading your ${itemTypePlural}.`,
         variant: "destructive",
       });
       setDocuments([]);
@@ -100,14 +104,14 @@ const DocumentSelection = () => {
       setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentToDelete));
       
       toast({
-        title: "Document deleted",
-        description: "Your document has been successfully deleted.",
+        title: `${isDesigner ? "Template" : "Document"} deleted`,
+        description: `Your ${itemType} has been successfully deleted.`,
       });
     } catch (error) {
-      console.error("Error deleting document:", error);
+      console.error(`Error deleting ${itemType}:`, error);
       toast({
-        title: "Error deleting document",
-        description: "There was a problem deleting your document.",
+        title: `Error deleting ${itemType}`,
+        description: `There was a problem deleting your ${itemType}.`,
         variant: "destructive",
       });
     } finally {
@@ -120,8 +124,12 @@ const DocumentSelection = () => {
     <div className="min-h-screen bg-editor-bg p-8">
       <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">Your {role?.charAt(0).toUpperCase() + role?.slice(1)} Documents</h1>
-          <p className="text-editor-text">Select a document to edit or create a new one</p>
+          <h1 className="text-3xl font-bold text-editor-heading mb-2">
+            Your {isDesigner ? "Design Templates" : "Documents"}
+          </h1>
+          <p className="text-editor-text">
+            Select a {itemType} to edit or create a new one
+          </p>
         </header>
         
         <div className="mb-6">
@@ -129,7 +137,7 @@ const DocumentSelection = () => {
             onClick={handleCreateNewDocument}
             className="text-base"
           >
-            Create New
+            Create New {isDesigner ? "Template" : "Document"}
           </Button>
         </div>
 
@@ -139,6 +147,7 @@ const DocumentSelection = () => {
             isLoading={isLoading}
             onDeleteDocument={confirmDelete}
             onSelectDocument={handleOpenDocument}
+            isDesigner={isDesigner}
           />
         </div>
       </div>
@@ -148,6 +157,7 @@ const DocumentSelection = () => {
         isDeleting={isDeleting}
         onCancel={cancelDelete}
         onConfirm={handleDeleteDocument}
+        isDesigner={isDesigner}
       />
     </div>
   );

@@ -9,9 +9,15 @@ interface DocumentCardProps {
   document: Document;
   onDelete: (e: React.MouseEvent, documentId: string) => void;
   onSelect: (documentId: string) => void;
+  isDesigner?: boolean;
 }
 
-export const DocumentCard = ({ document, onDelete, onSelect }: DocumentCardProps) => {
+export const DocumentCard = ({ 
+  document, 
+  onDelete, 
+  onSelect,
+  isDesigner = false
+}: DocumentCardProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -34,6 +40,7 @@ export const DocumentCard = ({ document, onDelete, onSelect }: DocumentCardProps
               size="icon" 
               className="h-8 w-8 text-gray-500 hover:bg-red-100 hover:text-red-600"
               onClick={(e) => onDelete(e, document.id)}
+              title={`Delete ${isDesigner ? "template" : "document"}`}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

@@ -2,7 +2,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
-import { SidebarPanel } from "@/components/sidebar/SidebarPanel";
 
 type MobileEditorProps = {
   content: string;
@@ -20,10 +19,9 @@ export const MobileEditor = ({
   return (
     <main className="animate-fade-in p-4">
       <Tabs defaultValue="editor" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="design">Design Preview</TabsTrigger>
-          <TabsTrigger value="tools">Tools</TabsTrigger>
         </TabsList>
         <TabsContent value="editor" className="mt-0">
           <EditorPanel 
@@ -37,9 +35,6 @@ export const MobileEditor = ({
             content={content}
             isEditable={isDesignEditable}
           />
-        </TabsContent>
-        <TabsContent value="tools" className="mt-0 h-[calc(100vh-10rem)]">
-          <SidebarPanel />
         </TabsContent>
       </Tabs>
     </main>

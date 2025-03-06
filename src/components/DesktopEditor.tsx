@@ -1,7 +1,6 @@
 
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
-import { SidebarPanel } from "@/components/sidebar/SidebarPanel";
 
 type DesktopEditorProps = {
   content: string;
@@ -27,7 +26,6 @@ export const DesktopEditor = ({
         content={content}
         isEditable={isDesignEditable}
       />
-      <SidebarPanel />
     </main>
   );
 };

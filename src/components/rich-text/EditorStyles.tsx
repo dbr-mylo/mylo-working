@@ -11,8 +11,9 @@ export const EditorStyles: React.FC = () => {
           outline: none;
           overflow-y: auto;
           background-color: white;
-          padding: 16px;
-          min-height: 400px;
+          min-height: 11in;
+          width: 100%;
+          box-sizing: border-box;
           border-radius: 4px;
         }
         .ProseMirror:focus {

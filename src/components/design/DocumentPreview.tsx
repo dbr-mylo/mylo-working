@@ -1,3 +1,4 @@
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
 
@@ -62,7 +63,7 @@ export const DocumentPreview = ({
   }, []);
   
   return (
-    <div className="bg-editor-panel p-4 rounded-md">
+    <div className="bg-editor-panel p-4 rounded-md flex justify-center">
       <div className="prose prose-sm max-w-none">
         <style>
           {`

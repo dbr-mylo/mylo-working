@@ -1,7 +1,7 @@
 
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
-import { Palette, Pilcrow } from "lucide-react";
+import { Pilcrow } from "lucide-react";
 import { useEffect, useState } from "react";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { TextStyle } from "@/lib/types";
@@ -28,24 +28,6 @@ export const DesignerSidebar = () => {
 
   return (
     <div className="w-64 bg-editor-sidebar border-l border-editor-border p-4">
-      <DesignerSidebarContainer 
-        title="Tools" 
-        menuOptions={[
-          { label: "Reset", onClick: () => console.log("Reset clicked") },
-          { label: "Help", onClick: () => console.log("Help clicked") }
-        ]}
-      >
-        <div className="space-y-2">
-          <p className="text-xs text-editor-text">Select a tool to begin</p>
-          <Card className="p-1.5 hover:bg-accent cursor-pointer">
-            <span className="text-xs">Typography</span>
-          </Card>
-          <Card className="p-1.5 hover:bg-accent cursor-pointer">
-            <span className="text-xs">Layout</span>
-          </Card>
-        </div>
-      </DesignerSidebarContainer>
-      
       <DesignerSidebarContainer 
         title="Styles" 
         menuOptions={[

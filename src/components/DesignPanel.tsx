@@ -1,3 +1,4 @@
+
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
@@ -64,7 +65,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     }
   };
   
-  if (role === "designer") {
+  // Fix the type checking by using isStandalone which is already defined
+  if (isStandalone) {
     return (
       <div className="w-full flex">
         <div className="flex-1 p-4 md:p-8 bg-editor-panel overflow-auto">

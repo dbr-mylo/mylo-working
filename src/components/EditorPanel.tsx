@@ -13,13 +13,15 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
   };
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/3'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
-      <RichTextEditor 
-        content={content} 
-        onUpdate={handleContentUpdate}
-        isEditable={isEditable}
-        hideToolbar={!isEditable} 
-      />
+    <div className="flex-1 h-full bg-editor-bg overflow-auto">
+      <div className="max-w-4xl mx-auto p-4 md:p-8">
+        <RichTextEditor 
+          content={content} 
+          onUpdate={handleContentUpdate}
+          isEditable={isEditable}
+          hideToolbar={!isEditable} 
+        />
+      </div>
     </div>
   );
 };

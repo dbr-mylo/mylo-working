@@ -26,7 +26,7 @@ export const DesignerSidebarContainer = ({
 
   return (
     <div className="mb-3 border border-editor-border rounded-md overflow-hidden">
-      <div className="flex items-center justify-between bg-muted p-1.5">
+      <div className="flex items-center justify-between p-1.5">
         <h3 className="text-xs font-medium text-editor-heading">{title}</h3>
         
         {menuOptions.length > 0 && (

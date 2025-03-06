@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useDocument } from "@/hooks/useDocument";
+import { useDocument } from "@/hooks/document";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";

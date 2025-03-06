@@ -82,6 +82,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 isEditable={isEditable}
                 onContentChange={handleContentChange}
                 onElementSelect={handleElementSelect}
+                showToolbar={false}
               />
             </div>
           </div>
@@ -106,6 +107,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             isEditable={isEditable}
             onContentChange={handleContentChange}
             onElementSelect={handleElementSelect}
+            showToolbar={false}
           />
         </div>
       </div>

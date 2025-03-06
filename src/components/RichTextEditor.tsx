@@ -32,6 +32,25 @@ export const RichTextEditor = ({
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
+  // Add this effect to make the editor instance available globally
+  useEffect(() => {
+    if (editor) {
+      const editorElement = document.querySelector('.ProseMirror');
+      if (editorElement) {
+        // @ts-ignore - Adding custom property to DOM element
+        editorElement.tiptapEditor = editor;
+      }
+    }
+    
+    return () => {
+      const editorElement = document.querySelector('.ProseMirror');
+      if (editorElement) {
+        // @ts-ignore - Removing custom property from DOM element
+        delete editorElement.tiptapEditor;
+      }
+    };
+  }, [editor]);
+
   if (!editor) {
     return null;
   }

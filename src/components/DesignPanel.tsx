@@ -1,4 +1,3 @@
-
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
@@ -7,6 +6,7 @@ import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { TypographyPanel } from "@/components/design/TypographyPanel";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { useToast } from "@/hooks/use-toast";
+import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -18,7 +18,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   
-  // Update local content when prop changes (for when editor updates content)
   if (content !== designContent && !isEditable) {
     setDesignContent(content);
   }
@@ -38,7 +37,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const handleStyleChange = (styles: Record<string, string>) => {
     if (!selectedElement) return;
     
-    // Apply styles to the selected element
     Object.entries(styles).forEach(([property, value]) => {
       selectedElement.style[property as any] = value;
     });
@@ -48,7 +46,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     try {
       await textStyleStore.saveTextStyle(styleData);
       
-      // Refresh styles
       const styles = await textStyleStore.getTextStyles();
       const css = textStyleStore.generateCSSFromTextStyles(styles);
       setCustomStyles(css);
@@ -66,6 +63,32 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       });
     }
   };
+  
+  if (role === "designer") {
+    return (
+      <div className="w-full flex">
+        <div className="flex-1 p-4 md:p-8 bg-editor-panel overflow-auto">
+          <div className="mx-auto">
+            <TypographyPanel 
+              selectedElement={selectedElement} 
+              onStyleChange={handleStyleChange}
+              onSaveStyle={handleSaveStyle}
+              onStylesChange={handleStylesChange}
+            />
+            
+            <DocumentPreview 
+              content={designContent}
+              customStyles={customStyles}
+              isEditable={isEditable}
+              onContentChange={handleContentChange}
+              onElementSelect={handleElementSelect}
+            />
+          </div>
+        </div>
+        <DesignerSidebar />
+      </div>
+    );
+  }
   
   return (
     <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>

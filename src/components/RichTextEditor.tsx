@@ -58,26 +58,12 @@ export const RichTextEditor = ({
             background-color: white;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 0.5rem;
-            margin-top: 0;
-          }
-          
-          /* Designer role specific toolbar styles */
-          .designer-toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 0.5rem;
-            margin-top: 0;
-            width: 8.5in;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 0.5rem;
           }
         `}
       </style>
       {!hideToolbar && (
-        <div className={isDesigner ? 'designer-toolbar' : (fixedToolbar ? 'fixed-toolbar' : '')}>
+        <div className={fixedToolbar ? 'fixed-toolbar' : ''}>
           <EditorToolbar 
             editor={editor}
             currentFont={currentFont}

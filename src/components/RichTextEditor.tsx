@@ -11,13 +11,15 @@ interface RichTextEditorProps {
   onUpdate: (content: string) => void;
   isEditable?: boolean;
   hideToolbar?: boolean;
+  fixedToolbar?: boolean;
 }
 
 export const RichTextEditor = ({ 
   content, 
   onUpdate, 
   isEditable = true, 
-  hideToolbar = false 
+  hideToolbar = false,
+  fixedToolbar = false
 }: RichTextEditorProps) => {
   const {
     editor,
@@ -47,16 +49,29 @@ export const RichTextEditor = ({
             margin: 0 auto;
             background-color: white;
           }
+          
+          /* Fixed toolbar styles */
+          .fixed-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+          }
         `}
       </style>
       {!hideToolbar && (
-        <EditorToolbar 
-          editor={editor}
-          currentFont={currentFont}
-          currentColor={currentColor}
-          onFontChange={handleFontChange}
-          onColorChange={handleColorChange}
-        />
+        <div className={fixedToolbar ? 'fixed-toolbar' : ''}>
+          <EditorToolbar 
+            editor={editor}
+            currentFont={currentFont}
+            currentColor={currentColor}
+            onFontChange={handleFontChange}
+            onColorChange={handleColorChange}
+          />
+        </div>
       )}
       <EditorContent editor={editor} />
     </div>

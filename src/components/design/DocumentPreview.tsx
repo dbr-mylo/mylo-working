@@ -1,4 +1,3 @@
-
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -118,6 +117,7 @@ export const DocumentPreview = ({
               onUpdate={handleContentChange}
               isEditable={true}
               hideToolbar={false}
+              fixedToolbar={true}
             />
           ) : (
             // For editor role, keep the white div with shadow

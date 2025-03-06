@@ -70,8 +70,8 @@ export const RichTextEditor = ({
           .designer-editor .ProseMirror {
             min-height: 11in;
             width: 8.5in;
-            padding: 1in;
-            margin: 0 auto;
+            padding: ${isDesigner ? '0' : '1in'};
+            margin: ${isDesigner ? '0' : '0 auto'};
             background-color: white;
           }
           

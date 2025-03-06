@@ -1,3 +1,4 @@
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,7 +68,7 @@ export const DocumentPreview = ({
   }, []);
   
   return (
-    <div className="bg-editor-panel p-4 rounded-md">
+    <div className={`bg-editor-panel ${isDesigner ? 'p-0' : 'p-4'} rounded-md`}>
       <div className="prose prose-sm max-w-none">
         <style>
           {`
@@ -130,7 +131,7 @@ export const DocumentPreview = ({
               ref={previewRef} 
               onClick={handlePreviewClick}
               dangerouslySetInnerHTML={{ __html: content }} 
-              className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white" 
+              className="cursor-pointer min-h-[11in] w-[8.5in] p-0 mx-0 bg-white" 
             />
           ) : (
             <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
@@ -144,7 +145,7 @@ export const DocumentPreview = ({
           )
         ) : (
           isDesigner ? (
-            <div className="text-editor-text opacity-50 min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white">
+            <div className="text-editor-text opacity-50 min-h-[11in] w-[8.5in] p-0 mx-0 bg-white">
               <p>Content from the editor will appear here with brand styling</p>
             </div>
           ) : (

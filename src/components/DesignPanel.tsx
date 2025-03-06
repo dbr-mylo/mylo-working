@@ -74,7 +74,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
               <ToolSettingsMenuBar />
             </div>
           )}
-          <div className="p-4 md:p-8">
+          <div className="p-0">
             <div className="mx-auto">
               <DocumentPreview 
                 content={designContent}

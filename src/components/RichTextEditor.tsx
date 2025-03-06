@@ -30,7 +30,7 @@ export const RichTextEditor = ({
   }
 
   return (
-    <>
+    <div className="w-full bg-white rounded-lg overflow-hidden">
       <EditorStyles />
       {!hideToolbar && (
         <EditorToolbar 
@@ -41,7 +41,9 @@ export const RichTextEditor = ({
           onColorChange={handleColorChange}
         />
       )}
-      <EditorContent editor={editor} className="prose max-w-none" />
-    </>
+      <div className="border rounded-lg mt-2">
+        <EditorContent editor={editor} className="prose max-w-none" />
+      </div>
+    </div>
   );
 };

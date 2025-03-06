@@ -13,8 +13,8 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
   };
   
   return (
-    <div className="flex-1 h-full bg-editor-bg overflow-auto">
-      <div className="max-w-4xl mx-auto p-4 md:p-8">
+    <div className="flex-1 h-full bg-white border-r border-gray-200 overflow-auto">
+      <div className="max-w-5xl mx-auto p-4">
         <RichTextEditor 
           content={content} 
           onUpdate={handleContentUpdate}

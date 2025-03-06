@@ -41,6 +41,13 @@ export const EditorStyles: React.FC = () => {
         .ProseMirror li > ul, .ProseMirror li > ol {
           padding-left: 24px;
         }
+        .ProseMirror p.is-editor-empty:first-child::before {
+          color: #adb5bd;
+          content: attr(data-placeholder);
+          float: left;
+          height: 0;
+          pointer-events: none;
+        }
       `}
     </style>
   );

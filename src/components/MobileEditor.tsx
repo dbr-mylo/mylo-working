@@ -17,20 +17,20 @@ export const MobileEditor = ({
   isDesignEditable 
 }: MobileEditorProps) => {
   return (
-    <main className="animate-fade-in p-4">
-      <Tabs defaultValue="editor" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+    <main className="animate-fade-in h-[calc(100vh-4rem)]">
+      <Tabs defaultValue="editor" className="h-full">
+        <TabsList className="grid w-full grid-cols-2 mb-2">
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="design">Design Preview</TabsTrigger>
         </TabsList>
-        <TabsContent value="editor" className="mt-0">
+        <TabsContent value="editor" className="h-[calc(100%-40px)]">
           <EditorPanel 
             content={content}
             onContentChange={onContentChange}
             isEditable={isEditorEditable}
           />
         </TabsContent>
-        <TabsContent value="design" className="mt-0">
+        <TabsContent value="design" className="h-[calc(100%-40px)]">
           <DesignPanel 
             content={content}
             isEditable={isDesignEditable}

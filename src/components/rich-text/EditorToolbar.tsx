@@ -62,53 +62,55 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 mb-4 border-b border-editor-border pb-2">
+    <div className="flex items-center gap-1 py-2 px-1 border rounded-md">
       <FontPicker value={currentFont} onChange={onFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-accent' : ''}
+        className={`h-8 w-8 ${editor.isActive('bold') ? 'bg-gray-100' : ''}`}
       >
         <Bold className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-accent' : ''}
+        className={`h-8 w-8 ${editor.isActive('italic') ? 'bg-gray-100' : ''}`}
       >
         <Italic className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+        className={`h-8 w-8 ${editor.isActive('bulletList') ? 'bg-gray-100' : ''}`}
       >
         <List className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+        className={`h-8 w-8 ${editor.isActive('orderedList') ? 'bg-gray-100' : ''}`}
       >
         <ListOrdered className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={handleIndent}
+        className="h-8 w-8"
         title="Indent paragraph"
       >
         <Indent className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
         onClick={handleOutdent}
+        className="h-8 w-8"
         title="Outdent paragraph"
       >
         <Outdent className="h-4 w-4" />

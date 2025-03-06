@@ -16,7 +16,7 @@ export const DesktopEditor = ({
   isDesignEditable 
 }: DesktopEditorProps) => {
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] animate-fade-in">
+    <main className="flex h-[calc(100vh-4rem)] animate-fade-in">
       <EditorPanel 
         content={content}
         onContentChange={onContentChange}

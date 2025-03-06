@@ -21,12 +21,22 @@ interface TypographyPanelProps {
   onSaveStyle?: (style: Partial<TextStyle>) => void;
 }
 
+interface TypographyStyles {
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  color: string;
+  lineHeight: string;
+  letterSpacing: string;
+  textAlign: string;
+}
+
 export const TypographyPanel = ({ 
   selectedElement, 
   onStyleChange,
   onSaveStyle 
 }: TypographyPanelProps) => {
-  const [styles, setStyles] = useState<Record<string, string>>({
+  const [styles, setStyles] = useState<TypographyStyles>({
     fontFamily: "Inter",
     fontSize: "16px",
     fontWeight: "400",
@@ -53,10 +63,17 @@ export const TypographyPanel = ({
     }
   }, [selectedElement]);
 
-  const handleStyleChange = (property: string, value: string) => {
+  const handleStyleChange = (property: keyof TypographyStyles, value: string) => {
     const newStyles = { ...styles, [property]: value };
     setStyles(newStyles);
-    onStyleChange(newStyles);
+    
+    // Convert to Record<string, string> for the parent component
+    const styleRecord: Record<string, string> = {};
+    Object.entries(newStyles).forEach(([key, val]) => {
+      styleRecord[key] = val;
+    });
+    
+    onStyleChange(styleRecord);
   };
 
   const handleSaveStyle = () => {

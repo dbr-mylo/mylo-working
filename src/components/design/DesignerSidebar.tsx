@@ -1,4 +1,3 @@
-
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
 import { Palette, Type } from "lucide-react";
@@ -36,12 +35,12 @@ export const DesignerSidebar = () => {
         ]}
       >
         <div className="space-y-2">
-          <p className="text-sm text-editor-text">Select a tool to begin</p>
-          <Card className="p-2 hover:bg-accent cursor-pointer">
-            <span className="text-sm">Typography</span>
+          <p className="text-xs text-editor-text">Select a tool to begin</p>
+          <Card className="p-1.5 hover:bg-accent cursor-pointer">
+            <span className="text-xs">Typography</span>
           </Card>
-          <Card className="p-2 hover:bg-accent cursor-pointer">
-            <span className="text-sm">Layout</span>
+          <Card className="p-1.5 hover:bg-accent cursor-pointer">
+            <span className="text-xs">Layout</span>
           </Card>
         </div>
       </DesignerSidebarContainer>
@@ -53,24 +52,19 @@ export const DesignerSidebar = () => {
         ]}
       >
         {isLoading ? (
-          <p className="text-sm text-editor-text py-2">Loading styles...</p>
+          <p className="text-xs text-editor-text py-1">Loading styles...</p>
         ) : textStyles.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {textStyles.map((style) => (
               <Card 
                 key={style.id} 
-                className="p-2 hover:bg-accent cursor-pointer"
+                className="p-1.5 hover:bg-accent cursor-pointer"
               >
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <Type className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">{style.name}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">
-                    {style.fontFamily}, {style.fontSize}, {style.color}
-                  </p>
+                <div className="flex items-center gap-1.5">
+                  <Type className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs">{style.name}</span>
                 </div>
               </Card>
             ))}
@@ -79,7 +73,7 @@ export const DesignerSidebar = () => {
       </DesignerSidebarContainer>
       
       <DesignerSidebarContainer title="Settings">
-        <p className="text-sm text-editor-text">No settings available yet</p>
+        <p className="text-xs text-editor-text">No settings available yet</p>
       </DesignerSidebarContainer>
     </div>
   );

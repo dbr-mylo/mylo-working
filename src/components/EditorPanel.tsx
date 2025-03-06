@@ -29,14 +29,12 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
             )}
           </div>
         )}
-        <div className="bg-editor-bg p-4 rounded-md">
-          <RichTextEditor 
-            content={content} 
-            onUpdate={handleContentUpdate}
-            isEditable={isEditable}
-            hideToolbar={!isEditable} // Hide toolbar if not editable
-          />
-        </div>
+        <RichTextEditor 
+          content={content} 
+          onUpdate={handleContentUpdate}
+          isEditable={isEditable}
+          hideToolbar={!isEditable} 
+        />
       </div>
     </div>
   );

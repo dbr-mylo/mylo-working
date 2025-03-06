@@ -25,15 +25,15 @@ export const DesignerSidebarContainer = ({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="mb-4 border border-editor-border rounded-md overflow-hidden">
-      <div className="flex items-center justify-between bg-muted p-2">
-        <h3 className="text-sm font-medium text-editor-heading">{title}</h3>
+    <div className="mb-3 border border-editor-border rounded-md overflow-hidden">
+      <div className="flex items-center justify-between bg-muted p-1.5">
+        <h3 className="text-xs font-medium text-editor-heading">{title}</h3>
         
         {menuOptions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="h-7 w-7 inline-flex items-center justify-center rounded-md hover:bg-accent transition-colors">
-                <MoreVertical className="h-4 w-4" />
+              <button className="h-6 w-6 inline-flex items-center justify-center rounded-md hover:bg-accent transition-colors">
+                <MoreVertical className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -51,7 +51,7 @@ export const DesignerSidebarContainer = ({
       </div>
       
       {isOpen && (
-        <div className="p-3">
+        <div className="p-2">
           {children}
         </div>
       )}

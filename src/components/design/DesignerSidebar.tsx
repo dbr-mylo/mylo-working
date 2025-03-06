@@ -1,3 +1,4 @@
+
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
 import { Palette, Type } from "lucide-react";
@@ -56,11 +57,11 @@ export const DesignerSidebar = () => {
         ) : textStyles.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-0.5">
             {textStyles.map((style) => (
               <Card 
                 key={style.id} 
-                className="p-1.5 hover:bg-accent cursor-pointer"
+                className="p-1 hover:bg-accent cursor-pointer"
               >
                 <div className="flex items-center gap-1.5">
                   <Type className="h-3 w-3 text-muted-foreground" />

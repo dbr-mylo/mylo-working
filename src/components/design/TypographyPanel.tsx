@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { FontPicker } from "@/components/rich-text/FontPicker";
 import { Button } from "@/components/ui/button";
 import { TextStyle } from "@/lib/types";
-import { Save, ArrowLeft, ArrowRight, Type, LetterCase, Baseline } from "lucide-react";
+import { Save, ArrowLeft, ArrowRight, Type, AlignJustify } from "lucide-react";
 
 interface TypographyPanelProps {
   selectedElement: HTMLElement | null;
@@ -45,7 +44,7 @@ export const TypographyPanel = ({
     { value: "left", label: "Left", icon: <ArrowLeft className="h-4 w-4" /> },
     { value: "center", label: "Center", icon: <Type className="h-4 w-4" /> },
     { value: "right", label: "Right", icon: <ArrowRight className="h-4 w-4" /> },
-    { value: "justify", label: "Justify", icon: <Baseline className="h-4 w-4" /> }
+    { value: "justify", label: "Justify", icon: <AlignJustify className="h-4 w-4" /> }
   ];
 
   // When selected element changes, extract its current styles
@@ -267,7 +266,7 @@ export const TypographyPanel = ({
         </div>
       ) : (
         <div className="py-6 text-center text-gray-500">
-          <LetterCase className="mx-auto h-10 w-10 opacity-20 mb-2" />
+          <AlignJustify className="mx-auto h-10 w-10 opacity-20 mb-2" />
           <p className="text-sm">Select text in the document to edit its properties</p>
         </div>
       )}

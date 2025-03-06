@@ -1,6 +1,6 @@
-
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DocumentPreviewProps {
   content: string;
@@ -19,6 +19,8 @@ export const DocumentPreview = ({
 }: DocumentPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
   
   const handleContentChange = (newContent: string) => {
     if (onContentChange) {
@@ -74,61 +76,84 @@ export const DocumentPreview = ({
   return (
     <div className="bg-editor-panel p-4 rounded-md">
       <div className="prose prose-sm max-w-none">
-        <div 
-          className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]"
-        >
-          <style>
-            {`
-              .prose p {
-                margin-top: 0;
-                margin-bottom: 4px;
-                line-height: 1.2;
-              }
-              .prose ul, .prose ol {
-                margin-top: 0;
-                margin-bottom: 0;
-                padding-left: 20px;
-              }
-              .prose li {
-                margin-bottom: 4px;
-                line-height: 1.2;
-              }
-              .prose li p {
-                margin: 0;
-              }
-              .prose ul ul, .prose ol ol, .prose ul ol, .prose ol ul {
-                margin-top: 4px;
-              }
-              .prose li > ul, .prose li > ol {
-                padding-left: 24px;
-              }
-              .text-element-selected {
-                outline: 2px solid #6366f1;
-                background-color: rgba(99, 102, 241, 0.1);
-              }
-              ${customStyles}
-            `}
-          </style>
-          {isEditable ? (
+        {/* For designer role, don't use the white div with shadow */}
+        <style>
+          {`
+            .prose p {
+              margin-top: 0;
+              margin-bottom: 4px;
+              line-height: 1.2;
+            }
+            .prose ul, .prose ol {
+              margin-top: 0;
+              margin-bottom: 0;
+              padding-left: 20px;
+            }
+            .prose li {
+              margin-bottom: 4px;
+              line-height: 1.2;
+            }
+            .prose li p {
+              margin: 0;
+            }
+            .prose ul ul, .prose ol ol, .prose ul ol, .prose ol ul {
+              margin-top: 4px;
+            }
+            .prose li > ul, .prose li > ol {
+              padding-left: 24px;
+            }
+            .text-element-selected {
+              outline: 2px solid #6366f1;
+              background-color: rgba(99, 102, 241, 0.1);
+            }
+            ${customStyles}
+          `}
+        </style>
+        {isEditable ? (
+          isDesigner ? (
+            // For designer role, don't wrap in the white div
             <RichTextEditor
               content={content}
               onUpdate={handleContentChange}
               isEditable={true}
               hideToolbar={false}
             />
-          ) : content ? (
+          ) : (
+            // For editor role, keep the white div with shadow
+            <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+              <RichTextEditor
+                content={content}
+                onUpdate={handleContentChange}
+                isEditable={true}
+                hideToolbar={false}
+              />
+            </div>
+          )
+        ) : content ? (
+          isDesigner ? (
+            // For designer role viewing mode, don't wrap in the white div
             <div 
               ref={previewRef} 
               onClick={handlePreviewClick}
               dangerouslySetInnerHTML={{ __html: content }} 
-              className="cursor-pointer" 
+              className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto" 
             />
           ) : (
-            <p className="text-editor-text opacity-50">
-              Content from the editor will appear here with brand styling
-            </p>
-          )}
-        </div>
+            // For editor role viewing mode, keep the white div with shadow
+            <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+              <div 
+                ref={previewRef} 
+                onClick={handlePreviewClick}
+                dangerouslySetInnerHTML={{ __html: content }} 
+                className="cursor-pointer" 
+              />
+            </div>
+          )
+        ) : (
+          <p className="text-editor-text opacity-50">
+            Content from the editor will appear here with brand styling
+          </p>
+        )}
       </div>
     </div>
   );

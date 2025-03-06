@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
 import { EditorStyles } from './rich-text/EditorStyles';
 import { useEditorSetup } from './rich-text/useEditor';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RichTextEditorProps {
   content: string;
@@ -25,14 +26,29 @@ export const RichTextEditor = ({
     handleFontChange,
     handleColorChange
   } = useEditorSetup({ content, onUpdate, isEditable });
+  
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
 
   if (!editor) {
     return null;
   }
 
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className={`prose prose-sm max-w-none ${isDesigner ? 'designer-editor' : ''}`}>
       <EditorStyles />
+      <style>
+        {`
+          /* Add specific styles for designer role editor */
+          .designer-editor .ProseMirror {
+            min-height: 11in;
+            width: 8.5in;
+            padding: 1in;
+            margin: 0 auto;
+            background-color: white;
+          }
+        `}
+      </style>
       {!hideToolbar && (
         <EditorToolbar 
           editor={editor}

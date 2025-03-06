@@ -15,14 +15,14 @@ export const DocumentTitle = ({
   isEditable,
   placeholder
 }: DocumentTitleProps) => {
-  const [localTitle, setLocalTitle] = useState(title);
+  const [localTitle, setLocalTitle] = useState(title || "Untitled");
 
   useEffect(() => {
-    setLocalTitle(title);
+    setLocalTitle(title || "Untitled");
   }, [title]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
+    const newTitle = e.target.value || "Untitled";
     setLocalTitle(newTitle);
   };
 
@@ -44,7 +44,7 @@ export const DocumentTitle = ({
         />
       ) : (
         <h1 className="text-lg font-medium text-editor-heading">
-          {title || placeholder}
+          {localTitle}
         </h1>
       )}
     </>

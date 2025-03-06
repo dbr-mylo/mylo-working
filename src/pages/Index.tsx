@@ -8,6 +8,7 @@ import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
+import { useAutoSave } from "@/hooks/document/useAutoSave";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -25,6 +26,14 @@ const Index = () => {
     loadDocument,
     isLoading
   } = useDocument(documentId);
+
+  // Enable auto-save functionality
+  useAutoSave({
+    content,
+    initialContent,
+    documentTitle,
+    saveDocument
+  });
   
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";

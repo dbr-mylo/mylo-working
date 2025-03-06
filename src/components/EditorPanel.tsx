@@ -13,7 +13,7 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
   };
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/3'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <RichTextEditor 
         content={content} 
         onUpdate={handleContentUpdate}

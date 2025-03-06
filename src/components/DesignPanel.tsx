@@ -68,7 +68,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   };
   
   return (
-    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/3'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
         {!isMobile && (
           <div className="flex justify-between items-center mb-4">

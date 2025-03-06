@@ -68,16 +68,22 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   if (isStandalone) {
     return (
       <div className="w-full flex">
-        <div className="flex-1 p-4 md:p-8 bg-editor-panel overflow-auto">
-          {isEditable && <ToolSettingsMenuBar />}
-          <div className="mx-auto">
-            <DocumentPreview 
-              content={designContent}
-              customStyles={customStyles}
-              isEditable={isEditable}
-              onContentChange={handleContentChange}
-              onElementSelect={handleElementSelect}
-            />
+        <div className="flex-1 bg-editor-panel overflow-auto">
+          {isEditable && (
+            <div className="w-full">
+              <ToolSettingsMenuBar />
+            </div>
+          )}
+          <div className="p-4 md:p-8">
+            <div className="mx-auto">
+              <DocumentPreview 
+                content={designContent}
+                customStyles={customStyles}
+                isEditable={isEditable}
+                onContentChange={handleContentChange}
+                onElementSelect={handleElementSelect}
+              />
+            </div>
           </div>
         </div>
         <DesignerSidebar />
@@ -86,16 +92,22 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   }
   
   return (
-    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
-      {isEditable && <ToolSettingsMenuBar />}
-      <div className="mx-auto">
-        <DocumentPreview 
-          content={designContent}
-          customStyles={customStyles}
-          isEditable={isEditable}
-          onContentChange={handleContentChange}
-          onElementSelect={handleElementSelect}
-        />
+    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+      {isEditable && (
+        <div className="w-full">
+          <ToolSettingsMenuBar />
+        </div>
+      )}
+      <div className="p-4 md:p-8">
+        <div className="mx-auto">
+          <DocumentPreview 
+            content={designContent}
+            customStyles={customStyles}
+            isEditable={isEditable}
+            onContentChange={handleContentChange}
+            onElementSelect={handleElementSelect}
+          />
+        </div>
       </div>
     </div>
   );

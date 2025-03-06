@@ -10,6 +10,10 @@ export const EditorStyles: React.FC = () => {
         .ProseMirror {
           outline: none;
           overflow-y: auto;
+          background-color: white;
+          padding: 16px;
+          min-height: 400px;
+          border-radius: 4px;
         }
         .ProseMirror:focus {
           outline: none;

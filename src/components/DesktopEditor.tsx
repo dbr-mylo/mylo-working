@@ -4,9 +4,10 @@ import { DesignPanel } from "@/components/DesignPanel";
 import { ToolSidebar } from "@/components/sidebar/ToolSidebar";
 import { ToolPanel } from "@/components/sidebar/ToolPanel";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TypographyPanel } from "@/components/design/TypographyPanel";
 import { TemplateControls } from "@/components/design/TemplateControls";
+import { toast } from "sonner";
 
 type DesktopEditorProps = {
   content: string;
@@ -26,6 +27,11 @@ export const DesktopEditor = ({
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   const [customStyles, setCustomStyles] = useState<string>("");
   
+  // Debug the role to see if it's correctly set
+  useEffect(() => {
+    console.log("Current user role:", role);
+  }, [role]);
+  
   const handleStylesChange = (styles: string) => {
     setCustomStyles(styles);
   };
@@ -42,6 +48,15 @@ export const DesktopEditor = ({
       selectedElement.style[property as any] = value;
     });
   };
+
+  // Display a message if the user is not a designer
+  useEffect(() => {
+    if (role && role !== "designer") {
+      toast("Designer tools are only available for users with designer role", {
+        description: "Your current role: " + role
+      });
+    }
+  }, [role]);
 
   return (
     <main className="flex min-h-[calc(100vh-4rem)] animate-fade-in">

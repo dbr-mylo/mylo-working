@@ -74,7 +74,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
               <ToolSettingsMenuBar />
             </div>
           )}
-          <div className="p-0">
+          <div className="p-4 md:p-8">
             <div className="mx-auto">
               <DocumentPreview 
                 content={designContent}
@@ -82,7 +82,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 isEditable={isEditable}
                 onContentChange={handleContentChange}
                 onElementSelect={handleElementSelect}
-                showToolbar={false}
               />
             </div>
           </div>
@@ -107,7 +106,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             isEditable={isEditable}
             onContentChange={handleContentChange}
             onElementSelect={handleElementSelect}
-            showToolbar={false}
           />
         </div>
       </div>

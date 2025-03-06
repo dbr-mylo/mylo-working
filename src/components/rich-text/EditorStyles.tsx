@@ -1,11 +1,7 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 
 export const EditorStyles: React.FC = () => {
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
-  
   return (
     <style>
       {`
@@ -14,10 +10,10 @@ export const EditorStyles: React.FC = () => {
         .ProseMirror {
           min-height: 11in;
           width: 8.5in;
-          padding: ${isDesigner ? '0' : '1in'};
-          margin: ${isDesigner ? '0' : '0 auto'};
+          padding: 1in;
+          margin: 0 auto;
           background-color: white;
-          ${!isDesigner ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);' : ''}
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
           overflow-y: auto;
         }
         .ProseMirror:focus {

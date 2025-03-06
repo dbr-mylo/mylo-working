@@ -32,33 +32,8 @@ export const RichTextEditor = ({
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
-  // Add this effect to make the editor instance available globally
-  useEffect(() => {
-    if (editor) {
-      // Wait for the DOM to be updated
-      setTimeout(() => {
-        const editorElement = document.querySelector('.ProseMirror');
-        if (editorElement) {
-          // Use a type assertion to add the custom property
-          (editorElement as any).tiptapEditor = editor;
-        }
-      }, 0);
-    }
-    
-    return () => {
-      const editorElement = document.querySelector('.ProseMirror');
-      if (editorElement) {
-        // Type assertion to remove the custom property
-        delete (editorElement as any).tiptapEditor;
-      }
-    };
-  }, [editor]);
-
-  // Always show at least a loading indicator when editor is initializing
   if (!editor) {
-    return <div className="flex items-center justify-center p-4 h-[11in] w-[8.5in] mx-auto bg-white">
-      <p className="text-gray-400">Editor is loading...</p>
-    </div>;
+    return null;
   }
 
   return (
@@ -70,8 +45,8 @@ export const RichTextEditor = ({
           .designer-editor .ProseMirror {
             min-height: 11in;
             width: 8.5in;
-            padding: ${isDesigner ? '0' : '1in'};
-            margin: ${isDesigner ? '0' : '0 auto'};
+            padding: 1in;
+            margin: 0 auto;
             background-color: white;
           }
           
@@ -88,14 +63,6 @@ export const RichTextEditor = ({
             margin-left: auto;
             margin-right: auto;
           }
-          
-          /* Ensure ProseMirror is always visible */
-          .ProseMirror {
-            display: block !important;
-            visibility: visible !important;
-            min-height: 11in;
-            background-color: white;
-          }
         `}
       </style>
       {!hideToolbar && (
@@ -109,7 +76,7 @@ export const RichTextEditor = ({
           />
         </div>
       )}
-      <EditorContent editor={editor} className="editor-content" />
+      <EditorContent editor={editor} />
     </div>
   );
 };

@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TemplateControls } from "@/components/design/TemplateControls";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
-import { TextStyleManager } from "@/components/design/TextStyleManager";
 import { TypographyPanel } from "@/components/design/TypographyPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { textStyleStore } from "@/stores/textStyleStore";
@@ -92,7 +91,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           <Tabs defaultValue="typography" className="mb-6">
             <TabsList className="mb-4">
               <TabsTrigger value="typography">Typography</TabsTrigger>
-              <TabsTrigger value="textStyles">Text Styles</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
             </TabsList>
             
@@ -101,11 +99,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 selectedElement={selectedElement} 
                 onStyleChange={handleStyleChange}
                 onSaveStyle={handleSaveStyle}
+                onStylesChange={handleStylesChange}
               />
-            </TabsContent>
-            
-            <TabsContent value="textStyles">
-              <TextStyleManager onStylesChange={handleStylesChange} />
             </TabsContent>
             
             <TabsContent value="templates">

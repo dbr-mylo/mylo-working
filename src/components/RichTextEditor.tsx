@@ -57,8 +57,11 @@ export const RichTextEditor = ({
             z-index: 10;
             background-color: white;
             border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
+            padding: 0;
+            margin: 0;
+            width: 8.5in;
+            margin-left: auto;
+            margin-right: auto;
           }
         `}
       </style>

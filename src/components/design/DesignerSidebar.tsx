@@ -1,7 +1,7 @@
 
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
-import { Palette, PilcrowSquare } from "lucide-react";
+import { Palette, Pilcrow } from "lucide-react";
 import { useEffect, useState } from "react";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { TextStyle } from "@/lib/types";
@@ -64,7 +64,7 @@ export const DesignerSidebar = () => {
                 className="p-1 hover:bg-accent cursor-pointer"
               >
                 <div className="flex items-center gap-1.5">
-                  <PilcrowSquare className="h-3 w-3 text-muted-foreground" />
+                  <Pilcrow className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs">{style.name}</span>
                 </div>
               </Card>

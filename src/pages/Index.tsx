@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,7 +6,6 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useDocument } from "@/hooks/document";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
-import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
 import { useAutoSave } from "@/hooks/document/useAutoSave";
 
@@ -34,8 +34,7 @@ const Index = () => {
     saveDocument
   });
   
-  const isEditorEditable = role === "editor";
-  const isDesignEditable = role === "designer";
+  const isEditorEditable = true; // Always editable since we only have editor role
   
   // Add a console log to track content changes
   useEffect(() => {
@@ -64,35 +63,7 @@ const Index = () => {
     );
   }
   
-  // Render different layouts based on user role
-  const renderContent = () => {
-    if (role === "designer") {
-      return (
-        <DesignPanel 
-          content={content}
-          isEditable={isDesignEditable}
-        />
-      );
-    } else {
-      // For editor role, render the split view
-      return isMobile ? (
-        <MobileEditor
-          content={content}
-          onContentChange={setContent}
-          isEditorEditable={isEditorEditable}
-          isDesignEditable={isDesignEditable}
-        />
-      ) : (
-        <DesktopEditor
-          content={content}
-          onContentChange={setContent}
-          isEditorEditable={isEditorEditable}
-          isDesignEditable={isDesignEditable}
-        />
-      );
-    }
-  };
-  
+  // Render layout based on device size
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
@@ -106,7 +77,21 @@ const Index = () => {
       />
       
       <main className="animate-fade-in">
-        {renderContent()}
+        {isMobile ? (
+          <MobileEditor
+            content={content}
+            onContentChange={setContent}
+            isEditorEditable={isEditorEditable}
+            isDesignEditable={false}
+          />
+        ) : (
+          <DesktopEditor
+            content={content}
+            onContentChange={setContent}
+            isEditorEditable={isEditorEditable}
+            isDesignEditable={false}
+          />
+        )}
       </main>
     </div>
   );

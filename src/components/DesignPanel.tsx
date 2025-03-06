@@ -70,7 +70,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   };
   
   return (
-    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'flex-1'} p-4 md:p-8 bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
         {!isMobile && (
           <div className="flex justify-between items-center mb-4">
@@ -87,35 +87,47 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           </div>
         )}
         
-        {role === "designer" && (
-          <Tabs defaultValue="typography" className="mb-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="typography">Typography</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-            </TabsList>
+        {/* Moved tabs to the separate sidebar, only show direct preview for designer role */}
+        {role === "designer" ? (
+          <DocumentPreview 
+            content={designContent}
+            customStyles={customStyles}
+            isEditable={isEditable}
+            onContentChange={handleContentChange}
+            onElementSelect={handleElementSelect}
+          />
+        ) : (
+          /* For editor role, keep the tabs here */
+          <>
+            <Tabs defaultValue="typography" className="mb-6">
+              <TabsList className="mb-4">
+                <TabsTrigger value="typography">Typography</TabsTrigger>
+                <TabsTrigger value="templates">Templates</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="typography">
+                <TypographyPanel 
+                  selectedElement={selectedElement} 
+                  onStyleChange={handleStyleChange}
+                  onSaveStyle={handleSaveStyle}
+                  onStylesChange={handleStylesChange}
+                />
+              </TabsContent>
+              
+              <TabsContent value="templates">
+                <TemplateControls onStylesChange={handleStylesChange} />
+              </TabsContent>
+            </Tabs>
             
-            <TabsContent value="typography">
-              <TypographyPanel 
-                selectedElement={selectedElement} 
-                onStyleChange={handleStyleChange}
-                onSaveStyle={handleSaveStyle}
-                onStylesChange={handleStylesChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="templates">
-              <TemplateControls onStylesChange={handleStylesChange} />
-            </TabsContent>
-          </Tabs>
+            <DocumentPreview 
+              content={designContent}
+              customStyles={customStyles}
+              isEditable={isEditable}
+              onContentChange={handleContentChange}
+              onElementSelect={handleElementSelect}
+            />
+          </>
         )}
-        
-        <DocumentPreview 
-          content={designContent}
-          customStyles={customStyles}
-          isEditable={isEditable}
-          onContentChange={handleContentChange}
-          onElementSelect={handleElementSelect}
-        />
       </div>
     </div>
   );

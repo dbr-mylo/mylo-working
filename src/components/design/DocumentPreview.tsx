@@ -1,3 +1,4 @@
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -150,9 +151,20 @@ export const DocumentPreview = ({
             </div>
           )
         ) : (
-          <p className="text-editor-text opacity-50">
-            Content from the editor will appear here with brand styling
-          </p>
+          // Add the white background and shadow for empty content when in editor role
+          isDesigner ? (
+            // Designer role empty state without white box
+            <p className="text-editor-text opacity-50 min-h-[11in] w-[8.5in] p-[1in] mx-auto">
+              Content from the editor will appear here with brand styling
+            </p>
+          ) : (
+            // Editor role empty state with white box and shadow
+            <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+              <p className="text-editor-text opacity-50">
+                Content from the editor will appear here with brand styling
+              </p>
+            </div>
+          )
         )}
       </div>
     </div>

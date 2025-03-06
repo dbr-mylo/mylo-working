@@ -6,8 +6,8 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useDocument } from "@/hooks/document";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
+import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
-import { useAutoSave } from "@/hooks/document/useAutoSave";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -25,16 +25,9 @@ const Index = () => {
     loadDocument,
     isLoading
   } = useDocument(documentId);
-
-  // Enable auto-save functionality
-  useAutoSave({
-    content,
-    initialContent,
-    documentTitle,
-    saveDocument
-  });
   
-  const isEditorEditable = true; // Always editable since we only have editor role
+  const isEditorEditable = role === "editor";
+  const isDesignEditable = role === "designer";
   
   // Add a console log to track content changes
   useEffect(() => {
@@ -44,8 +37,6 @@ const Index = () => {
   // Create a Promise-returning wrapper for setDocumentTitle
   const handleTitleChange = async (title: string): Promise<void> => {
     setDocumentTitle(title);
-    // Save immediately when title changes
-    await saveDocument();
     return Promise.resolve();
   };
   
@@ -63,7 +54,35 @@ const Index = () => {
     );
   }
   
-  // Render layout based on device size
+  // Render different layouts based on user role
+  const renderContent = () => {
+    if (role === "designer") {
+      return (
+        <DesignPanel 
+          content={content}
+          isEditable={isDesignEditable}
+        />
+      );
+    } else {
+      // For editor role, render the split view
+      return isMobile ? (
+        <MobileEditor
+          content={content}
+          onContentChange={setContent}
+          isEditorEditable={isEditorEditable}
+          isDesignEditable={isDesignEditable}
+        />
+      ) : (
+        <DesktopEditor
+          content={content}
+          onContentChange={setContent}
+          isEditorEditable={isEditorEditable}
+          isDesignEditable={isDesignEditable}
+        />
+      );
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
@@ -77,21 +96,7 @@ const Index = () => {
       />
       
       <main className="animate-fade-in">
-        {isMobile ? (
-          <MobileEditor
-            content={content}
-            onContentChange={setContent}
-            isEditorEditable={isEditorEditable}
-            isDesignEditable={false}
-          />
-        ) : (
-          <DesktopEditor
-            content={content}
-            onContentChange={setContent}
-            isEditorEditable={isEditorEditable}
-            isDesignEditable={false}
-          />
-        )}
+        {renderContent()}
       </main>
     </div>
   );

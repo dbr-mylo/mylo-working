@@ -1,12 +1,20 @@
-
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { TextStyle } from "@/lib/types";
+import { Save, PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { textStyleStore } from "@/stores/textStyleStore";
-import { StyleSelection } from "./typography/StyleSelection";
-import { StyleControls } from "./typography/StyleControls";
+
+// Import smaller components
+import { FontFamilyControl } from "./typography/FontFamilyControl";
+import { FontSizeControl } from "./typography/FontSizeControl";
+import { FontWeightControl } from "./typography/FontWeightControl";
+import { ColorControl } from "./typography/ColorControl";
+import { SpacingControl } from "./typography/SpacingControl";
+import { TextAlignmentControl } from "./typography/TextAlignmentControl";
+import { TextPreview } from "./typography/TextPreview";
 import { EmptyState } from "./typography/EmptyState";
-import { TypographyStyles } from "./typography/types";
 import { rgbToHex } from "./typography/utils";
 
 interface TypographyPanelProps {
@@ -14,6 +22,16 @@ interface TypographyPanelProps {
   onStyleChange: (styles: Record<string, string>) => void;
   onSaveStyle?: (style: Partial<TextStyle>) => void;
   onStylesChange?: (styles: string) => void;
+}
+
+interface TypographyStyles {
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  color: string;
+  lineHeight: string;
+  letterSpacing: string;
+  textAlign: string;
 }
 
 export const TypographyPanel = ({ 
@@ -218,21 +236,113 @@ export const TypographyPanel = ({
         </div>
 
         {/* Text Style Selection */}
-        <StyleSelection 
-          textStyles={textStyles}
-          selectedStyleId={selectedStyleId}
-          styleName={styleName}
-          onStyleNameChange={setStyleName}
-          onStyleSelect={setSelectedStyleId}
-          onSaveStyle={handleSaveStyle}
-          onDeleteStyle={handleDeleteStyle}
-        />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium">Text Styles</label>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveStyle}
+                className="h-8"
+              >
+                <Save className="h-3.5 w-3.5 mr-1" />
+                Save
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Select
+              value={selectedStyleId || ""}
+              onValueChange={setSelectedStyleId}
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select a text style" />
+              </SelectTrigger>
+              <SelectContent>
+                {textStyles.map(style => (
+                  <SelectItem key={style.id} value={style.id}>
+                    <span style={{ fontFamily: style.fontFamily }}>
+                      {style.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {selectedStyleId && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => selectedStyleId && handleDeleteStyle(selectedStyleId)}
+                className="h-10 w-10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={styleName}
+              onChange={(e) => setStyleName(e.target.value)}
+              placeholder="Style name"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+        </div>
 
         {selectedElement ? (
-          <StyleControls 
-            styles={styles}
-            onStyleChange={handleStyleChange}
-          />
+          <div className="space-y-4">
+            {/* Font Family */}
+            <FontFamilyControl 
+              value={styles.fontFamily} 
+              onChange={(value) => handleStyleChange("fontFamily", value)} 
+            />
+
+            {/* Font Size */}
+            <FontSizeControl 
+              value={styles.fontSize} 
+              onChange={(value) => handleStyleChange("fontSize", value)} 
+            />
+
+            {/* Font Weight */}
+            <FontWeightControl 
+              value={styles.fontWeight} 
+              onChange={(value) => handleStyleChange("fontWeight", value)} 
+            />
+
+            {/* Text Color */}
+            <ColorControl 
+              value={styles.color} 
+              onChange={(value) => handleStyleChange("color", value)} 
+            />
+
+            {/* Line Height */}
+            <SpacingControl 
+              type="lineHeight"
+              value={styles.lineHeight} 
+              onChange={(value) => handleStyleChange("lineHeight", value)} 
+            />
+
+            {/* Letter Spacing */}
+            <SpacingControl 
+              type="letterSpacing"
+              value={styles.letterSpacing} 
+              onChange={(value) => handleStyleChange("letterSpacing", value)} 
+            />
+
+            {/* Text Alignment */}
+            <TextAlignmentControl 
+              value={styles.textAlign} 
+              onChange={(value) => handleStyleChange("textAlign", value)} 
+            />
+
+            {/* Preview */}
+            <TextPreview styles={styles} />
+          </div>
         ) : (
           <EmptyState />
         )}

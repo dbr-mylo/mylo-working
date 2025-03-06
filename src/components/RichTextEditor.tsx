@@ -1,8 +1,9 @@
 
 import { EditorContent } from '@tiptap/react';
-import { useEditorSetup } from './rich-text/useEditor';
+import { useState, useEffect } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
 import { EditorStyles } from './rich-text/EditorStyles';
+import { useEditorSetup } from './rich-text/useEditor';
 
 interface RichTextEditorProps {
   content: string;
@@ -30,7 +31,7 @@ export const RichTextEditor = ({
   }
 
   return (
-    <div className="w-full bg-white">
+    <div className="prose prose-sm max-w-none">
       <EditorStyles />
       {!hideToolbar && (
         <EditorToolbar 
@@ -41,17 +42,7 @@ export const RichTextEditor = ({
           onColorChange={handleColorChange}
         />
       )}
-      <EditorContent 
-        editor={editor} 
-        className="prose max-w-none"
-        style={{
-          width: '8.5in',
-          minHeight: '11in',
-          margin: '0 auto',
-          padding: '1in',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
-        }}
-      />
+      <EditorContent editor={editor} />
     </div>
   );
 };

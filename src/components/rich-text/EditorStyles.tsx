@@ -8,13 +8,13 @@ export const EditorStyles: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Source+Sans+Pro:wght@400;700&display=swap');
         
         .ProseMirror {
-          outline: none;
-          overflow-y: auto;
-          background-color: white;
           min-height: 11in;
-          width: 100%;
-          box-sizing: border-box;
-          border-radius: 4px;
+          width: 8.5in;
+          padding: 1in;
+          margin: 0 auto;
+          background-color: white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          overflow-y: auto;
         }
         .ProseMirror:focus {
           outline: none;
@@ -41,13 +41,6 @@ export const EditorStyles: React.FC = () => {
         }
         .ProseMirror li > ul, .ProseMirror li > ol {
           padding-left: 24px;
-        }
-        .ProseMirror p.is-editor-empty:first-child::before {
-          color: #adb5bd;
-          content: attr(data-placeholder);
-          float: left;
-          height: 0;
-          pointer-events: none;
         }
       `}
     </style>

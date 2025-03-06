@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,6 +45,8 @@ const Index = () => {
   // Create a Promise-returning wrapper for setDocumentTitle
   const handleTitleChange = async (title: string): Promise<void> => {
     setDocumentTitle(title);
+    // Save immediately when title changes
+    await saveDocument();
     return Promise.resolve();
   };
   

@@ -31,6 +31,12 @@ export function useAutoSave({
     };
   }, []);
   
+  // Update refs when a save occurs elsewhere (like from manual save or title change)
+  useEffect(() => {
+    lastSavedContentRef.current = content;
+    lastSavedTitleRef.current = documentTitle;
+  }, [initialContent, documentTitle]);
+  
   // Set up auto-save
   useEffect(() => {
     if (!isEnabled) return;

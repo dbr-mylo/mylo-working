@@ -36,7 +36,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                     size="sm"
                     onClick={onTogglePreview}
                     title={isPreviewVisible ? "Hide preview" : "Show preview"}
-                    className="ml-2"
+                    className="ml-2 w-[140px] justify-center"
                   >
                     {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                     <span className="ml-2 hidden sm:inline">
@@ -55,6 +55,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                   size="sm"
                   onClick={onTogglePreview}
                   title={isPreviewVisible ? "Hide preview" : "Show preview"}
+                  className="w-[140px] justify-center"
                 >
                   {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                   <span className="ml-2 hidden sm:inline">

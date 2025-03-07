@@ -39,7 +39,8 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                     title={isPreviewVisible ? "Hide preview" : "Show preview"}
                     className={cn("ml-2 w-[140px] justify-center")}
                   >
-                    {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
+                    <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
                     <span className="ml-2 hidden sm:inline">
                       {isPreviewVisible ? "Hide Preview" : "Show Preview"}
                     </span>
@@ -58,7 +59,8 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                   title={isPreviewVisible ? "Hide preview" : "Show preview"}
                   className="w-[140px] justify-center"
                 >
-                  {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
+                  <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
                   <span className="ml-2 hidden sm:inline">
                     {isPreviewVisible ? "Hide Preview" : "Show Preview"}
                   </span>

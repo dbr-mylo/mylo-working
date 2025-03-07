@@ -129,6 +129,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   if (isStandalone) {
     return (
       <div className="w-full flex flex-row">
+        {/* Editor view - shown when preview is not visible OR along with preview */}
         <div className={`${isPreviewVisible ? "flex-1" : "w-full"} bg-editor-panel overflow-auto`}>
           {isEditable && (
             <div className="w-full">

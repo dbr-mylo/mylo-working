@@ -1,7 +1,7 @@
 
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { textStyleStore } from "@/stores/textStyleStore";
@@ -10,6 +10,8 @@ import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
+
+const PREVIEW_PREFERENCE_KEY = "designerPreviewVisible";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -20,6 +22,23 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const [designContent, setDesignContent] = useState(content);
   const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
+  
+  // Add state for preview visibility
+  const [isPreviewVisible, setIsPreviewVisible] = useState(() => {
+    if (isStandalone) {
+      // Get stored preference or default to true
+      const storedPreference = localStorage.getItem(PREVIEW_PREFERENCE_KEY);
+      return storedPreference ? storedPreference === "true" : true;
+    }
+    return true;
+  });
+  
+  // Save preference to localStorage when it changes
+  useEffect(() => {
+    if (isStandalone) {
+      localStorage.setItem(PREVIEW_PREFERENCE_KEY, isPreviewVisible.toString());
+    }
+  }, [isPreviewVisible, isStandalone]);
   
   if (content !== designContent && !isEditable) {
     setDesignContent(content);
@@ -67,6 +86,11 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     }
   };
   
+  // Toggle preview visibility
+  const handleTogglePreview = () => {
+    setIsPreviewVisible(prev => !prev);
+  };
+  
   // For designer role, create editor setup to get toolbar props
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
@@ -92,10 +116,14 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   if (isStandalone) {
     return (
       <div className="w-full flex">
-        <div className="flex-1 bg-editor-panel overflow-auto">
+        <div className={`flex-1 bg-editor-panel overflow-auto ${!isPreviewVisible ? "w-full" : ""}`}>
           {isEditable && (
             <div className="w-full">
-              <ToolSettingsMenuBar toolbar={isEditable ? renderToolbar() : undefined} />
+              <ToolSettingsMenuBar 
+                toolbar={isEditable ? renderToolbar() : undefined} 
+                isPreviewVisible={isPreviewVisible}
+                onTogglePreview={handleTogglePreview}
+              />
             </div>
           )}
           <div className="p-4 md:p-8">
@@ -111,7 +139,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             </div>
           </div>
         </div>
-        <DesignerSidebar />
+        {isPreviewVisible && <DesignerSidebar />}
       </div>
     );
   }

@@ -129,8 +129,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   if (isStandalone) {
     return (
       <div className="w-full flex flex-row">
-        {/* Main content area */}
-        <div className="flex-1 bg-editor-panel overflow-auto">
+        {/* Editor view - always visible */}
+        <div className={isPreviewVisible ? "w-1/2 bg-editor-panel overflow-auto border-r border-editor-border" : "w-full bg-editor-panel overflow-auto"}>
           {isEditable && (
             <div className="w-full">
               <ToolSettingsMenuBar 
@@ -142,28 +142,32 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           )}
           <div className="p-4 md:p-8">
             <div className="mx-auto">
-              {/* Show document editor or preview based on the isPreviewVisible state */}
-              {isPreviewVisible ? (
-                <div className="mb-3">
-                  <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: previewContent }} 
-                    className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
-                  />
-                </div>
-              ) : (
-                <DocumentPreview 
-                  content={designContent}
-                  customStyles={customStyles}
-                  isEditable={isEditable}
-                  onContentChange={handleContentChange}
-                  onElementSelect={handleElementSelect}
-                  renderToolbarOutside={isEditable}
-                />
-              )}
+              <DocumentPreview 
+                content={designContent}
+                customStyles={customStyles}
+                isEditable={isEditable}
+                onContentChange={handleContentChange}
+                onElementSelect={handleElementSelect}
+                renderToolbarOutside={isEditable}
+              />
             </div>
           </div>
         </div>
+        
+        {/* Preview panel - only visible when isPreviewVisible is true */}
+        {isPreviewVisible && (
+          <div className="w-1/2 bg-white overflow-auto">
+            <div className="p-4 md:p-8">
+              <div className="mb-3">
+                <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
+                <div 
+                  dangerouslySetInnerHTML={{ __html: previewContent }} 
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Sidebar - always on the right */}
         <DesignerSidebar />

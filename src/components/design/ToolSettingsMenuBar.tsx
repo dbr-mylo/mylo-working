@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Columns, LayoutTemplate } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ToolSettingsMenuBarProps {
   children?: React.ReactNode;
@@ -42,9 +42,9 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
               title={isPreviewVisible ? "Hide preview" : "Show preview"}
               className="ml-2"
             >
-              {isPreviewVisible ? <Columns size={18} /> : <LayoutTemplate size={18} />}
+              {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
               <span className="ml-2 hidden sm:inline">
-                {isPreviewVisible ? "Editor Only" : "Show Preview"}
+                {isPreviewVisible ? "Hide Preview" : "Show Preview"}
               </span>
             </Button>
           </div>

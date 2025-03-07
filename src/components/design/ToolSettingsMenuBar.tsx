@@ -22,7 +22,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
   
   return (
     <div className="w-full bg-slate-50 border-b border-slate-200">
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full mx-auto flex items-center justify-between">
         <div className="flex-1">
           {isDesigner && toolbar ? (
             <div>{toolbar}</div>

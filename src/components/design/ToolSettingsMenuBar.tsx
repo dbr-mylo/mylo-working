@@ -44,7 +44,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
             >
               {isPreviewVisible ? <Columns size={18} /> : <LayoutTemplate size={18} />}
               <span className="ml-2 hidden sm:inline">
-                {isPreviewVisible ? "Split View" : "Editor Only"}
+                {isPreviewVisible ? "Show Preview" : "Editor Only"}
               </span>
             </Button>
           </div>

@@ -1,4 +1,3 @@
-
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -109,6 +108,22 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       />
     );
   };
+
+  // Sample preview content for split view
+  const previewContent = `
+    <h1>Preview of Your Document</h1>
+    <p>This is a preview of how your document will look with the current styling. The content shown here is for demonstration purposes only.</p>
+    <h2>Section Heading</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula.</p>
+    <ul>
+      <li>First item in a list</li>
+      <li>Second item in a list</li>
+      <li>Third item with some additional text to show wrapping behavior</li>
+    </ul>
+    <h3>Subsection Example</h3>
+    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.</p>
+    <blockquote>This is an example of a blockquote that might appear in your document.</blockquote>
+  `;
   
   if (isStandalone) {
     return (
@@ -138,7 +153,16 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         </div>
         {isPreviewVisible && (
           <div className="w-64 border-l border-editor-border">
-            <DesignerSidebar />
+            <div className="p-4 md:p-8 bg-white h-full overflow-auto">
+              <h3 className="text-lg font-medium mb-4">Preview</h3>
+              <div className="prose prose-sm max-w-none">
+                <div 
+                  dangerouslySetInnerHTML={{ __html: previewContent }} 
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-md"
+                  style={{ fontSize: '0.875rem' }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

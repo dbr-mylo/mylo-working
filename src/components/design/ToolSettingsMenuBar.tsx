@@ -42,7 +42,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                     <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
                     <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
                     <span className="ml-2 hidden sm:inline">
-                      {isPreviewVisible ? "Hide Preview" : "Show Preview"}
+                      {isPreviewVisible ? "Preview" : "Preview"}
                     </span>
                   </Button>
                 </div>
@@ -62,7 +62,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                   <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
                   <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
                   <span className="ml-2 hidden sm:inline">
-                    {isPreviewVisible ? "Hide Preview" : "Show Preview"}
+                    {isPreviewVisible ? "Preview" : "Preview"}
                   </span>
                 </Button>
               )}

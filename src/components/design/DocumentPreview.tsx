@@ -8,6 +8,7 @@ interface DocumentPreviewProps {
   isEditable: boolean;
   onContentChange?: (content: string) => void;
   onElementSelect?: (element: HTMLElement | null) => void;
+  renderToolbarOutside?: boolean;
 }
 
 export const DocumentPreview = ({ 
@@ -15,7 +16,8 @@ export const DocumentPreview = ({
   customStyles, 
   isEditable, 
   onContentChange,
-  onElementSelect
+  onElementSelect,
+  renderToolbarOutside = false
 }: DocumentPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
@@ -116,8 +118,8 @@ export const DocumentPreview = ({
               content={content}
               onUpdate={handleContentChange}
               isEditable={true}
-              hideToolbar={false}
-              fixedToolbar={true}
+              hideToolbar={true}
+              renderToolbarOutside={renderToolbarOutside}
             />
           ) : (
             // For editor role, keep the white div with shadow

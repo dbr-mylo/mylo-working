@@ -1,13 +1,15 @@
 
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { useToast } from "@/hooks/use-toast";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
+import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
+import { useEditorSetup } from "@/components/rich-text/useEditor";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -65,13 +67,35 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     }
   };
   
+  // For designer role, create editor setup to get toolbar props
+  const editorSetup = isEditable && isStandalone ? 
+    useEditorSetup({ 
+      content: designContent, 
+      onUpdate: handleContentChange, 
+      isEditable 
+    }) : null;
+  
+  const renderToolbar = () => {
+    if (!editorSetup || !editorSetup.editor) return null;
+    
+    return (
+      <EditorToolbar 
+        editor={editorSetup.editor}
+        currentFont={editorSetup.currentFont}
+        currentColor={editorSetup.currentColor}
+        onFontChange={editorSetup.handleFontChange}
+        onColorChange={editorSetup.handleColorChange}
+      />
+    );
+  };
+  
   if (isStandalone) {
     return (
       <div className="w-full flex">
         <div className="flex-1 bg-editor-panel overflow-auto">
           {isEditable && (
             <div className="w-full">
-              <ToolSettingsMenuBar />
+              <ToolSettingsMenuBar toolbar={isEditable ? renderToolbar() : undefined} />
             </div>
           )}
           <div className="p-4 md:p-8">
@@ -82,6 +106,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 isEditable={isEditable}
                 onContentChange={handleContentChange}
                 onElementSelect={handleElementSelect}
+                renderToolbarOutside={isEditable}
               />
             </div>
           </div>

@@ -12,6 +12,7 @@ interface RichTextEditorProps {
   isEditable?: boolean;
   hideToolbar?: boolean;
   fixedToolbar?: boolean;
+  renderToolbarOutside?: boolean;
 }
 
 export const RichTextEditor = ({ 
@@ -19,7 +20,8 @@ export const RichTextEditor = ({
   onUpdate, 
   isEditable = true, 
   hideToolbar = false,
-  fixedToolbar = false
+  fixedToolbar = false,
+  renderToolbarOutside = false
 }: RichTextEditorProps) => {
   const {
     editor,
@@ -35,6 +37,16 @@ export const RichTextEditor = ({
   if (!editor) {
     return null;
   }
+
+  const renderToolbar = () => (
+    <EditorToolbar 
+      editor={editor}
+      currentFont={currentFont}
+      currentColor={currentColor}
+      onFontChange={handleFontChange}
+      onColorChange={handleColorChange}
+    />
+  );
 
   return (
     <div className={`prose prose-sm max-w-none ${isDesigner ? 'designer-editor' : ''}`}>
@@ -65,15 +77,9 @@ export const RichTextEditor = ({
           }
         `}
       </style>
-      {!hideToolbar && (
+      {!hideToolbar && !renderToolbarOutside && (
         <div className={fixedToolbar ? 'fixed-toolbar' : ''}>
-          <EditorToolbar 
-            editor={editor}
-            currentFont={currentFont}
-            currentColor={currentColor}
-            onFontChange={handleFontChange}
-            onColorChange={handleColorChange}
-          />
+          {renderToolbar()}
         </div>
       )}
       <EditorContent editor={editor} />

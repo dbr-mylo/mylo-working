@@ -110,7 +110,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     );
   };
 
-  // Sample preview content for split view
+  // Sample preview content for preview view
   const previewContent = `
     <h1>Preview of Your Document</h1>
     <p>This is a preview of how your document will look with the current styling. The content shown here is for demonstration purposes only.</p>
@@ -152,21 +152,21 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             </div>
           </div>
         </div>
+        
+        {/* Sidebar (always visible) */}
+        <DesignerSidebar />
+        
+        {/* Preview section (only visible when isPreviewVisible is true) */}
         {isPreviewVisible && (
-          <DesignerSidebar>
-            <div className="mb-3 border border-editor-border rounded-md overflow-hidden">
-              <div className="p-1.5 border-b border-editor-border bg-slate-50">
-                <h3 className="text-xs font-medium text-editor-heading">Document Preview</h3>
-              </div>
-              <div className="p-2">
-                <div 
-                  dangerouslySetInnerHTML={{ __html: previewContent }} 
-                  className="p-2 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
-                  style={{ fontSize: '0.875rem' }}
-                />
-              </div>
+          <div className="w-1/2 p-4 bg-white border-l border-editor-border">
+            <div className="mb-3">
+              <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
+              <div 
+                dangerouslySetInnerHTML={{ __html: previewContent }} 
+                className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+              />
             </div>
-          </DesignerSidebar>
+          </div>
         )}
       </div>
     );

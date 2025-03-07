@@ -1,3 +1,4 @@
+
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -155,7 +156,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
                   <div 
                     dangerouslySetInnerHTML={{ __html: previewContent }} 
-                    className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+                    className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
                   />
                 </div>
               </div>

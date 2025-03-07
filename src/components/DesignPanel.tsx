@@ -1,3 +1,4 @@
+
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -152,18 +153,20 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           </div>
         </div>
         {isPreviewVisible && (
-          <div className="w-64 border-l border-editor-border">
-            <div className="p-4 md:p-8 bg-white h-full overflow-auto">
-              <h3 className="text-lg font-medium mb-4">Preview</h3>
-              <div className="prose prose-sm max-w-none">
+          <DesignerSidebar>
+            <div className="mb-3 border border-editor-border rounded-md overflow-hidden">
+              <div className="p-1.5 border-b border-editor-border bg-slate-50">
+                <h3 className="text-xs font-medium text-editor-heading">Document Preview</h3>
+              </div>
+              <div className="p-2">
                 <div 
                   dangerouslySetInnerHTML={{ __html: previewContent }} 
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-md"
+                  className="p-2 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
                   style={{ fontSize: '0.875rem' }}
                 />
               </div>
             </div>
-          </div>
+          </DesignerSidebar>
         )}
       </div>
     );

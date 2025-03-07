@@ -129,7 +129,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   if (isStandalone) {
     return (
       <div className="w-full flex flex-row">
-        {/* Editor view - always visible */}
+        {/* Main content area */}
         <div className="flex-1 bg-editor-panel overflow-auto">
           {isEditable && (
             <div className="w-full">
@@ -142,33 +142,31 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
           )}
           <div className="p-4 md:p-8">
             <div className="mx-auto">
-              <DocumentPreview 
-                content={designContent}
-                customStyles={customStyles}
-                isEditable={isEditable}
-                onContentChange={handleContentChange}
-                onElementSelect={handleElementSelect}
-                renderToolbarOutside={isEditable}
-              />
+              {/* Show document editor or preview based on the isPreviewVisible state */}
+              {isPreviewVisible ? (
+                <div className="mb-3">
+                  <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: previewContent }} 
+                    className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+                  />
+                </div>
+              ) : (
+                <DocumentPreview 
+                  content={designContent}
+                  customStyles={customStyles}
+                  isEditable={isEditable}
+                  onContentChange={handleContentChange}
+                  onElementSelect={handleElementSelect}
+                  renderToolbarOutside={isEditable}
+                />
+              )}
             </div>
           </div>
         </div>
         
-        {/* Sidebar (always visible) */}
+        {/* Sidebar - always on the right */}
         <DesignerSidebar />
-        
-        {/* Preview section (only visible when isPreviewVisible is true) */}
-        {isPreviewVisible && (
-          <div className="w-1/2 p-4 bg-white border-l border-editor-border">
-            <div className="mb-3">
-              <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
-              <div 
-                dangerouslySetInnerHTML={{ __html: previewContent }} 
-                className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
-              />
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -194,4 +192,3 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     </div>
   );
 };
-

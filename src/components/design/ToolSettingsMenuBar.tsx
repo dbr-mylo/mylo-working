@@ -30,7 +30,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                 {toolbar}
               </div>
               {onTogglePreview && (
-                <div className="flex-shrink-0 p-2">
+                <div className="flex items-center h-full">
                   <Button
                     variant="outline"
                     size="sm"

@@ -8,11 +8,20 @@ export const fetchUserDocuments = async (userId: string | undefined, role: strin
   }
   
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('documents')
       .select('id, title, content, updated_at')
       .eq('owner_id', userId)
       .order('updated_at', { ascending: false });
+    
+    // Filter by template status for designer role
+    if (role === 'designer') {
+      query = query.eq('is_template', true);
+    } else if (role === 'editor') {
+      query = query.eq('is_template', false);
+    }
+    
+    const { data, error } = await query;
       
     if (error) throw error;
     
@@ -43,4 +52,42 @@ export const hasUnsavedChanges = (
   documentTitle: string
 ): boolean => {
   return (content !== initialContent) || (title !== documentTitle);
+};
+
+export const deleteDocument = async (documentId: string, userId: string | undefined, role: string | null): Promise<boolean> => {
+  if (!userId) {
+    return deleteLocalDocument(documentId, role);
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('documents')
+      .delete()
+      .eq('id', documentId)
+      .eq('owner_id', userId);
+      
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    return false;
+  }
+};
+
+export const deleteLocalDocument = (documentId: string, role: string | null): boolean => {
+  try {
+    const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
+    const localDocs = localStorage.getItem(storageKey);
+    
+    if (localDocs) {
+      const documents = JSON.parse(localDocs);
+      const updatedDocuments = documents.filter((doc: Document) => doc.id !== documentId);
+      localStorage.setItem(storageKey, JSON.stringify(updatedDocuments));
+      return true;
+    }
+  } catch (error) {
+    console.error(`Error deleting ${role} document:`, error);
+  }
+  return false;
 };

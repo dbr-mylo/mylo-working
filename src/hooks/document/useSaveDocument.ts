@@ -56,7 +56,8 @@ export function useSaveDocument({
           content, 
           documentTitle, 
           user.id,
-          toast
+          toast,
+          isDesigner
         );
       } else if (role) {
         console.log(`Saving ${itemType} for ${role} user`);

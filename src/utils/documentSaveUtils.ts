@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import type { Document } from "@/lib/types";
@@ -7,7 +8,8 @@ export async function saveDocumentToSupabase(
   content: string,
   title: string,
   userId: string,
-  toast: any
+  toast: any,
+  isTemplate: boolean = false
 ): Promise<Document | null> {
   try {
     const now = new Date().toISOString();
@@ -22,7 +24,8 @@ export async function saveDocumentToSupabase(
         .update({
           title: documentTitle,
           content: content,
-          updated_at: now
+          updated_at: now,
+          is_template: isTemplate
         })
         .eq('id', documentId)
         .eq('owner_id', userId)
@@ -45,7 +48,8 @@ export async function saveDocumentToSupabase(
           content: content,
           owner_id: userId,
           created_at: now,
-          updated_at: now
+          updated_at: now,
+          is_template: isTemplate
         })
         .select()
         .single();

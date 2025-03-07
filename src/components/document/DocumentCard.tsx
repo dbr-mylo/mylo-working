@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
+import { Trash2, FileEdit } from "lucide-react";
 import type { Document } from "@/lib/types";
 
 interface DocumentCardProps {
@@ -30,11 +30,27 @@ export const DocumentCard = ({
     >
       <CardHeader className="p-3">
         <div className="flex justify-between items-center gap-2">
-          <CardTitle className="text-md break-words overflow-hidden">{document.title}</CardTitle>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="text-xs text-gray-500 flex items-center">
+          <div className="flex flex-col">
+            <CardTitle className="text-md break-words overflow-hidden">{document.title}</CardTitle>
+            <span className="text-xs text-gray-500">
               {formatDate(document.updated_at)}
-            </div>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {isDesigner && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-500 hover:bg-blue-100 hover:text-blue-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(document.id);
+                }}
+                title="Edit template"
+              >
+                <FileEdit className="h-4 w-4" />
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 

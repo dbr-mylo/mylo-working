@@ -140,15 +140,13 @@ export const EditorNav = ({
       </div>
       
       <div className="flex items-center space-x-2">
-        {currentRole === "editor" && (
-          <DocumentControls
-            onSave={onSave}
-            onLoadDocument={onLoadDocument}
-            documents={documents}
-            isLoadingDocs={isLoadingDocs}
-            content={content}
-          />
-        )}
+        <DocumentControls
+          onSave={onSave}
+          onLoadDocument={onLoadDocument}
+          documents={documents}
+          isLoadingDocs={isLoadingDocs}
+          content={content}
+        />
         
         <ExternalActions 
           onSignOut={signOut} 

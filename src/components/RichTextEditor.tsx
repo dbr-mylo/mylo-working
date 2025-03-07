@@ -1,3 +1,4 @@
+
 import { EditorContent } from '@tiptap/react';
 import { useState, useEffect } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
@@ -68,7 +69,7 @@ export const RichTextEditor = ({
             top: 0;
             z-index: 10;
             background-color: white;
-            border-bottom: 1px solid #e2e8f0;
+            ${!isDesigner ? 'border-bottom: 1px solid #e2e8f0;' : ''}
             padding: 0;
             margin: 0;
             width: 8.5in;

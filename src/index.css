@@ -98,4 +98,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  [data-role="designer"] .designer-specific-element {
+    border-bottom: none !important;
+  }
 }

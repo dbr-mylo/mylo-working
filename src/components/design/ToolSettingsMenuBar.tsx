@@ -21,7 +21,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
   const isDesigner = role === "designer";
   
   return (
-    <div className="w-full bg-white border-b border-slate-200">
+    <div className={`w-full bg-white ${!isDesigner ? 'border-b border-slate-200' : ''}`}>
       <div className="flex items-center justify-between w-full">
         <div className="flex-1">
           {isDesigner && toolbar ? (

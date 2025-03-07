@@ -2,12 +2,16 @@
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
 import { Pilcrow } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { textStyleStore } from "@/stores/textStyleStore";
 import { TextStyle } from "@/lib/types";
 import { EmptyState } from "./typography/EmptyState";
 
-export const DesignerSidebar = () => {
+interface DesignerSidebarProps {
+  children?: ReactNode;
+}
+
+export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
   const [textStyles, setTextStyles] = useState<TextStyle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,6 +32,8 @@ export const DesignerSidebar = () => {
 
   return (
     <div className="w-64 bg-editor-sidebar border-l border-editor-border p-4">
+      {children}
+      
       <DesignerSidebarContainer 
         title="Styles" 
         menuOptions={[

@@ -25,30 +25,46 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
       <div className="flex items-center justify-between w-full">
         <div className="flex-1">
           {isDesigner && toolbar ? (
-            <div className="w-full">{toolbar}</div>
+            <div className="w-full flex items-center justify-between">
+              <div className="flex-1">
+                {toolbar}
+              </div>
+              {onTogglePreview && (
+                <div className="flex-shrink-0 p-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onTogglePreview}
+                    title={isPreviewVisible ? "Hide preview" : "Show preview"}
+                    className="ml-2"
+                  >
+                    {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    <span className="ml-2 hidden sm:inline">
+                      {isPreviewVisible ? "Hide Preview" : "Show Preview"}
+                    </span>
+                  </Button>
+                </div>
+              )}
+            </div>
           ) : children || (
-            <div className="flex items-center h-10 px-4">
+            <div className="flex items-center justify-between h-10 px-4">
               <span className="text-sm text-slate-500">Tool settings will appear here</span>
+              {isDesigner && onTogglePreview && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onTogglePreview}
+                  title={isPreviewVisible ? "Hide preview" : "Show preview"}
+                >
+                  {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  <span className="ml-2 hidden sm:inline">
+                    {isPreviewVisible ? "Hide Preview" : "Show Preview"}
+                  </span>
+                </Button>
+              )}
             </div>
           )}
         </div>
-        
-        {isDesigner && onTogglePreview && (
-          <div className="flex-shrink-0 p-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onTogglePreview}
-              title={isPreviewVisible ? "Hide preview" : "Show preview"}
-              className="ml-2"
-            >
-              {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-              <span className="ml-2 hidden sm:inline">
-                {isPreviewVisible ? "Hide Preview" : "Show Preview"}
-              </span>
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

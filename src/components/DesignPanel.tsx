@@ -1,4 +1,3 @@
-
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -22,7 +21,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   
-  // Add state for preview visibility
   const [isPreviewVisible, setIsPreviewVisible] = useState(() => {
     if (isStandalone) {
       return getPreviewVisibilityPreference();
@@ -30,7 +28,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     return true;
   });
   
-  // Save preference to localStorage when it changes
   useEffect(() => {
     if (isStandalone) {
       setPreviewVisibilityPreference(isPreviewVisible);
@@ -83,12 +80,10 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     }
   };
   
-  // Toggle preview visibility
   const handleTogglePreview = () => {
     setIsPreviewVisible(prev => !prev);
   };
   
-  // For designer role, create editor setup to get toolbar props
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
@@ -110,7 +105,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     );
   };
 
-  // Sample preview content for preview view
   const previewContent = `
     <h1>Preview of Your Document</h1>
     <p>This is a preview of how your document will look with the current styling. The content shown here is for demonstration purposes only.</p>
@@ -128,49 +122,48 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   
   if (isStandalone) {
     return (
-      <div className="w-full flex flex-row">
-        {/* Editor view - always visible */}
-        <div className={isPreviewVisible ? "w-1/2 bg-editor-panel overflow-auto border-r border-editor-border" : "w-full bg-editor-panel overflow-auto"}>
-          {isEditable && (
-            <div className="w-full">
-              <ToolSettingsMenuBar 
-                toolbar={isEditable ? renderToolbar() : undefined} 
-                isPreviewVisible={isPreviewVisible}
-                onTogglePreview={handleTogglePreview}
-              />
-            </div>
-          )}
-          <div className="p-4 md:p-8">
-            <div className="mx-auto">
-              <DocumentPreview 
-                content={designContent}
-                customStyles={customStyles}
-                isEditable={isEditable}
-                onContentChange={handleContentChange}
-                onElementSelect={handleElementSelect}
-                renderToolbarOutside={isEditable}
-              />
-            </div>
+      <div className="w-full flex flex-col">
+        {isEditable && (
+          <div className="w-full">
+            <ToolSettingsMenuBar 
+              toolbar={isEditable ? renderToolbar() : undefined} 
+              isPreviewVisible={isPreviewVisible}
+              onTogglePreview={handleTogglePreview}
+            />
           </div>
-        </div>
-        
-        {/* Preview panel - only visible when isPreviewVisible is true */}
-        {isPreviewVisible && (
-          <div className="w-1/2 bg-white overflow-auto">
+        )}
+        <div className="flex flex-row flex-1">
+          <div className={isPreviewVisible ? "w-1/2 bg-editor-panel overflow-auto border-r border-editor-border" : "w-full bg-editor-panel overflow-auto"}>
             <div className="p-4 md:p-8">
-              <div className="mb-3">
-                <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
-                <div 
-                  dangerouslySetInnerHTML={{ __html: previewContent }} 
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+              <div className="mx-auto">
+                <DocumentPreview 
+                  content={designContent}
+                  customStyles={customStyles}
+                  isEditable={isEditable}
+                  onContentChange={handleContentChange}
+                  onElementSelect={handleElementSelect}
+                  renderToolbarOutside={isEditable}
                 />
               </div>
             </div>
           </div>
-        )}
-        
-        {/* Sidebar - always on the right */}
-        <DesignerSidebar />
+          
+          {isPreviewVisible && (
+            <div className="w-1/2 bg-white overflow-auto">
+              <div className="p-4 md:p-8">
+                <div className="mb-3">
+                  <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: previewContent }} 
+                    className="p-4 bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DesignerSidebar />
+        </div>
       </div>
     );
   }

@@ -22,10 +22,10 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
   
   return (
     <div className="w-full bg-slate-50 border-b border-slate-200">
-      <div className="w-full mx-auto flex items-center justify-between">
+      <div className="flex items-center justify-between w-full">
         <div className="flex-1">
           {isDesigner && toolbar ? (
-            <div>{toolbar}</div>
+            <div className="w-full">{toolbar}</div>
           ) : children || (
             <div className="flex items-center h-10 px-4">
               <span className="text-sm text-slate-500">Tool settings will appear here</span>

@@ -1,4 +1,3 @@
-
 import { EditorContent } from '@tiptap/react';
 import { useState, useEffect } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
@@ -23,6 +22,7 @@ export const RichTextEditor = ({
   fixedToolbar = false,
   renderToolbarOutside = false
 }: RichTextEditorProps) => {
+  
   const {
     editor,
     currentFont,

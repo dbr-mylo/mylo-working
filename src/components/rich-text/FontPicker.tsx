@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Type } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const fonts = [
   { name: 'Inter', value: 'Inter' },
@@ -31,13 +32,17 @@ interface FontPickerProps {
 }
 
 export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
+  const dropdownWidth = isDesigner ? 'w-[220px]' : 'w-[180px]';
+  
   return (
     <div className={`flex items-center ${className || ''}`}>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-9 w-[180px] bg-white">
-          <div className="flex items-center gap-2">
-            <Type className="h-3.5 w-3.5" />
-            <span style={{ fontFamily: value }}>
+        <SelectTrigger className={`h-9 ${dropdownWidth} bg-white`}>
+          <div className="flex items-center gap-2 w-full">
+            <Type className="h-3.5 w-3.5 flex-shrink-0" />
+            <span style={{ fontFamily: value }} className="truncate">
               {value || 'Select Font'}
             </span>
           </div>
@@ -49,7 +54,9 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
               value={font.value}
               className="flex items-center"
             >
-              <span style={{ fontFamily: font.value }}>{font.name}</span>
+              <span style={{ fontFamily: font.value }} className="truncate">
+                {font.name}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>

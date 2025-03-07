@@ -10,8 +10,7 @@ import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
-
-const PREVIEW_PREFERENCE_KEY = "designerPreviewVisible";
+import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -26,9 +25,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   // Add state for preview visibility
   const [isPreviewVisible, setIsPreviewVisible] = useState(() => {
     if (isStandalone) {
-      // Get stored preference or default to true
-      const storedPreference = localStorage.getItem(PREVIEW_PREFERENCE_KEY);
-      return storedPreference ? storedPreference === "true" : true;
+      return getPreviewVisibilityPreference();
     }
     return true;
   });
@@ -36,7 +33,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   // Save preference to localStorage when it changes
   useEffect(() => {
     if (isStandalone) {
-      localStorage.setItem(PREVIEW_PREFERENCE_KEY, isPreviewVisible.toString());
+      setPreviewVisibilityPreference(isPreviewVisible);
     }
   }, [isPreviewVisible, isStandalone]);
   
@@ -115,8 +112,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   
   if (isStandalone) {
     return (
-      <div className="w-full flex">
-        <div className={`flex-1 bg-editor-panel overflow-auto ${!isPreviewVisible ? "w-full" : ""}`}>
+      <div className="w-full flex flex-row">
+        <div className={`${isPreviewVisible ? "flex-1" : "w-full"} bg-editor-panel overflow-auto`}>
           {isEditable && (
             <div className="w-full">
               <ToolSettingsMenuBar 
@@ -139,7 +136,11 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             </div>
           </div>
         </div>
-        {isPreviewVisible && <DesignerSidebar />}
+        {isPreviewVisible && (
+          <div className="w-64 border-l border-editor-border">
+            <DesignerSidebar />
+          </div>
+        )}
       </div>
     );
   }

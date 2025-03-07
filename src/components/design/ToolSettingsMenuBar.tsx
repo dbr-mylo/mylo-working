@@ -3,6 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ToolSettingsMenuBarProps {
   children?: React.ReactNode;
@@ -30,13 +31,13 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                 {toolbar}
               </div>
               {onTogglePreview && (
-                <div className="flex items-center h-full">
+                <div className="flex items-center h-full pr-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={onTogglePreview}
                     title={isPreviewVisible ? "Hide preview" : "Show preview"}
-                    className="ml-2"
+                    className={cn("ml-2 w-[140px] justify-center")}
                   >
                     {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                     <span className="ml-2 hidden sm:inline">
@@ -55,6 +56,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                   size="sm"
                   onClick={onTogglePreview}
                   title={isPreviewVisible ? "Hide preview" : "Show preview"}
+                  className="w-[140px] justify-center"
                 >
                   {isPreviewVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                   <span className="ml-2 hidden sm:inline">

@@ -67,7 +67,8 @@ export const RichTextEditor = ({
   return (
     <div className={`prose prose-sm max-w-none ${isDesigner ? 'designer-editor' : ''}`}>
       <EditorStyles />
-      <style jsx global>{`
+      <style>
+        {`
         /* Add specific styles for designer role editor */
         .designer-editor .ProseMirror {
           min-height: 11in;
@@ -93,7 +94,8 @@ export const RichTextEditor = ({
           z-index: 10;
           width: 100%;
         }
-      `}</style>
+        `}
+      </style>
       
       {!hideToolbar && !externalToolbar && (
         <div className={`editor-toolbar ${fixedToolbar ? 'fixed-toolbar' : ''}`}>

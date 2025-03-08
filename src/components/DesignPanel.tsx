@@ -139,7 +139,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                 <div className="mb-3">
                   <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
                   <div 
-                    dangerouslySetInnerHTML={{ __html: previewContent }} 
+                    dangerouslySetInnerHTML={{ __html: designContent }} 
                     className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
                   />
                 </div>

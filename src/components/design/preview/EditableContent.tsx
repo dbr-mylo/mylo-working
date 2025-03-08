@@ -27,9 +27,9 @@ export const EditableContent = ({
         content={content}
         onUpdate={onContentChange}
         isEditable={true}
-        hideToolbar={hideToolbar}
+        hideToolbar={false} // Always show toolbar for designers
         renderToolbarOutside={renderToolbarOutside}
-        externalToolbar={externalToolbar} // Pass the external toolbar flag
+        externalToolbar={externalToolbar}
       />
     );
   } 

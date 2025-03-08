@@ -50,33 +50,60 @@ export const EditorStyles = () => {
         padding-left: 6em;
       }
       
-      /* Important styles for color preservation */
-      .ProseMirror strong {
+      /* Comprehensive color preservation rules */
+      /* Base rule to ensure all elements inherit their parent's color */
+      .ProseMirror * {
         color: inherit;
       }
       
+      /* Make sure strong elements inherit color by default */
+      .ProseMirror strong {
+        color: inherit !important;
+      }
+      
+      /* Ensure span elements with color styles pass their color to children */
+      .ProseMirror span[style*="color"] * {
+        color: inherit !important;
+      }
+      
+      /* Special class for our custom bold extension */
       .ProseMirror .color-preserving-bold {
         font-weight: bold;
         color: inherit !important;
       }
       
-      /* Ensure that text style marks inherit colors properly */
-      .ProseMirror [style*="color"] strong,
-      .ProseMirror strong[style*="color"] {
-        color: inherit !important;
-      }
-      
-      /* Additional specific rules to ensure color inheritance */
-      .ProseMirror em[style*="color"],
+      /* Override any browser default for bold elements with color styles */
       .ProseMirror strong[style*="color"],
-      .ProseMirror span[style*="color"] strong,
-      .ProseMirror span[style*="color"] em {
+      .ProseMirror [style*="color"] strong {
         color: inherit !important;
       }
       
-      /* Special handling for nested formatting */
-      .ProseMirror [style*="color"] * {
-        color: inherit;
+      /* Ensure specific formatting combinations preserve color */
+      .ProseMirror em[style*="color"],
+      .ProseMirror span[style*="color"] em,
+      .ProseMirror span[style*="color"] strong,
+      .ProseMirror p[style*="color"] strong,
+      .ProseMirror p[style*="color"] em {
+        color: inherit !important;
+      }
+      
+      /* Highest specificity rule to ensure marks inside colored text */
+      .ProseMirror [style*="color"] mark,
+      .ProseMirror mark[style*="color"] {
+        background-color: transparent;
+        color: inherit !important;
+      }
+      
+      /* Force color inheritance for all inline elements, no exceptions */
+      .ProseMirror p[style*="color"] *,
+      .ProseMirror h1[style*="color"] *,
+      .ProseMirror h2[style*="color"] *,
+      .ProseMirror h3[style*="color"] *,
+      .ProseMirror h4[style*="color"] *,
+      .ProseMirror h5[style*="color"] *,
+      .ProseMirror h6[style*="color"] *,
+      .ProseMirror li[style*="color"] * {
+        color: inherit !important;
       }
       `}</style>
     </>

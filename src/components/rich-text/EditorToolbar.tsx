@@ -37,18 +37,22 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     const { color } = editor.getAttributes('textStyle');
     const currentColorValue = color || currentColor;
+    const isBoldActive = editor.isActive('bold');
     
-    console.log("Before bold toggle - Current color:", currentColorValue);
-    console.log("Is bold active before toggle:", editor.isActive('bold'));
+    console.log("Before bold toggle - Current color:", currentColorValue, "Bold active:", isBoldActive);
     
     editor.chain().focus().toggleBold().run();
     
-    console.log("After bold toggle - Is bold active:", editor.isActive('bold'));
+    editor.chain().focus().setColor(currentColorValue).run();
+    
+    console.log("After bold toggle - Color applied:", currentColorValue, "Bold active:", editor.isActive('bold'));
     
     setTimeout(() => {
-      editor.chain().focus().setColor(currentColorValue).run();
-      console.log("Color reapplied after bold toggle:", currentColorValue);
-    }, 0);
+      if (editor.isActive('textStyle') && !editor.getAttributes('textStyle').color) {
+        editor.chain().focus().setColor(currentColorValue).run();
+        console.log("Color reapplied after delay:", currentColorValue);
+      }
+    }, 10);
   };
 
   const preserveColorAfterFormatting = (formatCommand: () => void) => {
@@ -60,10 +64,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     formatCommand();
     
+    editor.chain().focus().setColor(colorToPreserve).run();
+    
     setTimeout(() => {
-      editor.chain().focus().setColor(colorToPreserve).run();
-      console.log("Color reapplied after formatting:", colorToPreserve);
-    }, 0);
+      if (editor.isActive('textStyle') && !editor.getAttributes('textStyle').color) {
+        editor.chain().focus().setColor(colorToPreserve).run();
+        console.log("Color reapplied after delay:", colorToPreserve);
+      }
+    }, 10);
   };
 
   const handleIndent = () => {

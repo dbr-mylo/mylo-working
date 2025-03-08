@@ -22,13 +22,40 @@ export const StyleInheritance = ({
 
   useEffect(() => {
     const fetchStyles = async () => {
-      const fetchedStyles = await textStyleStore.getTextStyles();
-      // Filter out the current style to prevent circular inheritance
-      setStyles(fetchedStyles.filter(style => style.id !== currentStyleId));
+      try {
+        const fetchedStyles = await textStyleStore.getTextStyles();
+        // Filter out the current style and any styles that have this style as their parent
+        // to prevent circular inheritance
+        const filteredStyles = fetchedStyles.filter(style => 
+          style.id !== currentStyleId && 
+          // Also filter out styles that would create circular dependencies
+          !hasCircularDependency(style.id, currentStyleId, fetchedStyles)
+        );
+        setStyles(filteredStyles);
+      } catch (error) {
+        console.error('Error fetching styles for inheritance:', error);
+        setStyles([]);
+      }
     };
 
     fetchStyles();
   }, [currentStyleId]);
+
+  // Function to check if selecting a style as parent would create a circular dependency
+  const hasCircularDependency = (
+    styleId: string,
+    potentialChildId: string | undefined,
+    allStyles: TextStyle[]
+  ): boolean => {
+    if (!potentialChildId || styleId === potentialChildId) return false;
+    
+    const style = allStyles.find(s => s.id === styleId);
+    if (!style || !style.parentId) return false;
+    
+    if (style.parentId === potentialChildId) return true;
+    
+    return hasCircularDependency(style.parentId, potentialChildId, allStyles);
+  };
 
   const handleSelectChange = (value: string) => {
     onChange(value === "none" ? undefined : value);

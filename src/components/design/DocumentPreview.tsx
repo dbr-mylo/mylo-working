@@ -1,4 +1,3 @@
-
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,8 +84,8 @@ export const DocumentPreview = ({
     if (!selectedElement) return;
     
     try {
-      const styles = await textStyleStore.getTextStyles();
-      const styleToApply = styles.find(s => s.id === styleId);
+      // Get the style with all inherited properties
+      const styleToApply = await textStyleStore.getStyleWithInheritance(styleId);
       
       if (!styleToApply) {
         toast({
@@ -107,6 +106,29 @@ export const DocumentPreview = ({
       
       if (styleToApply.textAlign) {
         selectedElement.style.textAlign = styleToApply.textAlign;
+      }
+      
+      if (styleToApply.textTransform) {
+        selectedElement.style.textTransform = styleToApply.textTransform;
+      }
+      
+      if (styleToApply.textDecoration) {
+        selectedElement.style.textDecoration = styleToApply.textDecoration;
+      }
+      
+      if (styleToApply.marginTop) {
+        selectedElement.style.marginTop = styleToApply.marginTop;
+      }
+      
+      if (styleToApply.marginBottom) {
+        selectedElement.style.marginBottom = styleToApply.marginBottom;
+      }
+      
+      // Apply any custom properties
+      if (styleToApply.customProperties) {
+        Object.entries(styleToApply.customProperties).forEach(([property, value]) => {
+          selectedElement.style[property as any] = value;
+        });
       }
       
       // Add a class based on the style selector if it exists and doesn't start with a dot

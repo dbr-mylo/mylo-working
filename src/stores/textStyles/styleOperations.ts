@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { TextStyle } from "@/lib/types";
 import { getLocalTextStyles, saveLocalTextStyle } from "./storage";
@@ -82,6 +81,12 @@ export const deleteTextStyle = async (id: string): Promise<void> => {
       throw new Error("Cannot delete the default style. Set another style as default first.");
     }
     
+    // Check if any styles inherit from this one
+    const childStyles = styles.filter(s => s.parentId === id);
+    if (childStyles.length > 0) {
+      throw new Error("Cannot delete a style that is used as a parent by other styles.");
+    }
+    
     const filteredStyles = styles.filter(s => s.id !== id);
     localStorage.setItem('text_styles', JSON.stringify(filteredStyles));
   } catch (error) {
@@ -155,5 +160,43 @@ export const getStylesWithParent = async (parentId: string): Promise<TextStyle[]
   } catch (error) {
     console.error('Error in getStylesWithParent:', error);
     return [];
+  }
+};
+
+export const getStyleWithInheritance = async (styleId: string): Promise<TextStyle | null> => {
+  try {
+    const styles = getLocalTextStyles();
+    const style = styles.find(s => s.id === styleId);
+    
+    if (!style) return null;
+    
+    // If this style doesn't inherit from a parent, return it as is
+    if (!style.parentId) return style;
+    
+    // Get the parent style with its inherited properties
+    const parentStyle = await getStyleWithInheritance(style.parentId);
+    
+    if (!parentStyle) return style;
+    
+    // Create a new style object that combines the parent's properties with this style's overrides
+    const combinedStyle: TextStyle = {
+      ...parentStyle,
+      ...style,
+      // Keep the original ID, name, selector, and description
+      id: style.id,
+      name: style.name,
+      selector: style.selector,
+      description: style.description,
+      isDefault: style.isDefault,
+      isSystem: style.isSystem,
+      isUsed: style.isUsed,
+      created_at: style.created_at,
+      updated_at: style.updated_at
+    };
+    
+    return combinedStyle;
+  } catch (error) {
+    console.error('Error in getStyleWithInheritance:', error);
+    return null;
   }
 };

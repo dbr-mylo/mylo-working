@@ -61,11 +61,12 @@ export const FontFamily = Extension.create({
     ];
   },
   
-  // Fix the command implementation to properly match TipTap's expected API
+  // Properly implement addCommands to match TipTap's API requirement
   addCommands() {
     return {
-      setFontFamily: (fontFamily) => ({ commands }) => {
-        return commands.setMark('textStyle', { fontFamily });
+      // Return function that directly returns the command execution
+      setFontFamily: (fontFamily) => ({ chain }) => {
+        return chain().setMark('textStyle', { fontFamily }).run();
       },
     };
   },

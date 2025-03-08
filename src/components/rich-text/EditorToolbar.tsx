@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -27,6 +28,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleFontChange = (font: string) => {
     console.log(`EditorToolbar: Font selected: ${font}`);
     onFontChange(font);
+  };
+
+  const handleBoldClick = () => {
+    // Toggle bold
+    editor.chain().focus().toggleBold().run();
+    
+    // Reapply color if bold is active and color is set
+    if (editor.isActive('bold') && currentColor !== '#000000') {
+      editor.chain().focus().setColor(currentColor).run();
+    }
   };
 
   const handleIndent = () => {
@@ -72,7 +83,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
+        onClick={handleBoldClick}
         className={editor.isActive('bold') ? 'bg-accent' : ''}
       >
         <Bold className="h-4 w-4" />

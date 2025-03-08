@@ -19,13 +19,33 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   
+  // Custom extension to preserve color when applying other marks
+  const ColorPreservationExtension = StarterKit.configure({
+    bulletList: false,
+    orderedList: false,
+    listItem: false,
+    bold: {
+      // Override the toggle command to preserve color
+      toggleMark: ({ editor, mark }) => {
+        const attributes = editor.getAttributes('textStyle');
+        const { color } = attributes;
+        
+        // Execute the original toggle bold
+        const toggleResult = editor.chain().toggleBold().run();
+        
+        // If color exists and bold was just applied, reapply color to the bold text
+        if (color && editor.isActive('bold')) {
+          editor.chain().setColor(color).run();
+        }
+        
+        return toggleResult;
+      }
+    }
+  });
+  
   const editor = useTipTapEditor({
     extensions: [
-      StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false, // Disable the default listItem to avoid duplication
-      }),
+      ColorPreservationExtension,
       TextStyle,
       FontFamily,
       ListItem, // Add our custom listItem

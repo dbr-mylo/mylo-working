@@ -26,10 +26,6 @@ export const StyleForm = ({
   const {
     name,
     setName,
-    selector,
-    setSelector,
-    description,
-    setDescription,
     parentId,
     handleParentChange,
     styles,
@@ -40,16 +36,14 @@ export const StyleForm = ({
     externalStyleChange
   });
 
-  const [activeTab, setActiveTab] = useState("typography");
-
   const handleSubmit = (e: React.FormEvent) => {
     if (!onSubmit) return;
     
     e.preventDefault();
     onSubmit({
       name,
-      selector,
-      description,
+      selector: "", // Providing empty string as default
+      description: "", // Providing empty string as default
       parentId,
       ...styles,
     });
@@ -71,23 +65,18 @@ export const StyleForm = ({
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 mb-4">
+        <TabsList className="w-full grid grid-cols-2 mb-4">
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
           <TabsTrigger value="typography">Typography</TabsTrigger>
-          <TabsTrigger value="spacing">Advanced</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basic" className="space-y-4">
           {showFormFields && (
             <StyleFormMetadata
               name={name}
-              selector={selector}
-              description={description}
               parentId={parentId}
               currentStyleId={initialValues?.id}
               onNameChange={setName}
-              onSelectorChange={setSelector}
-              onDescriptionChange={setDescription}
               onParentChange={handleParentChange}
             />
           )}
@@ -99,20 +88,14 @@ export const StyleForm = ({
             onStyleChange={handleStyleChange}
           />
         </TabsContent>
-        
-        <TabsContent value="spacing" className="space-y-4">
-          <div className="text-sm text-muted-foreground text-center py-8">
-            Advanced settings will be available in a future update
-          </div>
-        </TabsContent>
       </Tabs>
 
       {showFormFields && (
         <div className="flex justify-end space-x-2 pt-6 border-t mt-6">
           <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
             name,
-            selector,
-            description,
+            selector: "",
+            description: "",
             parentId,
             ...styles,
           }) : undefined}>

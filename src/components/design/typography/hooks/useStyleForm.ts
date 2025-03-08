@@ -14,8 +14,6 @@ export const useStyleForm = ({
 }: UseStyleFormProps) => {
   // State for using the form in "controlled mode"
   const [name, setName] = useState(initialValues?.name || "");
-  const [selector, setSelector] = useState(initialValues?.selector || "");
-  const [description, setDescription] = useState(initialValues?.description || "");
   const [parentId, setParentId] = useState(initialValues?.parentId);
   
   // Internal styles state when not in controlled mode
@@ -36,8 +34,6 @@ export const useStyleForm = ({
   useEffect(() => {
     if (initialValues && !externalStyles) {
       setName(initialValues.name || "");
-      setSelector(initialValues.selector || "");
-      setDescription(initialValues.description || "");
       setParentId(initialValues.parentId);
       
       setInternalStyles({
@@ -72,10 +68,6 @@ export const useStyleForm = ({
   return {
     name,
     setName,
-    selector, 
-    setSelector,
-    description,
-    setDescription,
     parentId,
     handleParentChange,
     styles,

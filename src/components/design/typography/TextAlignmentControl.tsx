@@ -1,8 +1,8 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Type, AlignJustify } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
 
 interface TextAlignmentControlProps {
   value: string;
@@ -10,30 +10,36 @@ interface TextAlignmentControlProps {
 }
 
 export const TextAlignmentControl = ({ value, onChange }: TextAlignmentControlProps) => {
-  // Text align options
-  const textAlignOptions = [
-    { value: "left", label: "Left", icon: <ArrowLeft className="h-4 w-4" /> },
-    { value: "center", label: "Center", icon: <Type className="h-4 w-4" /> },
-    { value: "right", label: "Right", icon: <ArrowRight className="h-4 w-4" /> },
-    { value: "justify", label: "Justify", icon: <AlignJustify className="h-4 w-4" /> }
+  const alignOptions = [
+    { value: "left", icon: AlignLeft, label: "Left" },
+    { value: "center", icon: AlignCenter, label: "Center" },
+    { value: "right", icon: AlignRight, label: "Right" },
+    { value: "justify", icon: AlignJustify, label: "Justify" }
   ];
 
   return (
     <div>
-      <Label className="text-xs mb-1 block">Text Align</Label>
-      <div className="flex gap-2">
-        {textAlignOptions.map(option => (
-          <Button
-            key={option.value}
-            variant={value === option.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => onChange(option.value)}
-            title={option.label}
-          >
-            {option.icon}
-          </Button>
-        ))}
-      </div>
+      <Label htmlFor="text-align" className="text-xs block mb-1">Text Alignment</Label>
+      <ToggleGroup 
+        type="single" 
+        value={value} 
+        onValueChange={(val) => val && onChange(val)}
+        className="justify-start"
+      >
+        {alignOptions.map((option) => {
+          const Icon = option.icon;
+          return (
+            <ToggleGroupItem 
+              key={option.value} 
+              value={option.value}
+              aria-label={option.label}
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <Icon className="h-4 w-4" />
+            </ToggleGroupItem>
+          );
+        })}
+      </ToggleGroup>
     </div>
   );
 };

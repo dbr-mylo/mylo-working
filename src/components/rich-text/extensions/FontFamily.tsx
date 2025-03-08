@@ -63,8 +63,8 @@ export const FontFamily = Extension.create({
   
   addCommands() {
     return {
-      setFontFamily: (fontFamily) => ({ editor }) => {
-        return editor.commands.setMark('textStyle', { fontFamily });
+      setFontFamily: (fontFamily) => ({ chain }) => {
+        return chain().setMark('textStyle', { fontFamily }).run();
       },
     };
   },

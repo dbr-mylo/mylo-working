@@ -56,25 +56,32 @@ export const EditorStyles = () => {
         color: inherit;
       }
       
-      /* Make sure strong elements inherit color by default */
-      .ProseMirror strong {
-        color: inherit !important;
-      }
-      
-      /* Ensure span elements with color styles pass their color to children */
-      .ProseMirror span[style*="color"] * {
-        color: inherit !important;
-      }
-      
       /* Special class for our custom bold extension */
       .ProseMirror .color-preserving-bold {
         font-weight: bold;
         color: inherit !important;
       }
       
+      /* Force color inheritance for all types of bold elements */
+      .ProseMirror strong,
+      .ProseMirror b {
+        color: inherit !important;
+        font-weight: bold;
+      }
+      
+      /* Ensure span elements with color styles pass their color to bold children */
+      .ProseMirror span[style*="color"] strong,
+      .ProseMirror span[style*="color"] b,
+      .ProseMirror strong[style*="color"] span,
+      .ProseMirror b[style*="color"] span {
+        color: inherit !important;
+      }
+      
       /* Override any browser default for bold elements with color styles */
       .ProseMirror strong[style*="color"],
-      .ProseMirror [style*="color"] strong {
+      .ProseMirror [style*="color"] strong,
+      .ProseMirror b[style*="color"],
+      .ProseMirror [style*="color"] b {
         color: inherit !important;
       }
       
@@ -83,7 +90,8 @@ export const EditorStyles = () => {
       .ProseMirror span[style*="color"] em,
       .ProseMirror span[style*="color"] strong,
       .ProseMirror p[style*="color"] strong,
-      .ProseMirror p[style*="color"] em {
+      .ProseMirror p[style*="color"] em,
+      .ProseMirror p[style*="color"] b {
         color: inherit !important;
       }
       
@@ -103,6 +111,21 @@ export const EditorStyles = () => {
       .ProseMirror h5[style*="color"] *,
       .ProseMirror h6[style*="color"] *,
       .ProseMirror li[style*="color"] * {
+        color: inherit !important;
+      }
+      
+      /* Specific rule for bold and italic elements with inline styles */
+      .ProseMirror span[style*="color"] strong,
+      .ProseMirror strong[style*="color"],
+      .ProseMirror span[style*="color"] b,
+      .ProseMirror b[style*="color"] {
+        color: inherit !important;
+      }
+      
+      /* Ensure that the TipTap color-preserving-bold class always inherits color */
+      .ProseMirror .color-preserving-bold[style*="color"],
+      .ProseMirror span[style*="color"] .color-preserving-bold,
+      .ProseMirror p[style*="color"] .color-preserving-bold {
         color: inherit !important;
       }
       `}</style>

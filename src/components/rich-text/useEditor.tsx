@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -54,6 +55,8 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onUpdate(editor.getHTML());
+      // Let's log the HTML on each update to check color preservation
+      console.log("Editor HTML on update:", editor.getHTML());
     },
   });
 
@@ -71,6 +74,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
       
       // If there's bold text selected, ensure it keeps the new color
       if (editor.isActive('bold')) {
+        console.log("Bold is active, reapplying color:", color);
         // Toggle bold off and on to refresh the styling
         editor.chain().focus().toggleBold().toggleBold().run();
         // Re-apply color to make sure it sticks
@@ -86,16 +90,23 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
         const { color } = editor.getAttributes('textStyle');
         if (color) {
           setCurrentColor(color);
+          console.log("Color state updated to:", color);
         }
       };
       
       // Add more detailed logging for debugging
       const logStyleChanges = () => {
-        console.log("Selection update - textStyle attrs:", editor.getAttributes('textStyle'));
-        console.log("Is bold active:", editor.isActive('bold'));
-        if (editor.isActive('bold')) {
-          console.log("Bold attrs:", editor.getAttributes('bold'));
-        }
+        const textStyleAttrs = editor.getAttributes('textStyle');
+        const isBoldActive = editor.isActive('bold');
+        const boldAttrs = isBoldActive ? editor.getAttributes('bold') : 'not active';
+        const html = editor.getHTML();
+        
+        console.log("Style change detected:", {
+          textStyle: textStyleAttrs,
+          isBold: isBoldActive,
+          boldAttrs,
+          selectionHtml: html.substring(0, 100) + (html.length > 100 ? '...' : '')
+        });
       };
       
       editor.on('selectionUpdate', updateColorState);

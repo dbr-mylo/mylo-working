@@ -39,18 +39,26 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     const currentColorValue = color || currentColor;
     const isBoldActive = editor.isActive('bold');
     
-    console.log("Before bold toggle - Current color:", currentColorValue, "Bold active:", isBoldActive);
+    console.log("Bold toggle - Before:", { 
+      currentColor: currentColorValue, 
+      isBoldActive: isBoldActive,
+      selectionHTML: editor.getHTML().substring(0, 100) 
+    });
     
     editor.chain().focus().toggleBold().run();
     
     editor.chain().focus().setColor(currentColorValue).run();
     
-    console.log("After bold toggle - Color applied:", currentColorValue, "Bold active:", editor.isActive('bold'));
+    console.log("Bold toggle - After:", { 
+      currentColor: currentColorValue, 
+      isBoldActive: editor.isActive('bold'),
+      selectionHTML: editor.getHTML().substring(0, 100)
+    });
     
     setTimeout(() => {
       if (editor.isActive('textStyle') && !editor.getAttributes('textStyle').color) {
         editor.chain().focus().setColor(currentColorValue).run();
-        console.log("Color reapplied after delay:", currentColorValue);
+        console.log("Bold toggle - Color reapplied after delay:", currentColorValue);
       }
     }, 10);
   };
@@ -60,16 +68,28 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     const { color } = editor.getAttributes('textStyle');
     const colorToPreserve = color || currentColor;
-    console.log("Preserving color for formatting:", colorToPreserve);
+    const selectionBefore = editor.state.selection;
+    const htmlBefore = editor.getHTML();
+    
+    console.log("Formatting - Before:", { 
+      colorToPreserve, 
+      selection: JSON.stringify(selectionBefore),
+      htmlPreview: htmlBefore.substring(0, 100)
+    });
     
     formatCommand();
     
     editor.chain().focus().setColor(colorToPreserve).run();
     
+    console.log("Formatting - After:", { 
+      colorApplied: colorToPreserve,
+      htmlPreview: editor.getHTML().substring(0, 100)
+    });
+    
     setTimeout(() => {
       if (editor.isActive('textStyle') && !editor.getAttributes('textStyle').color) {
         editor.chain().focus().setColor(colorToPreserve).run();
-        console.log("Color reapplied after delay:", colorToPreserve);
+        console.log("Formatting - Color reapplied after delay:", colorToPreserve);
       }
     }, 10);
   };
@@ -137,7 +157,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        onClick={() => preserveColorAfterFormatting(() => editor.chain().focus().toggleBulletList().run())}
         className={editor.isActive('bulletList') ? 'bg-accent' : ''}
       >
         <List className="h-4 w-4" />
@@ -145,7 +165,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        onClick={() => preserveColorAfterFormatting(() => editor.chain().focus().toggleOrderedList().run())}
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />

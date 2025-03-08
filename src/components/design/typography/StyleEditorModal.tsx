@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
@@ -53,9 +53,6 @@ export const StyleEditorModal = ({
           <DialogTitle className="text-xl font-semibold">
             {style ? `Edit Style: ${style.name}` : "Create New Style"}
           </DialogTitle>
-          <DialogDescription>
-            {style ? "Modify the existing text style properties" : "Configure a new text style for your document"}
-          </DialogDescription>
         </DialogHeader>
         
         <div className="px-6 pb-6">

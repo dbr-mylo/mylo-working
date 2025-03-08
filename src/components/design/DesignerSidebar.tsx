@@ -43,7 +43,7 @@ export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
         <div className="mb-2">
           <Button 
             variant="outline" 
-            size="sm" 
+            size="xs" 
             className="w-full justify-start" 
             onClick={handleNewStyle}
           >

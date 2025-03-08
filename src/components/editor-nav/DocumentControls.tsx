@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Save, FolderOpen } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,7 @@ export const DocumentControls = ({
   
   const isDesigner = role === "designer";
   const itemType = isDesigner ? "template" : "document";
+  const buttonSize = isDesigner ? "xs" : "sm";
 
   const handleLoadDocument = (doc: Document) => {
     if (onLoadDocument) {
@@ -76,7 +78,7 @@ export const DocumentControls = ({
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
-            size="sm" 
+            size={buttonSize} 
             className="flex items-center gap-2"
             disabled={isLoadingDocs}
           >
@@ -106,7 +108,7 @@ export const DocumentControls = ({
 
       <Button 
         variant="outline" 
-        size="sm" 
+        size={buttonSize} 
         className="flex items-center gap-2"
         onClick={handleSave}
         disabled={isSaving}

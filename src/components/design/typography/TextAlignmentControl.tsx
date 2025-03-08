@@ -32,7 +32,7 @@ export const TextAlignmentControl = ({ value, onChange }: TextAlignmentControlPr
           <Button
             key={option.value}
             variant={value === option.value ? "default" : "outline"}
-            size="sm"
+            size="xs"
             onClick={(e) => handleButtonClick(option.value, e)}
             title={option.label}
             type="button" // Explicitly set type to button to prevent form submission

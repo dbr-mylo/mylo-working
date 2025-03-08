@@ -32,8 +32,8 @@ export const DesignerSidebarContainer = ({
         {menuOptions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="h-6 w-6 inline-flex items-center justify-center rounded-md hover:bg-accent transition-colors">
-                <MoreVertical className="h-3.5 w-3.5" />
+              <button className="h-5 w-5 inline-flex items-center justify-center rounded-md hover:bg-accent transition-colors">
+                <MoreVertical className="h-3 w-3" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

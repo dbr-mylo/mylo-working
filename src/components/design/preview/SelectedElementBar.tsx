@@ -13,7 +13,7 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle }: SelectedEl
 
   return (
     <div className="mb-4 flex justify-between items-center bg-background p-2 rounded-md">
-      <div className="text-sm">
+      <div className="text-xs">
         <span className="font-medium">Selected: </span>
         <span className="text-muted-foreground">{selectedElement.tagName.toLowerCase()}</span>
       </div>

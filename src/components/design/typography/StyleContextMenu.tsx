@@ -62,12 +62,12 @@ export const StyleContextMenu = ({
         left: `${adjustedPosition.x}px`,
       }}
     >
-      <Card className="w-48 p-1 text-sm">
+      <Card className="w-48 p-1 text-xs">
         <button
           className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
           onClick={handleEditClick}
         >
-          <Edit className="h-4 w-4" />
+          <Edit className="h-3.5 w-3.5" />
           Edit Style
         </button>
         <button
@@ -75,7 +75,7 @@ export const StyleContextMenu = ({
           onClick={handleDuplicateClick}
           disabled={style.isSystem}
         >
-          <Copy className="h-4 w-4" />
+          <Copy className="h-3.5 w-3.5" />
           Duplicate
         </button>
         <button
@@ -83,7 +83,7 @@ export const StyleContextMenu = ({
           onClick={handleSetDefaultClick}
           disabled={style.isDefault}
         >
-          <Check className="h-4 w-4" />
+          <Check className="h-3.5 w-3.5" />
           Set as Default
         </button>
         <hr className="my-1" />
@@ -92,7 +92,7 @@ export const StyleContextMenu = ({
           onClick={handleDeleteClick}
           disabled={style.isSystem || style.isDefault}
         >
-          <Trash className="h-4 w-4" />
+          <Trash className="h-3.5 w-3.5" />
           Delete
         </button>
       </Card>

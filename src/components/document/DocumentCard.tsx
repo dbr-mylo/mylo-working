@@ -22,6 +22,8 @@ export const DocumentCard = ({
     return new Date(dateString).toLocaleString();
   };
 
+  const buttonSize = isDesigner ? "xs" : "icon";
+  
   return (
     <Card 
       key={document.id} 
@@ -40,8 +42,8 @@ export const DocumentCard = ({
             {isDesigner && (
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-gray-500 hover:bg-blue-100 hover:text-blue-600"
+                size={buttonSize}
+                className={buttonSize === "xs" ? "h-7 w-7 p-0 text-gray-500 hover:bg-blue-100 hover:text-blue-600" : "h-8 w-8 text-gray-500 hover:bg-blue-100 hover:text-blue-600"}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect(document.id);
@@ -53,8 +55,8 @@ export const DocumentCard = ({
             )}
             <Button 
               variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-gray-500 hover:bg-red-100 hover:text-red-600"
+              size={buttonSize} 
+              className={buttonSize === "xs" ? "h-7 w-7 p-0 text-gray-500 hover:bg-red-100 hover:text-red-600" : "h-8 w-8 text-gray-500 hover:bg-red-100 hover:text-red-600"}
               onClick={(e) => onDelete(e, document.id)}
               title={`Delete ${isDesigner ? "template" : "document"}`}
             >

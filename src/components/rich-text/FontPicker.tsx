@@ -36,9 +36,14 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   const isDesigner = role === "designer";
   const dropdownWidth = isDesigner ? 'w-[220px]' : 'w-[180px]';
   
+  const handleFontChange = (newFont: string) => {
+    console.log("FontPicker: Font selected:", newFont);
+    onChange(newFont);
+  };
+  
   return (
     <div className={`flex items-center ${className || ''}`}>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={handleFontChange}>
         <SelectTrigger className={`h-9 ${dropdownWidth} bg-white`}>
           <div className="flex items-center gap-2 w-full">
             <Type className="h-3.5 w-3.5 flex-shrink-0" />

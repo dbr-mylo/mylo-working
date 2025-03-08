@@ -25,6 +25,12 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     return null;
   }
 
+  const handleFontChange = (font: string) => {
+    onFontChange(font);
+    // Add a console log to verify font change was triggered
+    console.log(`Font changed to: ${font}`);
+  };
+
   const handleIndent = () => {
     if (editor) {
       if (editor.isActive('bulletList')) {
@@ -63,7 +69,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
 
   return (
     <div className="flex items-center gap-2 py-2 px-4 border-b border-editor-border bg-white">
-      <FontPicker value={currentFont} onChange={onFontChange} />
+      <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       <Button
         variant="outline"

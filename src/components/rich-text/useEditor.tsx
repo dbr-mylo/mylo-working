@@ -40,26 +40,20 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
     },
   });
 
-  useEffect(() => {
-    if (editor && currentFont) {
-      editor.chain().focus().setMark('textStyle', { fontFamily: currentFont }).run();
-    }
-  }, [currentFont, editor]);
-
-  useEffect(() => {
-    if (editor && currentColor) {
-      editor.chain().focus().setColor(currentColor).run();
-    }
-  }, [currentColor, editor]);
+  // Remove the ineffective useEffect hooks and directly apply styles in the handlers
 
   const handleFontChange = (font: string) => {
     setCurrentFont(font);
-    editor?.chain().focus().setMark('textStyle', { fontFamily: font }).run();
+    if (editor) {
+      editor.chain().focus().setFontFamily(font).run();
+    }
   };
 
   const handleColorChange = (color: string) => {
     setCurrentColor(color);
-    editor?.chain().focus().setColor(color).run();
+    if (editor) {
+      editor.chain().focus().setColor(color).run();
+    }
   };
 
   return {

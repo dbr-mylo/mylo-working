@@ -41,7 +41,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                     className="flex items-center gap-2"
                   >
                     {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    <span className="ml-1">Preview</span>
+                    Preview
                   </Button>
                 </div>
               )}
@@ -58,7 +58,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                   className="flex items-center gap-2"
                 >
                   {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  <span className="ml-1">Preview</span>
+                  Preview
                 </Button>
               )}
             </div>

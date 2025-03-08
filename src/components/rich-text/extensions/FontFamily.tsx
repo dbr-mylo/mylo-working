@@ -62,11 +62,9 @@ export const FontFamily = Extension.create({
   },
   
   addCommands() {
-    // Fix for TypeScript error - match the expected command structure
     return {
-      setFontFamily: (fontFamily) => ({ chain }) => {
-        // Use the chain directly to set the textStyle mark
-        return chain().setMark('textStyle', { fontFamily }).run();
+      setFontFamily: (fontFamily) => ({ editor }) => {
+        return editor.commands.setMark('textStyle', { fontFamily });
       },
     };
   },

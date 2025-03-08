@@ -3,59 +3,74 @@ import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Card } from "@/components/ui/card";
-import { Paintbrush, Pilcrow } from "lucide-react";
+import { Paintbrush, Check } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface StyleApplicatorProps {
   onApplyStyle: (styleId: string) => void;
+  selectedElement?: HTMLElement | null;
 }
 
-export const StyleApplicator = ({ onApplyStyle }: StyleApplicatorProps) => {
+export const StyleApplicator = ({ onApplyStyle, selectedElement }: StyleApplicatorProps) => {
   const [styles, setStyles] = useState<TextStyle[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const loadStyles = async () => {
-      const textStyles = await textStyleStore.getTextStyles();
-      setStyles(textStyles);
+    const fetchStyles = async () => {
+      const fetchedStyles = await textStyleStore.getTextStyles();
+      setStyles(fetchedStyles);
     };
-    
-    loadStyles();
+
+    fetchStyles();
   }, []);
 
-  const handleApplyStyle = (styleId: string) => {
-    onApplyStyle(styleId);
-    setIsOpen(false);
-  };
+  if (!selectedElement) {
+    return null;
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+        >
           <Paintbrush className="h-4 w-4" />
-          Apply Style
+          <span>Apply Style</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-56 p-2">
-        <div className="space-y-1 max-h-60 overflow-y-auto">
-          {styles.length === 0 ? (
-            <p className="text-xs text-muted-foreground p-2">
-              No styles available
-            </p>
-          ) : (
-            styles.map((style) => (
-              <Card
-                key={style.id}
-                className="p-2 hover:bg-accent cursor-pointer flex items-center gap-2"
-                onClick={() => handleApplyStyle(style.id)}
-              >
-                <Pilcrow className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs">{style.name}</span>
-              </Card>
-            ))
-          )}
-        </div>
+      <PopoverContent className="w-64 p-2">
+        <h4 className="font-medium text-sm mb-2">Select Style to Apply</h4>
+        <ScrollArea className="h-[300px] pr-3">
+          <div className="space-y-1">
+            {styles.length > 0 ? (
+              styles.map((style) => (
+                <Button
+                  key={style.id}
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between text-left font-normal"
+                  onClick={() => {
+                    onApplyStyle(style.id);
+                    setIsOpen(false);
+                  }}
+                >
+                  <div className="flex flex-col items-start">
+                    <span>{style.name}</span>
+                    <span className="text-xs text-muted-foreground">{style.selector}</span>
+                  </div>
+                  <Check className="h-4 w-4 opacity-0 group-hover:opacity-50" />
+                </Button>
+              ))
+            ) : (
+              <p className="text-xs text-center py-4 text-muted-foreground">
+                No styles available. Create a style first.
+              </p>
+            )}
+          </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );

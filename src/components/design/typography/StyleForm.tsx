@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { TextStyle, TypographyStyles, StyleFormData } from "@/lib/types";
 import { FontFamilyControl } from "./FontFamilyControl";
@@ -7,6 +8,7 @@ import { ColorControl } from "./ColorControl";
 import { SpacingControl } from "./SpacingControl";
 import { TextAlignmentControl } from "./TextAlignmentControl";
 import { TextPreview } from "./TextPreview";
+import { StyleInheritance } from "./StyleInheritance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +32,7 @@ export const StyleForm = ({
   const [name, setName] = useState(initialValues?.name || "");
   const [selector, setSelector] = useState(initialValues?.selector || "");
   const [description, setDescription] = useState(initialValues?.description || "");
+  const [parentId, setParentId] = useState(initialValues?.parentId);
   
   // Internal styles state when not in controlled mode
   const [internalStyles, setInternalStyles] = useState<TypographyStyles>({
@@ -51,6 +54,7 @@ export const StyleForm = ({
       setName(initialValues.name || "");
       setSelector(initialValues.selector || "");
       setDescription(initialValues.description || "");
+      setParentId(initialValues.parentId);
       
       setInternalStyles({
         fontFamily: initialValues.fontFamily || "Inter",
@@ -77,6 +81,10 @@ export const StyleForm = ({
     }
   };
 
+  const handleParentChange = (newParentId: string | undefined) => {
+    setParentId(newParentId);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     if (!onSubmit) return;
     
@@ -85,6 +93,7 @@ export const StyleForm = ({
       name,
       selector,
       description,
+      parentId,
       ...styles,
     });
   };
@@ -134,6 +143,13 @@ export const StyleForm = ({
               placeholder="Main heading style"
             />
           </div>
+          
+          {/* Style Inheritance */}
+          <StyleInheritance
+            currentStyleId={initialValues?.id}
+            parentId={parentId}
+            onChange={handleParentChange}
+          />
         </>
       )}
 

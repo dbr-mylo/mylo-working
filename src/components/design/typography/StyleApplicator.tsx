@@ -5,7 +5,7 @@ import { textStyleStore } from "@/stores/textStyles";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
-import { PaintBrush, Pilcrow } from "lucide-react";
+import { Paintbrush, Pilcrow } from "lucide-react";
 
 interface StyleApplicatorProps {
   onApplyStyle: (styleId: string) => void;
@@ -33,7 +33,7 @@ export const StyleApplicator = ({ onApplyStyle }: StyleApplicatorProps) => {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
-          <PaintBrush className="h-4 w-4" />
+          <Paintbrush className="h-4 w-4" />
           Apply Style
         </Button>
       </PopoverTrigger>

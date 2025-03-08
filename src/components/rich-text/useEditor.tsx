@@ -23,23 +23,16 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   
   // Create a custom Bold extension that preserves color
   const ColorPreservingBold = Bold.extend({
-    addKeyboardShortcuts() {
+    addAttributes() {
       return {
-        'Mod-b': () => {
-          const { color } = this.editor.getAttributes('textStyle');
-          
-          // First toggle bold
-          this.editor.chain().toggleBold().run();
-          
-          // Reapply the color if it exists and bold is now active
-          if (color && this.editor.isActive('bold')) {
-            this.editor.chain().setColor(color).run();
-          }
-          
-          return true;
+        ...this.parent?.(),
+        preserveColor: {
+          default: null,
+          parseHTML: () => null,
+          renderHTML: () => ({}),
         },
-      }
-    }
+      };
+    },
   });
   
   const editor = useTipTapEditor({

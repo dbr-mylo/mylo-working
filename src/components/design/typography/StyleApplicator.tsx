@@ -1,12 +1,11 @@
 
-import { useState, useEffect } from "react";
-import { TextStyle } from "@/lib/types";
-import { textStyleStore } from "@/stores/textStyles";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Paintbrush, Check } from "lucide-react";
+import { Paintbrush } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { StyleListItem } from "./StyleListItem";
+import { useTextStyles } from "./hooks/useTextStyles";
 
 interface StyleApplicatorProps {
   onApplyStyle: (styleId: string) => void;
@@ -14,27 +13,8 @@ interface StyleApplicatorProps {
 }
 
 export const StyleApplicator = ({ onApplyStyle, selectedElement }: StyleApplicatorProps) => {
-  const [styles, setStyles] = useState<TextStyle[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchStyles = async () => {
-      try {
-        const fetchedStyles = await textStyleStore.getTextStyles();
-        setStyles(fetchedStyles);
-      } catch (error) {
-        console.error("Error loading text styles:", error);
-        toast({
-          title: "Error loading styles",
-          description: "Could not load text styles",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchStyles();
-  }, [toast]);
+  const { styles, isLoading } = useTextStyles();
 
   if (!selectedElement) {
     return null;
@@ -61,21 +41,17 @@ export const StyleApplicator = ({ onApplyStyle, selectedElement }: StyleApplicat
         <h4 className="font-medium text-sm mb-2">Select Style to Apply</h4>
         <ScrollArea className="h-[300px] pr-3">
           <div className="space-y-1">
-            {styles.length > 0 ? (
+            {isLoading ? (
+              <p className="text-xs text-center py-4 text-muted-foreground">
+                Loading styles...
+              </p>
+            ) : styles.length > 0 ? (
               styles.map((style) => (
-                <Button
-                  key={style.id}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-between text-left font-normal"
-                  onClick={() => handleApplyStyle(style.id)}
-                >
-                  <div className="flex flex-col items-start">
-                    <span>{style.name}</span>
-                    <span className="text-xs text-muted-foreground">{style.selector || 'No selector'}</span>
-                  </div>
-                  <Check className="h-4 w-4 opacity-0 group-hover:opacity-50" />
-                </Button>
+                <StyleListItem 
+                  key={style.id} 
+                  style={style} 
+                  onSelect={handleApplyStyle} 
+                />
               ))
             ) : (
               <p className="text-xs text-center py-4 text-muted-foreground">

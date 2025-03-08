@@ -44,7 +44,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
     console.log(`Setting font to: ${font}`);
     setCurrentFont(font);
     if (editor) {
-      // Use setMark directly since setFontFamily is not recognized properly by TypeScript
+      // Use setMark directly since we removed the custom command
       editor.chain().focus().setMark('textStyle', { fontFamily: font }).run();
       console.log(`Font applied in editor: ${font}`);
     }

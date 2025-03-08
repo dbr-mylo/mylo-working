@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -27,6 +28,20 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleFontChange = (font: string) => {
     console.log(`EditorToolbar: Font selected: ${font}`);
     onFontChange(font);
+  };
+
+  const handleBulletList = () => {
+    if (editor) {
+      editor.chain().focus().toggleBulletList().run();
+      console.log('Toggled bullet list', editor.isActive('bulletList'));
+    }
+  };
+
+  const handleOrderedList = () => {
+    if (editor) {
+      editor.chain().focus().toggleOrderedList().run();
+      console.log('Toggled ordered list', editor.isActive('orderedList'));
+    }
   };
 
   const handleIndent = () => {
@@ -66,7 +81,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 py-2 px-4 border-b border-editor-border bg-white">
+    <div className="flex items-center gap-2 py-2 px-4 border-b border-editor-border bg-white z-10">
       <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       <Button
@@ -88,7 +103,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        onClick={handleBulletList}
         className={editor.isActive('bulletList') ? 'bg-accent' : ''}
       >
         <List className="h-4 w-4" />
@@ -96,7 +111,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        onClick={handleOrderedList}
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />

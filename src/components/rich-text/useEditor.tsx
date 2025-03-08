@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import ListItem from '@tiptap/extension-list-item';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
@@ -24,10 +23,11 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
+        // Ensure we don't import ListItem twice
+        listItem: false,
       }),
       TextStyle,
       FontFamily,
-      ListItem,
       CustomBulletList,
       CustomOrderedList,
       Color,
@@ -39,6 +39,16 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
       onUpdate(editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    if (editor && content) {
+      // Only update content from props if it's different from the editor content
+      const editorContent = editor.getHTML();
+      if (content !== editorContent) {
+        editor.commands.setContent(content);
+      }
+    }
+  }, [content, editor]);
 
   const handleFontChange = (font: string) => {
     console.log(`Setting font to: ${font}`);

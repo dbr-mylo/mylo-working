@@ -21,33 +21,39 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   
-  // Use a custom extension to maintain a global editor color state
-  const ColorStateExtension = Extension.create({
-    name: 'colorState',
-    addStorage() {
+  // Custom Bold extension that preserves text color when toggled
+  const PreservingBold = Bold.extend({
+    addKeyboardShortcuts() {
       return {
-        color: '#000000'
+        'Mod-b': () => {
+          // Get current color before toggling
+          const { color } = this.editor.getAttributes('textStyle');
+          // Store it for later use
+          const colorToPreserve = color || currentColor;
+          
+          // Toggle bold
+          this.editor.chain().toggleBold().run();
+          
+          // Reapply color if it exists and isn't default black
+          if (colorToPreserve && colorToPreserve !== '#000000') {
+            this.editor.chain().setColor(colorToPreserve).run();
+          }
+          
+          return true;
+        },
       };
-    },
-  });
-
-  // Customize Bold to integrate with our color tracking
-  const CustomBold = Bold.configure({
-    HTMLAttributes: {
-      class: 'custom-bold',
     },
   });
   
   const editor = useTipTapEditor({
     extensions: [
-      ColorStateExtension,
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
         listItem: false,
         bold: false, // Disable default bold
       }),
-      CustomBold, // Use our custom bold that has specific HTML attributes
+      PreservingBold, // Use our custom bold that preserves color
       TextStyle,
       FontFamily,
       ListItem,
@@ -73,31 +79,26 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const handleColorChange = (color: string) => {
     setCurrentColor(color);
     if (editor) {
-      // Store the color in our extension's storage
-      editor.storage.colorState.color = color;
       editor.chain().focus().setColor(color).run();
     }
   };
 
-  // Use an effect to track and maintain color state
+  // Monitor selection changes to update color state
   useEffect(() => {
     if (editor) {
-      // This callback runs when the selection changes
-      const updateListener = () => {
+      const updateColorState = () => {
         const { color } = editor.getAttributes('textStyle');
         if (color) {
           setCurrentColor(color);
-          // Update our stored color
-          editor.storage.colorState.color = color;
         }
       };
       
-      editor.on('selectionUpdate', updateListener);
-      editor.on('transaction', updateListener);
+      editor.on('selectionUpdate', updateColorState);
+      editor.on('transaction', updateColorState);
       
       return () => {
-        editor.off('selectionUpdate', updateListener);
-        editor.off('transaction', updateListener);
+        editor.off('selectionUpdate', updateColorState);
+        editor.off('transaction', updateColorState);
       };
     }
   }, [editor]);

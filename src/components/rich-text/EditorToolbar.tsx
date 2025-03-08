@@ -33,19 +33,21 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     // Get the current color before toggling bold
     const { color } = editor.getAttributes('textStyle');
+    const colorToPreserve = color || currentColor;
     
-    // Get our stored color from the extension or use what's in the current attributes
-    const storedColor = editor.storage.colorState?.color || color || currentColor;
+    // Use a custom transaction to combine bold toggle and color preservation
+    editor.view.dispatch(
+      editor.state.tr
+        .setMeta('addToHistory', true)
+        .setMeta('preventUpdateSelection', false)
+    );
     
-    // First toggle bold
-    editor.chain().focus().toggleBold().run();
+    // Toggle bold
+    editor.chain().toggleBold().run();
     
-    // Always reapply the color after toggling bold to ensure it persists
-    if (storedColor && storedColor !== '#000000') {
-      // Using requestAnimationFrame to ensure DOM updates before reapplying color
-      requestAnimationFrame(() => {
-        editor.chain().focus().setColor(storedColor).run();
-      });
+    // Reapply color in the same transaction chain
+    if (colorToPreserve && colorToPreserve !== '#000000') {
+      editor.chain().setColor(colorToPreserve).run();
     }
   };
 

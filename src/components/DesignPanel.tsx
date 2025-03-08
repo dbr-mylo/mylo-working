@@ -84,8 +84,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     setIsPreviewVisible(prev => !prev);
   };
   
-  // Create a single editor setup that will be shared by both the toolbar and the editor
-  // Only create this for the designer role when in editable mode
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
@@ -127,7 +125,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   onElementSelect={handleElementSelect}
                   renderToolbarOutside={true}
                   externalToolbar={isEditable}
-                  editorInstance={editorSetup?.editor} // Pass the editor instance
+                  editorInstance={editorSetup?.editor}
                 />
               </div>
             </div>
@@ -153,7 +151,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     );
   }
   
-  // For the editor role, keep the existing implementation which already works correctly
   return (
     <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       {isEditable && (

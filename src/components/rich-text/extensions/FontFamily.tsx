@@ -63,8 +63,10 @@ export const FontFamily = Extension.create({
   
   addCommands() {
     return {
+      // Note: The key difference is that we're returning a function that modifies the chain directly
+      // instead of returning an object with methods
       setFontFamily: (fontFamily) => ({ chain }) => {
-        return chain().setMark('textStyle', { fontFamily }).run();
+        return chain().setMark('textStyle', { fontFamily });
       },
     };
   },

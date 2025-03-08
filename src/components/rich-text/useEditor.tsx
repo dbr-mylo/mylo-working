@@ -44,7 +44,8 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
     console.log(`Setting font to: ${font}`);
     setCurrentFont(font);
     if (editor) {
-      editor.chain().focus().setMark('textStyle', { fontFamily: font }).run();
+      // Using the correct command pattern that matches our extension
+      editor.chain().focus().setFontFamily(font).run();
       console.log(`Font applied in editor: ${font}`);
     }
   };

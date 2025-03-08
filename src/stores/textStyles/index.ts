@@ -10,7 +10,7 @@ import {
   getStylesWithParent,
   getStyleWithInheritance,
   SaveTextStyleInput
-} from './styleOperations';
+} from './operations';
 
 // Re-export the SaveTextStyleInput interface
 export type { SaveTextStyleInput };

@@ -9,6 +9,7 @@ import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
 import { IndentExtension } from './extensions/IndentExtension';
 import { FontFamily } from './extensions/FontFamily';
 import { Extension } from '@tiptap/core';
+import Bold from '@tiptap/extension-bold';
 
 export interface UseEditorProps {
   content: string;
@@ -20,29 +21,25 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   
-  // Create a custom extension to preserve color when toggling bold
-  const ColorPreservationExtension = Extension.create({
-    name: 'colorPreservation',
-    
-    // Add a listener that reapplies color after bold is toggled
+  // Create a custom Bold extension that preserves color
+  const ColorPreservingBold = Bold.extend({
     addKeyboardShortcuts() {
       return {
         'Mod-b': () => {
-          const { editor } = this;
-          const { color } = editor.getAttributes('textStyle');
+          const { color } = this.editor.getAttributes('textStyle');
           
           // First toggle bold
-          editor.chain().toggleBold().run();
+          this.editor.chain().toggleBold().run();
           
-          // If color exists and bold is active, reapply the color
-          if (color && editor.isActive('bold')) {
-            editor.chain().setColor(color).run();
+          // Reapply the color if it exists and bold is now active
+          if (color && this.editor.isActive('bold')) {
+            this.editor.chain().setColor(color).run();
           }
           
           return true;
         },
-      };
-    },
+      }
+    }
   });
   
   const editor = useTipTapEditor({
@@ -51,7 +48,9 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
         bulletList: false,
         orderedList: false,
         listItem: false, // Disable the default listItem to avoid duplication
+        bold: false, // Disable default bold to use our custom one
       }),
+      ColorPreservingBold, // Use our custom bold extension
       TextStyle,
       FontFamily,
       ListItem, // Add our custom listItem
@@ -59,7 +58,6 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
       CustomOrderedList,
       Color,
       IndentExtension,
-      ColorPreservationExtension, // Add our custom extension
     ],
     content: content,
     editable: isEditable,

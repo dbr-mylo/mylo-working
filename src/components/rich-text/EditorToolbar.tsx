@@ -31,17 +31,19 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   const handleBoldClick = () => {
-    // Store the current color before toggling bold
+    // Get the current color from editor state
     const { color } = editor.getAttributes('textStyle');
+    console.log("Current color before bold:", color || currentColor);
     
     // Toggle bold
     editor.chain().focus().toggleBold().run();
     
-    // If bold is active after toggle, reapply the color
-    // Use either the stored color or the currentColor from props
+    // After toggling, if bold is active, ensure color is preserved
     if (editor.isActive('bold')) {
+      // Use either the color from the current selection or the toolbar's current color
       const colorToApply = color || currentColor;
       if (colorToApply && colorToApply !== '#000000') {
+        console.log("Reapplying color after bold:", colorToApply);
         editor.chain().focus().setColor(colorToApply).run();
       }
     }

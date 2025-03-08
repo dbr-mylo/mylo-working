@@ -3,6 +3,28 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 
 export const CustomBulletList = BulletList.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      indent: {
+        default: 0,
+        parseHTML: element => {
+          return parseInt(element.getAttribute('data-indent') || '0', 10);
+        },
+        renderHTML: attributes => {
+          if (!attributes.indent) {
+            return {};
+          }
+          
+          return {
+            'data-indent': attributes.indent,
+            style: `padding-left: ${attributes.indent * 2}em`,
+          };
+        },
+      },
+    };
+  },
+  
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
@@ -28,6 +50,28 @@ export const CustomBulletList = BulletList.extend({
 });
 
 export const CustomOrderedList = OrderedList.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      indent: {
+        default: 0,
+        parseHTML: element => {
+          return parseInt(element.getAttribute('data-indent') || '0', 10);
+        },
+        renderHTML: attributes => {
+          if (!attributes.indent) {
+            return {};
+          }
+          
+          return {
+            'data-indent': attributes.indent,
+            style: `padding-left: ${attributes.indent * 2}em`,
+          };
+        },
+      },
+    };
+  },
+  
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {

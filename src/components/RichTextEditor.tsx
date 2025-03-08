@@ -64,25 +64,29 @@ export const RichTextEditor = ({
           }
           
           /* Fixed toolbar styles */
-          .fixed-toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 10;
+          .editor-toolbar {
             background-color: white;
             ${!isDesigner ? 'border-bottom: 1px solid #e2e8f0;' : ''}
             padding: 0;
             margin: 0;
-            width: 8.5in;
-            margin-left: auto;
-            margin-right: auto;
+            z-index: 10;
+          }
+          
+          .fixed-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            width: 100%;
           }
         `}
       </style>
-      {!hideToolbar && !renderToolbarOutside && (
-        <div className={fixedToolbar ? 'fixed-toolbar' : ''}>
+      
+      {!hideToolbar && (
+        <div className={`editor-toolbar ${fixedToolbar ? 'fixed-toolbar' : ''}`}>
           {renderToolbar()}
         </div>
       )}
+      
       <EditorContent editor={editor} />
     </div>
   );

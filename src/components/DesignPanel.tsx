@@ -8,9 +8,9 @@ import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
-import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
+import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -92,19 +92,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       isEditable 
     }) : null;
   
-  const renderToolbar = () => {
-    if (!editorSetup || !editorSetup.editor) return null;
-    
-    return (
-      <EditorToolbar 
-        editor={editorSetup.editor}
-        currentFont={editorSetup.currentFont}
-        currentColor={editorSetup.currentColor}
-        onFontChange={editorSetup.handleFontChange}
-        onColorChange={editorSetup.handleColorChange}
-      />
-    );
-  };
+  // Removed the toolbar rendering from ToolSettingsMenuBar
+  // and added it directly in the component
 
   const previewContent = `
     <h1>Preview of Your Document</h1>
@@ -127,10 +116,20 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
         {isEditable && (
           <div className="w-full">
             <ToolSettingsMenuBar 
-              toolbar={isEditable ? renderToolbar() : undefined} 
               isPreviewVisible={isPreviewVisible}
               onTogglePreview={handleTogglePreview}
             />
+            {editorSetup?.editor && (
+              <div className="bg-white border-b border-slate-200 z-10">
+                <EditorToolbar 
+                  editor={editorSetup.editor}
+                  currentFont={editorSetup.currentFont}
+                  currentColor={editorSetup.currentColor}
+                  onFontChange={editorSetup.handleFontChange}
+                  onColorChange={editorSetup.handleColorChange}
+                />
+              </div>
+            )}
           </div>
         )}
         <div className="flex flex-row flex-1">

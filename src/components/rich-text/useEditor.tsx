@@ -24,10 +24,11 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
+        listItem: false, // Disable the default listItem to avoid duplication
       }),
       TextStyle,
       FontFamily,
-      ListItem,
+      ListItem, // Add our custom listItem
       CustomBulletList,
       CustomOrderedList,
       Color,

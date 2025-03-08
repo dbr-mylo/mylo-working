@@ -50,20 +50,33 @@ export const EditorStyles = () => {
         padding-left: 6em;
       }
       
-      /* Special styles for color preservation */
-      .ProseMirror .color-preserving-bold {
-        font-weight: bold;
+      /* Important styles for color preservation */
+      .ProseMirror strong {
+        color: inherit;
       }
       
-      /* Ensure that color styles are respected when toggling bold */
+      .ProseMirror .color-preserving-bold {
+        font-weight: bold;
+        color: inherit !important;
+      }
+      
+      /* Ensure that text style marks inherit colors properly */
+      .ProseMirror [style*="color"] strong,
       .ProseMirror strong[style*="color"] {
         color: inherit !important;
       }
       
-      /* Additional rule to ensure text style marks are properly inherited */
-      .ProseMirror mark[data-color] {
-        background-color: transparent;
-        color: attr(data-color);
+      /* Additional specific rules to ensure color inheritance */
+      .ProseMirror em[style*="color"],
+      .ProseMirror strong[style*="color"],
+      .ProseMirror span[style*="color"] strong,
+      .ProseMirror span[style*="color"] em {
+        color: inherit !important;
+      }
+      
+      /* Special handling for nested formatting */
+      .ProseMirror [style*="color"] * {
+        color: inherit;
       }
       `}</style>
     </>

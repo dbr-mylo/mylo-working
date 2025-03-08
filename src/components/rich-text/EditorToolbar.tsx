@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -33,49 +32,38 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     onFontChange(font);
   };
 
-  // New approach: Preserve color on bold toggle
   const handleBoldClick = () => {
     if (!editor) return;
     
-    // Get current color
     const { color } = editor.getAttributes('textStyle');
     const currentColorValue = color || currentColor;
     
-    // Check if bold is active
-    const isBoldActive = editor.isActive('bold');
+    console.log("Before bold toggle - Current color:", currentColorValue);
+    console.log("Is bold active before toggle:", editor.isActive('bold'));
     
-    // Create a transaction chain
-    editor
-      .chain()
-      .focus()
-      .toggleBold()
-      .run();
+    editor.chain().focus().toggleBold().run();
     
-    // Reapply color after the bold toggle
-    if (!isBoldActive || isDesigner) {
-      editor
-        .chain()
-        .focus()
-        .setColor(currentColorValue)
-        .run();
-    }
+    console.log("After bold toggle - Is bold active:", editor.isActive('bold'));
+    
+    setTimeout(() => {
+      editor.chain().focus().setColor(currentColorValue).run();
+      console.log("Color reapplied after bold toggle:", currentColorValue);
+    }, 0);
   };
 
-  // Helper to preserve color on any formatting change
   const preserveColorAfterFormatting = (formatCommand: () => void) => {
     if (!editor) return;
     
-    // Get current color before formatting
     const { color } = editor.getAttributes('textStyle');
     const colorToPreserve = color || currentColor;
+    console.log("Preserving color for formatting:", colorToPreserve);
     
-    // Execute the formatting command
     formatCommand();
     
-    // Reapply the color after formatting
-    if (isDesigner) {
+    setTimeout(() => {
       editor.chain().focus().setColor(colorToPreserve).run();
-    }
+      console.log("Color reapplied after formatting:", colorToPreserve);
+    }, 0);
   };
 
   const handleIndent = () => {
@@ -130,16 +118,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         variant="outline"
         size="sm"
         onClick={() => {
-          // Preserve color when toggling italic
-          const { color } = editor.getAttributes('textStyle');
-          const currentColorValue = color || currentColor;
-          
-          editor.chain().focus().toggleItalic().run();
-          
-          // Reapply the color
-          if (isDesigner) {
-            editor.chain().focus().setColor(currentColorValue).run();
-          }
+          preserveColorAfterFormatting(() => {
+            editor.chain().focus().toggleItalic().run();
+          });
         }}
         className={editor.isActive('italic') ? 'bg-accent' : ''}
       >

@@ -4,6 +4,7 @@ import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FontPicker } from './FontPicker';
 import { ColorPicker } from './ColorPicker';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -20,6 +21,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onFontChange,
   onColorChange
 }) => {
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
+  
   if (!editor) {
     return null;
   }
@@ -31,23 +35,48 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleBoldClick = () => {
     if (!editor) return;
     
-    // Get the current color before toggling bold
-    const { color } = editor.getAttributes('textStyle');
-    const colorToPreserve = color || currentColor;
-    
-    // Use a custom transaction to combine bold toggle and color preservation
-    editor.view.dispatch(
-      editor.state.tr
-        .setMeta('addToHistory', true)
-        .setMeta('preventUpdateSelection', false)
-    );
-    
-    // Toggle bold
-    editor.chain().toggleBold().run();
-    
-    // Reapply color in the same transaction chain
-    if (colorToPreserve && colorToPreserve !== '#000000') {
-      editor.chain().setColor(colorToPreserve).run();
+    if (isDesigner) {
+      // For designer role: Use combined transaction approach
+      // Get current color
+      const { color } = editor.getAttributes('textStyle');
+      const colorToPreserve = color || currentColor;
+      
+      // Start a single transaction
+      editor.view.dispatch(editor.state.tr);
+      
+      // Create a transaction chain in a single update
+      const chain = editor.chain().focus();
+      
+      // Toggle bold
+      chain.toggleBold();
+      
+      // Immediately reapply the color in the same transaction
+      if (colorToPreserve && colorToPreserve !== '#000000') {
+        chain.setColor(colorToPreserve);
+      }
+      
+      // Execute the combined chain
+      chain.run();
+    } else {
+      // For other roles: Use the original approach
+      // Get the current color before toggling bold
+      const { color } = editor.getAttributes('textStyle');
+      const colorToPreserve = color || currentColor;
+      
+      // Use a custom transaction to combine bold toggle and color preservation
+      editor.view.dispatch(
+        editor.state.tr
+          .setMeta('addToHistory', true)
+          .setMeta('preventUpdateSelection', false)
+      );
+      
+      // Toggle bold
+      editor.chain().toggleBold().run();
+      
+      // Reapply color in the same transaction chain
+      if (colorToPreserve && colorToPreserve !== '#000000') {
+        editor.chain().setColor(colorToPreserve).run();
+      }
     }
   };
 

@@ -8,8 +8,8 @@ import { Color } from '@tiptap/extension-color';
 import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
 import { IndentExtension } from './extensions/IndentExtension';
 import { FontFamily } from './extensions/FontFamily';
-import { Extension } from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseEditorProps {
   content: string;
@@ -20,26 +20,51 @@ export interface UseEditorProps {
 export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEditorProps) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
   
-  // Custom Bold extension that preserves text color when toggled
-  const PreservingBold = Bold.extend({
+  // Custom Bold extension with improved color preservation
+  const ColorPreservingBold = Bold.extend({
     addKeyboardShortcuts() {
       return {
         'Mod-b': () => {
-          // Get current color before toggling
-          const { color } = this.editor.getAttributes('textStyle');
-          // Store it for later use
-          const colorToPreserve = color || currentColor;
-          
-          // Toggle bold
-          this.editor.chain().toggleBold().run();
-          
-          // Reapply color if it exists and isn't default black
-          if (colorToPreserve && colorToPreserve !== '#000000') {
-            this.editor.chain().setColor(colorToPreserve).run();
+          if (isDesigner) {
+            // Get current color before toggling
+            const { color } = this.editor.getAttributes('textStyle');
+            const colorToPreserve = color || currentColor;
+            
+            // Start a chain and execute both commands in a single transaction
+            const chain = this.editor.chain().focus();
+            
+            // Toggle bold
+            chain.toggleBold();
+            
+            // Reapply color in the same transaction
+            if (colorToPreserve && colorToPreserve !== '#000000') {
+              chain.setColor(colorToPreserve);
+            }
+            
+            // Execute the combined chain
+            chain.run();
+            
+            return true;
+          } else {
+            // Original behavior for non-designer roles
+            // Get current color before toggling
+            const { color } = this.editor.getAttributes('textStyle');
+            // Store it for later use
+            const colorToPreserve = color || currentColor;
+            
+            // Toggle bold
+            this.editor.chain().toggleBold().run();
+            
+            // Reapply color if it exists and isn't default black
+            if (colorToPreserve && colorToPreserve !== '#000000') {
+              this.editor.chain().setColor(colorToPreserve).run();
+            }
+            
+            return true;
           }
-          
-          return true;
         },
       };
     },
@@ -53,7 +78,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
         listItem: false,
         bold: false, // Disable default bold
       }),
-      PreservingBold, // Use our custom bold that preserves color
+      ColorPreservingBold, // Use our improved custom bold extension
       TextStyle,
       FontFamily,
       ListItem,

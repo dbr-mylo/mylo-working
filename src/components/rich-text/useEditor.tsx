@@ -26,22 +26,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const ColorPreservingBold = Bold.configure({
     HTMLAttributes: {
       class: 'color-preserving-bold',
-    },
-    parseHTML() {
-      return [
-        {
-          tag: 'strong',
-        },
-        {
-          tag: 'b',
-          getAttrs: (node) => node.style.fontWeight !== 'normal' && null,
-        },
-        {
-          style: 'font-weight',
-          getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value as string) && null,
-        },
-      ]
-    },
+    }
   });
   
   const editor = useTipTapEditor({

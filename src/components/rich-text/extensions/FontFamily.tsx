@@ -11,20 +11,10 @@ export const FontFamily = Extension.create({
     };
   },
   
-  addCommands() {
-    return {
-      setFontFamily: (fontFamily: string) => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontFamily })
-          .run();
-      },
-    };
-  },
-
   addGlobalAttributes() {
     return [
       {
-        types: ['textStyle'],
+        types: this.options.types,
         attributes: {
           fontFamily: {
             default: 'Inter',
@@ -69,5 +59,13 @@ export const FontFamily = Extension.create({
         },
       },
     ];
+  },
+  
+  addCommands() {
+    return {
+      setFontFamily: (fontFamily: string) => ({ chain, commands }) => {
+        return commands.setMark('textStyle', { fontFamily });
+      },
+    };
   },
 });

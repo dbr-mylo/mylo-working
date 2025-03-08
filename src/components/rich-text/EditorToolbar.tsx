@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -26,9 +25,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const handleFontChange = (font: string) => {
+    console.log(`EditorToolbar: Font selected: ${font}`);
     onFontChange(font);
-    // Add a console log to verify font change was triggered
-    console.log(`Font changed to: ${font}`);
   };
 
   const handleIndent = () => {

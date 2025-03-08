@@ -23,48 +23,52 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
-  // Custom Bold extension with improved color preservation
+  // Modified Bold extension with improved color preservation
   const ColorPreservingBold = Bold.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        // Store the current color as an attribute on the bold mark
+        preservedColor: {
+          default: null,
+          parseHTML: element => element.getAttribute('data-preserved-color'),
+          renderHTML: attributes => {
+            if (!attributes.preservedColor) {
+              return {};
+            }
+            
+            return {
+              'data-preserved-color': attributes.preservedColor,
+              style: `color: ${attributes.preservedColor}`,
+            };
+          },
+        },
+      };
+    },
+    
     addKeyboardShortcuts() {
       return {
         'Mod-b': () => {
-          if (isDesigner) {
-            // Get current color before toggling
-            const { color } = this.editor.getAttributes('textStyle');
-            const colorToPreserve = color || currentColor;
-            
-            // Start a chain and execute both commands in a single transaction
-            const chain = this.editor.chain().focus();
-            
-            // Toggle bold
-            chain.toggleBold();
-            
-            // Reapply color in the same transaction
-            if (colorToPreserve && colorToPreserve !== '#000000') {
-              chain.setColor(colorToPreserve);
-            }
-            
-            // Execute the combined chain
-            chain.run();
-            
-            return true;
+          if (!this.editor) return false;
+          
+          // Get current color before toggling
+          const { color } = this.editor.getAttributes('textStyle');
+          
+          // If bold is active, we'll be removing bold, so we need to preserve the color
+          if (this.editor.isActive('bold')) {
+            this.editor.chain()
+              .setColor(color || currentColor)
+              .toggleBold()
+              .run();
           } else {
-            // Original behavior for non-designer roles
-            // Get current color before toggling
-            const { color } = this.editor.getAttributes('textStyle');
-            // Store it for later use
-            const colorToPreserve = color || currentColor;
-            
-            // Toggle bold
-            this.editor.chain().toggleBold().run();
-            
-            // Reapply color if it exists and isn't default black
-            if (colorToPreserve && colorToPreserve !== '#000000') {
-              this.editor.chain().setColor(colorToPreserve).run();
-            }
-            
-            return true;
+            // If bold is not active, we'll be adding bold
+            this.editor.chain()
+              .toggleBold()
+              .setColor(color || currentColor)
+              .run();
           }
+          
+          return true;
         },
       };
     },

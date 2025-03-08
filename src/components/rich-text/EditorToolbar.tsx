@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -35,49 +36,32 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleBoldClick = () => {
     if (!editor) return;
     
-    if (isDesigner) {
-      // For designer role: Use combined transaction approach
-      // Get current color
-      const { color } = editor.getAttributes('textStyle');
-      const colorToPreserve = color || currentColor;
-      
-      // Start a single transaction
-      editor.view.dispatch(editor.state.tr);
-      
-      // Create a transaction chain in a single update
-      const chain = editor.chain().focus();
-      
-      // Toggle bold
-      chain.toggleBold();
-      
-      // Immediately reapply the color in the same transaction
-      if (colorToPreserve && colorToPreserve !== '#000000') {
-        chain.setColor(colorToPreserve);
-      }
-      
-      // Execute the combined chain
-      chain.run();
+    // Track if bold is currently active
+    const isBoldActive = editor.isActive('bold');
+    
+    // Get the current color
+    const { color } = editor.getAttributes('textStyle');
+    const colorToPreserve = color || currentColor;
+    
+    // Create a single transaction chain
+    const chain = editor.chain().focus();
+    
+    if (isBoldActive) {
+      // If bold is active, we'll remove bold first then set color
+      chain.toggleBold().setColor(colorToPreserve);
     } else {
-      // For other roles: Use the original approach
-      // Get the current color before toggling bold
-      const { color } = editor.getAttributes('textStyle');
-      const colorToPreserve = color || currentColor;
-      
-      // Use a custom transaction to combine bold toggle and color preservation
-      editor.view.dispatch(
-        editor.state.tr
-          .setMeta('addToHistory', true)
-          .setMeta('preventUpdateSelection', false)
-      );
-      
-      // Toggle bold
-      editor.chain().toggleBold().run();
-      
-      // Reapply color in the same transaction chain
-      if (colorToPreserve && colorToPreserve !== '#000000') {
-        editor.chain().setColor(colorToPreserve).run();
-      }
+      // If bold is not active, we'll set color first then add bold
+      chain.setColor(colorToPreserve).toggleBold();
     }
+    
+    // Execute the combined chain
+    chain.run();
+    
+    // Log current state for debugging
+    console.log("After bold toggle:", {
+      isBoldNowActive: editor.isActive('bold'),
+      currentColor: editor.getAttributes('textStyle').color || 'none'
+    });
   };
 
   const handleIndent = () => {
@@ -131,7 +115,15 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
+        onClick={() => {
+          // Preserve color when toggling italic
+          const { color } = editor.getAttributes('textStyle');
+          editor.chain()
+            .focus()
+            .toggleItalic()
+            .setColor(color || currentColor)
+            .run();
+        }}
         className={editor.isActive('italic') ? 'bg-accent' : ''}
       >
         <Italic className="h-4 w-4" />
@@ -148,7 +140,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         variant="outline"
         size="sm"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />
       </Button>

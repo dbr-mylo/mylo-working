@@ -3,7 +3,8 @@ import React from 'react';
 
 export const EditorStyles = () => {
   return (
-    <style jsx global>{`
+    <>
+      <style>{`
       /* Base Editor Styles */
       .ProseMirror {
         position: relative;
@@ -64,6 +65,7 @@ export const EditorStyles = () => {
         background-color: transparent;
         color: attr(data-color);
       }
-    `}</style>
+      `}</style>
+    </>
   );
 };

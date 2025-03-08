@@ -88,7 +88,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
-      onContentChange: handleContentChange, // Updated to match the new prop name
+      onContentChange: handleContentChange,
       isEditable 
     }) : null;
   

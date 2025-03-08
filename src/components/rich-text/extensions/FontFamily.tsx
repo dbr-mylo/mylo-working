@@ -60,4 +60,12 @@ export const FontFamily = Extension.create({
       },
     ];
   },
+  
+  addCommands() {
+    return {
+      setFontFamily: fontFamily => ({ commands }) => {
+        return commands.setMark('textStyle', { fontFamily });
+      },
+    };
+  },
 });

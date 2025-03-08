@@ -1,25 +1,8 @@
 
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
-
-// Export the ListItem extension to make sure we have only one instance
-export const CustomListItem = ListItem.configure({
-  HTMLAttributes: {
-    class: 'custom-list-item',
-  },
-});
 
 export const CustomBulletList = BulletList.extend({
-  addOptions() {
-    return {
-      ...this.parent?.(),
-      HTMLAttributes: {
-        class: 'custom-bullet-list',
-      },
-    };
-  },
-  
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
@@ -40,20 +23,11 @@ export const CustomBulletList = BulletList.extend({
         }
         return false;
       },
-    };
+    }
   },
 });
 
 export const CustomOrderedList = OrderedList.extend({
-  addOptions() {
-    return {
-      ...this.parent?.(),
-      HTMLAttributes: {
-        class: 'custom-ordered-list',
-      },
-    };
-  },
-  
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
@@ -74,6 +48,6 @@ export const CustomOrderedList = OrderedList.extend({
         }
         return false;
       },
-    };
+    }
   },
 });

@@ -33,7 +33,7 @@ export const RichTextEditor = ({
   const useOwnEditor = !externalEditorInstance;
   
   const editorSetup = useOwnEditor 
-    ? useEditorSetup({ content, onUpdate, isEditable })
+    ? useEditorSetup({ content, onContentChange: onUpdate, isEditable })
     : null;
   
   // Use either the external editor or our own
@@ -41,6 +41,20 @@ export const RichTextEditor = ({
   
   const { role } = useAuth();
   const isDesigner = role === "designer";
+
+  useEffect(() => {
+    // Test color preservation on editor initialization
+    if (editor && isEditable) {
+      console.log("Editor initialized with content:", content.substring(0, 100));
+      
+      // Log initial editor state
+      setTimeout(() => {
+        if (editor) {
+          console.log("Initial editor HTML:", editor.getHTML().substring(0, 100));
+        }
+      }, 100);
+    }
+  }, [editor, content, isEditable]);
 
   if (!editor) {
     return null;

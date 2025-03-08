@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -17,7 +16,7 @@ export interface UseEditorProps {
   isEditable?: boolean;
 }
 
-export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEditorProps) => {
+export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorProps) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   const { role } = useAuth();
@@ -54,7 +53,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
     content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
-      onUpdate(editor.getHTML());
+      onContentChange(editor.getHTML());
       // Let's log the HTML on each update to check color preservation
       console.log("Editor HTML on update:", editor.getHTML());
     },

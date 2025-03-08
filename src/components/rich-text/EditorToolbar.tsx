@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -24,6 +23,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
+  const buttonSize = isDesigner ? "xxs" : "sm";
   
   if (!editor) {
     return null;
@@ -36,7 +36,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleBoldClick = () => {
     if (!editor) return;
     
-    // Get current color before toggling bold
     const { color } = editor.getAttributes('textStyle');
     const currentColorValue = color || currentColor;
     
@@ -47,15 +46,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       selectionHTML: editor.getHTML().substring(0, 100) 
     });
     
-    // Toggle bold formatting
     editor.chain().focus().toggleBold().run();
-    
-    // Immediately apply color to ensure it sticks after toggling bold
     editor.chain().focus().setColor(currentColorValue).run();
     
     console.log("Bold toggle - Color applied:", currentColorValue);
     
-    // Apply color again with a slight delay to ensure it overrides any default styling
     setTimeout(() => {
       if (editor.isActive('bold')) {
         editor.chain().focus().setColor(currentColorValue).run();
@@ -63,7 +58,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       }
     }, 10);
     
-    // And one more time with a longer delay as a fallback
     setTimeout(() => {
       if (editor.isActive('bold')) {
         editor.chain().focus().setColor(currentColorValue).run();
@@ -81,7 +75,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const preserveColorAfterFormatting = (formatCommand: () => void) => {
     if (!editor) return;
     
-    // Store current color and selection state before formatting
     const { color } = editor.getAttributes('textStyle');
     const colorToPreserve = color || currentColor;
     const htmlBefore = editor.getHTML();
@@ -91,21 +84,17 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       selectionHtml: htmlBefore.substring(0, 100)
     });
     
-    // Execute the formatting command
     formatCommand();
     
-    // Immediately apply the color to the formatted text
     editor.chain().focus().setColor(colorToPreserve).run();
     
     console.log("Formatting - Color applied:", colorToPreserve);
     
-    // Apply color again with a delay to ensure it sticks
     setTimeout(() => {
       editor.chain().focus().setColor(colorToPreserve).run();
       console.log("Formatting - Color reapplied after delay:", colorToPreserve);
     }, 10);
     
-    // One more application with a longer delay as a fallback
     setTimeout(() => {
       editor.chain().focus().setColor(colorToPreserve).run();
       console.log("Formatting - Final color application:", colorToPreserve);
@@ -159,7 +148,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <ColorPicker value={currentColor} onChange={onColorChange} />
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={handleBoldClick}
         className={editor.isActive('bold') ? 'bg-accent' : ''}
       >
@@ -167,7 +156,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={() => {
           preserveColorAfterFormatting(() => {
             editor.chain().focus().toggleItalic().run();
@@ -179,7 +168,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={() => preserveColorAfterFormatting(() => editor.chain().focus().toggleBulletList().run())}
         className={editor.isActive('bulletList') ? 'bg-accent' : ''}
       >
@@ -187,7 +176,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={() => preserveColorAfterFormatting(() => editor.chain().focus().toggleOrderedList().run())}
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
@@ -195,7 +184,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={handleIndent}
         title="Indent paragraph"
       >
@@ -203,7 +192,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size={buttonSize}
         onClick={handleOutdent}
         title="Outdent paragraph"
       >

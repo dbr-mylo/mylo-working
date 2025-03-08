@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Palette } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ColorPickerProps {
   value: string;
@@ -28,13 +29,17 @@ const COLORS = [
 ];
 
 export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
+  const buttonSize = isDesigner ? "xxs" : "sm";
+  
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1 w-[90px]"
+          size={buttonSize} 
+          className="flex items-center gap-2 w-[90px]"
         >
           <div 
             className="w-4 h-4 rounded-sm border border-gray-300" 

@@ -19,6 +19,14 @@ export default {
       },
     },
     extend: {
+      fontSize: {
+        'xs': '0.675rem',    // 10.8px instead of 12px
+        'sm': '0.75rem',     // 12px instead of 14px
+        'base': '0.875rem',  // 14px instead of 16px
+        'lg': '1rem',        // 16px instead of 18px
+        'xl': '1.125rem',    // 18px instead of 20px
+        '2xl': '1.25rem',    // 20px instead of 24px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

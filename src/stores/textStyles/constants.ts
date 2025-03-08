@@ -19,6 +19,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Main heading style',
     isSystem: true,
     isDefault: false,
+    isUsed: true,  // Default header is considered used
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -35,6 +36,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Secondary heading style',
     isSystem: true,
     isDefault: false,
+    isUsed: true,  // Default header is considered used
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -51,6 +53,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Default paragraph style',
     isSystem: true,
     isDefault: true,
+    isUsed: true,  // Default body text is considered used
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -67,6 +70,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Caption text style',
     isSystem: true,
     isDefault: false,
+    isUsed: false,  // Caption may not be used by default
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }

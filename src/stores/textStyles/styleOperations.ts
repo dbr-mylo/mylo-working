@@ -17,6 +17,7 @@ export interface SaveTextStyleInput {
   description?: string;
   parentId?: string;
   isDefault?: boolean;
+  isUsed?: boolean;
   textAlign?: string;
   textTransform?: string;
   textDecoration?: string;
@@ -41,6 +42,7 @@ export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyl
       description: style.description,
       parentId: style.parentId,
       isDefault: style.isDefault || false,
+      isUsed: style.isUsed !== undefined ? style.isUsed : false, // Default to false if not specified
       textAlign: style.textAlign,
       textTransform: style.textTransform,
       textDecoration: style.textDecoration,

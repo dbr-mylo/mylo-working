@@ -1,7 +1,7 @@
 
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
-import { Pilcrow } from "lucide-react";
+import { Pilcrow, Check } from "lucide-react";
 import { useEffect, useState, ReactNode } from "react";
 import { textStyleStore } from "@/stores/textStyles";
 import { TextStyle } from "@/lib/types";
@@ -54,6 +54,18 @@ export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
                 <div className="flex items-center gap-1.5">
                   <Pilcrow className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs">{style.name}</span>
+                  
+                  {/* Show visual indicators for isUsed and isDefault */}
+                  <div className="flex ml-auto items-center space-x-1">
+                    {style.isUsed && (
+                      <span className="text-[10px] text-green-500 flex items-center" title="This style is used in documents">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                    {style.isDefault && (
+                      <span className="text-[10px] text-blue-500" title="Default style">Default</span>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}
@@ -66,4 +78,4 @@ export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
       </DesignerSidebarContainer>
     </div>
   );
-};
+}

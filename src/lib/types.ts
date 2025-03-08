@@ -1,3 +1,4 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -69,6 +70,7 @@ export interface TextStyle {
   parentId?: string;           // For style inheritance
   isDefault?: boolean;         // To mark a default style
   isSystem?: boolean;          // To identify system styles that cannot be deleted
+  isUsed?: boolean;            // To track if the style is used in any documents
   created_at?: string;         // Creation timestamp
   updated_at?: string;         // Last update timestamp
   textAlign?: string;          // Text alignment property

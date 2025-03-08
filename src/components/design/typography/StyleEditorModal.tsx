@@ -4,6 +4,7 @@ import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -48,16 +49,19 @@ export const StyleEditorModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-6 pb-2">
+          <DialogTitle className="text-xl font-semibold">
             {style ? `Edit Style: ${style.name}` : "Create New Style"}
           </DialogTitle>
         </DialogHeader>
-        <StyleForm 
-          initialValues={style || undefined}
-          onSubmit={handleSave}
-        />
+        
+        <div className="px-6 pb-6">
+          <StyleForm 
+            initialValues={style || undefined}
+            onSubmit={handleSave}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -3,7 +3,7 @@ import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { Card } from "@/components/ui/card";
 import { Pilcrow } from "lucide-react";
 import { useEffect, useState, ReactNode } from "react";
-import { textStyleStore } from "@/stores/textStyleStore";
+import { textStyleStore } from "@/stores/textStyles";
 import { TextStyle } from "@/lib/types";
 import { EmptyState } from "./typography/EmptyState";
 

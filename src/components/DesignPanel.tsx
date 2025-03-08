@@ -4,7 +4,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
-import { textStyleStore } from "@/stores/textStyleStore";
+import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";

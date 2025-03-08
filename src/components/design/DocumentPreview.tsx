@@ -7,6 +7,7 @@ import { ViewableContent } from "./preview/ViewableContent";
 import { EmptyContent } from "./preview/EmptyContent";
 import { SelectedElementBar } from "./preview/SelectedElementBar";
 import { useDocumentPreview } from "./preview/useDocumentPreview";
+import { Editor } from "@tiptap/react";
 
 interface DocumentPreviewProps {
   content: string;
@@ -16,6 +17,7 @@ interface DocumentPreviewProps {
   onElementSelect?: (element: HTMLElement | null) => void;
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
+  editorInstance?: Editor | null; // Add editorInstance prop
 }
 
 export const DocumentPreview = ({ 
@@ -25,7 +27,8 @@ export const DocumentPreview = ({
   onContentChange,
   onElementSelect,
   renderToolbarOutside = false,
-  externalToolbar = false
+  externalToolbar = false,
+  editorInstance = null // Default to null
 }: DocumentPreviewProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -63,6 +66,7 @@ export const DocumentPreview = ({
             hideToolbar={isDesigner}
             renderToolbarOutside={renderToolbarOutside}
             externalToolbar={externalToolbar}
+            editorInstance={editorInstance} // Pass the editorInstance
           />
         ) : content ? (
           <ViewableContent

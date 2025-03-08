@@ -5,6 +5,7 @@ import { EditorToolbar } from './rich-text/EditorToolbar';
 import { EditorStyles } from './rich-text/EditorStyles';
 import { useEditorSetup } from './rich-text/useEditor';
 import { useAuth } from '@/contexts/AuthContext';
+import { Editor } from '@tiptap/react';
 
 interface RichTextEditorProps {
   content: string;
@@ -13,7 +14,8 @@ interface RichTextEditorProps {
   hideToolbar?: boolean;
   fixedToolbar?: boolean;
   renderToolbarOutside?: boolean;
-  externalToolbar?: boolean; // New prop to indicate the toolbar is managed externally
+  externalToolbar?: boolean;
+  externalEditorInstance?: Editor | null; // New prop for external editor instance
 }
 
 export const RichTextEditor = ({ 
@@ -23,16 +25,19 @@ export const RichTextEditor = ({
   hideToolbar = false,
   fixedToolbar = false,
   renderToolbarOutside = false,
-  externalToolbar = false // Don't render toolbar if it's managed externally
+  externalToolbar = false,
+  externalEditorInstance = null // Default to null
 }: RichTextEditorProps) => {
   
-  const {
-    editor,
-    currentFont,
-    currentColor,
-    handleFontChange,
-    handleColorChange
-  } = useEditorSetup({ content, onUpdate, isEditable });
+  // Use external editor if provided, otherwise create a new one
+  const useOwnEditor = !externalEditorInstance;
+  
+  const editorSetup = useOwnEditor 
+    ? useEditorSetup({ content, onUpdate, isEditable })
+    : null;
+  
+  // Use either the external editor or our own
+  const editor = externalEditorInstance || (editorSetup?.editor);
   
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -41,15 +46,23 @@ export const RichTextEditor = ({
     return null;
   }
 
-  const renderToolbar = () => (
-    <EditorToolbar 
-      editor={editor}
-      currentFont={currentFont}
-      currentColor={currentColor}
-      onFontChange={handleFontChange}
-      onColorChange={handleColorChange}
-    />
-  );
+  const renderToolbar = () => {
+    if (externalEditorInstance) {
+      return null; // Don't render toolbar if using external editor instance
+    }
+    
+    if (!editorSetup) return null;
+    
+    return (
+      <EditorToolbar 
+        editor={editorSetup.editor}
+        currentFont={editorSetup.currentFont}
+        currentColor={editorSetup.currentColor}
+        onFontChange={editorSetup.handleFontChange}
+        onColorChange={editorSetup.handleColorChange}
+      />
+    );
+  };
 
   return (
     <div className={`prose prose-sm max-w-none ${isDesigner ? 'designer-editor' : ''}`}>

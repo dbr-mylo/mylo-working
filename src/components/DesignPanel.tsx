@@ -1,4 +1,3 @@
-
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -86,29 +85,13 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   };
   
   // Create a single editor setup that will be shared by both the toolbar and the editor
+  // Only create this for the designer role when in editable mode
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
       onUpdate: handleContentChange, 
       isEditable 
     }) : null;
-  
-  // Pass editorSetup to both the toolbar and the editor
-  
-  const previewContent = `
-    <h1>Preview of Your Document</h1>
-    <p>This is a preview of how your document will look with the current styling. The content shown here is for demonstration purposes only.</p>
-    <h2>Section Heading</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula.</p>
-    <ul>
-      <li>First item in a list</li>
-      <li>Second item in a list</li>
-      <li>Third item with some additional text to show wrapping behavior</li>
-    </ul>
-    <h3>Subsection Example</h3>
-    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.</p>
-    <blockquote>This is an example of a blockquote that might appear in your document.</blockquote>
-  `;
   
   if (isStandalone) {
     return (
@@ -142,8 +125,9 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   isEditable={isEditable}
                   onContentChange={handleContentChange}
                   onElementSelect={handleElementSelect}
-                  renderToolbarOutside={false}
-                  externalToolbar={isEditable && isStandalone} // Tell DocumentPreview that toolbar is managed externally
+                  renderToolbarOutside={true}
+                  externalToolbar={isEditable}
+                  editorInstance={editorSetup?.editor} // Pass the editor instance
                 />
               </div>
             </div>
@@ -169,6 +153,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     );
   }
   
+  // For the editor role, keep the existing implementation which already works correctly
   return (
     <div className={`${isStandalone ? 'w-full' : isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       {isEditable && (

@@ -20,6 +20,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
+  const buttonSize = isDesigner ? "xxs" : "sm";
   
   return (
     <div className={`w-full bg-white ${!isDesigner ? 'border-b border-slate-200' : ''}`}>
@@ -34,16 +35,13 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                 <div className="flex items-center h-full pr-4">
                   <Button
                     variant="outline"
-                    size="sm"
+                    size={buttonSize}
                     onClick={onTogglePreview}
                     title={isPreviewVisible ? "Hide preview" : "Show preview"}
-                    className={cn("ml-2 w-[140px] justify-center")}
+                    className="flex items-center gap-2"
                   >
-                    <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
-                    <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
-                    <span className="ml-2 hidden sm:inline">
-                      {isPreviewVisible ? "Preview" : "Preview"}
-                    </span>
+                    {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <span className="ml-1">Preview</span>
                   </Button>
                 </div>
               )}
@@ -54,16 +52,13 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
               {isDesigner && onTogglePreview && (
                 <Button
                   variant="outline"
-                  size="sm"
+                  size={buttonSize}
                   onClick={onTogglePreview}
                   title={isPreviewVisible ? "Hide preview" : "Show preview"}
-                  className="w-[140px] justify-center"
+                  className="flex items-center gap-2"
                 >
-                  <EyeOff size={18} className={isPreviewVisible ? "block" : "hidden"} />
-                  <Eye size={18} className={isPreviewVisible ? "hidden" : "block"} />
-                  <span className="ml-2 hidden sm:inline">
-                    {isPreviewVisible ? "Preview" : "Preview"}
-                  </span>
+                  {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <span className="ml-1">Preview</span>
                 </Button>
               )}
             </div>

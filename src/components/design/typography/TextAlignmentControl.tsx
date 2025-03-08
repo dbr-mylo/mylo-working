@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Type, AlignJustify } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
 
 interface TextAlignmentControlProps {
   value: string;
@@ -12,11 +12,17 @@ interface TextAlignmentControlProps {
 export const TextAlignmentControl = ({ value, onChange }: TextAlignmentControlProps) => {
   // Text align options
   const textAlignOptions = [
-    { value: "left", label: "Left", icon: <ArrowLeft className="h-4 w-4" /> },
-    { value: "center", label: "Center", icon: <Type className="h-4 w-4" /> },
-    { value: "right", label: "Right", icon: <ArrowRight className="h-4 w-4" /> },
+    { value: "left", label: "Left", icon: <AlignLeft className="h-4 w-4" /> },
+    { value: "center", label: "Center", icon: <AlignCenter className="h-4 w-4" /> },
+    { value: "right", label: "Right", icon: <AlignRight className="h-4 w-4" /> },
     { value: "justify", label: "Justify", icon: <AlignJustify className="h-4 w-4" /> }
   ];
+
+  const handleButtonClick = (alignValue: string, e: React.MouseEvent) => {
+    // Prevent form submission
+    e.preventDefault();
+    onChange(alignValue);
+  };
 
   return (
     <div>
@@ -27,8 +33,9 @@ export const TextAlignmentControl = ({ value, onChange }: TextAlignmentControlPr
             key={option.value}
             variant={value === option.value ? "default" : "outline"}
             size="sm"
-            onClick={() => onChange(option.value)}
+            onClick={(e) => handleButtonClick(option.value, e)}
             title={option.label}
+            type="button" // Explicitly set type to button to prevent form submission
           >
             {option.icon}
           </Button>

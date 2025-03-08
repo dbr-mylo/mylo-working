@@ -63,8 +63,9 @@ export const FontFamily = Extension.create({
   
   addCommands() {
     return {
-      setFontFamily: (fontFamily) => ({ commands }) => {
-        return commands.setMark('textStyle', { fontFamily });
+      // This is the correct way to declare a custom command in TipTap
+      setFontFamily: (fontFamily) => ({ editor }) => {
+        return editor.commands.setMark('textStyle', { fontFamily });
       },
     };
   },

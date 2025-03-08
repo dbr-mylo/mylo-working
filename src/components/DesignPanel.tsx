@@ -1,3 +1,4 @@
+
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useRef, useEffect } from "react";
@@ -87,7 +88,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
-      onUpdate: handleContentChange, 
+      onContentChange: handleContentChange, // Updated to match the new prop name
       isEditable 
     }) : null;
   

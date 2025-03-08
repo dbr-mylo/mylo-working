@@ -62,13 +62,13 @@ export const FontFamily = Extension.create({
   },
   
   addCommands() {
-    // The proper way to implement commands for TipTap extensions
-    // is to return an object with function factories that take parameters
-    // and return command functions
     return {
-      setFontFamily: (fontFamily: string) => ({ chain }) => {
-        // Use chain instead of commands for better TypeScript compatibility
-        return chain().setMark('textStyle', { fontFamily }).run();
+      setFontFamily: (fontFamily: string) => ({ editor }) => {
+        return editor
+          .chain()
+          .focus()
+          .setMark('textStyle', { fontFamily })
+          .run();
       },
     };
   },

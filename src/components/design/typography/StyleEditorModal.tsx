@@ -49,13 +49,13 @@ export const StyleEditorModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-4 pb-2">
-          <DialogTitle className="text-lg font-semibold">
+        <DialogHeader className="p-3 pb-2">
+          <DialogTitle className="text-sm font-semibold">
             {style ? `Edit Style: ${style.name}` : "Create New Style"}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="px-4 pb-4">
+        <div className="px-3 pb-3">
           <StyleForm 
             initialValues={style || undefined}
             onSubmit={handleSave}

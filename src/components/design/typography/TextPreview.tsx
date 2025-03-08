@@ -15,10 +15,10 @@ interface TextPreviewProps {
 
 export const TextPreview = ({ styles }: TextPreviewProps) => {
   return (
-    <div className="flex flex-col space-y-1">
+    <div className="flex flex-col space-y-0.5">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-medium">Preview</h3>
-        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
           <span>{styles.fontFamily}</span>
           <span>•</span>
           <span>{styles.fontSize}</span>
@@ -28,7 +28,7 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
       </div>
       
       <div 
-        className="py-2"
+        className="py-1"
         style={{ 
           fontFamily: styles.fontFamily,
           fontSize: styles.fontSize,

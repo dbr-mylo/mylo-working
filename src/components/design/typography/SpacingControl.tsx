@@ -52,8 +52,8 @@ export const SpacingControl = ({
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-1">
+    <div className="mb-2">
+      <div className="flex justify-between items-center mb-0.5">
         <Label htmlFor={id} className="text-xs">{label}</Label>
         <span className="text-xs text-gray-500">{formatDisplayValue()}</span>
       </div>

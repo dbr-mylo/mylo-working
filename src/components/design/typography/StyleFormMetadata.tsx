@@ -22,8 +22,8 @@ export const StyleFormMetadata = ({
   return (
     <>
       {/* Style Name */}
-      <div className="grid gap-2">
-        <Label htmlFor="name">Style Name</Label>
+      <div className="mb-2">
+        <Label htmlFor="name" className="text-xs mb-0.5 inline-block">Style Name</Label>
         <Input 
           id="name" 
           value={name} 

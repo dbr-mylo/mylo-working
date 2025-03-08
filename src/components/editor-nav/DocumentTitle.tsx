@@ -36,14 +36,14 @@ export const DocumentTitle = ({
     <>
       {isEditable ? (
         <Input 
-          className="h-8 w-48 text-editor-heading font-medium focus-visible:ring-1"
+          className="h-7 w-48 text-editor-heading font-medium focus-visible:ring-1"
           value={localTitle}
           onChange={handleTitleChange}
           onBlur={handleTitleBlur}
           placeholder={placeholder}
         />
       ) : (
-        <h1 className="text-lg font-medium text-editor-heading">
+        <h1 className="text-base font-medium text-editor-heading">
           {title || placeholder}
         </h1>
       )}

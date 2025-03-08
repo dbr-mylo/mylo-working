@@ -58,19 +58,19 @@ export const StyleForm = ({
   const showFormFields = !!onSubmit;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {/* Smaller preview at the top */}
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
+      <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
         <TextPreview styles={styles} />
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-4">
+        <TabsList className="w-full grid grid-cols-2 mb-3">
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
           <TabsTrigger value="typography">Typography</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="basic" className="space-y-4">
+        <TabsContent value="basic" className="space-y-3">
           {showFormFields && (
             <StyleFormMetadata
               name={name}
@@ -82,7 +82,7 @@ export const StyleForm = ({
           )}
         </TabsContent>
         
-        <TabsContent value="typography" className="space-y-4">
+        <TabsContent value="typography" className="space-y-3">
           <StyleFormControls 
             styles={styles}
             onStyleChange={handleStyleChange}
@@ -91,7 +91,7 @@ export const StyleForm = ({
       </Tabs>
 
       {showFormFields && (
-        <div className="flex justify-end space-x-2 pt-6 border-t mt-6">
+        <div className="flex justify-end space-x-2 pt-3 border-t mt-3">
           <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
             name,
             selector: "",

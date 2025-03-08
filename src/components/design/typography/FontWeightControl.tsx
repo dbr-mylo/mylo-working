@@ -20,13 +20,13 @@ export const FontWeightControl = ({ value, onChange }: FontWeightControlProps) =
   ];
 
   return (
-    <div>
-      <Label htmlFor="font-weight" className="text-xs">Font Weight</Label>
+    <div className="mb-2">
+      <Label htmlFor="font-weight" className="text-xs mb-0.5 inline-block">Font Weight</Label>
       <Select
         value={value}
         onValueChange={onChange}
       >
-        <SelectTrigger id="font-weight" className="mt-1">
+        <SelectTrigger id="font-weight">
           <SelectValue placeholder="Select weight" />
         </SelectTrigger>
         <SelectContent>

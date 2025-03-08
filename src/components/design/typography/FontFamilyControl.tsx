@@ -10,9 +10,9 @@ interface FontFamilyControlProps {
 
 export const FontFamilyControl = ({ value, onChange }: FontFamilyControlProps) => {
   return (
-    <div>
-      <Label htmlFor="font-family" className="text-xs">Font Family</Label>
-      <div className="mt-1">
+    <div className="mb-2">
+      <Label htmlFor="font-family" className="text-xs mb-0.5 inline-block">Font Family</Label>
+      <div>
         <FontPicker 
           value={value} 
           onChange={onChange}

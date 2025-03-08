@@ -16,12 +16,12 @@ export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-1">
+    <div className="mb-2">
+      <div className="flex justify-between items-center mb-0.5">
         <Label htmlFor="font-size" className="text-xs">Font Size</Label>
         <span className="text-xs text-gray-500">{value}</span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Slider 
           id="font-size"
           value={[getNumberFromPixelValue(value)]} 
@@ -35,7 +35,7 @@ export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
           type="number"
           value={getNumberFromPixelValue(value)}
           onChange={(e) => onChange(`${e.target.value}px`)}
-          className="w-16"
+          className="w-14"
           min={8}
           max={72}
         />

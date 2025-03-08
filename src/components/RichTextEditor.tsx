@@ -13,6 +13,7 @@ interface RichTextEditorProps {
   hideToolbar?: boolean;
   fixedToolbar?: boolean;
   renderToolbarOutside?: boolean;
+  externalToolbar?: boolean; // New prop to indicate the toolbar is managed externally
 }
 
 export const RichTextEditor = ({ 
@@ -21,7 +22,8 @@ export const RichTextEditor = ({
   isEditable = true, 
   hideToolbar = false,
   fixedToolbar = false,
-  renderToolbarOutside = false
+  renderToolbarOutside = false,
+  externalToolbar = false // Don't render toolbar if it's managed externally
 }: RichTextEditorProps) => {
   
   const {
@@ -81,7 +83,7 @@ export const RichTextEditor = ({
         `}
       </style>
       
-      {!hideToolbar && (
+      {!hideToolbar && !externalToolbar && (
         <div className={`editor-toolbar ${fixedToolbar ? 'fixed-toolbar' : ''}`}>
           {renderToolbar()}
         </div>

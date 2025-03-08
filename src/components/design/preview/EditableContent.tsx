@@ -1,3 +1,4 @@
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -6,13 +7,15 @@ interface EditableContentProps {
   onContentChange: (content: string) => void;
   hideToolbar?: boolean;
   renderToolbarOutside?: boolean;
+  externalToolbar?: boolean;
 }
 
 export const EditableContent = ({ 
   content, 
   onContentChange, 
   hideToolbar = false,
-  renderToolbarOutside = false 
+  renderToolbarOutside = false,
+  externalToolbar = false
 }: EditableContentProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -26,6 +29,7 @@ export const EditableContent = ({
         isEditable={true}
         hideToolbar={hideToolbar}
         renderToolbarOutside={renderToolbarOutside}
+        externalToolbar={externalToolbar} // Pass the external toolbar flag
       />
     );
   } 

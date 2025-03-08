@@ -85,6 +85,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     setIsPreviewVisible(prev => !prev);
   };
   
+  // Create a single editor setup that will be shared by both the toolbar and the editor
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 
@@ -92,9 +93,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       isEditable 
     }) : null;
   
-  // Removed the toolbar rendering from ToolSettingsMenuBar
-  // and added it directly in the component
-
+  // Pass editorSetup to both the toolbar and the editor
+  
   const previewContent = `
     <h1>Preview of Your Document</h1>
     <p>This is a preview of how your document will look with the current styling. The content shown here is for demonstration purposes only.</p>
@@ -142,7 +142,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   isEditable={isEditable}
                   onContentChange={handleContentChange}
                   onElementSelect={handleElementSelect}
-                  renderToolbarOutside={isEditable}
+                  renderToolbarOutside={false}
+                  externalToolbar={isEditable && isStandalone} // Tell DocumentPreview that toolbar is managed externally
                 />
               </div>
             </div>

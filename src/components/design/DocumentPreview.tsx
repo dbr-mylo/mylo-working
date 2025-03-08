@@ -15,6 +15,7 @@ interface DocumentPreviewProps {
   onContentChange?: (content: string) => void;
   onElementSelect?: (element: HTMLElement | null) => void;
   renderToolbarOutside?: boolean;
+  externalToolbar?: boolean;
 }
 
 export const DocumentPreview = ({ 
@@ -23,7 +24,8 @@ export const DocumentPreview = ({
   isEditable, 
   onContentChange,
   onElementSelect,
-  renderToolbarOutside = false
+  renderToolbarOutside = false,
+  externalToolbar = false
 }: DocumentPreviewProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -60,6 +62,7 @@ export const DocumentPreview = ({
             onContentChange={handleContentChange}
             hideToolbar={isDesigner}
             renderToolbarOutside={renderToolbarOutside}
+            externalToolbar={externalToolbar}
           />
         ) : content ? (
           <ViewableContent

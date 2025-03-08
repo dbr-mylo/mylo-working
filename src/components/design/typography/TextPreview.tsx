@@ -15,9 +15,9 @@ interface TextPreviewProps {
 
 export const TextPreview = ({ styles }: TextPreviewProps) => {
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex flex-col space-y-1">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Preview</h3>
+        <h3 className="text-xs font-medium">Preview</h3>
         <div className="flex items-center space-x-2 text-xs text-muted-foreground">
           <span>{styles.fontFamily}</span>
           <span>•</span>
@@ -28,7 +28,7 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
       </div>
       
       <div 
-        className="py-4"
+        className="py-2"
         style={{ 
           fontFamily: styles.fontFamily,
           fontSize: styles.fontSize,
@@ -39,8 +39,7 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
           textAlign: styles.textAlign as "left" | "center" | "right" | "justify"
         }}
       >
-        The quick brown fox jumps over the lazy dog. 
-        <div>Typography is the art and technique of arranging type.</div>
+        The quick brown fox jumps over the lazy dog.
       </div>
     </div>
   );

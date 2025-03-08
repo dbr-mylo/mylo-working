@@ -59,8 +59,8 @@ export const StyleForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Always display the preview at the top */}
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-6">
+      {/* Smaller preview at the top */}
+      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
         <TextPreview styles={styles} />
       </div>
       

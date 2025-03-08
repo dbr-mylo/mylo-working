@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Edit2, Trash2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { TextStyle } from "@/lib/types";
-import { textStyleStore } from "@/stores/textStyleStore";
+import { textStyleStore } from "@/stores/textStyles"; // Updated import path
 import { FontPicker } from "@/components/rich-text/FontPicker";
 
 interface TextStyleManagerProps {

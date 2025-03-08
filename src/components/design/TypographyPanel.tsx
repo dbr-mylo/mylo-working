@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { TextStyle } from "@/lib/types";
 import { Save, PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { textStyleStore } from "@/stores/textStyleStore";
+import { textStyleStore } from "@/stores/textStyles"; // Updated import path
 
 // Import smaller components
 import { FontFamilyControl } from "./typography/FontFamilyControl";

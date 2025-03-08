@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Indent, Outdent } from 'lucide-react';
@@ -26,29 +25,27 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const handleFontChange = (font: string) => {
-    console.log(`EditorToolbar: Font selected: ${font}`);
     onFontChange(font);
   };
 
   const handleBoldClick = () => {
-    // Get the current color from editor state before any changes
-    const { color } = editor.getAttributes('textStyle');
-    console.log("Current color before bold:", color || currentColor);
+    if (!editor) return;
     
-    // Store the color for reapplication
-    const colorToPreserve = color || currentColor;
+    // Get the current color before toggling bold
+    const { color } = editor.getAttributes('textStyle');
+    
+    // Get our stored color from the extension or use what's in the current attributes
+    const storedColor = editor.storage.colorState?.color || color || currentColor;
     
     // First toggle bold
     editor.chain().focus().toggleBold().run();
     
-    // Always reapply color after toggling bold
-    if (colorToPreserve && colorToPreserve !== '#000000') {
-      console.log("Reapplying color after bold:", colorToPreserve);
-      
-      // Apply color in a separate chain command to ensure it's not affected by the bold toggle
-      setTimeout(() => {
-        editor.chain().focus().setColor(colorToPreserve).run();
-      }, 0);
+    // Always reapply the color after toggling bold to ensure it persists
+    if (storedColor && storedColor !== '#000000') {
+      // Using requestAnimationFrame to ensure DOM updates before reapplying color
+      requestAnimationFrame(() => {
+        editor.chain().focus().setColor(storedColor).run();
+      });
     }
   };
 

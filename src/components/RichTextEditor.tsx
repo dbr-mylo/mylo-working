@@ -33,7 +33,11 @@ export const RichTextEditor = ({
   const useOwnEditor = !externalEditorInstance;
   
   const editorSetup = useOwnEditor 
-    ? useEditorSetup({ content, onContentChange: onUpdate, isEditable })
+    ? useEditorSetup({ 
+        content, 
+        onContentChange: onUpdate, // This is the correct prop name now
+        isEditable 
+      })
     : null;
   
   // Use either the external editor or our own

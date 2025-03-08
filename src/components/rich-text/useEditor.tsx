@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -12,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseEditorProps {
   content: string;
-  onUpdate: (content: string) => void;
+  onContentChange: (content: string) => void; // Changed from onUpdate to onContentChange
   isEditable?: boolean;
 }
 

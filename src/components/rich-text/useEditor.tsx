@@ -23,54 +23,10 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
-  // Modified Bold extension with improved color preservation
-  const ColorPreservingBold = Bold.extend({
-    addAttributes() {
-      return {
-        ...this.parent?.(),
-        // Store the current color as an attribute on the bold mark
-        preservedColor: {
-          default: null,
-          parseHTML: element => element.getAttribute('data-preserved-color'),
-          renderHTML: attributes => {
-            if (!attributes.preservedColor) {
-              return {};
-            }
-            
-            return {
-              'data-preserved-color': attributes.preservedColor,
-              style: `color: ${attributes.preservedColor}`,
-            };
-          },
-        },
-      };
-    },
-    
-    addKeyboardShortcuts() {
-      return {
-        'Mod-b': () => {
-          if (!this.editor) return false;
-          
-          // Get current color before toggling
-          const { color } = this.editor.getAttributes('textStyle');
-          
-          // If bold is active, we'll be removing bold, so we need to preserve the color
-          if (this.editor.isActive('bold')) {
-            this.editor.chain()
-              .setColor(color || currentColor)
-              .toggleBold()
-              .run();
-          } else {
-            // If bold is not active, we'll be adding bold
-            this.editor.chain()
-              .toggleBold()
-              .setColor(color || currentColor)
-              .run();
-          }
-          
-          return true;
-        },
-      };
+  // Create a custom Bold extension that preserves color
+  const ColorPreservingBold = Bold.configure({
+    HTMLAttributes: {
+      class: 'color-preserving-bold',
     },
   });
   
@@ -82,7 +38,7 @@ export const useEditorSetup = ({ content, onUpdate, isEditable = true }: UseEdit
         listItem: false,
         bold: false, // Disable default bold
       }),
-      ColorPreservingBold, // Use our improved custom bold extension
+      ColorPreservingBold,
       TextStyle,
       FontFamily,
       ListItem,

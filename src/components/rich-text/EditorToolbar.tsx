@@ -33,35 +33,49 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     onFontChange(font);
   };
 
+  // New approach: Preserve color on bold toggle
   const handleBoldClick = () => {
     if (!editor) return;
     
-    // Track if bold is currently active
+    // Get current color
+    const { color } = editor.getAttributes('textStyle');
+    const currentColorValue = color || currentColor;
+    
+    // Check if bold is active
     const isBoldActive = editor.isActive('bold');
     
-    // Get the current color
+    // Create a transaction chain
+    editor
+      .chain()
+      .focus()
+      .toggleBold()
+      .run();
+    
+    // Reapply color after the bold toggle
+    if (!isBoldActive || isDesigner) {
+      editor
+        .chain()
+        .focus()
+        .setColor(currentColorValue)
+        .run();
+    }
+  };
+
+  // Helper to preserve color on any formatting change
+  const preserveColorAfterFormatting = (formatCommand: () => void) => {
+    if (!editor) return;
+    
+    // Get current color before formatting
     const { color } = editor.getAttributes('textStyle');
     const colorToPreserve = color || currentColor;
     
-    // Create a single transaction chain
-    const chain = editor.chain().focus();
+    // Execute the formatting command
+    formatCommand();
     
-    if (isBoldActive) {
-      // If bold is active, we'll remove bold first then set color
-      chain.toggleBold().setColor(colorToPreserve);
-    } else {
-      // If bold is not active, we'll set color first then add bold
-      chain.setColor(colorToPreserve).toggleBold();
+    // Reapply the color after formatting
+    if (isDesigner) {
+      editor.chain().focus().setColor(colorToPreserve).run();
     }
-    
-    // Execute the combined chain
-    chain.run();
-    
-    // Log current state for debugging
-    console.log("After bold toggle:", {
-      isBoldNowActive: editor.isActive('bold'),
-      currentColor: editor.getAttributes('textStyle').color || 'none'
-    });
   };
 
   const handleIndent = () => {
@@ -118,11 +132,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         onClick={() => {
           // Preserve color when toggling italic
           const { color } = editor.getAttributes('textStyle');
-          editor.chain()
-            .focus()
-            .toggleItalic()
-            .setColor(color || currentColor)
-            .run();
+          const currentColorValue = color || currentColor;
+          
+          editor.chain().focus().toggleItalic().run();
+          
+          // Reapply the color
+          if (isDesigner) {
+            editor.chain().focus().setColor(currentColorValue).run();
+          }
         }}
         className={editor.isActive('italic') ? 'bg-accent' : ''}
       >
@@ -140,7 +157,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         variant="outline"
         size="sm"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />
       </Button>

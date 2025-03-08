@@ -1,48 +1,69 @@
 
 import React from 'react';
 
-export const EditorStyles: React.FC = () => {
+export const EditorStyles = () => {
   return (
-    <style>
-      {`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Source+Sans+Pro:wght@400;700&display=swap');
-        
-        .ProseMirror {
-          min-height: 11in;
-          width: 8.5in;
-          padding: 1in;
-          margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-          overflow-y: auto;
-        }
-        .ProseMirror:focus {
-          outline: none;
-        }
-        .ProseMirror p {
-          margin-top: 0;
-          margin-bottom: 4px;
-          line-height: 1.2;
-        }
-        .ProseMirror ul, .ProseMirror ol {
-          margin-top: 0;
-          margin-bottom: 0;
-          padding-left: 20px;
-        }
-        .ProseMirror li {
-          margin-bottom: 4px;
-          line-height: 1.2;
-        }
-        .ProseMirror li p {
-          margin: 0;
-        }
-        .ProseMirror ul ul, .ProseMirror ol ol, .ProseMirror ul ol, .ProseMirror ol ul {
-          margin-top: 4px;
-        }
-        .ProseMirror li > ul, .ProseMirror li > ol {
-          padding-left: 24px;
-        }
-      `}
-    </style>
+    <style jsx global>{`
+      /* Base Editor Styles */
+      .ProseMirror {
+        position: relative;
+        outline: none;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        white-space: break-spaces;
+        -webkit-font-variant-ligatures: none;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+      }
+      
+      /* Placeholder */
+      .ProseMirror p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        float: left;
+        color: #adb5bd;
+        pointer-events: none;
+        height: 0;
+      }
+      
+      /* Lists */
+      .ProseMirror ul {
+        list-style-type: disc;
+        padding-left: 1.5em;
+      }
+      
+      .ProseMirror ol {
+        list-style-type: decimal;
+        padding-left: 1.5em;
+      }
+      
+      /* Indentation */
+      .ProseMirror *[data-indent="1"] {
+        padding-left: 2em;
+      }
+      
+      .ProseMirror *[data-indent="2"] {
+        padding-left: 4em;
+      }
+      
+      .ProseMirror *[data-indent="3"] {
+        padding-left: 6em;
+      }
+      
+      /* Special styles for color preservation */
+      .ProseMirror .color-preserving-bold {
+        font-weight: bold;
+      }
+      
+      /* Ensure that color styles are respected when toggling bold */
+      .ProseMirror strong[style*="color"] {
+        color: inherit !important;
+      }
+      
+      /* Additional rule to ensure text style marks are properly inherited */
+      .ProseMirror mark[data-color] {
+        background-color: transparent;
+        color: attr(data-color);
+      }
+    `}</style>
   );
 };

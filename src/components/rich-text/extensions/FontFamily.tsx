@@ -63,8 +63,12 @@ export const FontFamily = Extension.create({
   
   addCommands() {
     return {
-      setFontFamily: fontFamily => ({ commands }) => {
-        return commands.setMark('textStyle', { fontFamily });
+      // The issue is that we need to return a function for each command
+      // instead of an object with methods
+      setFontFamily: (fontFamily: string) => {
+        return ({ commands }) => {
+          return commands.setMark('textStyle', { fontFamily });
+        };
       },
     };
   },

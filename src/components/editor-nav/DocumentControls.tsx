@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Save, FolderOpen } from "lucide-react";
 import { useState } from "react";
@@ -33,7 +32,7 @@ export const DocumentControls = ({
   
   const isDesigner = role === "designer";
   const itemType = isDesigner ? "template" : "document";
-  const buttonSize = isDesigner ? "xs" : "sm";
+  const buttonSize = isDesigner ? "xxs" : "sm";
 
   const handleLoadDocument = (doc: Document) => {
     if (onLoadDocument) {

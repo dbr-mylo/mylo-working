@@ -1,4 +1,3 @@
-
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -107,4 +106,14 @@ export interface StyleContextMenuProps {
   onSetDefault: (id: string) => void;
   position: { x: number, y: number } | null;
   onClose: () => void;
+}
+
+export interface TypographyStyles {
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  color: string;
+  lineHeight: string;
+  letterSpacing: string;
+  textAlign: string;
 }

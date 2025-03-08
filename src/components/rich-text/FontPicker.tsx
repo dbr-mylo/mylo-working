@@ -64,4 +64,3 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
     </div>
   );
 };
-

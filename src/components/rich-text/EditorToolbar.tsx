@@ -143,7 +143,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 py-2 px-4 border-b border-editor-border bg-white">
+    <div className="flex items-center gap-2">
       <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       <Button

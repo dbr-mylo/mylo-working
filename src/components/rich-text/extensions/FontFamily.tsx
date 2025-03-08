@@ -2,6 +2,17 @@
 import { Extension } from '@tiptap/core';
 import '@tiptap/extension-text-style';
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    fontFamily: {
+      /**
+       * Set the font family
+       */
+      setFontFamily: (fontFamily: string) => ReturnType;
+    }
+  }
+}
+
 export const FontFamily = Extension.create({
   name: 'fontFamily',
   

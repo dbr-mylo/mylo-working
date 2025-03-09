@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
@@ -34,8 +33,8 @@ export const EditorNav = ({
   const navigate = useNavigate();
   const isDesigner = currentRole === "designer";
   
-  // Use a smaller nav height for designers
-  const navHeight = isDesigner ? "h-8" : "h-16";
+  // Use a slightly smaller nav height for designers, but not as compressed as h-8
+  const navHeight = isDesigner ? "h-12" : "h-16";
 
   useEffect(() => {
     setTitle(documentTitle);

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TextStyle } from "@/lib/types";
@@ -21,7 +21,7 @@ export const StyleApplicatorTest = () => {
     { tag: "blockquote", content: "This is a blockquote element." },
   ];
 
-  const handleElementClick = (e: React.MouseEvent<HTMLElement>) => {
+  const handleElementClick = (e: MouseEvent<HTMLHeadingElement | HTMLParagraphElement | HTMLQuoteElement>) => {
     // Remove previous selection
     if (selectedElement) {
       selectedElement.classList.remove("ring-2", "ring-primary");
@@ -168,16 +168,17 @@ export const StyleApplicatorTest = () => {
         
         <div ref={contentRef} className="space-y-6 p-4 border rounded-md">
           {sampleElements.map((element, index) => {
-            const TagName = element.tag as keyof JSX.IntrinsicElements;
-            return (
-              <TagName 
-                key={index}
-                onClick={handleElementClick}
-                className="cursor-pointer hover:bg-muted/20 p-2 transition-colors"
-              >
-                {element.content}
-              </TagName>
-            );
+            if (element.tag === "h1") {
+              return <h1 key={index} onClick={handleElementClick} className="cursor-pointer hover:bg-muted/20 p-2 transition-colors">{element.content}</h1>;
+            } else if (element.tag === "h2") {
+              return <h2 key={index} onClick={handleElementClick} className="cursor-pointer hover:bg-muted/20 p-2 transition-colors">{element.content}</h2>;
+            } else if (element.tag === "h3") {
+              return <h3 key={index} onClick={handleElementClick} className="cursor-pointer hover:bg-muted/20 p-2 transition-colors">{element.content}</h3>;
+            } else if (element.tag === "blockquote") {
+              return <blockquote key={index} onClick={handleElementClick} className="cursor-pointer hover:bg-muted/20 p-2 transition-colors">{element.content}</blockquote>;
+            } else {
+              return <p key={index} onClick={handleElementClick} className="cursor-pointer hover:bg-muted/20 p-2 transition-colors">{element.content}</p>;
+            }
           })}
         </div>
       </Card>

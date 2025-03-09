@@ -16,8 +16,11 @@ const Index = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
   
-  // Check if this is the style test route
+  // Check if this is the style test route - both "style-test" and exact match
   const isStyleTestRoute = documentId === "style-test";
+  
+  console.log("Current documentId:", documentId);
+  console.log("Is style test route:", isStyleTestRoute);
   
   const {
     content,
@@ -50,16 +53,9 @@ const Index = () => {
     console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
   }, []);
   
-  if (isLoading && !isStyleTestRoute) {
-    return (
-      <div className="min-h-screen bg-editor-bg flex items-center justify-center">
-        <div className="animate-pulse text-lg">Loading document...</div>
-      </div>
-    );
-  }
-  
-  // Handle style test route
+  // Handle style test route - putting this before loading check
   if (isStyleTestRoute) {
+    console.log("Rendering StyleApplicatorTest component");
     return (
       <div className="min-h-screen bg-editor-bg">
         <EditorNav 
@@ -68,9 +64,17 @@ const Index = () => {
           onTitleChange={handleTitleChange}
           onSave={saveDocument}
         />
-        <main className="animate-fade-in">
+        <main className="animate-fade-in p-4">
           <StyleApplicatorTest />
         </main>
+      </div>
+    );
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-editor-bg flex items-center justify-center">
+        <div className="animate-pulse text-lg">Loading document...</div>
       </div>
     );
   }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -58,7 +57,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
       // Let's log the HTML on update to check color preservation
-      console.log("Editor HTML on update:", editor.getHTML());
+      console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
     },
   });
 

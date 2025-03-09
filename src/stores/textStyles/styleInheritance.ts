@@ -1,3 +1,4 @@
+
 import { TextStyle } from "@/lib/types";
 import { getLocalTextStyles } from "./storage";
 
@@ -9,15 +10,26 @@ export const getStyleWithInheritance = async (styleId: string): Promise<TextStyl
     const styles = getLocalTextStyles();
     const style = styles.find(s => s.id === styleId);
     
-    if (!style) return null;
+    if (!style) {
+      console.error('Style not found:', styleId);
+      return null;
+    }
     
     // If this style doesn't inherit from a parent, return it as is
-    if (!style.parentId) return style;
+    if (!style.parentId) {
+      console.log('Style has no parent, returning as is:', style.name);
+      return style;
+    }
     
     // Get the parent style with its inherited properties
     const parentStyle = await getStyleWithInheritance(style.parentId);
     
-    if (!parentStyle) return style;
+    if (!parentStyle) {
+      console.warn('Parent style not found, returning child as is');
+      return style;
+    }
+    
+    console.log(`Merging style ${style.name} with parent ${parentStyle.name}`);
     
     // Create a new style object that combines the parent's properties with this style's overrides
     const combinedStyle: TextStyle = {

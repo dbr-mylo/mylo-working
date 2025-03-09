@@ -78,7 +78,7 @@ export const useStyleApplication = (editor: Editor | null) => {
       });
       
       // Log to console for debugging
-      console.log(`Applied style "${styleToApply.name}" to selection`);
+      console.log(`Applied style "${styleToApply.name}" to selection:`, styleToApply);
       
     } catch (error) {
       console.error("Error applying style:", error);

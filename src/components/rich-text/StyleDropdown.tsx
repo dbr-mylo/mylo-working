@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useTextStyles } from "@/components/design/typography/hooks/useTextStyles";
 import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TextStyle } from "@/lib/types";
 import { Text } from "lucide-react";
 
 interface StyleDropdownProps {
@@ -18,8 +17,8 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
   const { styles, isLoading } = useTextStyles();
   const { applyStyleToSelection } = useStyleApplication(editor);
 
-  const handleStyleSelect = (style: TextStyle) => {
-    applyStyleToSelection(style.id);
+  const handleStyleSelect = (styleId: string) => {
+    applyStyleToSelection(styleId);
     setIsOpen(false);
   };
 
@@ -49,7 +48,7 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
                     variant="ghost"
                     size="sm"
                     className="w-full justify-start font-normal"
-                    onClick={() => handleStyleSelect(style)}
+                    onClick={() => handleStyleSelect(style.id)}
                   >
                     <div 
                       className="w-full overflow-hidden text-ellipsis"

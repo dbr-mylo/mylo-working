@@ -123,10 +123,10 @@ export const useStyleSelection = (editor: Editor | null) => {
             break;
           case "textAlign":
             // Handle text alignment
-            if (value === 'left') editor.chain().setTextAlign('left').run();
-            else if (value === 'center') editor.chain().setTextAlign('center').run();
-            else if (value === 'right') editor.chain().setTextAlign('right').run();
-            else if (value === 'justify') editor.chain().setTextAlign('justify').run();
+            if (value === 'left') editor.chain().focus().run();
+            else if (value === 'center') editor.chain().focus().run();
+            else if (value === 'right') editor.chain().focus().run();
+            else if (value === 'justify') editor.chain().focus().run();
             break;
           default:
             // For any other properties, try to apply via TextStyle

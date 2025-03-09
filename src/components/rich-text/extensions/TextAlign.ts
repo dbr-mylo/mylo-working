@@ -1,6 +1,5 @@
 
 import { Extension } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { TextAlign as TiptapTextAlign } from '@tiptap/extension-text-align'
 
 // Re-export the TipTap TextAlign extension with our default configuration
@@ -17,16 +16,16 @@ export const TextAlignmentCommands = Extension.create({
   addCommands() {
     return {
       // These commands provide a more direct API for our components to use
-      setTextAlignLeft: () => ({ commands }) => {
+      setTextAlignLeft: () => ({ commands }: { commands: any }) => {
         return commands.setTextAlign('left')
       },
-      setTextAlignCenter: () => ({ commands }) => {
+      setTextAlignCenter: () => ({ commands }: { commands: any }) => {
         return commands.setTextAlign('center')
       },
-      setTextAlignRight: () => ({ commands }) => {
+      setTextAlignRight: () => ({ commands }: { commands: any }) => {
         return commands.setTextAlign('right')
       },
-      setTextAlignJustify: () => ({ commands }) => {
+      setTextAlignJustify: () => ({ commands }: { commands: any }) => {
         return commands.setTextAlign('justify')
       },
     }

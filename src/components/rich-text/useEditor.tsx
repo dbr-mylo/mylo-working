@@ -8,12 +8,13 @@ import { Color } from '@tiptap/extension-color';
 import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
 import { IndentExtension } from './extensions/IndentExtension';
 import { FontFamily } from './extensions/FontFamily';
+import { FontSize } from './extensions/FontSize';
 import Bold from '@tiptap/extension-bold';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseEditorProps {
   content: string;
-  onContentChange: (content: string) => void; // Changed from onUpdate to onContentChange
+  onContentChange: (content: string) => void;
   isEditable?: boolean;
 }
 
@@ -45,6 +46,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         },
       }),
       FontFamily,
+      FontSize, // Add the FontSize extension
       ListItem,
       CustomBulletList,
       CustomOrderedList,
@@ -55,7 +57,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
-      // Let's log the HTML on each update to check color preservation
+      // Let's log the HTML on update to check color preservation
       console.log("Editor HTML on update:", editor.getHTML());
     },
   });

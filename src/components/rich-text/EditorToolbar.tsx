@@ -6,6 +6,8 @@ import { FontPicker } from './FontPicker';
 import { ColorPicker } from './ColorPicker';
 import { FormatButtons } from './toolbar/FormatButtons';
 import { IndentButtons } from './toolbar/IndentButtons';
+import { StyleDropdown } from './StyleDropdown';
+import { Separator } from '@/components/ui/separator';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -35,7 +37,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       
@@ -49,6 +51,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         editor={editor}
         buttonSize={buttonSize}
       />
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      
+      {/* Add the new StyleDropdown component */}
+      <StyleDropdown editor={editor} />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 import { StyleSelectionInfo } from "./StyleSelectionInfo";
-import { useStyleSelection, SelectedTextInfo } from "@/hooks/styleSelection";
+import { useStyleSelection, SelectedTextInfo } from "@/hooks/useStyleSelection";
 import { Editor } from "@tiptap/react";
 import { useState, useEffect } from "react";
 
@@ -14,12 +14,12 @@ export const EditorStyleControls = ({ editor }: EditorStyleControlsProps) => {
   
   // Toggle visibility when selection changes
   useEffect(() => {
-    if (editor && (selectedInfo.hasSelection || editor.isFocused)) {
+    if (editor && (selectedInfo.hasSelection || editor.isFocused())) {
       setIsControlsVisible(true);
     } else {
       // Add a small delay before hiding to avoid flickering
       const timer = setTimeout(() => {
-        if (!editor?.isFocused) {
+        if (!editor?.isFocused()) {
           setIsControlsVisible(false);
         }
       }, 200);

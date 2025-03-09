@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -7,13 +8,12 @@ import { Color } from '@tiptap/extension-color';
 import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
 import { IndentExtension } from './extensions/IndentExtension';
 import { FontFamily } from './extensions/FontFamily';
-import { TextAlign, TextAlignmentCommands } from './extensions/TextAlign';
 import Bold from '@tiptap/extension-bold';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseEditorProps {
   content: string;
-  onContentChange: (content: string) => void;
+  onContentChange: (content: string) => void; // Changed from onUpdate to onContentChange
   isEditable?: boolean;
 }
 
@@ -23,6 +23,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
+  // Enhanced Bold extension with better color preservation
   const ColorPreservingBold = Bold.configure({
     HTMLAttributes: {
       class: 'color-preserving-bold',
@@ -49,13 +50,12 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
       CustomOrderedList,
       Color,
       IndentExtension,
-      TextAlign,
-      TextAlignmentCommands,
     ],
     content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
+      // Let's log the HTML on each update to check color preservation
       console.log("Editor HTML on update:", editor.getHTML());
     },
   });
@@ -72,14 +72,18 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     if (editor) {
       editor.chain().focus().setColor(color).run();
       
+      // If there's bold text selected, ensure it keeps the new color
       if (editor.isActive('bold')) {
         console.log("Bold is active, reapplying color:", color);
+        // Toggle bold off and on to refresh the styling
         editor.chain().focus().toggleBold().toggleBold().run();
+        // Re-apply color to make sure it sticks
         editor.chain().focus().setColor(color).run();
       }
     }
   };
 
+  // Monitor selection changes to update color state
   useEffect(() => {
     if (editor) {
       const updateColorState = () => {
@@ -90,6 +94,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         }
       };
       
+      // Add more detailed logging for debugging
       const logStyleChanges = () => {
         const textStyleAttrs = editor.getAttributes('textStyle');
         const isBoldActive = editor.isActive('bold');
@@ -107,6 +112,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
       editor.on('selectionUpdate', updateColorState);
       editor.on('transaction', updateColorState);
       
+      // Add debug logging
       editor.on('selectionUpdate', logStyleChanges);
       editor.on('transaction', logStyleChanges);
       

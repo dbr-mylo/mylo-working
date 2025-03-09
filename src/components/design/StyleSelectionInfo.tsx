@@ -1,9 +1,9 @@
 
 import { useEffect } from "react";
-import { SelectedTextInfo } from "@/hooks/styleSelection";
+import { SelectedTextInfo } from "@/hooks/useStyleSelection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Paintbrush, Type, Text } from "lucide-react";
+import { Paintbrush, Type, CursorText } from "lucide-react";
 import { StyleApplicator } from "./typography/StyleApplicator";
 
 interface StyleSelectionInfoProps {
@@ -64,7 +64,7 @@ export const StyleSelectionInfo = ({
             </Badge>
           ) : (
             <Badge variant="outline" className="bg-gray-100">
-              <Text className="h-3 w-3 mr-1" />
+              <CursorText className="h-3 w-3 mr-1" />
               Cursor Position
             </Badge>
           )}

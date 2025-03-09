@@ -6,7 +6,6 @@ import { FontPicker } from './FontPicker';
 import { ColorPicker } from './ColorPicker';
 import { FormatButtons } from './toolbar/FormatButtons';
 import { IndentButtons } from './toolbar/IndentButtons';
-import { TextAlignButtons } from './toolbar/TextAlignButtons';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -36,7 +35,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2">
       <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
       
@@ -45,13 +44,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         currentColor={currentColor}
         buttonSize={buttonSize}
       />
-      
-      <div className="flex items-center gap-1">
-        <TextAlignButtons
-          editor={editor}
-          buttonSize={buttonSize}
-        />
-      </div>
       
       <IndentButtons 
         editor={editor}

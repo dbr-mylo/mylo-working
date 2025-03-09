@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
+import { StyleInheritance } from "./StyleInheritance";
 
 interface StyleFormProps {
   initialValues?: TextStyle;

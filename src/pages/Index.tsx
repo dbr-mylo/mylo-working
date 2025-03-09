@@ -8,12 +8,16 @@ import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
+import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
 
 const Index = () => {
   const { documentId } = useParams();
   const { role } = useAuth();
   const { width } = useWindowSize();
   const isMobile = width < 1281;
+  
+  // Check if this is the style test route
+  const isStyleTestRoute = documentId === "style-test";
   
   const {
     content,
@@ -46,10 +50,27 @@ const Index = () => {
     console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
   }, []);
   
-  if (isLoading) {
+  if (isLoading && !isStyleTestRoute) {
     return (
       <div className="min-h-screen bg-editor-bg flex items-center justify-center">
         <div className="animate-pulse text-lg">Loading document...</div>
+      </div>
+    );
+  }
+  
+  // Handle style test route
+  if (isStyleTestRoute) {
+    return (
+      <div className="min-h-screen bg-editor-bg">
+        <EditorNav 
+          currentRole={role || "editor"} 
+          documentTitle="Style Inheritance Test"
+          onTitleChange={handleTitleChange}
+          onSave={saveDocument}
+        />
+        <main className="animate-fade-in">
+          <StyleApplicatorTest />
+        </main>
       </div>
     );
   }

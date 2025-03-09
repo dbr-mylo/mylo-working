@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { describe, it, beforeEach, expect } from 'vitest';
+import { describe, it, beforeEach, expect, vi } from 'vitest';
 
 // Import all test files to ensure they run
 import './StyleFormTabs/StyleFormTabs.basic.test';

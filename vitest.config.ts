@@ -12,6 +12,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    deps: {
+      inline: ['@testing-library/jest-dom'],
+    }
   },
   resolve: {
     alias: {

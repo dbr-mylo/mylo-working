@@ -1,6 +1,10 @@
 
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 import '@testing-library/jest-dom';
+
+// Extend Vitest matchers with jest-dom
+expect.extend({});
 
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {

@@ -2,11 +2,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { StyleFormActions } from '../StyleFormActions';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Button component
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, variant, type }: { children: React.ReactNode; onClick?: () => void; variant?: string; type?: string }) => (
+  Button: ({ children, onClick, variant, type }: { 
+    children: React.ReactNode; 
+    onClick?: () => void; 
+    variant?: string; 
+    type?: "button" | "submit" | "reset"; 
+  }) => (
     <button
       data-testid={`button-${variant || 'default'}`}
       onClick={onClick}

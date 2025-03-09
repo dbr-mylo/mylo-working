@@ -95,10 +95,14 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
   };
 
   const handleStyleClick = async (style: TextStyle) => {
+    console.log("Style clicked in sidebar:", style.name);
+    console.log("Editor has selection:", editorInstance && !editorInstance.state.selection.empty);
+    
     // Check if we have an editor and if there's a selection
     if (editorInstance && styleApplication && !editorInstance.state.selection.empty) {
       // Apply the style to the selected text
       try {
+        console.log("Applying style to selection:", style.id);
         await styleApplication.applyStyleToSelection(style.id);
         toast({
           title: "Style applied",
@@ -114,6 +118,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
       }
     } else {
       // If no text is selected or no editor instance, open the style editor
+      console.log("No selection or no editor, opening style editor");
       onEditStyle(style);
     }
   };

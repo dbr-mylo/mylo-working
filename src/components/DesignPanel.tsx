@@ -170,7 +170,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             </div>
           )}
           
-          <DesignerSidebar />
+          <DesignerSidebar editorInstance={editorSetup?.editor} />
         </div>
       </div>
     );

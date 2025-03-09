@@ -5,12 +5,12 @@ import { Check, Text } from "lucide-react";
 
 interface StyleListItemProps {
   style: TextStyle;
-  onSelect: (styleId: string) => void;
+  onSelect: (style: TextStyle) => void;  // Updated to pass the entire style object
 }
 
 export const StyleListItem = ({ style, onSelect }: StyleListItemProps) => {
   const handleClick = () => {
-    onSelect(style.id);
+    onSelect(style);  // Pass the entire style object, not just the ID
   };
 
   return (

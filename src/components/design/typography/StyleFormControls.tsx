@@ -1,6 +1,6 @@
 
 import React from "react";
-import { TypographyStyles } from "@/lib/types";
+import { TypographyStyles, TextStyle } from "@/lib/types";
 import { FontFamilyControl } from "./FontFamilyControl";
 import { FontSizeControl } from "./FontSizeControl";
 import { FontWeightControl } from "./FontWeightControl";
@@ -12,9 +12,10 @@ import { Separator } from "@/components/ui/separator";
 interface StyleFormControlsProps {
   styles: TypographyStyles;
   onStyleChange: (property: keyof TypographyStyles, value: string) => void;
+  parentStyle?: TextStyle | null;
 }
 
-export const StyleFormControls = ({ styles, onStyleChange }: StyleFormControlsProps) => {
+export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleFormControlsProps) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

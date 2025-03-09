@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Link, LinkOff, AlertCircle } from "lucide-react";
+import { Link, Link2Off, AlertCircle } from "lucide-react";
 
 interface StyleInheritanceProps {
   currentStyleId?: string;
@@ -39,11 +38,9 @@ export const StyleInheritance = ({
         
         if (!isMounted) return;
         
-        // Filter out styles that would create circular dependencies
         const filteredStyles = filterValidParentStyles(fetchedStyles, currentStyleId);
         setStyles(filteredStyles);
         
-        // If we have a parentId, fetch the inheritance chain
         if (parentId) {
           const chain = await fetchInheritanceChain(parentId, fetchedStyles);
           setInheritanceChain(chain);
@@ -74,12 +71,10 @@ export const StyleInheritance = ({
     };
   }, [currentStyleId, parentId, toast]);
 
-  // Fetch the inheritance chain (parent and its parents)
   const fetchInheritanceChain = async (styleId: string, allStyles: TextStyle[]): Promise<TextStyle[]> => {
     const chain: TextStyle[] = [];
     let currentId = styleId;
     
-    // Prevent infinite loops
     const visitedIds = new Set<string>();
     
     while (currentId && !visitedIds.has(currentId)) {
@@ -95,54 +90,44 @@ export const StyleInheritance = ({
     return chain;
   };
 
-  // Function to filter out styles that would create circular dependencies
   const filterValidParentStyles = (allStyles: TextStyle[], styleId?: string): TextStyle[] => {
     if (!styleId) return allStyles;
     
     return allStyles.filter(style => 
-      // Cannot inherit from itself
       style.id !== styleId && 
-      // Cannot inherit from any style that would create a circular dependency
       !wouldCreateCircularDependency(style.id, styleId, allStyles)
     );
   };
 
-  // Enhanced function to check if selecting a style as parent would create a circular dependency
   const wouldCreateCircularDependency = (
     potentialParentId: string,
     childStyleId: string,
     allStyles: TextStyle[],
     visited: Set<string> = new Set()
   ): boolean => {
-    // If we've already visited this style in our traversal, we have a cycle
     if (visited.has(potentialParentId)) {
       return true;
     }
     
-    // Add the current style to our visited set
     visited.add(potentialParentId);
     
     const style = allStyles.find(s => s.id === potentialParentId);
     
-    // If style doesn't exist or has no parent, it can't form a cycle
     if (!style || !style.parentId) {
       return false;
     }
     
-    // If this style's parent is the child we're checking, we have a cycle
     if (style.parentId === childStyleId) {
       return true;
     }
     
-    // Recursively check this style's parent
     return wouldCreateCircularDependency(style.parentId, childStyleId, allStyles, visited);
   };
 
   const handleSelectChange = (value: string) => {
-    if (value === parentId) return; // No change
+    if (value === parentId) return;
     
     try {
-      // Additional validation if needed before applying the change
       if (value !== "none" && styles.findIndex(s => s.id === value) === -1) {
         throw new Error("Selected style is not valid as a parent");
       }
@@ -171,7 +156,7 @@ export const StyleInheritance = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none" className="flex items-center">
-            <LinkOff className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <Link2Off className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
             <span>None (Base Style)</span>
           </SelectItem>
           {styles.map((style) => (
@@ -183,7 +168,6 @@ export const StyleInheritance = ({
         </SelectContent>
       </Select>
       
-      {/* Show inheritance chain if it exists */}
       {inheritanceChain.length > 0 && (
         <div className="pt-2">
           <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">

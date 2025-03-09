@@ -22,14 +22,14 @@ export const useStyleApplicator = (
     }
 
     try {
-      // Start a transaction
-      editor.chain().focus();
+      // Start a transaction and focus the editor
+      const chain = editor.chain().focus();
       
       // Apply each style property
       Object.entries(styleProperties).forEach(([property, value]) => {
         switch (property) {
           case "fontFamily":
-            editor.chain().setFontFamily(value).run();
+            chain.setFontFamily(value);
             break;
           case "fontSize":
             // Convert to px if needed and apply
@@ -42,14 +42,14 @@ export const useStyleApplicator = (
             editor.commands.updateAttributes('textStyle', { fontWeight: value });
             break;
           case "color":
-            editor.chain().setColor(value).run();
+            chain.setColor(value);
             break;
           case "textAlign":
-            // Now we can properly handle text alignment
-            if (value === 'left') editor.chain().setTextAlign('left').run();
-            else if (value === 'center') editor.chain().setTextAlign('center').run();
-            else if (value === 'right') editor.chain().setTextAlign('right').run();
-            else if (value === 'justify') editor.chain().setTextAlign('justify').run();
+            // Use direct setTextAlign command for alignment
+            if (value === 'left') chain.setTextAlign('left');
+            else if (value === 'center') chain.setTextAlign('center');
+            else if (value === 'right') chain.setTextAlign('right');
+            else if (value === 'justify') chain.setTextAlign('justify');
             break;
           default:
             // For any other properties, try to apply via TextStyle
@@ -57,6 +57,9 @@ export const useStyleApplicator = (
             editor.commands.updateAttributes('textStyle', styleUpdate);
         }
       });
+      
+      // Execute the chain
+      chain.run();
 
       toast({
         title: "Style applied",

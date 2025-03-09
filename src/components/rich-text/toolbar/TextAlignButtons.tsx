@@ -13,12 +13,17 @@ export const TextAlignButtons: React.FC<TextAlignButtonsProps> = ({
   editor, 
   buttonSize 
 }) => {
+  // Helper function to set text alignment
+  const setTextAlign = (alignment: 'left' | 'center' | 'right' | 'justify') => {
+    return () => editor.chain().focus().setTextAlign(alignment).run();
+  };
+
   return (
     <>
       <Button
         variant="outline"
         size={buttonSize}
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        onClick={setTextAlign('left')}
         className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
         title="Align left"
       >
@@ -28,7 +33,7 @@ export const TextAlignButtons: React.FC<TextAlignButtonsProps> = ({
       <Button
         variant="outline"
         size={buttonSize}
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        onClick={setTextAlign('center')}
         className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
         title="Align center"
       >
@@ -38,7 +43,7 @@ export const TextAlignButtons: React.FC<TextAlignButtonsProps> = ({
       <Button
         variant="outline"
         size={buttonSize}
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        onClick={setTextAlign('right')}
         className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
         title="Align right"
       >
@@ -48,7 +53,7 @@ export const TextAlignButtons: React.FC<TextAlignButtonsProps> = ({
       <Button
         variant="outline"
         size={buttonSize}
-        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        onClick={setTextAlign('justify')}
         className={editor.isActive({ textAlign: 'justify' }) ? 'bg-accent' : ''}
         title="Justify text"
       >

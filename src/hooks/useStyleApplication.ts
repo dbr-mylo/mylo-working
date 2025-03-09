@@ -38,7 +38,7 @@ export const useStyleApplication = (editor: Editor | null) => {
         toast({
           title: "No text selected",
           description: "Please select some text to apply the style",
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default"
         });
         return;
       }

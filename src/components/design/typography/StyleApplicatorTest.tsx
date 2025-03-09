@@ -21,7 +21,10 @@ export const StyleApplicatorTest = () => {
     { tag: "blockquote", content: "This is a blockquote element." },
   ];
 
-  const handleElementClick = (e: MouseEvent<HTMLHeadingElement | HTMLParagraphElement | HTMLQuoteElement>) => {
+  // Generic handler for any HTML element
+  const handleElementClick = (e: MouseEvent<HTMLElement>) => {
+    console.log("Element clicked:", e.currentTarget.tagName);
+    
     // Remove previous selection
     if (selectedElement) {
       selectedElement.classList.remove("ring-2", "ring-primary");
@@ -49,8 +52,10 @@ export const StyleApplicatorTest = () => {
     }
 
     try {
+      console.log("Applying style:", styleId);
       // Get the style with all inherited properties
       const style = await textStyleStore.getStyleWithInheritance(styleId);
+      console.log("Style to apply:", style);
       
       // Apply style to selected element
       if (style) {
@@ -82,10 +87,13 @@ export const StyleApplicatorTest = () => {
 
   const createDefaultStyles = async () => {
     try {
+      console.log("Creating default styles...");
       // Create some default styles for testing if none exist
       const styles = await textStyleStore.getTextStyles();
+      console.log("Current styles:", styles);
       
       if (styles.length === 0) {
+        console.log("No styles found, creating defaults...");
         const defaultStyles = [
           {
             name: "Heading 1",
@@ -151,6 +159,7 @@ export const StyleApplicatorTest = () => {
 
   useEffect(() => {
     // Create default styles when component mounts
+    console.log("StyleApplicatorTest mounted");
     createDefaultStyles();
   }, []);
 

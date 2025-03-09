@@ -24,11 +24,14 @@ const DocumentSelection = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  console.log("DocumentSelection rendered, role:", role, "user:", user ? "logged in" : "not logged in");
+  
   const isDesigner = role === "designer";
   const itemType = isDesigner ? "template" : "document";
   const itemTypePlural = isDesigner ? "templates" : "documents";
 
   useEffect(() => {
+    console.log("Fetching user documents...");
     fetchUserDocuments();
   }, [user, role]);
 
@@ -36,13 +39,17 @@ const DocumentSelection = () => {
     setIsLoading(true);
     try {
       if (user) {
+        console.log("Fetching documents for logged in user:", user.id);
         const data = await fetchUserDocumentsFromSupabase(user.id);
         const uniqueDocuments = deduplicateDocuments(data);
         setDocuments(uniqueDocuments);
+        console.log("Fetched documents:", uniqueDocuments.length);
       } else if (role) {
+        console.log("Fetching documents for guest with role:", role);
         try {
           const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
           setDocuments(uniqueDocs);
+          console.log("Fetched local documents:", uniqueDocs.length);
           
           // Also update the localStorage with deduplicated list if needed
           const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
@@ -58,6 +65,9 @@ const DocumentSelection = () => {
           console.error(`Error loading ${role} ${itemTypePlural}:`, error);
           setDocuments([]);
         }
+      } else {
+        console.log("No user or role found, showing empty document list");
+        setDocuments([]);
       }
     } catch (error) {
       console.error(`Error fetching ${itemTypePlural}:`, error);

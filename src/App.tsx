@@ -14,18 +14,20 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/editor" element={<Index />} />
+            <Route path="/editor/:documentId" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/documents" element={<DocumentSelection />} />
             <Route path="/style-test" element={<StyleTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </AuthProvider>
+          <Toaster />
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

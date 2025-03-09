@@ -56,9 +56,12 @@ export const setupTextStyleStoreMock = () => {
 // Mock components used by StyleForm
 export const setupComponentMocks = () => {
   vi.mock('../../StyleFormPreview', () => ({
-    StyleFormPreview: ({ 
-      styles, 
-      parentStyle 
+    StyleFormPreview: ({
+      styles,
+      parentStyle
+    }: {
+      styles: TypographyStyles;
+      parentStyle: TextStyle | null;
     }) => (
       <div 
         data-testid="style-form-preview" 
@@ -71,13 +74,20 @@ export const setupComponentMocks = () => {
   }));
 
   vi.mock('../../StyleFormTabs', () => ({
-    StyleFormTabs: ({ 
-      name, 
-      parentId, 
-      styles, 
-      onNameChange, 
-      onStyleChange, 
-      showFormFields 
+    StyleFormTabs: ({
+      name,
+      parentId,
+      styles,
+      onNameChange,
+      onStyleChange,
+      showFormFields
+    }: {
+      name: string;
+      parentId?: string;
+      styles: TypographyStyles;
+      onNameChange: (name: string) => void;
+      onStyleChange: (property: keyof TypographyStyles, value: string) => void;
+      showFormFields: boolean;
     }) => (
       <div 
         data-testid="style-form-tabs" 
@@ -96,11 +106,16 @@ export const setupComponentMocks = () => {
   }));
 
   vi.mock('../../StyleFormActions', () => ({
-    StyleFormActions: ({ 
-      showActions, 
-      isUpdate, 
-      onCancel, 
-      onSubmit 
+    StyleFormActions: ({
+      showActions,
+      isUpdate,
+      onCancel,
+      onSubmit
+    }: {
+      showActions: boolean;
+      isUpdate: boolean;
+      onCancel: () => void;
+      onSubmit: (e: React.FormEvent) => void;
     }) => (
       <div 
         data-testid="style-form-actions" 

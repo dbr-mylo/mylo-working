@@ -34,11 +34,16 @@ export const mockOnStyleChange = vi.fn();
 // Mock the StyleFormMetadata component for tests
 export const setupMetadataMock = () => {
   vi.mock('../../StyleFormMetadata', () => ({
-    StyleFormMetadata: ({ 
-      name, 
-      parentId, 
-      onNameChange, 
-      onParentChange 
+    StyleFormMetadata: ({
+      name,
+      parentId,
+      onNameChange,
+      onParentChange
+    }: {
+      name: string;
+      parentId?: string;
+      onNameChange: (value: string) => void;
+      onParentChange: (parentId: string | undefined) => void;
     }) => (
       <div data-testid="style-form-metadata" data-name={name} data-parent-id={parentId || 'none'}>
         <button 
@@ -61,9 +66,12 @@ export const setupMetadataMock = () => {
 // Mock the StyleFormControls component for tests
 export const setupControlsMock = () => {
   vi.mock('../../StyleFormControls', () => ({
-    StyleFormControls: ({ 
-      styles, 
-      onStyleChange 
+    StyleFormControls: ({
+      styles,
+      onStyleChange
+    }: {
+      styles: TypographyStyles;
+      onStyleChange: (property: keyof TypographyStyles, value: string) => void;
     }) => (
       <div data-testid="style-form-controls" data-styles={JSON.stringify(styles)}>
         <button 
@@ -80,16 +88,40 @@ export const setupControlsMock = () => {
 // Mock the Tabs components for tests
 export const setupTabsMock = () => {
   vi.mock('@/components/ui/tabs', () => ({
-    Tabs: ({ children, defaultValue }) => (
+    Tabs: ({
+      children,
+      defaultValue
+    }: {
+      children: React.ReactNode;
+      defaultValue: string;
+    }) => (
       <div data-testid="tabs" data-default-value={defaultValue}>{children}</div>
     ),
-    TabsList: ({ children, className }) => (
+    TabsList: ({
+      children,
+      className
+    }: {
+      children: React.ReactNode;
+      className?: string;
+    }) => (
       <div data-testid="tabs-list" className={className}>{children}</div>
     ),
-    TabsTrigger: ({ children, value }) => (
+    TabsTrigger: ({
+      children,
+      value
+    }: {
+      children: React.ReactNode;
+      value: string;
+    }) => (
       <button data-testid={`tab-${value}`} data-value={value}>{children}</button>
     ),
-    TabsContent: ({ children, value }) => (
+    TabsContent: ({
+      children,
+      value
+    }: {
+      children: React.ReactNode;
+      value: string;
+    }) => (
       <div data-testid={`tab-content-${value}`} data-value={value}>{children}</div>
     ),
   }));

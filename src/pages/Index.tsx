@@ -8,6 +8,7 @@ import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
+import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -56,6 +57,15 @@ const Index = () => {
   
   // Render different layouts based on user role
   const renderContent = () => {
+    // Show StyleApplicatorTest regardless of role
+    return (
+      <div className="p-4">
+        <StyleApplicatorTest />
+      </div>
+    );
+    
+    /*
+    // Commenting out the original layout logic to focus on testing
     if (role === "designer") {
       return (
         <DesignPanel 
@@ -81,6 +91,7 @@ const Index = () => {
         />
       );
     }
+    */
   };
   
   return (

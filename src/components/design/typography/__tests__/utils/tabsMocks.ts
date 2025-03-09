@@ -39,11 +39,6 @@ export const setupMetadataMock = () => {
       parentId, 
       onNameChange, 
       onParentChange 
-    }: { 
-      name: string;
-      parentId?: string;
-      onNameChange: (value: string) => void;
-      onParentChange: (parentId: string | undefined) => void;
     }) => (
       <div data-testid="style-form-metadata" data-name={name} data-parent-id={parentId || 'none'}>
         <button 
@@ -69,9 +64,6 @@ export const setupControlsMock = () => {
     StyleFormControls: ({ 
       styles, 
       onStyleChange 
-    }: { 
-      styles: TypographyStyles;
-      onStyleChange: (property: keyof TypographyStyles, value: string) => void;
     }) => (
       <div data-testid="style-form-controls" data-styles={JSON.stringify(styles)}>
         <button 
@@ -88,16 +80,16 @@ export const setupControlsMock = () => {
 // Mock the Tabs components for tests
 export const setupTabsMock = () => {
   vi.mock('@/components/ui/tabs', () => ({
-    Tabs: ({ children, defaultValue }: { children: React.ReactNode; defaultValue: string }) => (
+    Tabs: ({ children, defaultValue }) => (
       <div data-testid="tabs" data-default-value={defaultValue}>{children}</div>
     ),
-    TabsList: ({ children, className }: { children: React.ReactNode; className: string }) => (
+    TabsList: ({ children, className }) => (
       <div data-testid="tabs-list" className={className}>{children}</div>
     ),
-    TabsTrigger: ({ children, value }: { children: React.ReactNode; value: string }) => (
+    TabsTrigger: ({ children, value }) => (
       <button data-testid={`tab-${value}`} data-value={value}>{children}</button>
     ),
-    TabsContent: ({ children, value }: { children: React.ReactNode; value: string }) => (
+    TabsContent: ({ children, value }) => (
       <div data-testid={`tab-content-${value}`} data-value={value}>{children}</div>
     ),
   }));

@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { TextStyle, TypographyStyles, StyleFormData } from "@/lib/types";
+import { StyleFormMetadata } from "./StyleFormMetadata";
+import { StyleFormControls } from "./StyleFormControls";
+import { Button } from "@/components/ui/button";
 import { useStyleForm } from "./hooks/useStyleForm";
-import { useStyleFormSubmit } from "./hooks/useStyleFormSubmit";
-import { StyleFormPreview } from "./StyleFormPreview";
-import { StyleFormTabs } from "./StyleFormTabs";
-import { StyleFormActions } from "./StyleFormActions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
+import { Badge } from "@/components/ui/badge";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -38,16 +40,6 @@ export const StyleForm = ({
     externalStyleChange
   });
 
-  const {
-    handleSubmit,
-    handleCancel,
-    showFormFields,
-    isUpdate
-  } = useStyleFormSubmit({
-    initialValues,
-    onSubmit
-  });
-
   // Fetch parent style details when parentId changes
   useEffect(() => {
     if (!parentId) {
@@ -69,13 +61,11 @@ export const StyleForm = ({
     fetchParentStyle();
   }, [parentId]);
 
-  // If both handlers are missing, we're likely in an invalid state
-  if (!onSubmit && !externalStyleChange) {
-    console.warn("StyleForm requires either onSubmit or handleStyleChange prop");
-  }
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    handleSubmit(e, {
+  const handleSubmit = (e: React.FormEvent) => {
+    if (!onSubmit) return;
+    
+    e.preventDefault();
+    onSubmit({
       name,
       selector: "", // Providing empty string as default
       description: "", // Providing empty string as default
@@ -84,31 +74,75 @@ export const StyleForm = ({
     });
   };
 
-  return (
-    <form onSubmit={handleFormSubmit} className="space-y-3">
-      {/* Preview section */}
-      <StyleFormPreview styles={styles} parentStyle={parentStyle} />
-      
-      {/* Form tabs */}
-      <StyleFormTabs
-        name={name}
-        parentId={parentId}
-        currentStyleId={initialValues?.id}
-        styles={styles}
-        onNameChange={setName}
-        onParentChange={handleParentChange}
-        onStyleChange={handleStyleChange}
-        showFormFields={showFormFields}
-        parentStyle={parentStyle}
-      />
+  // If both handlers are missing, we're likely in an invalid state
+  if (!onSubmit && !externalStyleChange) {
+    console.warn("StyleForm requires either onSubmit or handleStyleChange prop");
+  }
 
-      {/* Form actions */}
-      <StyleFormActions
-        showActions={showFormFields}
-        isUpdate={isUpdate}
-        onCancel={handleCancel}
-        onSubmit={handleFormSubmit}
-      />
+  // Show form fields for creating/editing styles only when onSubmit is provided
+  const showFormFields = !!onSubmit;
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Smaller preview at the top */}
+      <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
+        <TextPreview styles={styles} />
+        {parentStyle && (
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center">
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherits from
+              </Badge>
+              <span className="text-xs ml-2">{parentStyle.name}</span>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="w-full grid grid-cols-2 mb-3">
+          <TabsTrigger value="basic">Basic Info</TabsTrigger>
+          <TabsTrigger value="typography">Typography</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="basic" className="space-y-3">
+          {showFormFields && (
+            <StyleFormMetadata
+              name={name}
+              parentId={parentId}
+              currentStyleId={initialValues?.id}
+              onNameChange={setName}
+              onParentChange={handleParentChange}
+              parentStyle={parentStyle}
+            />
+          )}
+        </TabsContent>
+        
+        <TabsContent value="typography" className="space-y-3">
+          <StyleFormControls 
+            styles={styles}
+            onStyleChange={handleStyleChange}
+            parentStyle={parentStyle}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {showFormFields && (
+        <div className="flex justify-end space-x-2 pt-3 border-t mt-3">
+          <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
+            name,
+            selector: "",
+            description: "",
+            parentId,
+            ...styles,
+          }) : undefined}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {initialValues ? "Update Style" : "Create Style"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 };

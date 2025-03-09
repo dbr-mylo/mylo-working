@@ -79,7 +79,6 @@ export interface TextStyle {
   marginTop?: string;          // Spacing above
   marginBottom?: string;       // Spacing below
   customProperties?: Record<string, string>; // For any additional CSS properties
-  hasChildren?: boolean;       // Flag indicating if the style is a parent to other styles
 }
 
 export interface StyleFormData {

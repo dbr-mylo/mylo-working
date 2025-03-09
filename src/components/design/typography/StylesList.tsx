@@ -6,18 +6,28 @@ import { Check, Pilcrow, MoreHorizontal } from "lucide-react";
 import { textStyleStore } from "@/stores/textStyles";
 import { EmptyState } from "./EmptyState";
 import { StyleContextMenu } from "./StyleContextMenu";
+import { Editor } from "@tiptap/react";
+import { useStyleApplication } from "@/hooks/useStyleApplication";
+import { useToast } from "@/hooks/use-toast";
 
 export interface StylesListProps {
   onEditStyle: (style: TextStyle) => void;
+  editorInstance?: Editor | null;
 }
 
-export const StylesList = ({ onEditStyle }: StylesListProps) => {
+export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => {
   const [textStyles, setTextStyles] = useState<TextStyle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState<{
     style: TextStyle;
     position: { x: number; y: number };
   } | null>(null);
+  const { toast } = useToast();
+  
+  // Set up the style application hook if we have an editor instance
+  const styleApplication = editorInstance 
+    ? useStyleApplication(editorInstance) 
+    : null;
 
   useEffect(() => {
     const loadTextStyles = async () => {
@@ -84,6 +94,30 @@ export const StylesList = ({ onEditStyle }: StylesListProps) => {
     }
   };
 
+  const handleStyleClick = async (style: TextStyle) => {
+    // Check if we have an editor and if there's a selection
+    if (editorInstance && styleApplication && !editorInstance.state.selection.empty) {
+      // Apply the style to the selected text
+      try {
+        await styleApplication.applyStyleToSelection(style.id);
+        toast({
+          title: "Style applied",
+          description: `Applied "${style.name}" to selected text`
+        });
+      } catch (error) {
+        console.error("Error applying style from sidebar:", error);
+        toast({
+          title: "Error applying style",
+          description: "Could not apply the style to the selected text",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // If no text is selected or no editor instance, open the style editor
+      onEditStyle(style);
+    }
+  };
+
   if (isLoading) {
     return <p className="text-xs text-editor-text py-1">Loading styles...</p>;
   }
@@ -98,7 +132,7 @@ export const StylesList = ({ onEditStyle }: StylesListProps) => {
         <Card
           key={style.id}
           className="p-1 hover:bg-accent cursor-pointer"
-          onClick={() => onEditStyle(style)}
+          onClick={() => handleStyleClick(style)}
           onContextMenu={(e) => handleContextMenu(e, style)}
         >
           <div className="flex items-center gap-1.5">

@@ -9,13 +9,17 @@ interface StyleListItemProps {
 }
 
 export const StyleListItem = ({ style, onSelect }: StyleListItemProps) => {
+  const handleClick = () => {
+    onSelect(style.id);
+  };
+
   return (
     <Button
       key={style.id}
       variant="ghost"
       size="xs"
       className="w-full justify-between text-left font-normal hover:bg-accent transition-colors py-2"
-      onClick={() => onSelect(style.id)}
+      onClick={handleClick}
     >
       <div className="flex items-center gap-2">
         <div className="h-5 w-5 flex items-center justify-center rounded-full bg-muted">

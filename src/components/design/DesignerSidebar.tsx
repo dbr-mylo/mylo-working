@@ -6,12 +6,14 @@ import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StylesList } from "./typography/StylesList";
 import { StyleEditorModal } from "./typography/StyleEditorModal";
+import { Editor } from "@tiptap/react";
 
 interface DesignerSidebarProps {
   children?: React.ReactNode;
+  editorInstance?: Editor | null;
 }
 
-export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
+export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarProps) => {
   const [isStyleEditorOpen, setIsStyleEditorOpen] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<TextStyle | null>(null);
 
@@ -52,7 +54,10 @@ export const DesignerSidebar = ({ children }: DesignerSidebarProps) => {
           </Button>
         </div>
         
-        <StylesList onEditStyle={handleEditStyle} />
+        <StylesList 
+          onEditStyle={handleEditStyle} 
+          editorInstance={editorInstance} 
+        />
       </DesignerSidebarContainer>
       
       <StyleEditorModal

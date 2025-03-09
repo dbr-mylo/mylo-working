@@ -16,17 +16,17 @@ export const TextAlignmentCommands = Extension.create({
   addCommands() {
     return {
       // These commands provide a more direct API for our components to use
-      setTextAlignLeft: () => ({ commands }: { commands: any }) => {
-        return commands.setTextAlign('left')
+      setTextAlignLeft: () => ({ chain }) => {
+        return chain().setTextAlign('left').run()
       },
-      setTextAlignCenter: () => ({ commands }: { commands: any }) => {
-        return commands.setTextAlign('center')
+      setTextAlignCenter: () => ({ chain }) => {
+        return chain().setTextAlign('center').run()
       },
-      setTextAlignRight: () => ({ commands }: { commands: any }) => {
-        return commands.setTextAlign('right')
+      setTextAlignRight: () => ({ chain }) => {
+        return chain().setTextAlign('right').run()
       },
-      setTextAlignJustify: () => ({ commands }: { commands: any }) => {
-        return commands.setTextAlign('justify')
+      setTextAlignJustify: () => ({ chain }) => {
+        return chain().setTextAlign('justify').run()
       },
     }
   },

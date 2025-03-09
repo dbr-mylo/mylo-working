@@ -8,25 +8,20 @@ import { StyleListItem } from "./StyleListItem";
 import { useTextStyles } from "./hooks/useTextStyles";
 
 interface StyleApplicatorProps {
-  onApplyStyle: (styleId: string) => Promise<void> | Promise<boolean>;
+  onApplyStyle: (styleId: string) => void;
   selectedElement?: HTMLElement | null;
-  isForEditor?: boolean;
 }
 
-export const StyleApplicator = ({ onApplyStyle, selectedElement, isForEditor = false }: StyleApplicatorProps) => {
+export const StyleApplicator = ({ onApplyStyle, selectedElement }: StyleApplicatorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles, isLoading } = useTextStyles();
 
-  // For DOM elements, only show if an element is selected
-  // For editor, always show as we can apply at cursor position
-  const shouldShow = isForEditor || selectedElement;
-  
-  if (!shouldShow) {
+  if (!selectedElement) {
     return null;
   }
 
-  const handleApplyStyle = async (styleId: string) => {
-    await onApplyStyle(styleId);
+  const handleApplyStyle = (styleId: string) => {
+    onApplyStyle(styleId);
     setIsOpen(false);
   };
 

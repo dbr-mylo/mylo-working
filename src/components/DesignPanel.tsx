@@ -11,7 +11,6 @@ import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
-import { EditorStyleControls } from "@/components/design/EditorStyleControls";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -136,13 +135,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                   </button>
                 </div>
               </div>
-              
-              {/* Add Style Selection Info Component */}
-              {editorSetup?.editor && (
-                <div className="px-4 pb-2 flex">
-                  <EditorStyleControls editor={editorSetup.editor} />
-                </div>
-              )}
             </div>
           </div>
         )}

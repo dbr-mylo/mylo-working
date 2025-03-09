@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextStyle, TypographyStyles, StyleFormData } from "@/lib/types";
 import { StyleFormMetadata } from "./StyleFormMetadata";
 import { StyleFormControls } from "./StyleFormControls";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useStyleForm } from "./hooks/useStyleForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextPreview } from "./TextPreview";
+import { textStyleStore } from "@/stores/textStyles";
+import { Badge } from "@/components/ui/badge";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -23,6 +25,8 @@ export const StyleForm = ({
   styles: externalStyles,
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
+  const [parentStyle, setParentStyle] = useState<TextStyle | null>(null);
+  
   const {
     name,
     setName,
@@ -35,6 +39,27 @@ export const StyleForm = ({
     externalStyles,
     externalStyleChange
   });
+
+  // Fetch parent style details when parentId changes
+  useEffect(() => {
+    if (!parentId) {
+      setParentStyle(null);
+      return;
+    }
+    
+    const fetchParentStyle = async () => {
+      try {
+        // Get the style with all inherited properties
+        const style = await textStyleStore.getStyleWithInheritance(parentId);
+        setParentStyle(style);
+      } catch (error) {
+        console.error("Error fetching parent style:", error);
+        setParentStyle(null);
+      }
+    };
+    
+    fetchParentStyle();
+  }, [parentId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     if (!onSubmit) return;
@@ -62,6 +87,16 @@ export const StyleForm = ({
       {/* Smaller preview at the top */}
       <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
         <TextPreview styles={styles} />
+        {parentStyle && (
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center">
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherits from
+              </Badge>
+              <span className="text-xs ml-2">{parentStyle.name}</span>
+            </div>
+          </div>
+        )}
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
@@ -78,6 +113,7 @@ export const StyleForm = ({
               currentStyleId={initialValues?.id}
               onNameChange={setName}
               onParentChange={handleParentChange}
+              parentStyle={parentStyle}
             />
           )}
         </TabsContent>
@@ -86,6 +122,7 @@ export const StyleForm = ({
           <StyleFormControls 
             styles={styles}
             onStyleChange={handleStyleChange}
+            parentStyle={parentStyle}
           />
         </TabsContent>
       </Tabs>

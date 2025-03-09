@@ -3,6 +3,9 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { StyleInheritance } from "./StyleInheritance";
+import { TextStyle } from "@/lib/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface StyleFormMetadataProps {
   name: string;
@@ -10,6 +13,7 @@ interface StyleFormMetadataProps {
   currentStyleId?: string;
   onNameChange: (value: string) => void;
   onParentChange: (parentId: string | undefined) => void;
+  parentStyle?: TextStyle | null;
 }
 
 export const StyleFormMetadata = ({
@@ -17,7 +21,8 @@ export const StyleFormMetadata = ({
   parentId,
   currentStyleId,
   onNameChange,
-  onParentChange
+  onParentChange,
+  parentStyle
 }: StyleFormMetadataProps) => {
   return (
     <>
@@ -39,6 +44,17 @@ export const StyleFormMetadata = ({
         parentId={parentId}
         onChange={onParentChange}
       />
+      
+      {/* Info about inheritance */}
+      {parentStyle && (
+        <Alert variant="default" className="bg-primary/5 border-primary/20 mt-3">
+          <InfoIcon className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-xs">
+            This style inherits properties from <strong>{parentStyle.name}</strong>. 
+            Any property you don't override will use the parent's value.
+          </AlertDescription>
+        </Alert>
+      )}
     </>
   );
 };

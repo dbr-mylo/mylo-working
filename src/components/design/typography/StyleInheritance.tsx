@@ -5,6 +5,8 @@ import { textStyleStore } from "@/stores/textStyles";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Link, LinkOff, AlertCircle } from "lucide-react";
 
 interface StyleInheritanceProps {
   currentStyleId?: string;
@@ -23,6 +25,7 @@ export const StyleInheritance = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [inheritanceChain, setInheritanceChain] = useState<TextStyle[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -39,6 +42,14 @@ export const StyleInheritance = ({
         // Filter out styles that would create circular dependencies
         const filteredStyles = filterValidParentStyles(fetchedStyles, currentStyleId);
         setStyles(filteredStyles);
+        
+        // If we have a parentId, fetch the inheritance chain
+        if (parentId) {
+          const chain = await fetchInheritanceChain(parentId, fetchedStyles);
+          setInheritanceChain(chain);
+        } else {
+          setInheritanceChain([]);
+        }
       } catch (err) {
         if (!isMounted) return;
         
@@ -61,7 +72,28 @@ export const StyleInheritance = ({
     return () => {
       isMounted = false;
     };
-  }, [currentStyleId, toast]);
+  }, [currentStyleId, parentId, toast]);
+
+  // Fetch the inheritance chain (parent and its parents)
+  const fetchInheritanceChain = async (styleId: string, allStyles: TextStyle[]): Promise<TextStyle[]> => {
+    const chain: TextStyle[] = [];
+    let currentId = styleId;
+    
+    // Prevent infinite loops
+    const visitedIds = new Set<string>();
+    
+    while (currentId && !visitedIds.has(currentId)) {
+      visitedIds.add(currentId);
+      
+      const style = allStyles.find(s => s.id === currentId);
+      if (!style) break;
+      
+      chain.push(style);
+      currentId = style.parentId || '';
+    }
+    
+    return chain;
+  };
 
   // Function to filter out styles that would create circular dependencies
   const filterValidParentStyles = (allStyles: TextStyle[], styleId?: string): TextStyle[] => {
@@ -138,18 +170,53 @@ export const StyleInheritance = ({
           <SelectValue placeholder={loading ? "Loading styles..." : "Select parent style"} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="none">None (Base Style)</SelectItem>
+          <SelectItem value="none" className="flex items-center">
+            <LinkOff className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <span>None (Base Style)</span>
+          </SelectItem>
           {styles.map((style) => (
-            <SelectItem key={style.id} value={style.id}>
-              {style.name}
+            <SelectItem key={style.id} value={style.id} className="flex items-center">
+              <Link className="h-3.5 w-3.5 mr-2 text-primary" />
+              <span>{style.name}</span>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+      
+      {/* Show inheritance chain if it exists */}
+      {inheritanceChain.length > 0 && (
+        <div className="pt-2">
+          <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+            <Link className="h-3 w-3" /> Inheritance Chain:
+          </Label>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {inheritanceChain.map((style, index) => (
+              <React.Fragment key={style.id}>
+                <Badge 
+                  variant="outline" 
+                  className={`
+                    text-[10px] px-1.5 py-0 
+                    ${index === 0 ? 'bg-primary/10 text-primary border-primary/30' : 'bg-muted/50'}
+                  `}
+                >
+                  {style.name}
+                </Badge>
+                {index < inheritanceChain.length - 1 && (
+                  <span className="text-muted-foreground">→</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {error ? (
-        <p className="text-xs text-destructive">{error}</p>
+        <div className="flex items-center text-xs text-destructive mt-1">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          <p>{error}</p>
+        </div>
       ) : (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground mt-1">
           Inheriting from another style will use its properties as a base for this style.
         </p>
       )}

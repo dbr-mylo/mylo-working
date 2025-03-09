@@ -34,95 +34,110 @@ export const mockOnStyleChange = vi.fn();
 // Mock the StyleFormMetadata component for tests
 export const setupMetadataMock = () => {
   vi.mock('../../StyleFormMetadata', () => ({
-    StyleFormMetadata: ({
-      name,
-      parentId,
-      onNameChange,
-      onParentChange
-    }: {
-      name: string;
-      parentId?: string;
-      onNameChange: (value: string) => void;
-      onParentChange: (parentId: string | undefined) => void;
-    }) => (
-      <div data-testid="style-form-metadata" data-name={name} data-parent-id={parentId || 'none'}>
-        <button 
-          data-testid="change-name-button"
-          onClick={() => onNameChange('Updated Name')}
-        >
-          Change Name
-        </button>
-        <button 
-          data-testid="change-parent-button"
-          onClick={() => onParentChange('new-parent-id')}
-        >
-          Change Parent
-        </button>
-      </div>
-    ),
+    StyleFormMetadata: (props) => {
+      const { name, parentId, onNameChange, onParentChange } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'style-form-metadata',
+          'data-name': name,
+          'data-parent-id': parentId || 'none',
+          children: [
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'change-name-button',
+                onClick: () => onNameChange('Updated Name'),
+                children: 'Change Name'
+              }
+            },
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'change-parent-button',
+                onClick: () => onParentChange('new-parent-id'),
+                children: 'Change Parent'
+              }
+            }
+          ]
+        }
+      };
+    }
   }));
 };
 
 // Mock the StyleFormControls component for tests
 export const setupControlsMock = () => {
   vi.mock('../../StyleFormControls', () => ({
-    StyleFormControls: ({
-      styles,
-      onStyleChange
-    }: {
-      styles: TypographyStyles;
-      onStyleChange: (property: keyof TypographyStyles, value: string) => void;
-    }) => (
-      <div data-testid="style-form-controls" data-styles={JSON.stringify(styles)}>
-        <button 
-          data-testid="change-font-size-button"
-          onClick={() => onStyleChange('fontSize', '24px')}
-        >
-          Change Font Size
-        </button>
-      </div>
-    ),
+    StyleFormControls: (props) => {
+      const { styles, onStyleChange } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'style-form-controls',
+          'data-styles': JSON.stringify(styles),
+          children: [
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'change-font-size-button',
+                onClick: () => onStyleChange('fontSize', '24px'),
+                children: 'Change Font Size'
+              }
+            }
+          ]
+        }
+      };
+    }
   }));
 };
 
 // Mock the Tabs components for tests
 export const setupTabsMock = () => {
   vi.mock('@/components/ui/tabs', () => ({
-    Tabs: ({
-      children,
-      defaultValue
-    }: {
-      children: React.ReactNode;
-      defaultValue: string;
-    }) => (
-      <div data-testid="tabs" data-default-value={defaultValue}>{children}</div>
-    ),
-    TabsList: ({
-      children,
-      className
-    }: {
-      children: React.ReactNode;
-      className?: string;
-    }) => (
-      <div data-testid="tabs-list" className={className}>{children}</div>
-    ),
-    TabsTrigger: ({
-      children,
-      value
-    }: {
-      children: React.ReactNode;
-      value: string;
-    }) => (
-      <button data-testid={`tab-${value}`} data-value={value}>{children}</button>
-    ),
-    TabsContent: ({
-      children,
-      value
-    }: {
-      children: React.ReactNode;
-      value: string;
-    }) => (
-      <div data-testid={`tab-content-${value}`} data-value={value}>{children}</div>
-    ),
+    Tabs: (props) => {
+      const { children, defaultValue } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'tabs',
+          'data-default-value': defaultValue,
+          children
+        }
+      };
+    },
+    TabsList: (props) => {
+      const { children, className } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'tabs-list',
+          className,
+          children
+        }
+      };
+    },
+    TabsTrigger: (props) => {
+      const { children, value } = props;
+      return {
+        type: 'button',
+        props: {
+          'data-testid': `tab-${value}`,
+          'data-value': value,
+          children
+        }
+      };
+    },
+    TabsContent: (props) => {
+      const { children, value } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': `tab-content-${value}`,
+          'data-value': value,
+          children
+        }
+      };
+    }
   }));
 };

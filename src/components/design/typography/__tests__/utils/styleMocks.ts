@@ -56,77 +56,82 @@ export const setupTextStyleStoreMock = () => {
 // Mock components used by StyleForm
 export const setupComponentMocks = () => {
   vi.mock('../../StyleFormPreview', () => ({
-    StyleFormPreview: ({
-      styles,
-      parentStyle
-    }: {
-      styles: TypographyStyles;
-      parentStyle: TextStyle | null;
-    }) => (
-      <div 
-        data-testid="style-form-preview" 
-        data-styles={JSON.stringify(styles)} 
-        data-parent={parentStyle ? parentStyle.id : 'none'}
-      >
-        Style Preview
-      </div>
-    ),
+    StyleFormPreview: (props) => {
+      const { styles, parentStyle } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'style-form-preview',
+          'data-styles': JSON.stringify(styles),
+          'data-parent': parentStyle ? parentStyle.id : 'none',
+          children: 'Style Preview'
+        }
+      };
+    }
   }));
 
   vi.mock('../../StyleFormTabs', () => ({
-    StyleFormTabs: ({
-      name,
-      parentId,
-      styles,
-      onNameChange,
-      onStyleChange,
-      showFormFields
-    }: {
-      name: string;
-      parentId?: string;
-      styles: TypographyStyles;
-      onNameChange: (name: string) => void;
-      onStyleChange: (property: keyof TypographyStyles, value: string) => void;
-      showFormFields: boolean;
-    }) => (
-      <div 
-        data-testid="style-form-tabs" 
-        data-name={name} 
-        data-parent-id={parentId || 'none'} 
-        data-show-fields={String(showFormFields)}
-      >
-        <button data-testid="mock-name-change" onClick={() => onNameChange('Changed Name')}>
-          Change Name
-        </button>
-        <button data-testid="mock-style-change" onClick={() => onStyleChange('fontSize', '20px')}>
-          Change Font Size
-        </button>
-      </div>
-    ),
+    StyleFormTabs: (props) => {
+      const { name, parentId, styles, onNameChange, onStyleChange, showFormFields } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'style-form-tabs',
+          'data-name': name,
+          'data-parent-id': parentId || 'none',
+          'data-show-fields': String(showFormFields),
+          children: [
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'mock-name-change',
+                onClick: () => onNameChange('Changed Name'),
+                children: 'Change Name'
+              }
+            },
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'mock-style-change',
+                onClick: () => onStyleChange('fontSize', '20px'),
+                children: 'Change Font Size'
+              }
+            }
+          ]
+        }
+      };
+    }
   }));
 
   vi.mock('../../StyleFormActions', () => ({
-    StyleFormActions: ({
-      showActions,
-      isUpdate,
-      onCancel,
-      onSubmit
-    }: {
-      showActions: boolean;
-      isUpdate: boolean;
-      onCancel: () => void;
-      onSubmit: (e: React.FormEvent) => void;
-    }) => (
-      <div 
-        data-testid="style-form-actions" 
-        data-show-actions={String(showActions)} 
-        data-is-update={String(isUpdate)}
-      >
-        <button data-testid="mock-cancel" onClick={onCancel}>Cancel</button>
-        <button data-testid="mock-submit" onClick={e => onSubmit(e as unknown as React.FormEvent)}>
-          Submit
-        </button>
-      </div>
-    ),
+    StyleFormActions: (props) => {
+      const { showActions, isUpdate, onCancel, onSubmit } = props;
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'style-form-actions',
+          'data-show-actions': String(showActions),
+          'data-is-update': String(isUpdate),
+          children: [
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'mock-cancel',
+                onClick: onCancel,
+                children: 'Cancel'
+              }
+            },
+            {
+              type: 'button',
+              props: {
+                'data-testid': 'mock-submit',
+                onClick: (e) => onSubmit(e),
+                children: 'Submit'
+              }
+            }
+          ]
+        }
+      };
+    }
   }));
 };

@@ -32,6 +32,10 @@ export const EditorNav = ({
   );
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const navigate = useNavigate();
+  const isDesigner = currentRole === "designer";
+  
+  // Use a smaller nav height for designers
+  const navHeight = isDesigner ? "h-8" : "h-16";
 
   useEffect(() => {
     setTitle(documentTitle);
@@ -123,7 +127,7 @@ export const EditorNav = ({
   };
 
   return (
-    <nav className="h-16 border-b border-editor-border bg-white px-4 flex items-center justify-between">
+    <nav className={`${navHeight} border-b border-editor-border bg-white px-4 flex items-center justify-between`}>
       <div className="flex items-center space-x-4">
         <FileText className="w-6 h-6 text-editor-text" />
         <DocumentTitle 

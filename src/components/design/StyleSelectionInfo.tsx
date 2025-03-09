@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { SelectedTextInfo } from "@/hooks/useStyleSelection";
+import { SelectedTextInfo } from "@/hooks/styleSelection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Paintbrush, Type, Text } from "lucide-react";

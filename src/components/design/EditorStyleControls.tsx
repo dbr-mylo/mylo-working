@@ -1,6 +1,6 @@
 
 import { StyleSelectionInfo } from "./StyleSelectionInfo";
-import { useStyleSelection, SelectedTextInfo } from "@/hooks/useStyleSelection";
+import { useStyleSelection, SelectedTextInfo } from "@/hooks/styleSelection";
 import { Editor } from "@tiptap/react";
 import { useState, useEffect } from "react";
 

@@ -86,7 +86,7 @@ export const StyleApplicatorTest = () => {
       const styles = await textStyleStore.getTextStyles();
       
       if (styles.length === 0) {
-        const defaultStyles: Partial<TextStyle>[] = [
+        const defaultStyles = [
           {
             name: "Heading 1",
             fontFamily: "Georgia, serif",
@@ -130,12 +130,13 @@ export const StyleApplicatorTest = () => {
             letterSpacing: "0.1px",
             selector: "blockquote",
             textAlign: "left",
-            fontStyle: "italic" as any,
+            textDecoration: "none",
+            textTransform: "none",
           }
         ];
 
         for (const style of defaultStyles) {
-          await textStyleStore.saveTextStyle(style);
+          await textStyleStore.saveTextStyle(style as any);
         }
         
         toast({

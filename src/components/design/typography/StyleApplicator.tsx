@@ -22,8 +22,9 @@ export const StyleApplicator = ({ onApplyStyle, selectedElement }: StyleApplicat
     return null;
   }
 
-  const handleApplyStyle = (styleId: string) => {
-    onApplyStyle(styleId);
+  const handleApplyStyle = (style: TextStyle) => {
+    // We extract the ID from the style object to maintain compatibility
+    onApplyStyle(style.id);
     setIsOpen(false);
   };
 

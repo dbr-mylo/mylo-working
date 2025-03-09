@@ -45,12 +45,11 @@ export const useStyleApplicator = (
             editor.chain().setColor(value).run();
             break;
           case "textAlign":
-            // Text alignment requires a separate extension that's not currently available
-            // For now, we'll just focus the editor but do nothing for text alignment
-            if (value === 'left') editor.chain().focus().run();
-            else if (value === 'center') editor.chain().focus().run();
-            else if (value === 'right') editor.chain().focus().run();
-            else if (value === 'justify') editor.chain().focus().run();
+            // Now we can properly handle text alignment
+            if (value === 'left') editor.chain().setTextAlign('left').run();
+            else if (value === 'center') editor.chain().setTextAlign('center').run();
+            else if (value === 'right') editor.chain().setTextAlign('right').run();
+            else if (value === 'justify') editor.chain().setTextAlign('justify').run();
             break;
           default:
             // For any other properties, try to apply via TextStyle

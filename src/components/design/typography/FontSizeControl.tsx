@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -93,6 +94,7 @@ export const FontSizeControl = ({ value, onChange, currentUnit: propCurrentUnit 
           min={8}
           max={72}
         />
+        <span className="text-xs text-muted-foreground">{currentUnit}</span>
       </div>
     </div>
   );

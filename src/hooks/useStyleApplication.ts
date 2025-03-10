@@ -58,6 +58,8 @@ export const useStyleApplication = (editor: Editor | null) => {
         }
       }
 
+      console.log(`Applying style to selection with font size: ${fontSize} (${currentUnit})`);
+
       // Start a chain to apply multiple style properties
       let chain = editor.chain().focus();
       
@@ -91,11 +93,6 @@ export const useStyleApplication = (editor: Editor | null) => {
         title: "Style applied",
         description: `Applied "${styleToApply.name}" to selected text`,
       });
-      
-      // Log to console for debugging
-      console.log(`Applied style "${styleToApply.name}" to selection:`, styleToApply);
-      console.log(`Font size converted to: ${fontSize}`);
-      
     } catch (error) {
       console.error("Error applying style:", error);
       toast({

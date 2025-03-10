@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,20 +12,14 @@ import { useDocument } from '@/hooks/document';
 import { useParams } from 'react-router-dom';
 
 interface EditorToolbarProps {
-  editor: Editor | null;
-  currentFont: string;
-  currentColor: string;
-  onFontChange: (font: string) => void;
-  onColorChange: (color: string) => void;
+  editor: Editor;
+  currentFont?: string;
+  currentColor?: string;
+  onFontChange?: (font: string) => void;
+  onColorChange?: (color: string) => void;
 }
 
-export const EditorToolbar: React.FC<EditorToolbarProps> = ({
-  editor,
-  currentFont,
-  currentColor,
-  onFontChange,
-  onColorChange
-}) => {
+export const EditorToolbar = ({ editor, currentFont, currentColor, onFontChange, onColorChange }: EditorToolbarProps) => {
   const { role } = useAuth();
   const { documentId } = useParams<{ documentId?: string }>();
   const { preferences } = useDocument(documentId);
@@ -39,29 +32,43 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const handleFontChange = (font: string) => {
-    onFontChange(font);
+    onFontChange?.(font);
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <FontPicker value={currentFont} onChange={handleFontChange} />
-      <FontSizeTool editor={editor} currentUnit={currentUnit} />
-      <ColorPicker value={currentColor} onChange={onColorChange} />
+    <div className="flex flex-wrap items-center gap-1 p-1">
+      {/* Font Controls */}
+      <FontPicker
+        value={currentFont || ""}
+        onChange={(value) => onFontChange?.(value)}
+      />
       
+      {/* Font Size Tool */}
+      <FontSizeTool editor={editor} currentUnit={currentUnit} />
+      
+      {/* Color Picker */}
+      <ColorPicker
+        value={currentColor || ""}
+        onChange={(value) => onColorChange?.(value)}
+      />
+      
+      {/* Formatting Buttons */}
       <FormatButtons 
         editor={editor}
         currentColor={currentColor}
         buttonSize={buttonSize}
       />
       
+      {/* Indent Buttons */}
       <IndentButtons 
         editor={editor}
         buttonSize={buttonSize}
       />
 
+      {/* Separator */}
       <Separator orientation="vertical" className="mx-1 h-6" />
       
-      {/* Add the new StyleDropdown component */}
+      {/* Style Dropdown */}
       <StyleDropdown editor={editor} />
     </div>
   );

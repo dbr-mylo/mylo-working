@@ -1,156 +1,99 @@
-
-import { useState, useEffect } from 'react';
-import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
+import { useEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import ListItem from '@tiptap/extension-list-item';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
-import { CustomBulletList, CustomOrderedList } from './extensions/CustomLists';
-import { IndentExtension } from './extensions/IndentExtension';
-import { FontFamily } from './extensions/FontFamily';
+import FontFamily from '@tiptap/extension-font-family';
+import Color from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import ListItem from '@tiptap/extension-list-item';
+import OrderedList from '@tiptap/extension-ordered-list';
+import BulletList from '@tiptap/extension-bullet-list';
+import Placeholder from '@tiptap/extension-placeholder';
+import { useState, useCallback } from 'react';
 import { FontSize } from './extensions/FontSize';
-import Bold from '@tiptap/extension-bold';
-import { useAuth } from '@/contexts/AuthContext';
-import { FontUnit, convertFontSize, extractFontSizeValue } from '@/lib/types/preferences';
+import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
+import { FontUnit } from "@/lib/types/preferences";
 
-export interface UseEditorProps {
+interface EditorSetupProps {
   content: string;
-  onContentChange: (content: string) => void;
+  onContentChange?: (content: string) => void;
   isEditable?: boolean;
   currentUnit?: FontUnit;
 }
 
-export const useEditorSetup = ({ content, onContentChange, isEditable = true, currentUnit }: UseEditorProps) => {
-  const [currentFont, setCurrentFont] = useState('Inter');
-  const [currentColor, setCurrentColor] = useState('#000000');
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
+export const useEditorSetup = ({ content, onContentChange, isEditable = true, currentUnit = 'px' }: EditorSetupProps) => {
+  const [currentFont, setCurrentFont] = useState<string | undefined>(undefined);
+  const [currentColor, setCurrentColor] = useState<string | undefined>(undefined);
   
-  // Enhanced Bold extension with better color preservation
-  const ColorPreservingBold = Bold.configure({
-    HTMLAttributes: {
-      class: 'color-preserving-bold',
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const defaultUnit = preferences?.typography?.fontUnit || 'px';
+  const editorUnit = currentUnit || defaultUnit;
+
+  const handleFontChange = useCallback((font: string) => {
+    if (!font) {
+      setCurrentFont(undefined);
+      return;
     }
-  });
-  
-  const editor = useTipTapEditor({
+    setCurrentFont(font);
+  }, []);
+
+  const handleColorChange = useCallback((color: string) => {
+    if (!color) {
+      setCurrentColor(undefined);
+      return;
+    }
+    setCurrentColor(color);
+  }, []);
+
+  // Create and configure the editor
+  const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        bold: false, // Disable default bold
+        history: true,
       }),
-      ColorPreservingBold,
-      TextStyle.configure({
-        HTMLAttributes: {
-          class: 'preserve-styling',
-        },
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
       }),
+      TextStyle,
       FontFamily,
-      FontSize, // Add the FontSize extension
-      ListItem,
-      CustomBulletList,
-      CustomOrderedList,
       Color,
-      IndentExtension,
+      Link.configure({
+        openOnClick: false,
+      }),
+      Image,
+      ListItem,
+      OrderedList,
+      BulletList,
+      Placeholder.configure({
+        placeholder: 'Type something here...',
+      }),
+      
+      FontSize.configure({
+        types: ['textStyle'],
+        defaultUnit: editorUnit,
+      }),
     ],
-    content: content,
+    content,
     editable: isEditable,
+    injectCSS: true,
     onUpdate: ({ editor }) => {
-      onContentChange(editor.getHTML());
-      // Let's log the HTML on update to check color preservation
-      console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
+      if (onContentChange) {
+        const html = editor.getHTML();
+        onContentChange(html);
+      }
     },
   });
-
-  const handleFontChange = (font: string) => {
-    setCurrentFont(font);
-    if (editor) {
-      editor.chain().focus().setFontFamily(font).run();
-    }
-  };
-
-  const handleColorChange = (color: string) => {
-    setCurrentColor(color);
-    if (editor) {
-      editor.chain().focus().setColor(color).run();
-      
-      // If there's bold text selected, ensure it keeps the new color
-      if (editor.isActive('bold')) {
-        console.log("Bold is active, reapplying color:", color);
-        // Toggle bold off and on to refresh the styling
-        editor.chain().focus().toggleBold().toggleBold().run();
-        // Re-apply color to make sure it sticks
-        editor.chain().focus().setColor(color).run();
-      }
-    }
-  };
-
-  // Handle font size changes with unit conversion
-  const handleFontSizeChange = (size: string) => {
-    if (editor) {
-      // Convert font size if needed
-      if (currentUnit) {
-        const { value, unit } = extractFontSizeValue(size);
-        if (unit !== currentUnit && unit) {
-          size = convertFontSize(size, unit as FontUnit, currentUnit);
-        }
-      }
-      
-      editor.chain().focus().setFontSize(size).run();
-    }
-  };
-
-  // Monitor selection changes to update color state
-  useEffect(() => {
-    if (editor) {
-      const updateColorState = () => {
-        const { color } = editor.getAttributes('textStyle');
-        if (color) {
-          setCurrentColor(color);
-          console.log("Color state updated to:", color);
-        }
-      };
-      
-      // Add more detailed logging for debugging
-      const logStyleChanges = () => {
-        const textStyleAttrs = editor.getAttributes('textStyle');
-        const isBoldActive = editor.isActive('bold');
-        const boldAttrs = isBoldActive ? editor.getAttributes('bold') : 'not active';
-        const html = editor.getHTML();
-        
-        console.log("Style change detected:", {
-          textStyle: textStyleAttrs,
-          isBold: isBoldActive,
-          boldAttrs,
-          selectionHtml: html.substring(0, 100) + (html.length > 100 ? '...' : '')
-        });
-      };
-      
-      editor.on('selectionUpdate', updateColorState);
-      editor.on('transaction', updateColorState);
-      
-      // Add debug logging
-      editor.on('selectionUpdate', logStyleChanges);
-      editor.on('transaction', logStyleChanges);
-      
-      return () => {
-        editor.off('selectionUpdate', updateColorState);
-        editor.off('transaction', updateColorState);
-        editor.off('selectionUpdate', logStyleChanges);
-        editor.off('transaction', logStyleChanges);
-      };
-    }
-  }, [editor]);
 
   return {
     editor,
     currentFont,
     currentColor,
     handleFontChange,
-    handleColorChange,
-    handleFontSizeChange,
-    currentUnit
+    handleColorChange
   };
 };

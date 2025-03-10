@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
@@ -85,6 +86,8 @@ export const useDocumentPreview = (
           fontSize = convertFontSize(fontSize, unit, currentFontUnit);
         }
       }
+      
+      console.log("Applying style with font size:", fontSize, "unit:", currentFontUnit);
       
       // Apply the style to the selected element
       selectedElement.style.fontFamily = styleToApply.fontFamily;

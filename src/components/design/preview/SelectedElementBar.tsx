@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
-import { FontUnit } from "@/lib/types/preferences";
+import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
 
 interface SelectedElementBarProps {
   selectedElement: HTMLElement | null;
@@ -29,6 +29,13 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit 
           const styles = await textStyleStore.getTextStyles();
           const style = styles.find(s => s.id === styleId);
           if (style) {
+            // Convert font size to current unit if needed
+            if (currentUnit && style.fontSize) {
+              const { unit } = extractFontSizeValue(style.fontSize);
+              if (unit !== currentUnit) {
+                style.fontSize = convertFontSize(style.fontSize, unit, currentUnit);
+              }
+            }
             setAppliedStyle(style);
           }
         } else {
@@ -41,7 +48,7 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit 
     };
     
     detectAppliedStyle();
-  }, [selectedElement]);
+  }, [selectedElement, currentUnit]);
 
   if (!selectedElement) {
     return null;
@@ -57,7 +64,7 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit 
         
         {appliedStyle && (
           <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
-            {appliedStyle.name}
+            {appliedStyle.name} {appliedStyle.fontSize && `• ${appliedStyle.fontSize}`}
           </Badge>
         )}
       </div>

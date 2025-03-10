@@ -1,3 +1,4 @@
+
 import { useEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -53,7 +54,10 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true, cu
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        history: true,
+        history: {
+          depth: 100,
+          newGroupDelay: 500
+        }
       }),
       Underline,
       TextAlign.configure({

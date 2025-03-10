@@ -1,37 +1,17 @@
-
 import { useEffect, useRef } from "react";
-import { TextStyle } from "@/lib/types";
+import { StyleContextMenuProps, TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Copy, Trash, Edit } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-export interface StyleContextMenuProps {
-  x: number;
-  y: number;
-  isOpen: boolean;
-  style: TextStyle;
-  onEdit: (style: TextStyle) => void;
-  onDelete: (id: string) => void;
-  onDuplicate: (style: TextStyle) => void;
-  onClose: () => void;
-  onDefaultFontChange?: () => void;
-  containerRef?: React.RefObject<HTMLDivElement>;
-}
 
 export const StyleContextMenu = ({
-  x,
-  y,
-  isOpen,
   style,
   onEdit,
   onDelete,
   onDuplicate,
+  position,
   onClose,
-  onDefaultFontChange,
-  containerRef
 }: StyleContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -46,7 +26,7 @@ export const StyleContextMenu = ({
     };
   }, [onClose]);
 
-  if (!isOpen || !style) return null;
+  if (!position) return null;
 
   const handleEditClick = () => {
     onEdit(style);
@@ -55,26 +35,16 @@ export const StyleContextMenu = ({
 
   const handleDuplicateClick = () => {
     onDuplicate(style);
-    onClose();
   };
 
   const handleDeleteClick = () => {
     onDelete(style.id);
-    onClose();
-  };
-
-  const handleChangeFontClick = () => {
-    if (onDefaultFontChange) {
-      onDefaultFontChange();
-    }
   };
 
   const adjustedPosition = {
-    x: Math.min(x, window.innerWidth - 200),
-    y: Math.min(y, window.innerHeight - 200),
+    x: Math.min(position.x, window.innerWidth - 200),
+    y: Math.min(position.y, window.innerHeight - 200),
   };
-
-  const isDefaultStyle = style.id === 'default-text-reset';
 
   return (
     <div
@@ -85,42 +55,31 @@ export const StyleContextMenu = ({
         left: `${adjustedPosition.x}px`,
       }}
     >
-      <Card className="w-48 p-1 text-xs bg-white">
-        {isDefaultStyle ? (
-          <button
-            className="w-full text-left px-2 py-1.5 hover:bg-accent rounded"
-            onClick={handleChangeFontClick}
-          >
-            Change Default Font
-          </button>
-        ) : (
-          <>
-            <button
-              className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
-              onClick={handleEditClick}
-            >
-              <Edit className="h-3.5 w-3.5" />
-              Edit Style
-            </button>
-            <button
-              className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
-              onClick={handleDuplicateClick}
-              disabled={style.isSystem}
-            >
-              <Copy className="h-3.5 w-3.5" />
-              Duplicate
-            </button>
-            <hr className="my-1" />
-            <button
-              className="w-full text-left px-2 py-1.5 hover:bg-accent text-destructive rounded flex items-center gap-2"
-              onClick={handleDeleteClick}
-              disabled={style.isSystem || style.isDefault}
-            >
-              <Trash className="h-3.5 w-3.5" />
-              Delete
-            </button>
-          </>
-        )}
+      <Card className="w-48 p-1 text-xs">
+        <button
+          className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
+          onClick={handleEditClick}
+        >
+          <Edit className="h-3.5 w-3.5" />
+          Edit Style
+        </button>
+        <button
+          className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
+          onClick={handleDuplicateClick}
+          disabled={style.isSystem}
+        >
+          <Copy className="h-3.5 w-3.5" />
+          Duplicate
+        </button>
+        <hr className="my-1" />
+        <button
+          className="w-full text-left px-2 py-1.5 hover:bg-accent text-destructive rounded flex items-center gap-2"
+          onClick={handleDeleteClick}
+          disabled={style.isSystem || style.isDefault}
+        >
+          <Trash className="h-3.5 w-3.5" />
+          Delete
+        </button>
       </Card>
     </div>
   );

@@ -9,36 +9,24 @@ export const useStyleContextMenu = (
 ) => {
   const [contextMenu, setContextMenu] = useState<{
     style: TextStyle;
-    x: number;
-    y: number;
-    isOpen: boolean;
-  }>({
-    style: {} as TextStyle,
-    x: 0,
-    y: 0,
-    isOpen: false
-  });
-  
-  const [defaultFontModalOpen, setDefaultFontModalOpen] = useState(false);
+    position: { x: number; y: number };
+  } | null>(null);
 
   const handleContextMenu = (
     e: React.MouseEvent,
     style: TextStyle
   ) => {
+    if (style.isPersistent) return;
+    
     e.preventDefault();
     setContextMenu({
       style,
-      x: e.clientX,
-      y: e.clientY,
-      isOpen: true
+      position: { x: e.clientX, y: e.clientY },
     });
   };
 
   const handleCloseContextMenu = () => {
-    setContextMenu(prev => ({
-      ...prev,
-      isOpen: false
-    }));
+    setContextMenu(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -62,23 +50,12 @@ export const useStyleContextMenu = (
       handleCloseContextMenu();
     }
   };
-  
-  const handleOpenDefaultFontModal = () => {
-    setDefaultFontModalOpen(true);
-  };
-  
-  const handleCloseDefaultFontModal = () => {
-    setDefaultFontModalOpen(false);
-  };
 
   return {
     contextMenu,
-    defaultFontModalOpen,
     handleContextMenu,
     handleCloseContextMenu,
     handleDelete,
-    handleDuplicate,
-    handleOpenDefaultFontModal,
-    handleCloseDefaultFontModal
+    handleDuplicate
   };
 };

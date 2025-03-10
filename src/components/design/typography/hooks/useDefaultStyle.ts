@@ -1,5 +1,5 @@
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { TextStyle } from "@/lib/types";
 import { Editor } from "@tiptap/react";
 import { useToast } from "@/hooks/use-toast";
@@ -7,45 +7,16 @@ import { textStyleStore } from "@/stores/textStyles";
 
 export const useDefaultStyle = (editorInstance?: Editor | null) => {
   const { toast } = useToast();
-  const [customDefaultStyle, setCustomDefaultStyle] = useState<TextStyle | null>(null);
-
-  // Load the saved default style on mount and when it changes
-  const loadCustomDefaultStyle = useCallback(async () => {
-    try {
-      const defaultStyle = await textStyleStore.getDefaultStyle(true);
-      if (defaultStyle) {
-        console.log("Loaded default style:", defaultStyle);
-        setCustomDefaultStyle(defaultStyle);
-      }
-    } catch (error) {
-      console.error('Error loading custom default style:', error);
-    }
-  }, []);
-  
-  useEffect(() => {
-    loadCustomDefaultStyle();
-    
-    // Set up a listener to reload when local storage changes
-    const handleStorageChange = () => {
-      loadCustomDefaultStyle();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [loadCustomDefaultStyle]);
 
   const defaultTextStyle: TextStyle = useMemo(() => ({
     id: 'default-text-reset',
     name: 'Clear to Default',
-    fontFamily: customDefaultStyle?.fontFamily || 'Inter',
-    fontSize: customDefaultStyle?.fontSize || '16px',
-    fontWeight: customDefaultStyle?.fontWeight || '400',
-    color: customDefaultStyle?.color || '#000000',
-    lineHeight: customDefaultStyle?.lineHeight || '1.5',
-    letterSpacing: customDefaultStyle?.letterSpacing || '0',
-    textAlign: customDefaultStyle?.textAlign || 'left',
+    fontFamily: 'Inter',
+    fontSize: '16px',
+    fontWeight: '400',
+    color: '#000000',
+    lineHeight: '1.5',
+    letterSpacing: '0',
     selector: 'span, div',
     description: 'Reset to default text formatting',
     isSystem: true,
@@ -53,7 +24,7 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     isUsed: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
-  }), [customDefaultStyle]);
+  }), []);
 
   const applyDefaultTextStyle = async () => {
     if (!editorInstance) {
@@ -61,8 +32,7 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
 
     try {
-      // Force refresh to get the latest default style
-      const defaultStyle = await textStyleStore.getDefaultStyle(true) || defaultTextStyle;
+      const defaultStyle = await textStyleStore.getDefaultStyle();
       
       editorInstance.chain()
         .focus()
@@ -95,14 +65,8 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
   };
 
-  // Force refresh the default style
-  const refreshDefaultStyle = () => {
-    loadCustomDefaultStyle();
-  };
-
   return {
     defaultTextStyle,
-    applyDefaultTextStyle,
-    refreshDefaultStyle
+    applyDefaultTextStyle
   };
 };

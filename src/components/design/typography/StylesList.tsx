@@ -1,13 +1,12 @@
-import React, { useRef } from "react";
-import { useStylesList } from "./hooks/useStylesList";
-import { EmptyState } from "./EmptyState";
-import { DefaultStyleSection } from "./DefaultStyleSection";
-import { OtherStylesSection } from "./OtherStylesSection";
-import { StyleContextMenu } from "./StyleContextMenu";
-import { Editor } from "@tiptap/react";
-import { TextStyle } from "@/lib/types";
 
-interface StylesListProps {
+import { TextStyle } from "@/lib/types";
+import { Editor } from "@tiptap/react";
+import { EmptyState } from "./EmptyState";
+import { StyleContextMenu } from "./StyleContextMenu";
+import { OtherStylesSection } from "./OtherStylesSection";
+import { useStylesList } from "./hooks/useStylesList";
+
+export interface StylesListProps {
   onEditStyle: (style: TextStyle) => void;
   editorInstance?: Editor | null;
 }
@@ -21,50 +20,35 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     handleContextMenu,
     handleCloseContextMenu,
     handleDelete,
-    handleDuplicate,
+    handleDuplicate
   } = useStylesList(onEditStyle, editorInstance);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
   if (isLoading) {
-    return <div className="py-2">Loading styles...</div>;
+    return <p className="text-xs text-editor-text py-1">Loading styles...</p>;
   }
 
-  if (!styles || styles.length === 0) {
+  if (styles.length === 0) {
     return <EmptyState />;
   }
 
-  const defaultStyle = styles.find(s => s.id === 'default-text-reset') || styles[0];
-  const otherStyles = styles.filter(s => s.id !== 'default-text-reset' && s.id !== defaultStyle.id);
-
   return (
-    <div className="space-y-4" ref={containerRef}>
-      <DefaultStyleSection 
-        defaultStyle={defaultStyle} 
-        onStyleClick={handleStyleClick}
+    <div className="space-y-2">
+      {/* All Styles Section */}
+      <OtherStylesSection 
+        styles={styles} 
+        onStyleClick={handleStyleClick} 
+        onContextMenu={handleContextMenu} 
       />
-      
-      {/* Other Styles Section */}
-      {otherStyles.length > 0 && (
-        <OtherStylesSection
-          styles={otherStyles}
-          onStyleClick={handleStyleClick}
-          onContextMenu={handleContextMenu}
-        />
-      )}
-      
-      {/* Only render context menu for non-default styles */}
-      {contextMenu.isOpen && contextMenu.style && contextMenu.style.id !== 'default-text-reset' && (
+
+      {/* Context Menu */}
+      {contextMenu && (
         <StyleContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          isOpen={contextMenu.isOpen}
-          onClose={handleCloseContextMenu}
           style={contextMenu.style}
+          onEdit={onEditStyle}
           onDelete={handleDelete}
           onDuplicate={handleDuplicate}
-          onEdit={onEditStyle}
-          containerRef={containerRef}
+          position={contextMenu.position}
+          onClose={handleCloseContextMenu}
         />
       )}
     </div>

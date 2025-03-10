@@ -6,7 +6,7 @@ import { Check, Pilcrow, MoreHorizontal, Eraser } from "lucide-react";
 interface StyleListItemCardProps {
   style: TextStyle;
   onStyleClick: (style: TextStyle) => void;
-  onContextMenu?: (e: React.MouseEvent, style: TextStyle) => void;
+  onContextMenu: (e: React.MouseEvent, style: TextStyle) => void;
   isDefaultStyleSection?: boolean;
 }
 
@@ -23,6 +23,7 @@ export const StyleListItemCard = ({
       key={style.id}
       className={`p-1.5 hover:bg-accent cursor-pointer ${isDefaultStyleSection ? 'bg-slate-50' : ''} ${isPersistentDefaultStyle ? 'bg-gray-50 border-dashed' : ''}`}
       onClick={() => onStyleClick(style)}
+      onContextMenu={(e) => !isPersistentDefaultStyle && onContextMenu(e, style)}
     >
       <div className="flex items-center gap-1.5">
         {isPersistentDefaultStyle ? (
@@ -43,7 +44,7 @@ export const StyleListItemCard = ({
               <Check className="h-3 w-3" />
             </span>
           )}
-          {onContextMenu && !isPersistentDefaultStyle && (
+          {!isPersistentDefaultStyle && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

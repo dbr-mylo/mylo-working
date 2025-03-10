@@ -1,27 +1,14 @@
 
 import { TextStyle } from "@/lib/types";
 import { getLocalTextStyles } from "./storage";
-import { DEFAULT_STYLE_ID_KEY } from "./constants";
 
 /**
- * Gets the default text style
+ * Gets the default style from the available styles
  */
-export const getDefaultStyle = async (forceRefresh = false): Promise<TextStyle | null> => {
+export const getDefaultStyle = async (): Promise<TextStyle | null> => {
   try {
-    // Get the default style ID from localStorage
-    const defaultStyleId = localStorage.getItem(DEFAULT_STYLE_ID_KEY);
-    if (!defaultStyleId) return null;
-    
-    // Get all styles and find the default one
-    const styles = getLocalTextStyles(forceRefresh);
-    const defaultStyle = styles.find(s => s.id === defaultStyleId);
-    
-    if (!defaultStyle) {
-      console.warn('Default style ID exists but style not found:', defaultStyleId);
-      return null;
-    }
-    
-    return defaultStyle;
+    const styles = getLocalTextStyles();
+    return styles.find(s => s.isDefault) || null;
   } catch (error) {
     console.error('Error in getDefaultStyle:', error);
     return null;
@@ -29,12 +16,10 @@ export const getDefaultStyle = async (forceRefresh = false): Promise<TextStyle |
 };
 
 /**
- * Gets all styles that have the specified parent ID
+ * Finds styles that have the specified parent
  */
 export const getStylesWithParent = async (parentId: string): Promise<TextStyle[]> => {
   try {
-    if (!parentId) return [];
-    
     const styles = getLocalTextStyles();
     return styles.filter(s => s.parentId === parentId);
   } catch (error) {

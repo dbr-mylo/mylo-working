@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -54,15 +55,18 @@ export const StyleContextMenu = ({
 
   const handleDuplicateClick = () => {
     onDuplicate(style);
+    onClose();
   };
 
   const handleDeleteClick = () => {
     onDelete(style.id);
+    onClose();
   };
 
   const handleChangeFontClick = () => {
     if (onDefaultFontChange) {
       onDefaultFontChange();
+      onClose();
     }
   };
 
@@ -82,7 +86,7 @@ export const StyleContextMenu = ({
         left: `${adjustedPosition.x}px`,
       }}
     >
-      <Card className="w-48 p-1 text-xs">
+      <Card className="w-48 p-1 text-xs bg-white">
         {isDefaultStyle ? (
           <button
             className="w-full text-left px-2 py-1.5 hover:bg-accent rounded"

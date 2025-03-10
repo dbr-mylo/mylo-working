@@ -32,6 +32,7 @@ export const DefaultStyleSection = ({
   
   const handleContextMenu = (e: React.MouseEvent, style: TextStyle) => {
     e.preventDefault();
+    e.stopPropagation();
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -57,17 +58,19 @@ export const DefaultStyleSection = ({
         isDefaultStyleSection={true}
       />
       
-      <StyleContextMenu
-        x={contextMenu.x}
-        y={contextMenu.y}
-        isOpen={contextMenu.isOpen}
-        style={defaultStyle}
-        onEdit={() => {}}
-        onDelete={() => {}}
-        onDuplicate={() => {}}
-        onClose={handleCloseContextMenu}
-        onDefaultFontChange={handleOpenDefaultFontModal}
-      />
+      {contextMenu.isOpen && (
+        <StyleContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          isOpen={contextMenu.isOpen}
+          style={defaultStyle}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
+          onClose={handleCloseContextMenu}
+          onDefaultFontChange={handleOpenDefaultFontModal}
+        />
+      )}
       
       <DefaultFontModal 
         isOpen={defaultFontModalOpen}

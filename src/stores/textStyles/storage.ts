@@ -1,3 +1,4 @@
+
 import { TextStyle } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { TEXT_STYLE_STORAGE_KEY, DEFAULT_TEXT_STYLES } from "./constants";
@@ -33,7 +34,7 @@ export const getLocalTextStyles = (): TextStyle[] => {
         parsedStyles = JSON.parse(stylesJSON);
       } catch (parseError) {
         console.error('Error parsing styles JSON:', parseError);
-        console.log('Invalid JSON in localStorage, returning defaults');
+        console.log('Invalid JSON in localStorage, returning empty array');
         localStorage.removeItem(TEXT_STYLE_STORAGE_KEY);
         localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(DEFAULT_TEXT_STYLES));
         return DEFAULT_TEXT_STYLES;
@@ -93,15 +94,15 @@ export const getLocalTextStyles = (): TextStyle[] => {
       
       return validatedStyles;
     } else {
-      // Initialize with default styles if none exist
-      console.log('No styles found in localStorage, initializing with defaults');
+      // Initialize with empty array if none exist
+      console.log('No styles found in localStorage, initializing with empty array');
       localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(DEFAULT_TEXT_STYLES));
       return DEFAULT_TEXT_STYLES;
     }
   } catch (error) {
     console.error('Error parsing text styles from localStorage:', error);
-    // Reset to defaults on error
-    console.log('Resetting to default styles due to error');
+    // Reset to empty array on error
+    console.log('Resetting to empty array due to error');
     localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(DEFAULT_TEXT_STYLES));
     return DEFAULT_TEXT_STYLES;
   }

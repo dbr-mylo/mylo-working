@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for managing text style cache
  */
@@ -115,57 +114,24 @@ export const resetTextStylesToDefaults = (): void => {
  * Performs a deep clean of all storage
  * This is a more aggressive approach to clearing all caches
  */
-export const deepCleanStorage = (): void => {
+export const deepCleanStorage = () => {
   try {
-    // Log all current localStorage items for debugging
-    console.log('Current localStorage items before cleaning:');
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        console.log(`${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`);
-      }
-    }
+    console.log("Performing deep cleaning of text style storage");
     
-    // Reset text styles to defaults
-    resetTextStylesToDefaults();
+    // Clear all styles from localStorage
+    localStorage.removeItem(TEXT_STYLE_STORAGE_KEY);
+    localStorage.removeItem(DEFAULT_STYLE_ID_KEY);
     
-    // Clear all editor state
-    localStorage.removeItem('editor_state');
+    // Clear any other related caches
+    localStorage.removeItem('style_css_cache');
+    localStorage.removeItem('editor_styles');
     
-    // Clear all style-related items with various naming patterns
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (
-        key.includes('text') || 
-        key.includes('style') || 
-        key.includes('font') || 
-        key.includes('editor') ||
-        key.includes('cache') ||
-        key.includes('temp')
-      )) {
-        keysToRemove.push(key);
-      }
-    }
+    // Initialize with empty array instead of defaults
+    localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify([]));
     
-    keysToRemove.forEach(key => {
-      console.log(`Removing localStorage item: ${key}`);
-      localStorage.removeItem(key);
-    });
-    
-    // Force reload DEFAULT_TEXT_STYLES from constants
-    console.log('Deep clean of storage completed');
-    
-    // Log remaining localStorage items for verification
-    console.log('Remaining localStorage items after cleaning:');
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        console.log(`${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`);
-      }
-    }
+    console.log("Deep clean completed successfully");
   } catch (error) {
-    console.error('Error performing deep clean of storage:', error);
+    console.error("Error during deep clean:", error);
+    throw error;
   }
 };
-

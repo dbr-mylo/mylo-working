@@ -6,6 +6,7 @@ import { TemplatePreferences } from "@/lib/types/preferences";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface PreferencesDialogProps {
   open: boolean;
@@ -21,10 +22,13 @@ export const PreferencesDialog = ({
   onPreferencesChange,
 }: PreferencesDialogProps) => {
   const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleFontUnitChange = async (value: 'px' | 'pt') => {
     // Early return if the value hasn't changed
     if (value === preferences.typography.fontUnit) return;
+    
+    setIsUpdating(true);
     
     try {
       // Update preferences first
@@ -44,8 +48,8 @@ export const PreferencesDialog = ({
         description: `All text styles have been converted to ${value === 'px' ? 'pixels' : 'points'}.`,
       });
       
-      // Force a refresh of the page to ensure all components show the updated unit
-      window.location.reload();
+      // Instead of reloading, we'll just notify that the changes are applied
+      // The useTextStyleCSS hook in use by the app will automatically update
     } catch (error) {
       console.error("Error updating font unit:", error);
       toast({
@@ -53,6 +57,8 @@ export const PreferencesDialog = ({
         description: "There was a problem converting text styles.",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -73,6 +79,7 @@ export const PreferencesDialog = ({
             <Select
               value={preferences.typography.fontUnit}
               onValueChange={handleFontUnitChange}
+              disabled={isUpdating}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select unit" />
@@ -84,9 +91,11 @@ export const PreferencesDialog = ({
             </Select>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground mt-2">
-          Note: Changing the font unit will reload the page to apply changes across all components.
-        </div>
+        {isUpdating && (
+          <div className="text-xs text-muted-foreground mt-2">
+            Converting text styles...
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

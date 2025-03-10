@@ -6,7 +6,7 @@ import { TemplatePreferences } from "@/lib/types/preferences";
 import { useTextStyleOperations } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PreferencesDialogProps {
   open: boolean;
@@ -24,37 +24,52 @@ export const PreferencesDialog = ({
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const { convertAllStylesToUnit } = useTextStyleOperations();
+  const [localFontUnit, setLocalFontUnit] = useState(preferences?.typography?.fontUnit || 'px');
+
+  // Update local state when preferences change
+  useEffect(() => {
+    if (preferences?.typography?.fontUnit) {
+      setLocalFontUnit(preferences.typography.fontUnit);
+      console.log("PreferencesDialog: Updated localFontUnit to", preferences.typography.fontUnit);
+    }
+  }, [preferences]);
+
+  // Log when the dialog opens
+  useEffect(() => {
+    if (open) {
+      console.log("PreferencesDialog opened with fontUnit:", preferences?.typography?.fontUnit);
+    }
+  }, [open, preferences]);
 
   const handleFontUnitChange = async (value: 'px' | 'pt') => {
     // Early return if the value hasn't changed
     if (value === preferences.typography.fontUnit) return;
     
+    console.log("Changing font unit from", preferences.typography.fontUnit, "to", value);
     setIsUpdating(true);
+    setLocalFontUnit(value); // Update local state immediately for UI feedback
     
     try {
       // Update preferences first
-      onPreferencesChange({
+      const updatedPreferences = {
         ...preferences,
         typography: {
           ...preferences.typography,
           fontUnit: value,
         },
-      });
+      };
+      
+      onPreferencesChange(updatedPreferences);
+      console.log("Updated preferences with new font unit:", value);
       
       // Convert all text styles to the new unit
       await convertAllStylesToUnit(value);
+      console.log("Converted all text styles to", value);
       
       toast({
         title: "Font unit updated",
         description: `All text styles have been converted to ${value === 'px' ? 'pixels' : 'points'}.`,
       });
-      
-      // Force a re-render of components by toggling the dialog closed and open
-      onOpenChange(false);
-      setTimeout(() => {
-        // Give a brief delay to ensure state updates propagate
-        onOpenChange(true);
-      }, 100);
     } catch (error) {
       console.error("Error updating font unit:", error);
       toast({
@@ -62,6 +77,9 @@ export const PreferencesDialog = ({
         description: "There was a problem converting text styles.",
         variant: "destructive",
       });
+      
+      // Revert local state on error
+      setLocalFontUnit(preferences.typography.fontUnit);
     } finally {
       setIsUpdating(false);
     }
@@ -82,7 +100,7 @@ export const PreferencesDialog = ({
               Font Unit
             </Label>
             <Select
-              value={preferences.typography.fontUnit}
+              value={localFontUnit}
               onValueChange={handleFontUnitChange}
               disabled={isUpdating}
             >
@@ -94,6 +112,9 @@ export const PreferencesDialog = ({
                 <SelectItem value="pt">Points (pt)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="col-span-4 text-xs text-muted-foreground">
+            Current font unit: {localFontUnit}
           </div>
         </div>
         {isUpdating && (

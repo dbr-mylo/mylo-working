@@ -24,18 +24,26 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
   }, [isOpen, defaultStyle]);
   
   const handleFontChange = (font: string) => {
+    console.log("DefaultFontModal: Font changed to:", font);
     setSelectedFont(font);
   };
   
   const handleSave = async () => {
     try {
-      // Update the default style with the new font
-      const updatedStyle = {
+      // Create a copy of the defaultStyle with the updated font
+      const updatedStyle: TextStyle = {
         ...defaultStyle,
-        fontFamily: selectedFont
+        fontFamily: selectedFont,
+        updated_at: new Date().toISOString()
       };
       
+      // Save the updated style
       await textStyleStore.saveTextStyle(updatedStyle);
+      
+      // Update the default style ID in localStorage
+      if (defaultStyle.id) {
+        await textStyleStore.setDefaultStyle(defaultStyle.id);
+      }
       
       toast({
         title: "Default font updated",
@@ -43,6 +51,9 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
       });
       
       onClose();
+      
+      // Force a refresh of the text styles to update UI
+      textStyleStore.getTextStyles(true);
     } catch (error) {
       console.error("Error updating default font:", error);
       toast({

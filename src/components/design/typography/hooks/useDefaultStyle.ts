@@ -1,5 +1,5 @@
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { TextStyle } from "@/lib/types";
 import { Editor } from "@tiptap/react";
 import { useToast } from "@/hooks/use-toast";
@@ -9,21 +9,34 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
   const { toast } = useToast();
   const [customDefaultStyle, setCustomDefaultStyle] = useState<TextStyle | null>(null);
 
-  // Load the saved default style on mount
+  // Load the saved default style on mount and when it changes
+  const loadCustomDefaultStyle = useCallback(async () => {
+    try {
+      const defaultStyle = await textStyleStore.getDefaultStyle();
+      if (defaultStyle) {
+        console.log("Loaded default style:", defaultStyle);
+        setCustomDefaultStyle(defaultStyle);
+      }
+    } catch (error) {
+      console.error('Error loading custom default style:', error);
+    }
+  }, []);
+  
   useEffect(() => {
-    const loadCustomDefaultStyle = async () => {
-      try {
-        const defaultStyle = await textStyleStore.getDefaultStyle();
-        if (defaultStyle) {
-          setCustomDefaultStyle(defaultStyle);
-        }
-      } catch (error) {
-        console.error('Error loading custom default style:', error);
+    loadCustomDefaultStyle();
+    
+    // Set up a listener to reload when local storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'text_styles' || e.key === 'default_style_id') {
+        loadCustomDefaultStyle();
       }
     };
     
-    loadCustomDefaultStyle();
-  }, []);
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [loadCustomDefaultStyle]);
 
   const defaultTextStyle: TextStyle = useMemo(() => ({
     id: 'default-text-reset',
@@ -50,7 +63,8 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
 
     try {
-      const defaultStyle = await textStyleStore.getDefaultStyle() || defaultTextStyle;
+      // Force refresh to get the latest default style
+      const defaultStyle = await textStyleStore.getDefaultStyle(true) || defaultTextStyle;
       
       editorInstance.chain()
         .focus()
@@ -83,8 +97,14 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
   };
 
+  // Force refresh the default style
+  const refreshDefaultStyle = () => {
+    loadCustomDefaultStyle();
+  };
+
   return {
     defaultTextStyle,
-    applyDefaultTextStyle
+    applyDefaultTextStyle,
+    refreshDefaultStyle
   };
 };

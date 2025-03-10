@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -22,17 +21,20 @@ export const FontSizeControl = ({ value, onChange, currentUnit: propCurrentUnit 
   
   const [internalValue, setInternalValue] = useState(extractFontSizeValue(value));
   
-  // Update internal value when external value changes
+  // Update internal value when external value or unit changes
   useEffect(() => {
     const extracted = extractFontSizeValue(value);
     // Convert to current unit if needed
     if (extracted.unit !== currentUnit) {
       const converted = convertFontSize(value, extracted.unit, currentUnit);
-      setInternalValue(extractFontSizeValue(converted));
+      const convertedValue = extractFontSizeValue(converted);
+      setInternalValue(convertedValue);
+      // Propagate the converted value up
+      onChange(converted);
     } else {
       setInternalValue(extracted);
     }
-  }, [value, currentUnit]);
+  }, [value, currentUnit, onChange]);
 
   // Get number value only
   const getNumberValue = (): number => {

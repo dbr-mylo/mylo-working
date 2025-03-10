@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -32,6 +31,14 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   });
   
+  // Add default styles to content if empty
+  const getInitialContent = () => {
+    if (!content || content.trim() === '') {
+      return `<p style="font-family: Inter; font-size: 16px; color: #000000;">Start typing here...</p>`;
+    }
+    return content;
+  };
+  
   const editor = useTipTapEditor({
     extensions: [
       StarterKit.configure({
@@ -46,22 +53,24 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
           class: 'preserve-styling',
         },
       }),
-      FontFamily,
-      FontSize, // Add the FontSize extension
+      FontFamily.configure({
+        defaultFontFamily: 'Inter',
+      }),
+      FontSize.configure({
+        defaultFontSize: '16px',
+      }),
       ListItem,
       CustomBulletList,
       CustomOrderedList,
       Color,
       IndentExtension,
     ],
-    content: content,
+    content: getInitialContent(),
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
       // Update current font state for the toolbar display
       updateStyleState(editor);
-      // Let's log the HTML on update to check color preservation
-      console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
     },
   });
 
@@ -86,7 +95,6 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
       
       // If there's bold text selected, ensure it keeps the new color
       if (editor.isActive('bold')) {
-        console.log("Bold is active, reapplying color:", color);
         // Toggle bold off and on to refresh the styling
         editor.chain().focus().toggleBold().toggleBold().run();
         // Re-apply color to make sure it sticks
@@ -105,16 +113,25 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     // Update font state if available in selection
     if (attrs.fontFamily) {
       setCurrentFont(attrs.fontFamily);
+    } else {
+      // Default to Inter if no font family is set
+      setCurrentFont('Inter');
     }
     
     // Update font size state if available in selection
     if (attrs.fontSize) {
       setCurrentFontSize(attrs.fontSize);
+    } else {
+      // Default to 16px if no font size is set
+      setCurrentFontSize('16px');
     }
     
     // Update color state if available in selection
     if (attrs.color) {
       setCurrentColor(attrs.color);
+    } else {
+      // Default to black if no color is set
+      setCurrentColor('#000000');
     }
   };
 

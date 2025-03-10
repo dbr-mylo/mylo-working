@@ -2,6 +2,11 @@
 import { Extension } from '@tiptap/core';
 import '@tiptap/extension-text-style';
 
+export interface FontFamilyOptions {
+  types: string[];
+  defaultFontFamily: string;
+}
+
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     fontFamily: {
@@ -13,12 +18,13 @@ declare module '@tiptap/core' {
   }
 }
 
-export const FontFamily = Extension.create({
+export const FontFamily = Extension.create<FontFamilyOptions>({
   name: 'fontFamily',
   
   addOptions() {
     return {
       types: ['textStyle'],
+      defaultFontFamily: 'Inter',
     };
   },
   
@@ -28,8 +34,8 @@ export const FontFamily = Extension.create({
         types: this.options.types,
         attributes: {
           fontFamily: {
-            default: 'Inter',
-            parseHTML: element => element.style.fontFamily?.replace(/['"]/g, ''),
+            default: this.options.defaultFontFamily,
+            parseHTML: element => element.style.fontFamily?.replace(/['"]/g, '') || this.options.defaultFontFamily,
             renderHTML: attributes => {
               if (!attributes.fontFamily) return {};
               return {

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FontPicker } from './FontPicker';
@@ -39,7 +39,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const handleFontChange = (font: string) => {
-    console.log("EditorToolbar: Changing font to:", font);
     onFontChange(font);
   };
 
@@ -100,13 +99,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     e.stopPropagation();
   };
 
-  // Log current font when component renders
-  React.useEffect(() => {
+  // Ensure the toolbar is initialized with the editor's current attributes
+  useEffect(() => {
     if (editor) {
+      // Get the current attributes from the editor
       const attrs = editor.getAttributes('textStyle');
-      console.log("EditorToolbar: Current font from attrs:", attrs.fontFamily, "currentFont prop:", currentFont);
+      
+      // Log them for debugging
+      console.log("Editor attributes:", attrs);
     }
-  }, [editor, currentFont]);
+  }, [editor]);
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

@@ -32,9 +32,6 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
 
     try {
-      // First try to get the user-configured default style
-      const storedDefaultStyle = await getDefaultStyle();
-      
       // Reset all marks and styles first
       editorInstance.chain()
         .focus()
@@ -47,46 +44,7 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
         .setParagraph()
         .run();
       
-      // Log information about what's being applied
-      console.log('Applying default style. Stored default:', storedDefaultStyle ? 
-        `Font: ${storedDefaultStyle.fontFamily}` : 'None available');
-        
-      if (storedDefaultStyle) {
-        // Apply stored default style if available
-        editorInstance.chain()
-          .focus()
-          .setFontFamily(storedDefaultStyle.fontFamily || 'Inter')
-          .setFontSize(storedDefaultStyle.fontSize || '16px')
-          .setColor(storedDefaultStyle.color || '#000000')
-          .run();
-          
-        console.log('Applied stored default style:', storedDefaultStyle.fontFamily);
-      } else {
-        // Apply fallback default style - ensure we're using 'Inter' here
-        console.log('No stored default style, applying fallback Inter');
-        editorInstance.chain()
-          .focus()
-          .setFontFamily('Inter')  // Explicitly set to 'Inter', not using variable
-          .setFontSize('16px')
-          .setColor('#000000')
-          .run();
-      }
-      
-      // Force an update to the selection to refresh the toolbar state
-      const currentSelection = editorInstance.state.selection;
-      editorInstance.commands.setTextSelection({
-        from: currentSelection.from,
-        to: currentSelection.to
-      });
-        
-      toast({
-        title: "Default style applied",
-        description: "Text has been reset to default formatting"
-      });
-    } catch (error) {
-      console.error('Error applying default style:', error);
-      
-      // In case of error, apply a hardcoded default style to ensure consistency
+      // Always use 'Inter' as the primary fallback font
       editorInstance.chain()
         .focus()
         .setFontFamily('Inter')
@@ -94,12 +52,24 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
         .setColor('#000000')
         .run();
         
-      // Force selection update even in error case
+      // Force an update to the selection to refresh the toolbar state
       const currentSelection = editorInstance.state.selection;
       editorInstance.commands.setTextSelection({
         from: currentSelection.from,
         to: currentSelection.to
       });
+    } catch (error) {
+      console.error('Error applying default style:', error);
+      
+      // In case of error, still try to set the font to Inter
+      if (editorInstance) {
+        editorInstance.chain()
+          .focus()
+          .setFontFamily('Inter')
+          .setFontSize('16px')
+          .setColor('#000000')
+          .run();
+      }
       
       toast({
         title: "Error applying default style",

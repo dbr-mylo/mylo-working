@@ -37,19 +37,21 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   const dropdownWidth = isDesigner ? 'w-[220px]' : 'w-[180px]';
   const dropdownHeight = isDesigner ? 'h-7' : 'h-9';
   
+  // If value isn't in our font list, default to Inter
+  const safeValue = fonts.some(f => f.value === value) ? value : 'Inter';
+  
   const handleFontChange = (newFont: string) => {
-    console.log("FontPicker: Font selected:", newFont);
     onChange(newFont);
   };
   
   return (
     <div className={`flex items-center ${className || ''}`}>
-      <Select value={value} onValueChange={handleFontChange}>
+      <Select value={safeValue} onValueChange={handleFontChange}>
         <SelectTrigger className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs`}>
           <div className="flex items-center gap-2 w-full">
             <Type className="h-3.5 w-3.5 flex-shrink-0" />
-            <span style={{ fontFamily: value }} className="truncate">
-              {value || 'Select Font'}
+            <span style={{ fontFamily: safeValue }} className="truncate">
+              {safeValue || 'Inter'}
             </span>
           </div>
         </SelectTrigger>

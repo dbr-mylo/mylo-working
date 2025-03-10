@@ -4,8 +4,7 @@ import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
-import { textStyleStore } from '@/stores/textStyles';
-import { useDefaultStyle } from '@/components/design/typography/hooks/useDefaultStyle';
+import { useToast } from '@/hooks/use-toast';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -18,15 +17,45 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   currentColor,
   buttonSize 
 }) => {
-  // Use the useDefaultStyle hook to access the applyDefaultTextStyle function
-  const { applyDefaultTextStyle } = useDefaultStyle(editor);
+  const { toast } = useToast();
 
-  const clearFormatting = async () => {
-    // Use the hook's function to apply default style
-    await applyDefaultTextStyle();
+  const clearFormatting = () => {
+    if (!editor) return;
     
-    // Log the current editor state after applying default style
-    console.log("After clearing formatting, current font:", editor.getAttributes('textStyle').fontFamily);
+    // First unset all marks
+    editor.chain()
+      .focus()
+      .unsetAllMarks()
+      .run();
+    
+    // Then reset to default paragraph
+    editor.chain()
+      .focus()
+      .setParagraph()
+      .run();
+    
+    // Explicitly set font to Inter
+    editor.chain()
+      .focus()
+      .setFontFamily('Inter')
+      .setFontSize('16px')
+      .setColor('#000000')
+      .run();
+    
+    // Force selection refresh to update toolbar state
+    const currentSelection = editor.state.selection;
+    editor.commands.setTextSelection({
+      from: currentSelection.from,
+      to: currentSelection.to
+    });
+    
+    // Show success toast
+    toast({
+      title: "Default style applied",
+      description: "Text has been reset to default formatting"
+    });
+    
+    console.log("After clearing formatting, font family:", editor.getAttributes('textStyle').fontFamily);
   };
 
   return (

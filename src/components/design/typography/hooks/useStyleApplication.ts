@@ -9,6 +9,49 @@ export const useStyleApplication = (
 ) => {
   const { toast } = useToast();
 
+  const applyDefaultTextStyle = async () => {
+    if (editorInstance) {
+      try {
+        // Reset formatting to defaults
+        editorInstance.chain()
+          .focus()
+          .unsetAllMarks()
+          .run();
+        
+        toast({
+          title: "Default formatting applied",
+          description: "Text has been reset to default style"
+        });
+      } catch (error) {
+        console.error("Error applying default text style:", error);
+      }
+    }
+  };
+
+  const applyStyleToSelection = async (styleId: string) => {
+    if (!editorInstance || editorInstance.state.selection.empty) {
+      return;
+    }
+    
+    try {
+      // This function would typically apply the style to the selected text
+      // Exact implementation would depend on how styles are stored and applied
+      console.log(`Applying style ${styleId} to selection`);
+      
+      // This is a simplified example - in a real implementation, 
+      // you would fetch the style and apply its properties
+      editorInstance.chain().focus().run();
+      
+    } catch (error) {
+      console.error("Error applying style from selection:", error);
+      toast({
+        title: "Error applying style",
+        description: "Could not apply the style to the selected text",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleStyleClick = async (style: TextStyle) => {
     console.log("Style clicked in sidebar:", style.name);
     
@@ -50,6 +93,8 @@ export const useStyleApplication = (
   };
 
   return {
-    handleStyleClick
+    handleStyleClick,
+    applyDefaultTextStyle,
+    applyStyleToSelection
   };
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,12 +74,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     if (!editor) return "16";
     const attrs = editor.getAttributes('textStyle');
     if (attrs.fontSize) {
-      return attrs.fontSize.replace('px', '');
+      return attrs.fontSize.replace(/[^0-9.]/g, '');
     }
     return "16";
   };
 
-  // Handler for keydown to prevent propagation to editor
   const handleKeyDown = (e: React.KeyboardEvent) => {
     e.stopPropagation();
   };

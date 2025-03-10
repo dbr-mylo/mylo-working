@@ -102,21 +102,6 @@ export const StyleDetails = ({ styleId }: StyleDetailsProps) => {
           </div>
         )}
       </div>
-      
-      {/* Preview */}
-      <div className="mt-3 p-3 bg-white rounded border">
-        <p style={{
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
-          color: style.color,
-          lineHeight: style.lineHeight,
-          letterSpacing: style.letterSpacing,
-          textAlign: style.textAlign as any || "left"
-        }}>
-          This is a preview of the text style
-        </p>
-      </div>
     </div>
   );
 };

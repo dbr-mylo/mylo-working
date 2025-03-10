@@ -75,15 +75,6 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
               className="w-full"
             />
           </div>
-          
-          <div className="mt-4">
-            <div className="border rounded p-3">
-              <p className="text-sm mb-1 text-muted-foreground">Preview:</p>
-              <p style={{ fontFamily: selectedFont }} className="text-base">
-                The quick brown fox jumps over the lazy dog.
-              </p>
-            </div>
-          </div>
         </div>
         
         <DialogFooter>

@@ -6,7 +6,6 @@ import { StyleFormControls } from "./StyleFormControls";
 import { Button } from "@/components/ui/button";
 import { useStyleForm } from "./hooks/useStyleForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
 import { StyleInheritance } from "./StyleInheritance";
@@ -85,20 +84,16 @@ export const StyleForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      {/* Smaller preview at the top */}
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
-        <TextPreview styles={styles} />
-        {parentStyle && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <div className="flex items-center">
-              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
-                Inherits from
-              </Badge>
-              <span className="text-xs ml-2">{parentStyle.name}</span>
-            </div>
+      {parentStyle && (
+        <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
+          <div className="flex items-center">
+            <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+              Inherits from
+            </Badge>
+            <span className="text-xs ml-2">{parentStyle.name}</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="w-full grid grid-cols-2 mb-3">

@@ -33,7 +33,12 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     const loadTextStyles = async () => {
       try {
         const styles = await textStyleStore.getTextStyles();
-        setTextStyles(styles);
+        // Filter out any system styles or unwanted default reset styles
+        const filteredStyles = styles.filter(style => 
+          !style.name.includes("Clear to Default") && 
+          !style.name.includes("Reset")
+        );
+        setTextStyles(filteredStyles);
       } catch (error) {
         console.error("Error loading text styles:", error);
       } finally {

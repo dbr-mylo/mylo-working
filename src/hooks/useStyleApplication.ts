@@ -1,96 +1,108 @@
-
 import { Editor } from "@tiptap/react";
+import { useState, useCallback } from "react";
+import { textStyleStore } from "@/stores/textStyles";
 import { TextStyle } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { textStyleStore } from "@/stores/textStyles";
 
-export const useStyleApplication = (editor: Editor | null) => {
+export const useStyleApplication = (editor: Editor) => {
+  const [isApplyingStyle, setIsApplyingStyle] = useState(false);
   const { toast } = useToast();
 
   /**
-   * Apply a text style to the currently selected text in the editor
+   * Applies a text style to the current selection in the editor
    */
-  const applyStyleToSelection = async (styleId: string) => {
-    if (!editor || !editor.isActive || !editor.chain().focus) {
-      toast({
-        title: "Editor unavailable",
-        description: "Cannot apply style - editor is not ready",
-        variant: "destructive",
-      });
+  const applyStyleToSelection = useCallback(async (styleId: string) => {
+    if (!editor || editor.state.selection.empty) {
+      console.log("No selection to apply style to");
       return;
     }
 
     try {
-      // Get the style with all inherited properties
-      const styleToApply = await textStyleStore.getStyleWithInheritance(styleId);
+      setIsApplyingStyle(true);
+      
+      // Get all styles to find the one we want to apply
+      const styles = await textStyleStore.getTextStyles();
+      const styleToApply = styles.find(s => s.id === styleId);
       
       if (!styleToApply) {
-        toast({
-          title: "Style not found",
-          description: "The selected style could not be found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if there is any selection
-      if (editor.state.selection.empty) {
-        toast({
-          title: "No text selected",
-          description: "Please select some text to apply the style",
-          variant: "default", // Changed from "warning" to "default"
-        });
-        return;
-      }
-
-      // Start a chain to apply multiple style properties
-      let chain = editor.chain().focus();
-      
-      // Apply all style properties to the selection
-      if (styleToApply.fontFamily) {
-        chain = chain.setFontFamily(styleToApply.fontFamily);
+        throw new Error(`Style with ID ${styleId} not found`);
       }
       
-      if (styleToApply.fontSize) {
-        chain = chain.setFontSize(styleToApply.fontSize);
-      }
+      console.log("Applying style:", styleToApply.name);
       
-      if (styleToApply.color) {
-        chain = chain.setColor(styleToApply.color);
-      }
+      // Get the complete style with inheritance
+      const completeStyle = await textStyleStore.getStyleWithInheritance(styleId);
       
-      if (styleToApply.fontWeight) {
-        // Apply bold if the weight is 600+
-        const weight = parseInt(styleToApply.fontWeight);
-        if (weight >= 600) {
-          chain = chain.setBold();
-        } else {
-          chain = chain.unsetBold();
-        }
-      }
+      // Apply the style to the selected text
+      editor.chain().focus().setMark('textStyle', { 
+        id: styleId,
+        // Include other style properties for direct rendering
+        ...completeStyle
+      }).run();
       
-      // Execute all style changes
-      chain.run();
-      
-      toast({
-        title: "Style applied",
-        description: `Applied "${styleToApply.name}" to selected text`,
-      });
-      
-      // Log to console for debugging
-      console.log(`Applied style "${styleToApply.name}" to selection:`, styleToApply);
-      
+      return completeStyle;
     } catch (error) {
       console.error("Error applying style:", error);
       toast({
         title: "Error applying style",
-        description: "There was a problem applying the style",
+        description: "There was a problem applying the selected style.",
         variant: "destructive",
       });
+      throw error;
+    } finally {
+      setIsApplyingStyle(false);
     }
-  };
+  }, [editor, toast]);
+
+  /**
+   * Gets the current style applied to the selection
+   */
+  const getCurrentStyle = useCallback(async (): Promise<TextStyle | null> => {
+    if (!editor || editor.state.selection.empty) {
+      return null;
+    }
+    
+    try {
+      const marks = editor.state.selection.$head.marks();
+      const textStyleMark = marks.find(mark => mark.type.name === 'textStyle');
+      
+      if (!textStyleMark) {
+        return null;
+      }
+      
+      const styleId = textStyleMark.attrs.id;
+      if (!styleId) {
+        return null;
+      }
+      
+      // Get all styles to find the one applied
+      const styles = await textStyleStore.getTextStyles();
+      return styles.find(s => s.id === styleId) || null;
+    } catch (error) {
+      console.error("Error getting current style:", error);
+      return null;
+    }
+  }, [editor]);
+
+  /**
+   * Removes any text style from the current selection
+   */
+  const removeStyleFromSelection = useCallback(() => {
+    if (!editor || editor.state.selection.empty) {
+      return;
+    }
+    
+    try {
+      editor.chain().focus().unsetMark('textStyle').run();
+    } catch (error) {
+      console.error("Error removing style:", error);
+    }
+  }, [editor]);
 
   return {
-    applyStyleToSelection
+    applyStyleToSelection,
+    getCurrentStyle,
+    removeStyleFromSelection,
+    isApplyingStyle
   };
 };

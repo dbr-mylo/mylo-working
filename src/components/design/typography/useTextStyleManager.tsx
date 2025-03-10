@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { TextStyle } from "@/lib/types";
@@ -21,7 +20,8 @@ export const useTextStyleManager = (onStylesChange: (styles: string) => void) =>
     lineHeight: '1.5',
     letterSpacing: '0',
     selector: 'p',
-    description: ''
+    description: '',
+    updated_at: new Date().toISOString() // Add the required updated_at property
   };
   
   // Current style being edited
@@ -150,7 +150,8 @@ export const useTextStyleManager = (onStylesChange: (styles: string) => void) =>
       lineHeight: '1.5',
       letterSpacing: '0',
       selector: 'p',
-      description: ''
+      description: '',
+      updated_at: new Date().toISOString() // Add the required updated_at property
     });
     setIsEditing(true);
     setSelectedStyleId(null);

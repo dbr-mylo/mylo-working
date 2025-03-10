@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TemplatePreferences } from "@/lib/types/preferences";
-import { textStyleStore } from "@/stores/textStyles";
+import { useTextStyleOperations } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -23,6 +23,7 @@ export const PreferencesDialog = ({
 }: PreferencesDialogProps) => {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
+  const { convertAllStylesToUnit } = useTextStyleOperations();
 
   const handleFontUnitChange = async (value: 'px' | 'pt') => {
     // Early return if the value hasn't changed
@@ -41,15 +42,19 @@ export const PreferencesDialog = ({
       });
       
       // Convert all text styles to the new unit
-      await textStyleStore.convertAllStylesToUnit(value);
+      await convertAllStylesToUnit(value);
       
       toast({
         title: "Font unit updated",
         description: `All text styles have been converted to ${value === 'px' ? 'pixels' : 'points'}.`,
       });
       
-      // Instead of reloading, we'll just notify that the changes are applied
-      // The useTextStyleCSS hook in use by the app will automatically update
+      // Force a re-render of components by toggling the dialog closed and open
+      onOpenChange(false);
+      setTimeout(() => {
+        // Give a brief delay to ensure state updates propagate
+        onOpenChange(true);
+      }, 100);
     } catch (error) {
       console.error("Error updating font unit:", error);
       toast({

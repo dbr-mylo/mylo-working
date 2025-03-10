@@ -66,7 +66,6 @@ export const StyleContextMenu = ({
   const handleChangeFontClick = () => {
     if (onDefaultFontChange) {
       onDefaultFontChange();
-      onClose();
     }
   };
 

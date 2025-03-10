@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useStylesList } from "./hooks/useStylesList";
 import { EmptyState } from "./EmptyState";
@@ -56,18 +57,20 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         />
       )}
       
-      {/* Context Menu */}
-      <StyleContextMenu
-        x={contextMenu.x}
-        y={contextMenu.y}
-        isOpen={contextMenu.isOpen}
-        onClose={handleCloseContextMenu}
-        style={contextMenu.style}
-        onDelete={handleDelete}
-        onDuplicate={handleDuplicate}
-        onEdit={onEditStyle}
-        containerRef={containerRef}
-      />
+      {/* Only render this context menu when the active item is not the default style */}
+      {contextMenu.isOpen && contextMenu.style && contextMenu.style.id !== 'default-text-reset' && (
+        <StyleContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          isOpen={contextMenu.isOpen}
+          onClose={handleCloseContextMenu}
+          style={contextMenu.style}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+          onEdit={onEditStyle}
+          containerRef={containerRef}
+        />
+      )}
     </div>
   );
 };

@@ -33,12 +33,16 @@ export const DefaultStyleSection = ({
   const handleContextMenu = (e: React.MouseEvent, style: TextStyle) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Close all other context menus first by triggering onContextMenu
+    onContextMenu(e, style);
+    
+    // Then open this one
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       isOpen: true
     });
-    onContextMenu(e, style);
   };
   
   const handleCloseContextMenu = () => {

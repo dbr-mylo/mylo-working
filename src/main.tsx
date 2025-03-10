@@ -16,6 +16,10 @@ const clearCache = () => {
     // Preview preferences
     localStorage.removeItem('designerPreviewVisible');
     
+    // Also clear any other potential cached items
+    localStorage.removeItem('text-style-default');
+    localStorage.removeItem('text-style-applied');
+    
     console.log('Application cache cleared successfully');
   } catch (error) {
     console.error('Error clearing cache:', error);

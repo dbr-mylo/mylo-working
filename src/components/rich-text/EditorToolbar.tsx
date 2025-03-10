@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -102,7 +103,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   onChange={handleFontSizeChange}
                   onKeyDown={handleKeyDown}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-12 h-7 text-xs pr-5 text-right"
+                  className="w-12 h-7 text-xs pr-5 text-center"
                 />
                 <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center">
                   <button

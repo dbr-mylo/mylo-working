@@ -39,6 +39,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const handleFontChange = (font: string) => {
+    console.log("EditorToolbar: Changing font to:", font);
     onFontChange(font);
   };
 
@@ -98,6 +99,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     e.stopPropagation();
   };
+
+  // Log current font when component renders
+  React.useEffect(() => {
+    if (editor) {
+      const attrs = editor.getAttributes('textStyle');
+      console.log("EditorToolbar: Current font from attrs:", attrs.fontFamily, "currentFont prop:", currentFont);
+    }
+  }, [editor, currentFont]);
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

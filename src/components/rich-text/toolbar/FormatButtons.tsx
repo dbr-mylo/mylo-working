@@ -24,6 +24,9 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   const clearFormatting = async () => {
     // Use the hook's function to apply default style
     await applyDefaultTextStyle();
+    
+    // Log the current editor state after applying default style
+    console.log("After clearing formatting, current font:", editor.getAttributes('textStyle').fontFamily);
   };
 
   return (

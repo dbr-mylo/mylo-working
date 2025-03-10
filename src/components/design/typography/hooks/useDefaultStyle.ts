@@ -44,57 +44,6 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     updated_at: new Date().toISOString()
   }), [customDefaultStyle]);
 
-  const saveAsDefaultStyle = async () => {
-    if (!editorInstance) {
-      return;
-    }
-
-    try {
-      // Get current styles from the editor
-      const currentFont = editorInstance.getAttributes('textStyle')?.fontFamily || defaultTextStyle.fontFamily;
-      const currentSize = editorInstance.getAttributes('textStyle')?.fontSize || defaultTextStyle.fontSize;
-      const currentWeight = editorInstance.getAttributes('textStyle')?.fontWeight || defaultTextStyle.fontWeight;
-      const currentColor = editorInstance.getAttributes('textStyle')?.color || defaultTextStyle.color;
-      const currentLineHeight = editorInstance.getAttributes('textStyle')?.lineHeight || defaultTextStyle.lineHeight;
-      const currentLetterSpacing = editorInstance.getAttributes('textStyle')?.letterSpacing || defaultTextStyle.letterSpacing;
-      const currentTextAlign = editorInstance.getAttributes('textStyle')?.textAlign || defaultTextStyle.textAlign;
-      
-      // Create an updated default style
-      const newDefaultStyle: TextStyle = {
-        ...defaultTextStyle,
-        fontFamily: currentFont,
-        fontSize: currentSize,
-        fontWeight: currentWeight,
-        color: currentColor,
-        lineHeight: currentLineHeight,
-        letterSpacing: currentLetterSpacing,
-        textAlign: currentTextAlign,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Save it as the default style
-      await textStyleStore.saveTextStyle({
-        ...newDefaultStyle,
-        isDefault: true
-      });
-      
-      // Update the local state
-      setCustomDefaultStyle(newDefaultStyle);
-      
-      toast({
-        title: "Default style updated",
-        description: "Current font settings saved as the default style"
-      });
-    } catch (error) {
-      console.error('Error saving default style:', error);
-      toast({
-        title: "Error saving default style",
-        description: "Could not save the current font settings as default",
-        variant: "destructive"
-      });
-    }
-  };
-
   const applyDefaultTextStyle = async () => {
     if (!editorInstance) {
       return;
@@ -136,7 +85,6 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
 
   return {
     defaultTextStyle,
-    applyDefaultTextStyle,
-    saveAsDefaultStyle
+    applyDefaultTextStyle
   };
 };

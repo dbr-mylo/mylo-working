@@ -7,8 +7,6 @@ import { StyleContextMenu } from "./StyleContextMenu";
 import { useToast } from "@/hooks/use-toast";
 import { Editor } from "@tiptap/react";
 import { TextStyle } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 
 interface StylesListProps {
   onEditStyle: (style: TextStyle) => void;
@@ -25,7 +23,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     handleCloseContextMenu,
     handleDelete,
     handleDuplicate,
-    saveAsDefaultStyle // This comes from useStylesList now
   } = useStylesList(onEditStyle, editorInstance);
 
   const { toast } = useToast();
@@ -43,19 +40,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
   const defaultStyle = styles.find(s => s.id === 'default-text-reset') || styles[0];
   const otherStyles = styles.filter(s => s.id !== 'default-text-reset' && s.id !== defaultStyle.id);
 
-  const handleSaveCurrentAsDefault = () => {
-    if (!editorInstance) {
-      toast({
-        title: "No active editor",
-        description: "Cannot save default style without an active editor",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    saveAsDefaultStyle();
-  };
-
   return (
     <div className="space-y-4" ref={containerRef}>
       {/* Default Style Section */}
@@ -64,19 +48,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         onStyleClick={handleStyleClick}
         onContextMenu={handleContextMenu}
       />
-      
-      {/* Button to save current formatting as default */}
-      {editorInstance && (
-        <Button 
-          variant="outline" 
-          size="xs" 
-          className="w-full justify-start mt-1 mb-2" 
-          onClick={handleSaveCurrentAsDefault}
-        >
-          <Save className="h-3 w-3 mr-2" />
-          <span className="text-xs">Save Current as Default</span>
-        </Button>
-      )}
       
       {/* Other Styles Section */}
       {otherStyles.length > 0 && (

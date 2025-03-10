@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -58,6 +59,11 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         
         // Deduplicate styles by name
         filteredStyles = deduplicateStyles(filteredStyles);
+        
+        // Log the styles we found for debugging
+        console.log('Available text styles:', filteredStyles.map(s => 
+          `${s.name} (isDefault: ${s.isDefault}, isUsed: ${s.isUsed})`
+        ).join(', '));
         
         setTextStyles(filteredStyles);
       } catch (error) {
@@ -171,7 +177,15 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         >
           <div className="flex items-center gap-1.5">
             <Pilcrow className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs">{style.name}</span>
+            <span 
+              className="text-xs"
+              style={{
+                fontFamily: style.fontFamily || 'inherit',
+                fontWeight: style.fontWeight || 'inherit'
+              }}
+            >
+              {style.name}
+            </span>
 
             <div className="flex ml-auto items-center space-x-1">
               {style.isUsed && (

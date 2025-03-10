@@ -7,17 +7,19 @@ interface StyleListItemCardProps {
   style: TextStyle;
   onStyleClick: (style: TextStyle) => void;
   onContextMenu: (e: React.MouseEvent, style: TextStyle) => void;
+  isDefaultStyleSection?: boolean;
 }
 
 export const StyleListItemCard = ({ 
   style, 
   onStyleClick, 
-  onContextMenu
+  onContextMenu,
+  isDefaultStyleSection
 }: StyleListItemCardProps) => {
   return (
     <Card
       key={style.id}
-      className="p-1.5 hover:bg-accent cursor-pointer"
+      className={`p-1.5 hover:bg-accent cursor-pointer ${isDefaultStyleSection ? 'bg-slate-50' : ''}`}
       onClick={() => onStyleClick(style)}
       onContextMenu={(e) => onContextMenu(e, style)}
     >
@@ -32,6 +34,14 @@ export const StyleListItemCard = ({
             <span
               className="text-[10px] text-green-500 flex items-center"
               title="This style is used in documents"
+            >
+              <Check className="h-3 w-3" />
+            </span>
+          )}
+          {style.isDefault && !isDefaultStyleSection && (
+            <span
+              className="text-[10px] text-blue-500 flex items-center"
+              title="Default style"
             >
               <Check className="h-3 w-3" />
             </span>

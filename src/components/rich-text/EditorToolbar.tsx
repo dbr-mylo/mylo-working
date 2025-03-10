@@ -10,8 +10,7 @@ import { StyleDropdown } from './StyleDropdown';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowUp, ArrowDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -80,7 +79,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         {isDesigner && (
           <div className="flex items-center gap-1">
             <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
-            <div className="flex items-center">
+            <div className="relative w-12">
               <Input
                 id="font-size"
                 type="text"
@@ -88,25 +87,23 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 pattern="[0-9]*"
                 value={getCurrentFontSize()}
                 onChange={handleFontSizeChange}
-                className="w-12 h-7 text-xs"
+                className="w-12 h-7 text-xs pr-5"
               />
-              <div className="flex flex-col ml-1">
-                <Button 
-                  variant="ghost" 
-                  size="xxs" 
-                  className="h-3.5 px-1" 
+              <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center">
+                <button
+                  type="button"
+                  className="flex items-center justify-center h-3.5 w-5 text-gray-500 hover:text-gray-700"
                   onClick={increaseFontSize}
                 >
-                  <ArrowUp className="h-3 w-3" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="xxs" 
-                  className="h-3.5 px-1" 
+                  <ChevronUp className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-center h-3.5 w-5 text-gray-500 hover:text-gray-700"
                   onClick={decreaseFontSize}
                 >
-                  <ArrowDown className="h-3 w-3" />
-                </Button>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
               </div>
             </div>
           </div>

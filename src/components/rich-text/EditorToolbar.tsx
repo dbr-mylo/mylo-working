@@ -70,10 +70,21 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       const { from, to } = editor.state.selection;
       const isSelected = from !== to;
       setIsTextSelected(isSelected);
+      
+      // When text is selected, immediately check its font size
+      if (isSelected) {
+        updateFontSize();
+      }
+    };
+    
+    // Add a log of the HTML content whenever selection changes
+    const logHtmlContent = () => {
+      console.log("Current HTML at selection:", editor.getHTML().substring(0, 100));
     };
     
     editor.on('selectionUpdate', updateFontSize);
     editor.on('selectionUpdate', updateTextSelection);
+    editor.on('selectionUpdate', logHtmlContent);
     editor.on('transaction', updateFontSize);
     
     // Initial update
@@ -83,6 +94,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     return () => {
       editor.off('selectionUpdate', updateFontSize);
       editor.off('selectionUpdate', updateTextSelection);
+      editor.off('selectionUpdate', logHtmlContent);
       editor.off('transaction', updateFontSize);
     };
   }, [editor]);
@@ -97,8 +109,15 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     console.log("EditorToolbar: Setting font size to:", fontSize);
     // Set state first for immediate UI update
     setCurrentFontSize(fontSize);
-    // Then update the editor
+    // Then update the editor with the important flag to override any parent styles
     editor.chain().focus().setFontSize(fontSize).run();
+    
+    // Force a second update after a brief delay to ensure it takes effect
+    setTimeout(() => {
+      if (editor && editor.isActive) {
+        editor.chain().focus().setFontSize(fontSize).run();
+      }
+    }, 50);
   };
 
   if (!editor) {

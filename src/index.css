@@ -107,5 +107,22 @@
   /* Apply editor font specifically to editor content */
   .ProseMirror {
     font-family: theme('fontFamily.editor');
+    /* Remove any default font size that might be causing inheritance issues */
+    font-size: initial;
+  }
+
+  /* Ensure proper font-size inheritance in the editor */
+  .prose * {
+    font-size: inherit;
+  }
+  
+  /* Make sure inline styles take precedence */
+  [style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Specifically target the preserve-styling spans */
+  .preserve-styling[style*="font-size"] {
+    font-size: unset !important;
   }
 }

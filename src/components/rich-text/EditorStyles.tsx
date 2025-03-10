@@ -50,6 +50,29 @@ export const EditorStyles = () => {
         padding-left: 6em;
       }
       
+      /* Fix for font-size inheritance - ensure fontSize style is not overridden */
+      .ProseMirror [style*="font-size"] {
+        font-size: inherit !important; /* Initially inherit from parent */
+      }
+      
+      /* Ensure spans with font-size style actually use their own font-size */
+      .ProseMirror span[style*="font-size"],
+      .ProseMirror p[style*="font-size"],
+      .ProseMirror div[style*="font-size"],
+      .ProseMirror .preserve-styling[style*="font-size"] {
+        font-size: unset !important; /* Revert the inherit to use the inline style */
+      }
+      
+      /* Specifically ensure the preserve-styling spans use their own font-size */
+      .ProseMirror .preserve-styling {
+        font-size: unset !important; /* Use the inline style */
+      }
+      
+      /* This is a critical fix for the editor's font rendering */
+      .ProseMirror * {
+        font-size: inherit; /* Default inheritance for elements without specific sizes */
+      }
+      
       /* Comprehensive color preservation rules - enhanced for bold text */
       /* Base rule to ensure all elements inherit their parent's color */
       .ProseMirror * {

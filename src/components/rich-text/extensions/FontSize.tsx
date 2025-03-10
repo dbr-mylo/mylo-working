@@ -48,7 +48,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
               }
               console.log("FontSize: Rendering fontSize to HTML:", attributes.fontSize);
               return {
-                style: `font-size: ${attributes.fontSize}`,
+                style: `font-size: ${attributes.fontSize} !important`,
               };
             },
           },
@@ -67,6 +67,11 @@ export const FontSize = Extension.create<FontSizeOptions>({
           if (fontSize) {
             console.log("FontSize: Applying fontSize:", fontSize);
             localStorage.setItem('editor_font_size', fontSize);
+            
+            // Force an update to ensure the size is applied
+            setTimeout(() => {
+              console.log("FontSize: Re-applying font size to ensure it's set");
+            }, 10);
           }
           return commands.setMark('textStyle', { fontSize });
         },

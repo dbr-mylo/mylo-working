@@ -20,17 +20,18 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
 
   // Update internal state when external value changes
   useEffect(() => {
-    setSize(getNumericValue(value));
+    const newSize = getNumericValue(value);
+    setSize(newSize);
   }, [value]);
 
   const incrementSize = () => {
-    const newSize = Math.min(size + 1, 99); // Maximum size is 99
+    const newSize = size + 1; // Remove Math.min to allow larger sizes
     setSize(newSize);
     onChange(`${newSize}px`);
   };
 
   const decrementSize = () => {
-    const newSize = Math.max(size - 1, 1); // Minimum size is 1
+    const newSize = Math.max(size - 1, 1); // Keep minimum size at 1
     setSize(newSize);
     onChange(`${newSize}px`);
   };
@@ -41,11 +42,6 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
     if (inputValue === '') {
       setSize(0);
       return;
-    }
-    
-    // Ensure the value doesn't exceed 99
-    if (parseInt(inputValue, 10) > 99) {
-      inputValue = '99';
     }
     
     const newSize = parseInt(inputValue, 10);

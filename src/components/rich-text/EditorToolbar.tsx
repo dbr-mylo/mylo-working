@@ -39,8 +39,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const size = e.target.value;
-    if (editor) {
+    // Get value and enforce 2-digit limit
+    let size = e.target.value;
+    
+    // Only allow numbers and limit to 2 digits
+    size = size.replace(/\D/g, '').substring(0, 2);
+    
+    // Update the input value directly to ensure the UI shows the correct value
+    e.target.value = size;
+    
+    if (editor && size) {
       editor.chain().focus().setFontSize(`${size}px`).run();
     }
   };
@@ -65,9 +73,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
             <Input
               id="font-size"
-              type="number"
-              min={8}
-              max={99}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               maxLength={2}
               value={getCurrentFontSize()}
               onChange={handleFontSizeChange}

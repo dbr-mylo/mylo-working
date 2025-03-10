@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, List, ListOrdered, Eraser } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
-import { useToast } from '@/hooks/use-toast';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -17,47 +16,6 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   currentColor,
   buttonSize 
 }) => {
-  const { toast } = useToast();
-
-  const clearFormatting = () => {
-    if (!editor) return;
-    
-    // First unset all marks
-    editor.chain()
-      .focus()
-      .unsetAllMarks()
-      .run();
-    
-    // Then reset to default paragraph
-    editor.chain()
-      .focus()
-      .setParagraph()
-      .run();
-    
-    // Explicitly set font to Inter
-    editor.chain()
-      .focus()
-      .setFontFamily('Inter')
-      .setFontSize('16px')
-      .setColor('#000000')
-      .run();
-    
-    // Force selection refresh to update toolbar state
-    const currentSelection = editor.state.selection;
-    editor.commands.setTextSelection({
-      from: currentSelection.from,
-      to: currentSelection.to
-    });
-    
-    // Show success toast
-    toast({
-      title: "Default style applied",
-      description: "Text has been reset to default formatting"
-    });
-    
-    console.log("After clearing formatting, font family:", editor.getAttributes('textStyle').fontFamily);
-  };
-
   return (
     <>
       <Button
@@ -106,15 +64,6 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />
-      </Button>
-
-      <Button
-        variant="outline"
-        size={buttonSize}
-        onClick={clearFormatting}
-        title="Clear formatting and apply default style"
-      >
-        <Eraser className="h-4 w-4" />
       </Button>
     </>
   );

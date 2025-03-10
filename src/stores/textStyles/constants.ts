@@ -43,16 +43,16 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
   {
     id: 'body',
     name: 'Body Text',
-    fontFamily: 'Roboto',
+    fontFamily: 'Inter',
     fontSize: '16px',
     fontWeight: '400',
-    color: '#000000',
+    color: '#333333',
     lineHeight: '1.5',
     letterSpacing: '0',
     selector: 'p',
     description: 'Default paragraph style',
     isSystem: true,
-    isDefault: false,  // Changed from true to false
+    isDefault: true,
     isUsed: true,  // Default body text is considered used
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -71,23 +71,6 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     isSystem: true,
     isDefault: false,
     isUsed: false,  // Caption may not be used by default
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'default',
-    name: 'Default',
-    fontFamily: 'Inter',
-    fontSize: '16px',
-    fontWeight: '400',
-    color: '#000000',
-    lineHeight: '1.5',
-    letterSpacing: '0',
-    selector: 'span, div',
-    description: 'Default text style',
-    isSystem: true,
-    isDefault: true,
-    isUsed: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }

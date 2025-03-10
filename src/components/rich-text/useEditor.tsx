@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -21,7 +20,6 @@ export interface UseEditorProps {
 export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorProps) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
-  const [currentFontSize, setCurrentFontSize] = useState('16px');
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
@@ -31,14 +29,6 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
       class: 'color-preserving-bold',
     }
   });
-  
-  // Add default styles to content if empty
-  const getInitialContent = () => {
-    if (!content || content.trim() === '') {
-      return `<p style="font-family: Inter; font-size: 16px; color: #000000;">Start typing here...</p>`;
-    }
-    return content;
-  };
   
   const editor = useTipTapEditor({
     extensions: [
@@ -54,26 +44,20 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
           class: 'preserve-styling',
         },
       }),
-      FontFamily.configure({
-        defaultFontFamily: 'Inter',
-      }),
-      FontSize.configure({
-        // Use the correct option name as defined in the interface
-        types: ['textStyle'],
-        defaultFontSize: '16px',
-      }),
+      FontFamily,
+      FontSize, // Add the FontSize extension
       ListItem,
       CustomBulletList,
       CustomOrderedList,
       Color,
       IndentExtension,
     ],
-    content: getInitialContent(),
+    content: content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
-      // Update current font state for the toolbar display
-      updateStyleState(editor);
+      // Let's log the HTML on update to check color preservation
+      console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
     },
   });
 
@@ -84,13 +68,6 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
-  const handleFontSizeChange = (size: string) => {
-    setCurrentFontSize(size);
-    if (editor) {
-      editor.chain().focus().setFontSize(size).run();
-    }
-  };
-
   const handleColorChange = (color: string) => {
     setCurrentColor(color);
     if (editor) {
@@ -98,6 +75,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
       
       // If there's bold text selected, ensure it keeps the new color
       if (editor.isActive('bold')) {
+        console.log("Bold is active, reapplying color:", color);
         // Toggle bold off and on to refresh the styling
         editor.chain().focus().toggleBold().toggleBold().run();
         // Re-apply color to make sure it sticks
@@ -106,59 +84,44 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
-  // Helper function to update the style state based on current selection
-  const updateStyleState = (editorInstance: Editor) => {
-    if (!editorInstance) return;
-    
-    // Get attributes from the current selection
-    const attrs = editorInstance.getAttributes('textStyle');
-    
-    // Update font state if available in selection
-    if (attrs.fontFamily) {
-      setCurrentFont(attrs.fontFamily);
-    } else {
-      // Default to Inter if no font family is set
-      setCurrentFont('Inter');
-    }
-    
-    // Update font size state if available in selection
-    if (attrs.fontSize) {
-      setCurrentFontSize(attrs.fontSize);
-    } else {
-      // Default to 16px if no font size is set
-      setCurrentFontSize('16px');
-    }
-    
-    // Update color state if available in selection
-    if (attrs.color) {
-      setCurrentColor(attrs.color);
-    } else {
-      // Default to black if no color is set
-      setCurrentColor('#000000');
-    }
-  };
-
-  // Monitor selection changes to update state
+  // Monitor selection changes to update color state
   useEffect(() => {
     if (editor) {
-      // Function to update UI state based on current selection
-      const handleSelectionUpdate = () => {
-        updateStyleState(editor);
+      const updateColorState = () => {
+        const { color } = editor.getAttributes('textStyle');
+        if (color) {
+          setCurrentColor(color);
+          console.log("Color state updated to:", color);
+        }
       };
       
-      // Register event listeners
-      editor.on('selectionUpdate', handleSelectionUpdate);
-      editor.on('focus', handleSelectionUpdate);
-      editor.on('transaction', handleSelectionUpdate);
+      // Add more detailed logging for debugging
+      const logStyleChanges = () => {
+        const textStyleAttrs = editor.getAttributes('textStyle');
+        const isBoldActive = editor.isActive('bold');
+        const boldAttrs = isBoldActive ? editor.getAttributes('bold') : 'not active';
+        const html = editor.getHTML();
+        
+        console.log("Style change detected:", {
+          textStyle: textStyleAttrs,
+          isBold: isBoldActive,
+          boldAttrs,
+          selectionHtml: html.substring(0, 100) + (html.length > 100 ? '...' : '')
+        });
+      };
       
-      // Initial update when editor is mounted
-      handleSelectionUpdate();
+      editor.on('selectionUpdate', updateColorState);
+      editor.on('transaction', updateColorState);
       
-      // Cleanup listeners on unmount
+      // Add debug logging
+      editor.on('selectionUpdate', logStyleChanges);
+      editor.on('transaction', logStyleChanges);
+      
       return () => {
-        editor.off('selectionUpdate', handleSelectionUpdate);
-        editor.off('focus', handleSelectionUpdate);
-        editor.off('transaction', handleSelectionUpdate);
+        editor.off('selectionUpdate', updateColorState);
+        editor.off('transaction', updateColorState);
+        editor.off('selectionUpdate', logStyleChanges);
+        editor.off('transaction', logStyleChanges);
       };
     }
   }, [editor]);
@@ -167,9 +130,7 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     editor,
     currentFont,
     currentColor,
-    currentFontSize,
     handleFontChange,
-    handleColorChange,
-    handleFontSizeChange
+    handleColorChange
   };
 };

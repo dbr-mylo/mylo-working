@@ -15,7 +15,7 @@ interface RichTextEditorProps {
   fixedToolbar?: boolean;
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
-  externalEditorInstance?: Editor | null; // Prop for external editor instance
+  externalEditorInstance?: Editor | null; // New prop for external editor instance
 }
 
 export const RichTextEditor = ({ 
@@ -76,10 +76,8 @@ export const RichTextEditor = ({
         editor={editorSetup.editor}
         currentFont={editorSetup.currentFont}
         currentColor={editorSetup.currentColor}
-        currentFontSize={editorSetup.currentFontSize}
         onFontChange={editorSetup.handleFontChange}
         onColorChange={editorSetup.handleColorChange}
-        onFontSizeChange={editorSetup.handleFontSizeChange}
       />
     );
   };

@@ -1,3 +1,4 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -64,19 +65,20 @@ export interface TextStyle {
   letterSpacing: string;
   selector: string;
   description?: string;
-  parentId?: string;
-  isDefault?: boolean;
-  isSystem?: boolean;
-  isUsed?: boolean;
-  isPersistent?: boolean;
-  textAlign?: string;
-  textTransform?: string;
-  textDecoration?: string;
-  marginTop?: string;
-  marginBottom?: string;
-  customProperties?: Record<string, string>;
-  created_at?: string;
-  updated_at: string;
+  
+  // New fields for style management
+  parentId?: string;           // For style inheritance
+  isDefault?: boolean;         // To mark a default style
+  isSystem?: boolean;          // To identify system styles that cannot be deleted
+  isUsed?: boolean;            // To track if the style is used in any documents
+  created_at?: string;         // Creation timestamp
+  updated_at?: string;         // Last update timestamp
+  textAlign?: string;          // Text alignment property
+  textTransform?: string;      // For uppercase, lowercase, etc.
+  textDecoration?: string;     // For underline, strikethrough, etc.
+  marginTop?: string;          // Spacing above
+  marginBottom?: string;       // Spacing below
+  customProperties?: Record<string, string>; // For any additional CSS properties
 }
 
 export interface StyleFormData {
@@ -103,6 +105,7 @@ export interface StyleContextMenuProps {
   onEdit: (style: TextStyle) => void;
   onDelete: (id: string) => void;
   onDuplicate: (style: TextStyle) => void;
+  onSetDefault: (id: string) => void;
   position: { x: number, y: number } | null;
   onClose: () => void;
 }

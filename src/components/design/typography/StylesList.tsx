@@ -21,8 +21,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     handleContextMenu,
     handleCloseContextMenu,
     handleDelete,
-    handleDuplicate,
-    handleSetDefault
+    handleDuplicate
   } = useStylesList(onEditStyle, editorInstance);
 
   if (isLoading) {
@@ -58,7 +57,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
           onEdit={onEditStyle}
           onDelete={handleDelete}
           onDuplicate={handleDuplicate}
-          onSetDefault={handleSetDefault}
           position={contextMenu.position}
           onClose={handleCloseContextMenu}
         />

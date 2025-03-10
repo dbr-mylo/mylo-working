@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Editor } from "@tiptap/react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -22,6 +21,8 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
     setIsOpen(false);
   };
 
+  const defaultStyle = styles.find(s => s.isDefault);
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -42,26 +43,49 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
           <ScrollArea className="h-56 pr-3">
             <div className="space-y-1">
               {styles.length > 0 ? (
-                styles.map((style) => (
-                  <Button
-                    key={style.id}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start font-normal"
-                    onClick={() => handleStyleSelect(style.id)}
-                  >
-                    <div 
-                      className="w-full overflow-hidden text-ellipsis"
-                      style={{ 
-                        fontFamily: style.fontFamily,
-                        fontWeight: style.fontWeight,
-                        color: style.color
-                      }}
+                <>
+                  {defaultStyle && (
+                    <Button
+                      key={defaultStyle.id}
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start font-normal mb-2"
+                      onClick={() => handleStyleSelect(defaultStyle.id)}
                     >
-                      {style.name}
-                    </div>
-                  </Button>
-                ))
+                      <div 
+                        className="w-full overflow-hidden text-ellipsis"
+                        style={{ 
+                          fontFamily: defaultStyle.fontFamily,
+                          fontWeight: defaultStyle.fontWeight,
+                          color: defaultStyle.color
+                        }}
+                      >
+                        {defaultStyle.name} (Default)
+                      </div>
+                    </Button>
+                  )}
+
+                  {styles.filter(style => !style.isDefault).map((style) => (
+                    <Button
+                      key={style.id}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start font-normal"
+                      onClick={() => handleStyleSelect(style.id)}
+                    >
+                      <div 
+                        className="w-full overflow-hidden text-ellipsis"
+                        style={{ 
+                          fontFamily: style.fontFamily,
+                          fontWeight: style.fontWeight,
+                          color: style.color
+                        }}
+                      >
+                        {style.name}
+                      </div>
+                    </Button>
+                  ))}
+                </>
               ) : (
                 <p className="text-xs text-muted-foreground py-2">
                   No styles available. Create a style in the Designer role first.

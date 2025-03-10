@@ -14,7 +14,22 @@ export const useTextStyles = () => {
       try {
         setIsLoading(true);
         const fetchedStyles = await textStyleStore.getTextStyles();
-        setStyles(fetchedStyles);
+        
+        // Sort styles to ensure the default style appears first
+        const sortedStyles = [...fetchedStyles].sort((a, b) => {
+          // Default style first
+          if (a.isDefault) return -1;
+          if (b.isDefault) return 1;
+          
+          // Then system styles
+          if (a.isSystem && !b.isSystem) return -1;
+          if (!a.isSystem && b.isSystem) return 1;
+          
+          // Then alphabetically
+          return a.name.localeCompare(b.name);
+        });
+        
+        setStyles(sortedStyles);
       } catch (error) {
         console.error("Error loading text styles:", error);
         toast({

@@ -4,6 +4,7 @@ import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
+import { textStyleStore } from '@/stores/textStyles';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -16,14 +17,42 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   currentColor,
   buttonSize 
 }) => {
-  const clearFormatting = () => {
-    editor.chain()
-      .focus()
-      .unsetAllMarks()
-      .setFontFamily(null)  // Use setFontFamily(null) instead of unsetFontFamily
-      .setFontSize(null)    // Use setFontSize(null) instead of unsetFontSize
-      .setColor(null)      // Use setColor(null) instead of unsetColor
-      .run();
+  const clearFormatting = async () => {
+    // First get the default style
+    try {
+      const defaultStyle = await textStyleStore.getDefaultStyle();
+      
+      // Clear all existing formatting
+      editor.chain()
+        .focus()
+        .unsetAllMarks()
+        .setFontFamily(null)
+        .setFontSize(null)
+        .setColor(null)
+        .run();
+        
+      // If we have a default style, apply it
+      if (defaultStyle) {
+        // Apply default style properties
+        editor.chain()
+          .focus()
+          .setFontFamily(defaultStyle.fontFamily || 'Inter')
+          .setFontSize(defaultStyle.fontSize || '16px')
+          .setColor(defaultStyle.color || '#000000')
+          .run();
+      }
+    } catch (error) {
+      console.error('Error applying default style after clearing formatting:', error);
+      
+      // Fallback to basic clearing if getting default style fails
+      editor.chain()
+        .focus()
+        .unsetAllMarks()
+        .setFontFamily(null)
+        .setFontSize(null)
+        .setColor(null)
+        .run();
+    }
   };
 
   return (
@@ -80,7 +109,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         variant="outline"
         size={buttonSize}
         onClick={clearFormatting}
-        title="Clear formatting"
+        title="Clear formatting and apply default style"
       >
         <Eraser className="h-4 w-4" />
       </Button>

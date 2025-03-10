@@ -44,11 +44,20 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
         .setParagraph()
         .run();
       
-      // Always use 'Inter' as the primary fallback font
+      // Explicitly set the font family to Inter, font size to 16px, and color to black
+      // Make sure each step is separate to ensure all properties are set correctly
       editorInstance.chain()
         .focus()
         .setFontFamily('Inter')
+        .run();
+        
+      editorInstance.chain()
+        .focus()
         .setFontSize('16px')
+        .run();
+        
+      editorInstance.chain()
+        .focus()
         .setColor('#000000')
         .run();
         
@@ -63,12 +72,14 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
       
       // In case of error, still try to set the font to Inter
       if (editorInstance) {
-        editorInstance.chain()
-          .focus()
-          .setFontFamily('Inter')
-          .setFontSize('16px')
-          .setColor('#000000')
-          .run();
+        try {
+          // Make separate calls to ensure each property is set
+          editorInstance.chain().focus().setFontFamily('Inter').run();
+          editorInstance.chain().focus().setFontSize('16px').run();
+          editorInstance.chain().focus().setColor('#000000').run();
+        } catch (e) {
+          console.error('Failed to apply fallback style:', e);
+        }
       }
       
       toast({

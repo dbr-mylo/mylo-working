@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -57,6 +58,8 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         defaultFontFamily: 'Inter',
       }),
       FontSize.configure({
+        // Use the correct option name as defined in the interface
+        types: ['textStyle'],
         defaultFontSize: '16px',
       }),
       ListItem,

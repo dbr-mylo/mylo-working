@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
+import { clearFormatting } from '../utils/textFormatting';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -64,6 +65,15 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
         <ListOrdered className="h-4 w-4" />
+      </Button>
+
+      <Button
+        variant="outline"
+        size={buttonSize}
+        onClick={() => clearFormatting(editor)}
+        title="Clear formatting"
+      >
+        <Eraser className="h-4 w-4" />
       </Button>
     </>
   );

@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 import { useState, useCallback } from "react";
 import { textStyleStore } from "@/stores/textStyles";
@@ -94,6 +95,9 @@ export const useStyleApplication = (editor: Editor) => {
     
     try {
       editor.chain().focus().unsetMark('textStyle').run();
+      
+      // Also clear any "Clear to Default" styles from cache
+      textStyleStore.clearDefaultResetStyle();
     } catch (error) {
       console.error("Error removing style:", error);
     }

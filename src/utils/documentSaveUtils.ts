@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import type { Document } from "@/lib/types";
@@ -112,7 +111,7 @@ export function saveDocumentToLocalStorage(
           title: documentTitle,
           content: content,
           updated_at: now,
-          preferences: preferences ? JSON.stringify(preferences) : null
+          preferences: preferences
         };
         
         documents[documentIndex] = savedDocument;
@@ -124,7 +123,7 @@ export function saveDocumentToLocalStorage(
           title: documentTitle,
           content: content,
           updated_at: now,
-          preferences: preferences ? JSON.stringify(preferences) : null
+          preferences: preferences
         };
         
         documents.push(savedDocument);
@@ -139,7 +138,7 @@ export function saveDocumentToLocalStorage(
         title: documentTitle,
         content: content,
         updated_at: now,
-        preferences: preferences ? JSON.stringify(preferences) : null
+        preferences: preferences
       };
       
       documents.push(savedDocument);

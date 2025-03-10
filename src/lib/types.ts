@@ -1,4 +1,3 @@
-
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -123,6 +122,6 @@ export interface TypographyStyles {
   textAlign: string;
 }
 
-// Import the TemplatePreferences from the dedicated file to ensure consistency
-import { TemplatePreferences } from "./types/preferences";
-export { TemplatePreferences };
+// Import and re-export the TemplatePreferences type using 'export type'
+import type { TemplatePreferences } from "./types/preferences";
+export type { TemplatePreferences };

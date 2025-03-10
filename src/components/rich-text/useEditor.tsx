@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -10,6 +11,7 @@ import { FontFamily } from './extensions/FontFamily';
 import { FontSize } from './extensions/FontSize';
 import Bold from '@tiptap/extension-bold';
 import { useAuth } from '@/contexts/AuthContext';
+import { textStyleStore } from '@/stores/textStyles';
 
 export interface UseEditorProps {
   content: string;
@@ -22,6 +24,13 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
   const [currentColor, setCurrentColor] = useState('#000000');
   const { role } = useAuth();
   const isDesigner = role === "designer";
+  
+  // Clear font caches on mount
+  useEffect(() => {
+    console.log("useEditorSetup: Clearing font caches");
+    textStyleStore.clearCachedStylesByPattern(['font-size', 'fontSize', 'fontFamily']);
+    localStorage.removeItem('editor_font_size');
+  }, []);
   
   // Enhanced Bold extension with better color preservation
   const ColorPreservingBold = Bold.configure({

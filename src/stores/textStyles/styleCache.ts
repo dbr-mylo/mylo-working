@@ -78,6 +78,30 @@ export const resetTextStylesToDefaults = (): void => {
     // Remove any default style ID
     localStorage.removeItem('default_text_style_id');
     
+    // Remove any style-related session storage items
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.includes('style')) {
+        sessionStorage.removeItem(key);
+      }
+    }
+    
+    // Clear browser indexedDB if available
+    if (window.indexedDB) {
+      try {
+        // Attempt to delete any style-related databases
+        const request = window.indexedDB.deleteDatabase('text_styles_db');
+        request.onsuccess = () => console.log('IndexedDB storage deleted successfully');
+        request.onerror = () => console.error('Error deleting IndexedDB storage');
+      } catch (dbError) {
+        console.error('IndexedDB operation failed:', dbError);
+      }
+    }
+    
+    // Clear any font caches
+    localStorage.removeItem('editor_font_size');
+    localStorage.removeItem('last_used_font');
+    
     // Clear any other related caches
     clearEditorCache();
     
@@ -86,3 +110,62 @@ export const resetTextStylesToDefaults = (): void => {
     console.error('Error resetting text styles:', error);
   }
 };
+
+/**
+ * Performs a deep clean of all storage
+ * This is a more aggressive approach to clearing all caches
+ */
+export const deepCleanStorage = (): void => {
+  try {
+    // Log all current localStorage items for debugging
+    console.log('Current localStorage items before cleaning:');
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        console.log(`${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`);
+      }
+    }
+    
+    // Reset text styles to defaults
+    resetTextStylesToDefaults();
+    
+    // Clear all editor state
+    localStorage.removeItem('editor_state');
+    
+    // Clear all style-related items with various naming patterns
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('text') || 
+        key.includes('style') || 
+        key.includes('font') || 
+        key.includes('editor') ||
+        key.includes('cache') ||
+        key.includes('temp')
+      )) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => {
+      console.log(`Removing localStorage item: ${key}`);
+      localStorage.removeItem(key);
+    });
+    
+    // Force reload DEFAULT_TEXT_STYLES from constants
+    console.log('Deep clean of storage completed');
+    
+    // Log remaining localStorage items for verification
+    console.log('Remaining localStorage items after cleaning:');
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        console.log(`${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`);
+      }
+    }
+  } catch (error) {
+    console.error('Error performing deep clean of storage:', error);
+  }
+};
+

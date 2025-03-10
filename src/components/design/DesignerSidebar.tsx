@@ -2,13 +2,16 @@
 import { DesignerSidebarContainer } from "./DesignerSidebarContainer";
 import { useState } from "react";
 import { TextStyle } from "@/lib/types";
-import { PlusIcon, RefreshCw } from "lucide-react";
+import { PlusIcon, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StylesList } from "./typography/StylesList";
 import { StyleEditorModal } from "./typography/StyleEditorModal";
 import { Editor } from "@tiptap/react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, 
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter, 
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface DesignerSidebarProps {
   children?: React.ReactNode;
@@ -54,6 +57,26 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
       });
     }
   };
+  
+  const handleDeepClean = () => {
+    try {
+      textStyleStore.deepCleanStorage();
+      toast({
+        title: "Storage cleaned",
+        description: "All caches and stored styles have been cleared"
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error("Error cleaning storage:", error);
+      toast({
+        title: "Error",
+        description: "Failed to clean storage",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="w-64 bg-editor-sidebar border-l border-editor-border p-4">
@@ -63,7 +86,8 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
         title="Styles" 
         menuOptions={[
           { label: "New Style", onClick: handleNewStyle },
-          { label: "Reset Styles", onClick: handleResetStyles }
+          { label: "Reset Styles", onClick: handleResetStyles },
+          { label: "Deep Clean", onClick: handleDeepClean }
         ]}
       >
         <div className="mb-2 flex gap-2">
@@ -76,6 +100,34 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
             <PlusIcon className="h-3 w-3 mr-2" />
             <span className="text-xs">New Style</span>
           </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="xs"
+                className="px-2"
+                title="Clean all caches and reset styles"
+              >
+                <Trash2 className="h-3 w-3 text-destructive" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clean all style caches?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all stored styles and reset to defaults. This action is useful
+                  when you encounter persistent style issues or duplicates.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeepClean}>
+                  Clean All Caches
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           
           <Button
             variant="outline"

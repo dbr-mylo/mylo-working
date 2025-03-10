@@ -15,7 +15,8 @@ import {
   clearCachedStylesByPattern, 
   clearDefaultResetStyle, 
   clearEditorCache,
-  resetTextStylesToDefaults
+  resetTextStylesToDefaults,
+  deepCleanStorage
 } from './styleCache';
 
 // Re-export the SaveTextStyleInput interface
@@ -37,5 +38,6 @@ export const textStyleStore = {
   clearCachedStylesByPattern,
   clearDefaultResetStyle,
   clearEditorCache,
-  resetTextStylesToDefaults
+  resetTextStylesToDefaults,
+  deepCleanStorage
 };

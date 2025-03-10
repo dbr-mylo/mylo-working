@@ -9,7 +9,7 @@ import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
 import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
-import { clearDefaultResetStyle, clearEditorCache } from "@/stores/textStyles/styleCache";
+import { textStyleStore } from "@/stores/textStyles";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -47,10 +47,35 @@ const Index = () => {
   
   // Clear editor cache on component mount to reset problematic styles
   useEffect(() => {
-    clearDefaultResetStyle();
-    clearEditorCache();
-    console.log("Index component rendered with documentId:", documentId);
-    console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
+    // Clear styles caches on component mount - more thorough approach
+    try {
+      console.log("Performing initial cache cleanup");
+      // Standard cleanup
+      textStyleStore.clearDefaultResetStyle();
+      textStyleStore.clearEditorCache();
+      
+      // Get localStorage size estimate
+      let totalSize = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          const value = localStorage.getItem(key) || '';
+          totalSize += (key.length + value.length) * 2; // Unicode chars are 2 bytes
+        }
+      }
+      console.log(`Current localStorage size estimate: ${totalSize / 1024} KB`);
+      
+      // Deep clean if localStorage is getting large or we have many items
+      if (totalSize > 100000 || localStorage.length > 10) {
+        console.log("Performing deep clean due to large localStorage size");
+        textStyleStore.deepCleanStorage();
+      }
+      
+      console.log("Index component rendered with documentId:", documentId);
+      console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
+    } catch (error) {
+      console.error("Error clearing cache on mount:", error);
+    }
   }, []);
   
   if (isLoading && !isStyleTestRoute) {

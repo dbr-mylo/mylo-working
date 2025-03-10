@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 
 interface UseDesignPanelProps {
@@ -12,6 +14,10 @@ interface UseDesignPanelProps {
 
 export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignPanelProps) => {
   const { toast } = useToast();
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const currentUnit = preferences?.typography?.fontUnit || 'px';
+  
   const [designContent, setDesignContent] = useState(content);
   const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
@@ -22,6 +28,17 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
     }
     return true;
   });
+  
+  // Update CSS when preferences change
+  useEffect(() => {
+    const generateStyles = async () => {
+      const styles = await textStyleStore.getTextStyles();
+      const css = textStyleStore.generateCSSFromTextStyles(styles, currentUnit);
+      setCustomStyles(css);
+    };
+    
+    generateStyles();
+  }, [currentUnit]);
   
   useEffect(() => {
     if (isStandalone) {
@@ -61,7 +78,7 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
       await textStyleStore.saveTextStyle(styleData);
       
       const styles = await textStyleStore.getTextStyles();
-      const css = textStyleStore.generateCSSFromTextStyles(styles);
+      const css = textStyleStore.generateCSSFromTextStyles(styles, currentUnit);
       setCustomStyles(css);
       
       toast({
@@ -87,6 +104,7 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
     customStyles,
     selectedElement,
     isPreviewVisible,
+    currentUnit,
     handleContentChange,
     handleStylesChange,
     handleElementSelect,

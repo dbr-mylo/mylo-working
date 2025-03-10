@@ -8,6 +8,7 @@ import { EmptyContent } from "./preview/EmptyContent";
 import { SelectedElementBar } from "./preview/SelectedElementBar";
 import { useDocumentPreview } from "./preview/useDocumentPreview";
 import { Editor } from "@tiptap/react";
+import { FontUnit } from "@/lib/types/preferences";
 
 interface DocumentPreviewProps {
   content: string;
@@ -17,7 +18,8 @@ interface DocumentPreviewProps {
   onElementSelect?: (element: HTMLElement | null) => void;
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
-  editorInstance?: Editor | null; // Add editorInstance prop
+  editorInstance?: Editor | null;
+  currentUnit?: FontUnit;
 }
 
 export const DocumentPreview = ({ 
@@ -28,7 +30,8 @@ export const DocumentPreview = ({
   onElementSelect,
   renderToolbarOutside = false,
   externalToolbar = false,
-  editorInstance = null // Default to null
+  editorInstance = null,
+  currentUnit
 }: DocumentPreviewProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -37,8 +40,9 @@ export const DocumentPreview = ({
     previewRef,
     selectedElement,
     handlePreviewClick,
-    handleApplyStyle
-  } = useDocumentPreview(onElementSelect);
+    handleApplyStyle,
+    currentFontUnit: previewFontUnit
+  } = useDocumentPreview(onElementSelect, currentUnit);
   
   const handleContentChange = (newContent: string) => {
     if (onContentChange) {
@@ -53,6 +57,7 @@ export const DocumentPreview = ({
         <SelectedElementBar 
           selectedElement={selectedElement}
           onApplyStyle={handleApplyStyle}
+          currentUnit={currentUnit}
         />
       )}
       
@@ -66,7 +71,8 @@ export const DocumentPreview = ({
             hideToolbar={isDesigner}
             renderToolbarOutside={renderToolbarOutside}
             externalToolbar={externalToolbar}
-            editorInstance={editorInstance} // Pass the editorInstance
+            editorInstance={editorInstance}
+            currentUnit={currentUnit}
           />
         ) : content ? (
           <ViewableContent

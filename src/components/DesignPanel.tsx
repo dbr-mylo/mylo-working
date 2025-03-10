@@ -22,6 +22,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     customStyles,
     selectedElement,
     isPreviewVisible,
+    currentUnit,
     handleContentChange,
     handleElementSelect,
     handleTogglePreview
@@ -64,12 +65,16 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
               onContentChange={handleContentChange}
               onElementSelect={handleElementSelect}
               editor={editorSetup?.editor}
+              currentUnit={currentUnit}
             />
           </div>
           
           {isPreviewVisible && (
             <div className="w-1/2 bg-white overflow-auto">
-              <DesignerPreview content={designContent} />
+              <DesignerPreview 
+                content={designContent}
+                currentUnit={currentUnit}
+              />
             </div>
           )}
           
@@ -94,6 +99,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             isEditable={isEditable}
             onContentChange={handleContentChange}
             onElementSelect={handleElementSelect}
+            currentUnit={currentUnit}
           />
         </div>
       </div>

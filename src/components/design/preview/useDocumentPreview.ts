@@ -2,13 +2,22 @@
 import { useState, useRef, useEffect } from "react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
+import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
 
 export const useDocumentPreview = (
-  onElementSelect?: (element: HTMLElement | null) => void
+  onElementSelect?: (element: HTMLElement | null) => void,
+  providedUnit?: FontUnit
 ) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   const { toast } = useToast();
+  
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const defaultUnit = preferences?.typography?.fontUnit || 'px';
+  const currentFontUnit = providedUnit || defaultUnit;
 
   // Handle element selection in preview
   const handlePreviewClick = (e: React.MouseEvent) => {
@@ -69,9 +78,18 @@ export const useDocumentPreview = (
         return;
       }
       
+      // Convert font size to the current unit if needed
+      let fontSize = styleToApply.fontSize;
+      if (currentFontUnit) {
+        const { unit } = extractFontSizeValue(fontSize);
+        if (unit !== currentFontUnit) {
+          fontSize = convertFontSize(fontSize, unit, currentFontUnit);
+        }
+      }
+      
       // Apply the style to the selected element
       selectedElement.style.fontFamily = styleToApply.fontFamily;
-      selectedElement.style.fontSize = styleToApply.fontSize;
+      selectedElement.style.fontSize = fontSize;
       selectedElement.style.fontWeight = styleToApply.fontWeight;
       selectedElement.style.color = styleToApply.color;
       selectedElement.style.lineHeight = styleToApply.lineHeight;
@@ -134,6 +152,7 @@ export const useDocumentPreview = (
     previewRef,
     selectedElement,
     handlePreviewClick,
-    handleApplyStyle
+    handleApplyStyle,
+    currentFontUnit
   };
 };

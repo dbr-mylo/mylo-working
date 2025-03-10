@@ -1,12 +1,18 @@
 
 import { TextStyle } from "@/lib/types";
+import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
 
-export const generateCSSFromTextStyles = (styles: TextStyle[]): string => {
+export const generateCSSFromTextStyles = (styles: TextStyle[], fontUnit?: FontUnit): string => {
   return styles.map(style => {
+    // Convert font size to the current unit preference if specified
+    const fontSize = fontUnit 
+      ? convertFontSizeToUnit(style.fontSize, fontUnit)
+      : style.fontSize;
+    
     let css = `
 ${style.selector} {
   font-family: ${style.fontFamily};
-  font-size: ${style.fontSize};
+  font-size: ${fontSize};
   font-weight: ${style.fontWeight};
   color: ${style.color};
   line-height: ${style.lineHeight};
@@ -29,4 +35,11 @@ ${style.selector} {
     css += '\n}';
     return css.trim();
   }).join('\n\n');
+};
+
+// Helper function to convert font size to a specific unit
+const convertFontSizeToUnit = (fontSize: string, targetUnit: FontUnit): string => {
+  const { value, unit } = extractFontSizeValue(fontSize);
+  if (unit === targetUnit) return fontSize;
+  return convertFontSize(fontSize, unit, targetUnit);
 };

@@ -2,6 +2,7 @@
 import React from "react";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { Editor } from "@tiptap/react";
+import { FontUnit } from "@/lib/types/preferences";
 
 interface DesignerContentProps {
   content: string;
@@ -10,6 +11,7 @@ interface DesignerContentProps {
   onContentChange: (content: string) => void;
   onElementSelect: (element: HTMLElement | null) => void;
   editor?: Editor | null;
+  currentUnit?: FontUnit;
 }
 
 export const DesignerContent: React.FC<DesignerContentProps> = ({
@@ -18,7 +20,8 @@ export const DesignerContent: React.FC<DesignerContentProps> = ({
   isEditable,
   onContentChange,
   onElementSelect,
-  editor
+  editor,
+  currentUnit
 }) => {
   return (
     <div className="p-4 md:p-8">
@@ -32,6 +35,7 @@ export const DesignerContent: React.FC<DesignerContentProps> = ({
           renderToolbarOutside={true}
           externalToolbar={isEditable}
           editorInstance={editor}
+          currentUnit={currentUnit}
         />
       </div>
     </div>

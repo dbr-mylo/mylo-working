@@ -1,11 +1,16 @@
 
 import React from "react";
+import { FontUnit } from "@/lib/types/preferences";
 
 interface DesignerPreviewProps {
   content: string;
+  currentUnit?: FontUnit;
 }
 
-export const DesignerPreview: React.FC<DesignerPreviewProps> = ({ content }) => {
+export const DesignerPreview: React.FC<DesignerPreviewProps> = ({ 
+  content,
+  currentUnit 
+}) => {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-3">

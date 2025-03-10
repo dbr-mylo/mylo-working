@@ -1,6 +1,8 @@
+
 /**
  * Utility functions for managing text style cache
  */
+import { TEXT_STYLE_STORAGE_KEY, DEFAULT_STYLE_ID_KEY, DEFAULT_TEXT_STYLES } from "./constants";
 
 /**
  * Clears any cached styles from localStorage that match certain patterns

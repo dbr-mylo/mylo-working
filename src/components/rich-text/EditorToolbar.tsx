@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,21 +38,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get value and enforce 2-digit limit
     let size = e.target.value;
-    
-    // Only allow numbers and limit to 2 digits
     size = size.replace(/\D/g, '').substring(0, 2);
-    
-    // Update the input value directly to ensure the UI shows the correct value
-    e.target.value = size;
-    
-    if (editor && size) {
-      editor.chain().focus().setFontSize(`${size}px`).run();
+    const numericSize = parseInt(size, 10);
+    if (!isNaN(numericSize) && editor) {
+      editor.chain().focus().setFontSize(`${numericSize}px`).run();
     }
   };
 
-  // Get current font size from editor (if available)
   const getCurrentFontSize = () => {
     if (!editor) return "16";
     const attrs = editor.getAttributes('textStyle');

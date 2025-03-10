@@ -69,7 +69,7 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
           value={size}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          className="w-6 h-7 px-0 text-center"
+          className="w-10 h-7 px-0 text-center"
           maxLength={2}
           style={{ 
             textAlign: 'center',

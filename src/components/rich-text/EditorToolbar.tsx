@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +8,7 @@ import { FormatButtons } from './toolbar/FormatButtons';
 import { IndentButtons } from './toolbar/IndentButtons';
 import { StyleDropdown } from './StyleDropdown';
 import { Separator } from '@/components/ui/separator';
-import { FontSizeInput } from './FontSizeInput';
+import { FontSizeInput } from './font-size';
 import { textStyleStore } from '@/stores/textStyles';
 
 interface EditorToolbarProps {

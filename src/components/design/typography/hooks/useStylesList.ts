@@ -19,7 +19,7 @@ export const useStylesList = (
     ? useStyleApplication(editorInstance) 
     : null;
 
-  const { defaultTextStyle } = useDefaultStyle(editorInstance);
+  const { defaultTextStyle, saveAsDefaultStyle } = useDefaultStyle(editorInstance);
   
   const {
     contextMenu,
@@ -58,6 +58,7 @@ export const useStylesList = (
     handleContextMenu,
     handleCloseContextMenu,
     handleDelete,
-    handleDuplicate
+    handleDuplicate,
+    saveAsDefaultStyle
   };
 };

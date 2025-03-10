@@ -1,4 +1,3 @@
-
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -105,7 +104,6 @@ export interface StyleContextMenuProps {
   onEdit: (style: TextStyle) => void;
   onDelete: (id: string) => void;
   onDuplicate: (style: TextStyle) => void;
-  onSetDefault: (id: string) => void;
   position: { x: number, y: number } | null;
   onClose: () => void;
 }

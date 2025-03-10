@@ -81,19 +81,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     }
   };
 
-  const handleSetDefault = async (id: string) => {
-    try {
-      await textStyleStore.setDefaultStyle(id);
-      // Reload styles to get updated default flags
-      const styles = await textStyleStore.getTextStyles();
-      setTextStyles(styles);
-    } catch (error) {
-      console.error("Error setting default style:", error);
-    } finally {
-      handleCloseContextMenu();
-    }
-  };
-
   const handleStyleClick = async (style: TextStyle) => {
     console.log("Style clicked in sidebar:", style.name);
     console.log("Editor has selection:", editorInstance && !editorInstance.state.selection.empty);
@@ -181,7 +168,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
           onEdit={onEditStyle}
           onDelete={handleDelete}
           onDuplicate={handleDuplicate}
-          onSetDefault={handleSetDefault}
           position={contextMenu.position}
           onClose={handleCloseContextMenu}
         />

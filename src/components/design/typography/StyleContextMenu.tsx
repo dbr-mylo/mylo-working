@@ -2,14 +2,13 @@
 import { useEffect, useRef } from "react";
 import { StyleContextMenuProps, TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
-import { Copy, Trash, Check, Edit } from "lucide-react";
+import { Copy, Trash, Edit } from "lucide-react";
 
 export const StyleContextMenu = ({
   style,
   onEdit,
   onDelete,
   onDuplicate,
-  onSetDefault,
   position,
   onClose,
 }: StyleContextMenuProps) => {
@@ -43,10 +42,6 @@ export const StyleContextMenu = ({
     onDelete(style.id);
   };
 
-  const handleSetDefaultClick = () => {
-    onSetDefault(style.id);
-  };
-
   // Adjust position if menu would go off screen
   const adjustedPosition = {
     x: Math.min(position.x, window.innerWidth - 200),
@@ -77,14 +72,6 @@ export const StyleContextMenu = ({
         >
           <Copy className="h-3.5 w-3.5" />
           Duplicate
-        </button>
-        <button
-          className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
-          onClick={handleSetDefaultClick}
-          disabled={style.isDefault}
-        >
-          <Check className="h-3.5 w-3.5" />
-          Set as Default
         </button>
         <hr className="my-1" />
         <button

@@ -1,5 +1,4 @@
 
-
 import { TextStyle } from "@/lib/types";
 
 export const TEXT_STYLE_STORAGE_KEY = 'text_styles';
@@ -74,6 +73,22 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     isUsed: false,  // Caption may not be used by default
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
+  },
+  {
+    id: 'default',
+    name: 'Default',
+    fontFamily: 'Roboto',
+    fontSize: '16px',
+    fontWeight: '400',
+    color: '#000000',
+    lineHeight: '1.5',
+    letterSpacing: '0',
+    selector: 'span, div',
+    description: 'Default text style',
+    isSystem: true,
+    isDefault: true,
+    isUsed: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
-

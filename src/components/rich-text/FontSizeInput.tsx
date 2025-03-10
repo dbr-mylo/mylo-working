@@ -21,18 +21,22 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
   // Update internal state when external value changes
   useEffect(() => {
     const newSize = getNumericValue(value);
-    setSize(newSize);
-  }, [value]);
+    if (newSize !== size) {
+      setSize(newSize);
+    }
+  }, [value, size]);
 
   const incrementSize = () => {
-    const newSize = size + 1; // Remove Math.min to allow larger sizes
+    const newSize = size + 1;
     setSize(newSize);
+    // Ensure we call onChange with the new value
     onChange(`${newSize}px`);
   };
 
   const decrementSize = () => {
     const newSize = Math.max(size - 1, 1); // Keep minimum size at 1
     setSize(newSize);
+    // Ensure we call onChange with the new value
     onChange(`${newSize}px`);
   };
 

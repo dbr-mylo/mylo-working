@@ -36,7 +36,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     const updateFontSize = () => {
       const fontSize = editor.getAttributes('textStyle').fontSize;
       if (fontSize) {
+        // Only update if the font size has actually changed
         setCurrentFontSize(fontSize);
+        console.log("Font size from editor:", fontSize);
       }
     };
     
@@ -58,8 +60,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
   
   const handleFontSizeChange = (fontSize: string) => {
-    editor.chain().focus().setFontSize(fontSize).run();
+    console.log("Changing font size to:", fontSize);
     setCurrentFontSize(fontSize);
+    editor.chain().focus().setFontSize(fontSize).run();
   };
 
   return (
@@ -67,7 +70,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       <FontPicker value={currentFont} onChange={handleFontChange} />
       
       {isDesigner && (
-        <FontSizeInput value={currentFontSize} onChange={handleFontSizeChange} className="ml-1 mr-1" />
+        <FontSizeInput 
+          value={currentFontSize} 
+          onChange={handleFontSizeChange} 
+          className="ml-1 mr-1" 
+        />
       )}
       
       <ColorPicker value={currentColor} onChange={onColorChange} />

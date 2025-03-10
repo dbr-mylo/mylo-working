@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -10,14 +11,16 @@ import { FontFamily } from './extensions/FontFamily';
 import { FontSize } from './extensions/FontSize';
 import Bold from '@tiptap/extension-bold';
 import { useAuth } from '@/contexts/AuthContext';
+import { FontUnit, convertFontSize, extractFontSizeValue } from '@/lib/types/preferences';
 
 export interface UseEditorProps {
   content: string;
   onContentChange: (content: string) => void;
   isEditable?: boolean;
+  currentUnit?: FontUnit;
 }
 
-export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorProps) => {
+export const useEditorSetup = ({ content, onContentChange, isEditable = true, currentUnit }: UseEditorProps) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   const { role } = useAuth();
@@ -84,6 +87,21 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
+  // Handle font size changes with unit conversion
+  const handleFontSizeChange = (size: string) => {
+    if (editor) {
+      // Convert font size if needed
+      if (currentUnit) {
+        const { value, unit } = extractFontSizeValue(size);
+        if (unit !== currentUnit && unit) {
+          size = convertFontSize(size, unit as FontUnit, currentUnit);
+        }
+      }
+      
+      editor.chain().focus().setFontSize(size).run();
+    }
+  };
+
   // Monitor selection changes to update color state
   useEffect(() => {
     if (editor) {
@@ -131,6 +149,8 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     currentFont,
     currentColor,
     handleFontChange,
-    handleColorChange
+    handleColorChange,
+    handleFontSizeChange,
+    currentUnit
   };
 };

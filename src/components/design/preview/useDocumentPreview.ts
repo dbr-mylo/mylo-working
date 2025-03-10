@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
@@ -81,7 +80,7 @@ export const useDocumentPreview = (
       // Convert font size to the current unit if needed
       let fontSize = styleToApply.fontSize;
       if (currentFontUnit) {
-        const { unit } = extractFontSizeValue(fontSize);
+        const { value, unit } = extractFontSizeValue(fontSize);
         if (unit !== currentFontUnit) {
           fontSize = convertFontSize(fontSize, unit, currentFontUnit);
         }
@@ -133,6 +132,9 @@ export const useDocumentPreview = (
         // Add new style class
         selectedElement.classList.add(`style-${styleToApply.id}`);
       }
+      
+      // Store the original style ID as a data attribute
+      selectedElement.setAttribute('data-style-id', styleId);
       
       toast({
         title: "Style applied",

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { StyleInheritance } from "./StyleInheritance";
 import { useDocument } from "@/hooks/document";
 import { useParams } from "react-router-dom";
-import { convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
+import { convertFontSize, extractFontSizeValue, FontUnit } from "@/lib/types/preferences";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -50,7 +50,8 @@ export const StyleForm = ({
   } = useStyleForm({
     initialValues: convertedInitialValues,
     externalStyles,
-    externalStyleChange
+    externalStyleChange,
+    currentUnit
   });
 
   // Convert font size when preference changes
@@ -164,6 +165,7 @@ export const StyleForm = ({
             styles={styles}
             onStyleChange={handleStyleChange}
             parentStyle={parentStyle}
+            currentUnit={currentUnit}
           />
         </TabsContent>
       </Tabs>

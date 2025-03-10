@@ -5,24 +5,34 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useDocument } from "@/hooks/document";
 import { useParams } from "react-router-dom";
-import { FontUnit, extractFontSizeValue } from "@/lib/types/preferences";
+import { FontUnit, extractFontSizeValue, convertFontSize } from "@/lib/types/preferences";
 
 interface FontSizeControlProps {
   value: string;
   onChange: (value: string) => void;
+  currentUnit?: FontUnit;
 }
 
-export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
+export const FontSizeControl = ({ value, onChange, currentUnit: propCurrentUnit }: FontSizeControlProps) => {
   const { documentId } = useParams<{ documentId?: string }>();
   const { preferences } = useDocument(documentId);
-  const [internalValue, setInternalValue] = useState(extractFontSizeValue(value));
   
-  const currentUnit = preferences?.typography?.fontUnit || 'px';
+  // Use the provided unit or fall back to preferences
+  const currentUnit = propCurrentUnit || preferences?.typography?.fontUnit || 'px';
+  
+  const [internalValue, setInternalValue] = useState(extractFontSizeValue(value));
   
   // Update internal value when external value changes
   useEffect(() => {
-    setInternalValue(extractFontSizeValue(value));
-  }, [value]);
+    const extracted = extractFontSizeValue(value);
+    // Convert to current unit if needed
+    if (extracted.unit !== currentUnit) {
+      const converted = convertFontSize(value, extracted.unit, currentUnit);
+      setInternalValue(extractFontSizeValue(converted));
+    } else {
+      setInternalValue(extracted);
+    }
+  }, [value, currentUnit]);
 
   // Get number value only
   const getNumberValue = (): number => {
@@ -36,22 +46,24 @@ export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
 
   // Handle slider change
   const handleSliderChange = (newValue: number[]) => {
+    const formattedValue = `${newValue[0]}${currentUnit}`;
     setInternalValue({
       value: newValue[0],
       unit: currentUnit
     });
-    onChange(`${newValue[0]}${currentUnit}`);
+    onChange(formattedValue);
   };
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
     if (!isNaN(newValue)) {
+      const formattedValue = `${newValue}${currentUnit}`;
       setInternalValue({
         value: newValue,
         unit: currentUnit
       });
-      onChange(`${newValue}${currentUnit}`);
+      onChange(formattedValue);
     }
   };
 

@@ -3,9 +3,15 @@ import { Editor } from "@tiptap/react";
 import { TextStyle } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { textStyleStore } from "@/stores/textStyles";
+import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
+import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
 
 export const useStyleApplication = (editor: Editor | null) => {
   const { toast } = useToast();
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const currentUnit = preferences?.typography?.fontUnit || 'px';
 
   /**
    * Apply a text style to the currently selected text in the editor
@@ -38,9 +44,18 @@ export const useStyleApplication = (editor: Editor | null) => {
         toast({
           title: "No text selected",
           description: "Please select some text to apply the style",
-          variant: "default", // Changed from "warning" to "default"
+          variant: "default",
         });
         return;
+      }
+
+      // Convert font size to the current unit if needed
+      let fontSize = styleToApply.fontSize;
+      if (currentUnit) {
+        const { value, unit } = extractFontSizeValue(fontSize);
+        if (unit !== currentUnit) {
+          fontSize = convertFontSize(fontSize, unit, currentUnit);
+        }
       }
 
       // Start a chain to apply multiple style properties
@@ -51,8 +66,8 @@ export const useStyleApplication = (editor: Editor | null) => {
         chain = chain.setFontFamily(styleToApply.fontFamily);
       }
       
-      if (styleToApply.fontSize) {
-        chain = chain.setFontSize(styleToApply.fontSize);
+      if (fontSize) {
+        chain = chain.setFontSize(fontSize);
       }
       
       if (styleToApply.color) {
@@ -79,6 +94,7 @@ export const useStyleApplication = (editor: Editor | null) => {
       
       // Log to console for debugging
       console.log(`Applied style "${styleToApply.name}" to selection:`, styleToApply);
+      console.log(`Font size converted to: ${fontSize}`);
       
     } catch (error) {
       console.error("Error applying style:", error);

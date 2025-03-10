@@ -12,18 +12,24 @@ import { Badge } from "@/components/ui/badge";
 import { Link2 } from "lucide-react";
 import { useDocument } from "@/hooks/document";
 import { useParams } from "react-router-dom";
-import { convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
+import { convertFontSize, extractFontSizeValue, FontUnit } from "@/lib/types/preferences";
 
 interface StyleFormControlsProps {
   styles: TypographyStyles;
   onStyleChange: (property: keyof TypographyStyles, value: string) => void;
   parentStyle?: TextStyle | null;
+  currentUnit?: FontUnit;
 }
 
-export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleFormControlsProps) => {
+export const StyleFormControls = ({ 
+  styles, 
+  onStyleChange, 
+  parentStyle,
+  currentUnit: propCurrentUnit
+}: StyleFormControlsProps) => {
   const { documentId } = useParams<{ documentId?: string }>();
   const { preferences } = useDocument(documentId);
-  const currentUnit = preferences?.typography?.fontUnit || 'px';
+  const currentUnit = propCurrentUnit || preferences?.typography?.fontUnit || 'px';
   
   // Function to determine if a property is inherited from parent
   const isInherited = (property: keyof TypographyStyles): boolean => {
@@ -81,7 +87,8 @@ export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleF
           <div className="space-y-1">
             <FontSizeControl 
               value={getDisplayFontSize()} 
-              onChange={handleFontSizeChange} 
+              onChange={handleFontSizeChange}
+              currentUnit={currentUnit}
             />
             {isInherited("fontSize") && (
               <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">

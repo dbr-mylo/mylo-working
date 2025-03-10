@@ -6,6 +6,7 @@ import { EditorStyles } from './rich-text/EditorStyles';
 import { useEditorSetup } from './rich-text/useEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { Editor } from '@tiptap/react';
+import { FontUnit } from '@/lib/types/preferences';
 
 interface RichTextEditorProps {
   content: string;
@@ -15,7 +16,8 @@ interface RichTextEditorProps {
   fixedToolbar?: boolean;
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
-  externalEditorInstance?: Editor | null; // New prop for external editor instance
+  externalEditorInstance?: Editor | null;
+  currentUnit?: FontUnit;
 }
 
 export const RichTextEditor = ({ 
@@ -26,7 +28,8 @@ export const RichTextEditor = ({
   fixedToolbar = false,
   renderToolbarOutside = false,
   externalToolbar = false,
-  externalEditorInstance = null // Default to null
+  externalEditorInstance = null,
+  currentUnit
 }: RichTextEditorProps) => {
   
   // Use external editor if provided, otherwise create a new one
@@ -35,8 +38,9 @@ export const RichTextEditor = ({
   const editorSetup = useOwnEditor 
     ? useEditorSetup({ 
         content, 
-        onContentChange: onUpdate, // This is the correct prop name now
-        isEditable 
+        onContentChange: onUpdate,
+        isEditable,
+        currentUnit
       })
     : null;
   

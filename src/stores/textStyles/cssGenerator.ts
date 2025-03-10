@@ -9,6 +9,8 @@ export const generateCSSFromTextStyles = (styles: TextStyle[], fontUnit?: FontUn
       ? convertFontSizeToUnit(style.fontSize, fontUnit)
       : style.fontSize;
     
+    console.log(`Converting style ${style.name} fontSize from ${style.fontSize} to ${fontSize}`);
+    
     let css = `
 ${style.selector} {
   font-family: ${style.fontFamily};
@@ -39,6 +41,11 @@ ${style.selector} {
 
 // Helper function to convert font size to a specific unit
 const convertFontSizeToUnit = (fontSize: string, targetUnit: FontUnit): string => {
+  // Always ensure input has a unit
+  if (!fontSize.match(/\d+(px|pt)$/)) {
+    fontSize = `${fontSize}px`; // Default to px
+  }
+  
   const { value, unit } = extractFontSizeValue(fontSize);
   if (unit === targetUnit) return fontSize;
   return convertFontSize(fontSize, unit, targetUnit);

@@ -32,6 +32,13 @@ export interface SaveTextStyleInput {
 export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyle> => {
   try {
     const now = new Date().toISOString();
+    
+    // Ensure the fontSize has a unit
+    if (style.fontSize && !style.fontSize.match(/\d+(px|pt)$/)) {
+      // Default to px if no unit is specified
+      style.fontSize = `${style.fontSize}px`;
+    }
+    
     const styleToSave: TextStyle = {
       id: style.id || uuidv4(),
       name: style.name,
@@ -63,6 +70,9 @@ export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyl
     
     // Save locally for now
     saveLocalTextStyle(styleToSave);
+    
+    console.log("Saved style with fontSize:", styleToSave.fontSize);
+    
     return styleToSave;
   } catch (error) {
     console.error('Error in saveTextStyle:', error);

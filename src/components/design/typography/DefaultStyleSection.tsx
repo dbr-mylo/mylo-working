@@ -3,23 +3,22 @@ import { TextStyle } from "@/lib/types";
 import { StyleListItemCard } from "./StyleListItemCard";
 
 interface DefaultStyleSectionProps {
-  style: TextStyle;
+  defaultStyle: TextStyle;
   onStyleClick: (style: TextStyle) => void;
   onContextMenu: (e: React.MouseEvent, style: TextStyle) => void;
 }
 
 export const DefaultStyleSection = ({ 
-  style, 
+  defaultStyle, 
   onStyleClick, 
   onContextMenu 
 }: DefaultStyleSectionProps) => {
-  if (!style) return null;
+  if (!defaultStyle) return null;
   
   return (
     <div className="mb-3">
-      <h4 className="text-xs font-medium text-editor-heading mb-1.5">Default Style</h4>
       <StyleListItemCard
-        style={style}
+        style={defaultStyle}
         onStyleClick={onStyleClick}
         onContextMenu={onContextMenu}
         isDefaultStyleSection={true}

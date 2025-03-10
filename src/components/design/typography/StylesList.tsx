@@ -36,15 +36,13 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     return <EmptyState />;
   }
 
-  // The default style is assumed to be the first one
   const defaultStyle = styles.find(s => s.id === 'default-text-reset') || styles[0];
   const otherStyles = styles.filter(s => s.id !== 'default-text-reset' && s.id !== defaultStyle.id);
 
   return (
     <div className="space-y-4" ref={containerRef}>
-      {/* Default Style Section */}
       <DefaultStyleSection 
-        style={defaultStyle} 
+        defaultStyle={defaultStyle} 
         onStyleClick={handleStyleClick}
         onContextMenu={handleContextMenu}
       />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -92,7 +91,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         
         {isDesigner && (
           <div className="flex items-center gap-1">
-            <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
             <div className="relative flex items-center">
               <div className="relative w-12">
                 <Input

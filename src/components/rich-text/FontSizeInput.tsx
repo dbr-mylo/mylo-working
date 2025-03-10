@@ -73,8 +73,8 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
           maxLength={2}
           style={{ 
             textAlign: 'left',
-            paddingLeft: '0.25rem',
-            padding: '0.25rem 0 0.25rem 0.25rem'
+            paddingLeft: '0.375rem',
+            padding: '0.25rem 0 0.25rem 0.375rem'
           }}
         />
         <div className="absolute right-0 flex flex-col h-full">

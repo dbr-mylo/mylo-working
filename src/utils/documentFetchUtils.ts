@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
@@ -113,11 +114,32 @@ export function loadDocument(doc: Document) {
   
   console.log("Loading document content:", docContent ? docContent.substring(0, 50) + "..." : "empty");
   
+  // Transform the preferences to match the expected structure
+  let typedPreferences: TemplatePreferences | null = null;
+  
+  if (doc.preferences) {
+    // Either parse from string or use the object directly
+    const rawPreferences = typeof doc.preferences === 'string' 
+      ? JSON.parse(doc.preferences) 
+      : doc.preferences;
+    
+    // Ensure the object has the required typography property
+    if (!rawPreferences.typography) {
+      typedPreferences = {
+        typography: {
+          fontUnit: 'px' // Default value
+        }
+      };
+    } else {
+      typedPreferences = rawPreferences as TemplatePreferences;
+    }
+  }
+  
   return {
     content: docContent,
     initialContent: docContent,
     documentTitle: doc.title || "",
     currentDocumentId: doc.id,
-    preferences: doc.preferences
+    preferences: typedPreferences
   };
 }

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { PreferencesDialog } from "./PreferencesDialog";
 import { TemplatePreferences } from "@/lib/types/preferences";
 import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
 
 const defaultPreferences: TemplatePreferences = {
   typography: {
@@ -14,7 +15,8 @@ const defaultPreferences: TemplatePreferences = {
 
 export const PreferencesButton = () => {
   const [open, setOpen] = useState(false);
-  const { preferences, setPreferences } = useDocument();
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences, setPreferences } = useDocument(documentId);
 
   // Initialize preferences if they don't exist
   useEffect(() => {

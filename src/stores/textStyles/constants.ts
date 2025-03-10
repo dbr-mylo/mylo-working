@@ -52,7 +52,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     selector: 'p',
     description: 'Default paragraph style',
     isSystem: true,
-    isDefault: true,
+    isDefault: false,  // Changed from true to false
     isUsed: true,  // Default body text is considered used
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -77,7 +77,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
   {
     id: 'default',
     name: 'Default',
-    fontFamily: 'Roboto',
+    fontFamily: 'Inter',
     fontSize: '16px',
     fontWeight: '400',
     color: '#000000',

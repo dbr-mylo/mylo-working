@@ -42,14 +42,13 @@ export const FontSize = Extension.create<FontSizeOptions>({
               const fontSize = element.style.fontSize;
               
               // Create and dispatch a custom event with the parsed font size
-              // This helps synchronize the UI with the actual font size in the DOM
               if (fontSize && typeof window !== 'undefined') {
                 try {
                   const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
                     detail: { fontSize }
                   });
                   document.dispatchEvent(fontSizeEvent);
-                  console.log("FontSize: Parsed and dispatched fontSize:", fontSize);
+                  console.log("FontSize Extension: Parsed fontSize from HTML:", fontSize);
                 } catch (e) {
                   console.error("Error dispatching font size event:", e);
                 }
@@ -63,14 +62,14 @@ export const FontSize = Extension.create<FontSizeOptions>({
               }
               
               // Log the font size being rendered
-              console.log("FontSize: Rendering fontSize to HTML:", attributes.fontSize);
+              console.log("FontSize Extension: Rendering fontSize to HTML:", attributes.fontSize);
               
-              // Use multiple approaches for maximum compatibility
+              // Use multiple attributes to ensure font size is applied consistently
               return {
-                style: `font-size: ${attributes.fontSize} !important; --tw-prose-body: none !important;`,
+                style: `font-size: ${attributes.fontSize} !important;`,
                 class: 'custom-font-size',
                 'data-font-size': attributes.fontSize.replace('px', ''),
-                'data-style-fontSize': attributes.fontSize // Additional attribute for tracking
+                'data-style-fontSize': attributes.fontSize
               };
             },
           },
@@ -85,9 +84,9 @@ export const FontSize = Extension.create<FontSizeOptions>({
         (fontSize: string) =>
         ({ commands, editor }) => {
           if (fontSize) {
-            console.log("FontSize: Applying fontSize:", fontSize);
+            console.log("FontSize Extension: Setting fontSize command:", fontSize);
             
-            // Store the current font size in localStorage and dispatch an event
+            // Store the current font size in localStorage to persist across sessions
             try {
               localStorage.setItem('editor_font_size', fontSize);
               
@@ -97,30 +96,17 @@ export const FontSize = Extension.create<FontSizeOptions>({
               });
               document.dispatchEvent(fontSizeChangeEvent);
               
-              // Clear any cached styles that might interfere
-              const clearCacheEvent = new CustomEvent('tiptap-clear-font-cache');
-              document.dispatchEvent(clearCacheEvent);
+              // Also refresh the extension's cache
+              setTimeout(() => {
+                const refreshEvent = new CustomEvent('tiptap-clear-font-cache');
+                document.dispatchEvent(refreshEvent);
+              }, 10);
             } catch (e) {
               console.error("Error in font size handling:", e);
             }
             
             // Apply the font size with the text style mark
-            const result = commands.setMark('textStyle', { fontSize });
-            
-            // Schedule multiple updates to ensure the style is applied consistently
-            const applyFontSize = () => {
-              if (editor && editor.isActive) {
-                editor.chain().focus().setMark('textStyle', { fontSize }).run();
-                console.log("FontSize: Re-applying font size:", fontSize);
-              }
-            };
-            
-            // Apply multiple times with increasing delays for persistence
-            setTimeout(applyFontSize, 50);
-            setTimeout(applyFontSize, 200);
-            setTimeout(applyFontSize, 500);
-            
-            return result;
+            return commands.setMark('textStyle', { fontSize });
           }
           return commands.setMark('textStyle', { fontSize });
         },

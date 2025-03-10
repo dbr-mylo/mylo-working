@@ -1,3 +1,4 @@
+
 import { EditorContent } from '@tiptap/react';
 import { useState, useEffect } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
@@ -30,8 +31,18 @@ export const RichTextEditor = ({
 }: RichTextEditorProps) => {
   
   useEffect(() => {
-    console.log("RichTextEditor: Clearing cache on mount");
+    console.log("RichTextEditor: Clearing cache and resetting styles on mount");
+    // Clear font size cache
+    localStorage.removeItem('editor_font_size');
+    sessionStorage.removeItem('editor_font_size');
+    
+    // Clear text style caches
+    textStyleStore.clearCachedStylesByPattern(['font-size', 'fontSize', 'fontFamily']);
     textStyleStore.clearEditorCache();
+    
+    // Clean up any previous events
+    const cleanupEvent = new CustomEvent('tiptap-clear-font-cache');
+    document.dispatchEvent(cleanupEvent);
   }, []);
   
   const useOwnEditor = !externalEditorInstance;
@@ -53,9 +64,24 @@ export const RichTextEditor = ({
     if (editor && isEditable) {
       console.log("Editor initialized with content:", content.substring(0, 100));
       
+      // After editor is mounted, scan for any font sizes in the content
       setTimeout(() => {
         if (editor) {
           console.log("Initial editor HTML:", editor.getHTML().substring(0, 100));
+          
+          // Force editor to update font size if needed
+          try {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+              const range = selection.getRangeAt(0);
+              if (range) {
+                const fontSizeEvent = new CustomEvent('tiptap-clear-font-cache');
+                document.dispatchEvent(fontSizeEvent);
+              }
+            }
+          } catch (e) {
+            console.error("Error handling editor initialization:", e);
+          }
         }
       }, 100);
     }

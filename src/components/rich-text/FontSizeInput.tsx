@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { clearCachedStylesByPattern } from '@/stores/textStyles/styleCache';
+import { textStyleStore } from '@/stores/textStyles';
 
 interface FontSizeInputProps {
   value: string;
@@ -24,6 +24,15 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
 
   const [size, setSize] = useState<number>(getNumericValue(value));
   
+  // Handler for font size events
+  const handleFontSizeEvent = useCallback((event: CustomEvent) => {
+    if (event.detail && event.detail.fontSize) {
+      const newSize = getNumericValue(event.detail.fontSize);
+      console.log("FontSizeInput: Received font size event:", event.detail.fontSize, "parsed to:", newSize);
+      setSize(newSize);
+    }
+  }, []);
+  
   // Update internal state when external value changes
   useEffect(() => {
     const newSize = getNumericValue(value);
@@ -35,35 +44,23 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
 
   // Listen for font size events from the editor
   useEffect(() => {
-    const handleFontSizeParsed = (event: CustomEvent) => {
-      if (event.detail && event.detail.fontSize) {
-        const parsedSize = getNumericValue(event.detail.fontSize);
-        console.log("FontSizeInput: Received parsed font size event:", event.detail.fontSize, "parsed to:", parsedSize);
-        setSize(parsedSize);
-      }
-    };
+    // Clear any cached styles
+    try {
+      textStyleStore.clearCachedStylesByPattern(['font-size', 'fontSize']);
+    } catch (error) {
+      console.error("Error clearing font size cache:", error);
+    }
     
-    const handleFontSizeChanged = (event: CustomEvent) => {
-      if (event.detail && event.detail.fontSize) {
-        const newSize = getNumericValue(event.detail.fontSize);
-        console.log("FontSizeInput: Received font size changed event:", event.detail.fontSize, "parsed to:", newSize);
-        setSize(newSize);
-      }
-    };
-    
-    // Add event listeners for custom font size events
-    document.addEventListener('tiptap-font-size-parsed', handleFontSizeParsed as EventListener);
-    document.addEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
-    
-    // Clear caches on component mount
-    clearCachedStylesByPattern(['font-size']);
+    // Add event listeners with proper typing
+    document.addEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
+    document.addEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
     
     return () => {
       // Clean up event listeners
-      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeParsed as EventListener);
-      document.removeEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
+      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
+      document.removeEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
     };
-  }, []);
+  }, [handleFontSizeEvent]);
 
   const incrementSize = () => {
     if (disabled) return;
@@ -71,6 +68,16 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     console.log("FontSizeInput: Incrementing from", size, "to", newSize);
     setSize(newSize);
     onChange(`${newSize}px`);
+    
+    // Dispatch event for other components
+    try {
+      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+        detail: { fontSize: `${newSize}px` }
+      });
+      document.dispatchEvent(fontSizeEvent);
+    } catch (error) {
+      console.error("Error dispatching font size event:", error);
+    }
   };
 
   const decrementSize = () => {
@@ -79,6 +86,16 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     console.log("FontSizeInput: Decrementing from", size, "to", newSize);
     setSize(newSize);
     onChange(`${newSize}px`);
+    
+    // Dispatch event for other components
+    try {
+      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+        detail: { fontSize: `${newSize}px` }
+      });
+      document.dispatchEvent(fontSizeEvent);
+    } catch (error) {
+      console.error("Error dispatching font size event:", error);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +118,16 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     // Only update if value is within acceptable range
     if (newSize >= MIN_FONT_SIZE) {
       onChange(`${newSize}px`);
+      
+      // Dispatch event for other components
+      try {
+        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+          detail: { fontSize: `${newSize}px` }
+        });
+        document.dispatchEvent(fontSizeEvent);
+      } catch (error) {
+        console.error("Error dispatching font size event:", error);
+      }
     }
   };
 
@@ -113,11 +140,16 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
       console.log("FontSizeInput: Correcting size to minimum:", newSize);
       setSize(newSize);
       onChange(`${newSize}px`);
-    } else if (size > MAX_FONT_SIZE) {
-      const newSize = MAX_FONT_SIZE;
-      console.log("FontSizeInput: Correcting size to maximum:", newSize);
-      setSize(newSize);
-      onChange(`${newSize}px`);
+      
+      // Dispatch event for other components
+      try {
+        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+          detail: { fontSize: `${newSize}px` }
+        });
+        document.dispatchEvent(fontSizeEvent);
+      } catch (error) {
+        console.error("Error dispatching font size event:", error);
+      }
     }
   };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -30,6 +29,14 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     console.log("useEditorSetup: Clearing font caches");
     textStyleStore.clearCachedStylesByPattern(['font-size', 'fontSize', 'fontFamily']);
     localStorage.removeItem('editor_font_size');
+    
+    // Force a clear cache event
+    try {
+      const clearEvent = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(clearEvent);
+    } catch (error) {
+      console.error("Error dispatching clear cache event:", error);
+    }
   }, []);
   
   // Enhanced Bold extension with better color preservation
@@ -65,8 +72,22 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
-      // Let's log the HTML on update to check color preservation
-      console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
+      
+      // Re-apply any font size to ensure consistency
+      try {
+        const attributes = editor.getAttributes('textStyle');
+        if (attributes.fontSize) {
+          console.log("Editor updating with fontSize:", attributes.fontSize);
+          
+          // Dispatch an event to notify components about the current font size
+          const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+            detail: { fontSize: attributes.fontSize }
+          });
+          document.dispatchEvent(fontSizeEvent);
+        }
+      } catch (error) {
+        console.error("Error handling editor update:", error);
+      }
     },
   });
 
@@ -100,37 +121,33 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         const { color } = editor.getAttributes('textStyle');
         if (color) {
           setCurrentColor(color);
-          console.log("Color state updated to:", color);
         }
       };
       
-      // Add more detailed logging for debugging
-      const logStyleChanges = () => {
-        const textStyleAttrs = editor.getAttributes('textStyle');
-        const isBoldActive = editor.isActive('bold');
-        const boldAttrs = isBoldActive ? editor.getAttributes('bold') : 'not active';
-        const html = editor.getHTML();
-        
-        console.log("Style change detected:", {
-          textStyle: textStyleAttrs,
-          isBold: isBoldActive,
-          boldAttrs,
-          selectionHtml: html.substring(0, 100) + (html.length > 100 ? '...' : '')
-        });
+      // Monitor font size changes
+      const updateFontSize = () => {
+        const { fontSize } = editor.getAttributes('textStyle');
+        if (fontSize) {
+          console.log("Font size detected in selection:", fontSize);
+          
+          // Broadcast the font size change
+          const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
+            detail: { fontSize }
+          });
+          document.dispatchEvent(fontSizeEvent);
+        }
       };
       
       editor.on('selectionUpdate', updateColorState);
+      editor.on('selectionUpdate', updateFontSize);
       editor.on('transaction', updateColorState);
-      
-      // Add debug logging
-      editor.on('selectionUpdate', logStyleChanges);
-      editor.on('transaction', logStyleChanges);
+      editor.on('transaction', updateFontSize);
       
       return () => {
         editor.off('selectionUpdate', updateColorState);
+        editor.off('selectionUpdate', updateFontSize);
         editor.off('transaction', updateColorState);
-        editor.off('selectionUpdate', logStyleChanges);
-        editor.off('transaction', logStyleChanges);
+        editor.off('transaction', updateFontSize);
       };
     }
   }, [editor]);

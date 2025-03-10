@@ -95,6 +95,14 @@ export const FontSizeStyles = () => {
       .prose-sm .custom-font-size {
         font-size: unset !important;
       }
+      
+      /* Force refresh for font cache clearing */
+      .ProseMirror.refresh-fonts * {
+        font-size: inherit !important;
+      }
+      .ProseMirror.refresh-fonts [style*="font-size"] {
+        font-size: unset !important;
+      }
     `}</style>
   );
 };

@@ -1,4 +1,5 @@
 
+
 import { TextStyle } from "@/lib/types";
 
 export const TEXT_STYLE_STORAGE_KEY = 'text_styles';
@@ -43,10 +44,10 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
   {
     id: 'body',
     name: 'Body Text',
-    fontFamily: 'Inter',
+    fontFamily: 'Roboto',
     fontSize: '16px',
     fontWeight: '400',
-    color: '#333333',
+    color: '#000000',
     lineHeight: '1.5',
     letterSpacing: '0',
     selector: 'p',
@@ -75,3 +76,4 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     updated_at: new Date().toISOString()
   }
 ];
+

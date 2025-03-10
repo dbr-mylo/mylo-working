@@ -3,7 +3,7 @@ import { StyleApplicator } from "../typography/StyleApplicator";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TextStyle } from "@/lib/types";
-import { textStyleStore } from "@/stores/textStyles";
+import { useTextStyleOperations } from "@/stores/textStyles";
 import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
 
 interface SelectedElementBarProps {
@@ -14,6 +14,7 @@ interface SelectedElementBarProps {
 
 export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit }: SelectedElementBarProps) => {
   const [appliedStyle, setAppliedStyle] = useState<TextStyle | null>(null);
+  const { getTextStyles, getStyleWithInheritance } = useTextStyleOperations();
   
   useEffect(() => {
     if (!selectedElement) {
@@ -26,7 +27,7 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit 
       try {
         const styleId = selectedElement.getAttribute('data-style-id');
         if (styleId) {
-          const styles = await textStyleStore.getTextStyles();
+          const styles = await getTextStyles();
           const style = styles.find(s => s.id === styleId);
           if (style) {
             // Convert font size to current unit if needed
@@ -48,7 +49,7 @@ export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit 
     };
     
     detectAppliedStyle();
-  }, [selectedElement, currentUnit]);
+  }, [selectedElement, currentUnit, getTextStyles]);
 
   if (!selectedElement) {
     return null;

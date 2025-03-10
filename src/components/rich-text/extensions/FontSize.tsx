@@ -47,8 +47,11 @@ export const FontSize = Extension.create<FontSizeOptions>({
                 return {};
               }
               console.log("FontSize: Rendering fontSize to HTML:", attributes.fontSize);
+              
+              // Use !important flag and override any Tailwind styles
               return {
-                style: `font-size: ${attributes.fontSize} !important`,
+                style: `font-size: ${attributes.fontSize} !important; --tw-prose-body: none !important;`,
+                class: 'custom-font-size'
               };
             },
           },
@@ -61,17 +64,25 @@ export const FontSize = Extension.create<FontSizeOptions>({
     return {
       setFontSize:
         (fontSize: string) =>
-        ({ commands }) => {
-          // Store the current font size in localStorage 
-          // as a temporary solution until state syncing is fully fixed
+        ({ commands, editor }) => {
           if (fontSize) {
             console.log("FontSize: Applying fontSize:", fontSize);
+            
+            // Store the current font size in localStorage 
             localStorage.setItem('editor_font_size', fontSize);
             
-            // Force an update to ensure the size is applied
+            // Apply the font size with the text style mark
+            const result = commands.setMark('textStyle', { fontSize });
+            
+            // Force a second update after a brief delay to ensure proper application
             setTimeout(() => {
-              console.log("FontSize: Re-applying font size to ensure it's set");
-            }, 10);
+              if (editor && editor.isActive) {
+                console.log("FontSize: Re-applying font size to ensure it's set:", fontSize);
+                editor.chain().focus().setMark('textStyle', { fontSize }).run();
+              }
+            }, 50);
+            
+            return result;
           }
           return commands.setMark('textStyle', { fontSize });
         },

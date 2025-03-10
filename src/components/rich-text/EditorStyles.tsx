@@ -50,27 +50,55 @@ export const EditorStyles = () => {
         padding-left: 6em;
       }
       
-      /* Fix for font-size inheritance - ensure fontSize style is not overridden */
-      .ProseMirror [style*="font-size"] {
-        font-size: inherit !important; /* Initially inherit from parent */
+      /* Critical fix for the root elements to prevent Tailwind prose classes from overriding font sizes */
+      .ProseMirror {
+        font-size: initial !important;
+        --tw-prose-body: none !important;
       }
       
-      /* Ensure spans with font-size style actually use their own font-size */
+      /* Base rule for all elements to ensure they inherit font size by default */
+      .ProseMirror * {
+        font-size: inherit;
+      }
+      
+      /* Override the Tailwind prose-sm font size explicitly */
+      .prose.prose-sm .ProseMirror {
+        font-size: initial !important;
+      }
+      
+      /* Ensure prose doesn't force font sizes on paragraphs */
+      .prose.prose-sm .ProseMirror p {
+        font-size: inherit !important;
+        margin-bottom: 4px;
+      }
+      
+      /* Make elements with explicit font-size styles use their inline styles */
+      .ProseMirror [style*="font-size"] {
+        font-size: unset !important;
+      }
+      
+      /* Custom class for our font-size extension */
+      .ProseMirror .custom-font-size {
+        font-size: unset !important;
+      }
+      
+      /* Additional specific selectors for common elements */
       .ProseMirror span[style*="font-size"],
       .ProseMirror p[style*="font-size"],
       .ProseMirror div[style*="font-size"],
+      .ProseMirror h1[style*="font-size"],
+      .ProseMirror h2[style*="font-size"],
+      .ProseMirror h3[style*="font-size"],
+      .ProseMirror h4[style*="font-size"],
+      .ProseMirror h5[style*="font-size"],
+      .ProseMirror h6[style*="font-size"] {
+        font-size: unset !important;
+      }
+      
+      /* Specifically target the preserve-styling spans */
+      .ProseMirror .preserve-styling,
       .ProseMirror .preserve-styling[style*="font-size"] {
-        font-size: unset !important; /* Revert the inherit to use the inline style */
-      }
-      
-      /* Specifically ensure the preserve-styling spans use their own font-size */
-      .ProseMirror .preserve-styling {
-        font-size: unset !important; /* Use the inline style */
-      }
-      
-      /* This is a critical fix for the editor's font rendering */
-      .ProseMirror * {
-        font-size: inherit; /* Default inheritance for elements without specific sizes */
+        font-size: unset !important;
       }
       
       /* Comprehensive color preservation rules - enhanced for bold text */

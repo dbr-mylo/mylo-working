@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -107,22 +106,38 @@
   /* Apply editor font specifically to editor content */
   .ProseMirror {
     font-family: theme('fontFamily.editor');
-    /* Remove any default font size that might be causing inheritance issues */
-    font-size: initial;
+    /* Set an explicit initial font size */
+    font-size: initial !important;
   }
 
-  /* Ensure proper font-size inheritance in the editor */
-  .prose * {
+  /* Override Tailwind prose classes for proper font size handling */
+  .prose, .prose-sm {
+    --tw-prose-body: none;
+  }
+  
+  /* Explicitly override prose text sizes */
+  .prose *, .prose-sm * {
     font-size: inherit;
   }
   
-  /* Make sure inline styles take precedence */
+  /* Ensure proper font-size inheritance in the editor */
+  .prose p, .prose-sm p {
+    font-size: inherit !important;
+    margin-bottom: 4px;
+  }
+  
+  /* Make sure inline styles take precedence - crucial fix */
   [style*="font-size"] {
     font-size: unset !important;
   }
   
   /* Specifically target the preserve-styling spans */
   .preserve-styling[style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Special class for our font size extension */
+  .custom-font-size {
     font-size: unset !important;
   }
 }

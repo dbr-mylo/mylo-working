@@ -4,6 +4,7 @@ import '@tiptap/extension-text-style';
 
 export interface FontSizeOptions {
   types: string[];
+  defaultSize: string;
 }
 
 declare module '@tiptap/core' {
@@ -27,6 +28,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
   addOptions() {
     return {
       types: ['textStyle'],
+      defaultSize: '16px',
     };
   },
 
@@ -39,16 +41,24 @@ export const FontSize = Extension.create<FontSizeOptions>({
             default: null,
             parseHTML: element => {
               // Get font size from element style (with higher priority than computed style)
-              const fontSize = element.style.fontSize || window.getComputedStyle(element).fontSize;
+              const inlineSize = element.style.fontSize;
+              const computedSize = window.getComputedStyle(element).fontSize;
+              const fontSize = inlineSize || computedSize;
               
               if (fontSize) {
                 try {
+                  // Normalize font size to ensure it's in px format
+                  let normalizedSize = fontSize;
+                  if (!normalizedSize.endsWith('px') && !isNaN(parseFloat(normalizedSize))) {
+                    normalizedSize = `${parseFloat(normalizedSize)}px`;
+                  }
+                  
                   // Create and dispatch an event with accurate font size from DOM
                   const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
-                    detail: { fontSize, source: 'dom' }
+                    detail: { fontSize: normalizedSize, source: 'dom' }
                   });
                   document.dispatchEvent(fontSizeEvent);
-                  console.log("FontSize Extension: Parsed fontSize from HTML:", fontSize);
+                  console.log("FontSize Extension: Parsed fontSize from HTML:", normalizedSize, "from original:", fontSize);
                 } catch (e) {
                   console.error("Error dispatching font size event:", e);
                 }
@@ -61,17 +71,16 @@ export const FontSize = Extension.create<FontSizeOptions>({
                 return {};
               }
               
-              // Log the font size being rendered
-              console.log("FontSize Extension: Rendering fontSize to HTML:", attributes.fontSize);
-              
               // Ensure consistent formatting of font size (px format)
               const formattedSize = attributes.fontSize.endsWith('px') 
                 ? attributes.fontSize 
                 : `${attributes.fontSize}px`;
               
+              console.log("FontSize Extension: Rendering fontSize to HTML:", formattedSize);
+              
               // Use multiple attributes to ensure font size is applied consistently
               return {
-                style: `font-size: ${formattedSize} !important;`,
+                style: `font-size: ${formattedSize};`,
                 class: 'custom-font-size preserve-styling',
                 'data-font-size': formattedSize.replace('px', ''),
                 'data-style-fontSize': formattedSize

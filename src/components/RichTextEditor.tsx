@@ -61,42 +61,65 @@ export const RichTextEditor = ({
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
-  // Extra check to ensure font sizes are in sync between DOM and editor
+  // Fix font size discrepancy by checking DOM directly on initialization
   useEffect(() => {
     if (!editor || !isEditable) return;
     
-    const syncFontSizes = () => {
+    const initialSizeCheck = () => {
       try {
-        // Get all elements with font size styles in the editor
         if (editorContainerRef.current) {
+          // First check if we have explicit font-size styles
           const elements = editorContainerRef.current.querySelectorAll('[style*="font-size"]');
           
-          elements.forEach(element => {
-            const computedStyle = window.getComputedStyle(element);
-            const fontSize = computedStyle.fontSize;
+          if (elements.length > 0) {
+            // Found explicit font sizes, use the first one as reference
+            const element = elements[0] as HTMLElement;
+            const fontSize = element.style.fontSize;
+            console.log("RichTextEditor: Found element with explicit font-size:", fontSize);
             
-            console.log("RichTextEditor: Found element with font-size:", fontSize, element);
-            
-            // Dispatch an event to notify components about this font size
+            // Broadcast this size to synchronize toolbar
             const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
-              detail: { fontSize, source: 'dom' }
+              detail: { fontSize, source: 'dom-init' }
             });
             document.dispatchEvent(fontSizeEvent);
-          });
+            
+            // Apply it to editor for consistency
+            setTimeout(() => {
+              if (editor && editor.isActive) {
+                editor.commands.setFontSize(fontSize);
+              }
+            }, 50);
+          } else {
+            // No explicit styles found, check default paragraph
+            const paragraphs = editorContainerRef.current.querySelectorAll('p');
+            if (paragraphs.length > 0) {
+              const computedStyle = window.getComputedStyle(paragraphs[0]);
+              const fontSize = computedStyle.fontSize;
+              console.log("RichTextEditor: No explicit style, using computed style:", fontSize);
+              
+              // Broadcast this computed size
+              const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
+                detail: { fontSize, source: 'dom-computed' }
+              });
+              document.dispatchEvent(fontSizeEvent);
+            } else {
+              console.log("RichTextEditor: No paragraphs found to check font size");
+            }
+          }
         }
       } catch (error) {
-        console.error("Error synchronizing font sizes:", error);
+        console.error("Error checking initial font size:", error);
       }
     };
     
-    // Sync after editor is fully initialized and content is loaded
+    // Run after editor is mounted and content is loaded
     const timeoutId = setTimeout(() => {
-      syncFontSizes();
+      initialSizeCheck();
       
-      // Force editor to update font size if needed
+      // Force one more refresh to ensure consistency
       const fontSizeEvent = new CustomEvent('tiptap-clear-font-cache');
       document.dispatchEvent(fontSizeEvent);
-    }, 200);
+    }, 300);
     
     return () => clearTimeout(timeoutId);
   }, [editor, isEditable, content]);

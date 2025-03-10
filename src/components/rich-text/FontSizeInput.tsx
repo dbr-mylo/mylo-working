@@ -18,41 +18,49 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
 
   // Extract the numeric value from the font size string (e.g., "16px" -> 16)
   const getNumericValue = (fontSizeValue: string): number => {
-    const match = fontSizeValue.match(/^(\d+)/);
-    return match ? parseInt(match[1], 10) : 16; // Default to 16 if parsing fails
+    if (!fontSizeValue) return 16; // Default size if no value provided
+    const match = String(fontSizeValue).match(/^(\d+(\.\d+)?)/);
+    return match ? parseFloat(match[1]) : 16; // Default to 16 if parsing fails
   };
 
-  const [size, setSize] = useState<number>(getNumericValue(value));
+  const initialSize = getNumericValue(value);
+  const [size, setSize] = useState<number>(initialSize);
+  
+  // Log initial value received
+  useEffect(() => {
+    console.log("FontSizeInput: Initialized with value:", value, "parsed to size:", initialSize);
+  }, []);
   
   // Handler for font size events with priority for DOM-sourced values
   const handleFontSizeEvent = useCallback((event: CustomEvent) => {
-    if (event.detail) {
-      // Prioritize DOM-sourced values for accurate representation
-      const isDomSource = event.detail.source === 'dom';
-      const newSize = getNumericValue(event.detail.fontSize);
-      
-      console.log(`FontSizeInput: Received font size event (${isDomSource ? 'DOM source' : 'command source'})`, 
-        event.detail.fontSize, "parsed to:", newSize);
-      
-      // Always update from DOM source or if size is different
-      if (isDomSource || newSize !== size) {
-        setSize(newSize);
-        // Only propagate changes from DOM to ensure toolbar matches DOM
-        if (isDomSource && onChange && !disabled) {
-          onChange(`${newSize}px`);
-        }
+    if (!event.detail || !event.detail.fontSize) return;
+    
+    // Prioritize DOM-sourced values for accurate representation
+    const source = event.detail.source || 'unknown';
+    const isDomSource = source.includes('dom');
+    const newSize = getNumericValue(event.detail.fontSize);
+    
+    console.log(`FontSizeInput: Received font size event (${source})`, 
+      event.detail.fontSize, "parsed to:", newSize, "current size:", size);
+    
+    // Always update from DOM source or if size is different
+    if (isDomSource || Math.abs(newSize - size) > 0.1) {
+      setSize(newSize);
+      // Propagate changes from DOM to ensure toolbar matches DOM
+      if (!disabled) {
+        onChange(`${newSize}px`);
       }
     }
-  }, [size, onChange, disabled]);
+  }, [size, onChange, disabled, getNumericValue]);
   
   // Update internal state when external value changes
   useEffect(() => {
     const newSize = getNumericValue(value);
-    if (newSize !== size) {
-      setSize(newSize);
+    if (Math.abs(newSize - size) > 0.1) {
       console.log("FontSizeInput: Value prop changed to:", value, "internal size updated to:", newSize);
+      setSize(newSize);
     }
-  }, [value, size]);
+  }, [value]);
 
   // Listen for font size events from the editor
   useEffect(() => {
@@ -74,7 +82,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     };
   }, [handleFontSizeEvent]);
 
-  // Directly check DOM for font size in selection
+  // Check DOM directly for font size in selection whenever selection changes
   useEffect(() => {
     if (disabled) return;
     
@@ -84,44 +92,55 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           if (!range.collapsed) {
-            const span = document.createElement('span');
-            range.surroundContents(span);
-            const computedStyle = window.getComputedStyle(span);
-            const domFontSize = computedStyle.fontSize;
+            // For text selection, get a direct DOM measurement
+            const selectedNode = range.commonAncestorContainer;
+            let targetElement: HTMLElement | null = null;
             
-            if (domFontSize) {
-              const newSize = getNumericValue(domFontSize);
-              console.log("FontSizeInput: DOM font size check:", domFontSize, "parsed to:", newSize);
+            if (selectedNode.nodeType === Node.TEXT_NODE && selectedNode.parentElement) {
+              targetElement = selectedNode.parentElement;
+            } else if (selectedNode.nodeType === Node.ELEMENT_NODE) {
+              targetElement = selectedNode as HTMLElement;
+            }
+            
+            if (targetElement) {
+              // Check if element has inline style first
+              let domFontSize = targetElement.style.fontSize;
               
-              if (newSize !== size) {
-                setSize(newSize);
-                onChange(`${newSize}px`);
+              // If no inline style, use computed style
+              if (!domFontSize) {
+                domFontSize = window.getComputedStyle(targetElement).fontSize;
+              }
+              
+              if (domFontSize) {
+                const newSize = getNumericValue(domFontSize);
+                console.log("FontSizeInput: DOM font size check:", domFontSize, "parsed to:", newSize);
+                
+                if (Math.abs(newSize - size) > 0.1) {
+                  setSize(newSize);
+                  onChange(`${newSize}px`);
+                  
+                  // Broadcast to other components
+                  const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
+                    detail: { fontSize: domFontSize, source: 'direct-dom-check' }
+                  });
+                  document.dispatchEvent(fontSizeEvent);
+                }
               }
             }
-            
-            // Remove the temporary span
-            const parent = span.parentNode;
-            while (span.firstChild) {
-              parent?.insertBefore(span.firstChild, span);
-            }
-            parent?.removeChild(span);
           }
         }
       } catch (error) {
         // Safely ignore errors during DOM inspection
+        console.error("Error checking DOM font size:", error);
       }
     };
     
-    // Check DOM on focus
-    const handleFocus = () => {
-      checkDomFontSize();
-    };
-    
-    document.addEventListener('selectionchange', handleFocus);
+    // Check DOM on selection change
+    document.addEventListener('selectionchange', checkDomFontSize);
     return () => {
-      document.removeEventListener('selectionchange', handleFocus);
+      document.removeEventListener('selectionchange', checkDomFontSize);
     };
-  }, [size, onChange, disabled]);
+  }, [size, onChange, disabled, getNumericValue]);
 
   const incrementSize = () => {
     if (disabled) return;
@@ -162,16 +181,19 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
     
-    let inputValue = e.target.value.replace(/\D/g, '');
+    let inputValue = e.target.value.replace(/[^\d.]/g, ''); // Allow digits and decimal point
     
     if (inputValue === '') {
       setSize(0);
       return;
     }
     
-    let newSize = parseInt(inputValue, 10);
+    let newSize = parseFloat(inputValue);
     // Enforce min/max limits
     newSize = Math.max(Math.min(newSize, MAX_FONT_SIZE), 0);
+    
+    // Round to one decimal place for better usability
+    newSize = Math.round(newSize * 10) / 10;
     
     setSize(newSize);
     console.log("FontSizeInput: Manual change to:", newSize);
@@ -223,7 +245,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
           onChange={handleInputChange}
           onBlur={handleBlur}
           className="w-10 h-7 px-0"
-          maxLength={2}
+          maxLength={4} // Allow for decimals like "10.5"
           disabled={disabled}
           style={{ 
             textAlign: 'left',

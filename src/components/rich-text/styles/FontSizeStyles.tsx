@@ -78,9 +78,20 @@ export const FontSizeStyles = () => {
         font-size: unset !important;
       }
 
-      /* Fix for DOM and editor toolbar mismatch */
+      /* Remove this default value that might be causing issues */
       .ProseMirror .preserve-styling[style*="font-size:20px"] {
-        font-size: 20px !important;
+        /* This was forcing 20px specifically */
+        /* font-size: 20px !important; */
+      }
+      
+      /* Initial default size that matches the toolbar's default */
+      .ProseMirror {
+        font-size: 16px !important;
+      }
+      
+      /* Only apply specific sizes when explicitly set */
+      .ProseMirror p:not([style*="font-size"]) {
+        font-size: 16px !important;
       }
     `}</style>
   );

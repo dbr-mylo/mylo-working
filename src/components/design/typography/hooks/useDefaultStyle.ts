@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { TextStyle } from "@/lib/types";
 import { Editor } from "@tiptap/react";
 import { useToast } from "@/hooks/use-toast";
-import { textStyleStore } from "@/stores/textStyles";
+import { getDefaultStyle } from "@/stores/textStyles/utils";
 
 export const useDefaultStyle = (editorInstance?: Editor | null) => {
   const { toast } = useToast();
@@ -32,22 +32,35 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     }
 
     try {
-      const defaultStyle = await textStyleStore.getDefaultStyle();
+      // First try to get the user-configured default style
+      const storedDefaultStyle = await getDefaultStyle();
       
+      // Reset all marks and styles first
       editorInstance.chain()
         .focus()
         .unsetAllMarks()
-        .setFontFamily(null)
-        .setFontSize(null)
-        .setColor(null)
         .run();
-        
-      if (defaultStyle) {
+      
+      if (storedDefaultStyle) {
+        // Apply stored default style if available
         editorInstance.chain()
           .focus()
-          .setFontFamily(defaultStyle.fontFamily || 'Inter')
-          .setFontSize(defaultStyle.fontSize || '16px')
-          .setColor(defaultStyle.color || '#000000')
+          .setFontFamily(storedDefaultStyle.fontFamily || 'Inter')
+          .setFontSize(storedDefaultStyle.fontSize || '16px')
+          .setColor(storedDefaultStyle.color || '#000000')
+          .run();
+          
+        toast({
+          title: "Default style applied",
+          description: "Text has been reset to default formatting"
+        });
+      } else {
+        // Apply fallback default style
+        editorInstance.chain()
+          .focus()
+          .setFontFamily(defaultTextStyle.fontFamily)
+          .setFontSize(defaultTextStyle.fontSize)
+          .setColor(defaultTextStyle.color)
           .run();
           
         toast({

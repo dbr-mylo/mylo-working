@@ -9,23 +9,26 @@ import { IndentButtons } from './toolbar/IndentButtons';
 import { StyleDropdown } from './StyleDropdown';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface EditorToolbarProps {
   editor: Editor | null;
   currentFont: string;
   currentColor: string;
+  currentFontSize?: string;
   onFontChange: (font: string) => void;
   onColorChange: (color: string) => void;
+  onFontSizeChange?: (size: string) => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   editor,
   currentFont,
   currentColor,
+  currentFontSize = '16px',
   onFontChange,
-  onColorChange
+  onColorChange,
+  onFontSizeChange
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -44,7 +47,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     e.stopPropagation(); // Stop propagation to prevent editor from capturing the input
     
     const size = e.target.value.replace(/\D/g, '');
-    if (editor) {
+    if (editor && onFontSizeChange) {
+      onFontSizeChange(`${size}px`);
+    } else if (editor) {
       editor.chain().focus().setFontSize(`${size}px`).run();
     }
   };
@@ -55,8 +60,10 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     const currentSize = parseInt(getCurrentFontSize(), 10);
     const newSize = Math.min(currentSize + 1, 72); // Max size 72px
-    if (editor) {
-      editor.chain().setFontSize(`${newSize}px`).run();
+    if (editor && onFontSizeChange) {
+      onFontSizeChange(`${newSize}px`);
+    } else if (editor) {
+      editor.chain().focus().setFontSize(`${newSize}px`).run();
     }
   };
 
@@ -66,17 +73,25 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     
     const currentSize = parseInt(getCurrentFontSize(), 10);
     const newSize = Math.max(currentSize - 1, 8); // Min size 8px
-    if (editor) {
-      editor.chain().setFontSize(`${newSize}px`).run();
+    if (editor && onFontSizeChange) {
+      onFontSizeChange(`${newSize}px`);
+    } else if (editor) {
+      editor.chain().focus().setFontSize(`${newSize}px`).run();
     }
   };
 
-  const getCurrentFontSize = () => {
+  const getCurrentFontSize = (): string => {
+    if (currentFontSize) {
+      return currentFontSize.replace(/[^0-9.]/g, '');
+    }
+    
     if (!editor) return "16";
+    
     const attrs = editor.getAttributes('textStyle');
     if (attrs.fontSize) {
       return attrs.fontSize.replace(/[^0-9.]/g, '');
     }
+    
     return "16";
   };
 

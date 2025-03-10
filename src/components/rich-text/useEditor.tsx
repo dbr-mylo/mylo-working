@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -57,6 +58,8 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     editable: isEditable,
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
+      // Update current font state for the toolbar display
+      updateStyleState(editor);
       // Let's log the HTML on update to check color preservation
       console.log("Editor HTML on update:", editor.getHTML().substring(0, 200));
     },
@@ -92,32 +95,50 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
+  // Helper function to update the style state based on current selection
+  const updateStyleState = (editorInstance: Editor) => {
+    if (!editorInstance) return;
+    
+    // Get attributes from the current selection
+    const attrs = editorInstance.getAttributes('textStyle');
+    
+    // Update font state if available in selection
+    if (attrs.fontFamily) {
+      setCurrentFont(attrs.fontFamily);
+    }
+    
+    // Update font size state if available in selection
+    if (attrs.fontSize) {
+      setCurrentFontSize(attrs.fontSize);
+    }
+    
+    // Update color state if available in selection
+    if (attrs.color) {
+      setCurrentColor(attrs.color);
+    }
+  };
+
   // Monitor selection changes to update state
   useEffect(() => {
     if (editor) {
-      const updateStyleState = () => {
-        // Update color state
-        const { color, fontSize, fontFamily } = editor.getAttributes('textStyle');
-        
-        if (color) {
-          setCurrentColor(color);
-        }
-        
-        if (fontSize) {
-          setCurrentFontSize(fontSize);
-        }
-        
-        if (fontFamily) {
-          setCurrentFont(fontFamily);
-        }
+      // Function to update UI state based on current selection
+      const handleSelectionUpdate = () => {
+        updateStyleState(editor);
       };
       
-      editor.on('selectionUpdate', updateStyleState);
-      editor.on('transaction', updateStyleState);
+      // Register event listeners
+      editor.on('selectionUpdate', handleSelectionUpdate);
+      editor.on('focus', handleSelectionUpdate);
+      editor.on('transaction', handleSelectionUpdate);
       
+      // Initial update when editor is mounted
+      handleSelectionUpdate();
+      
+      // Cleanup listeners on unmount
       return () => {
-        editor.off('selectionUpdate', updateStyleState);
-        editor.off('transaction', updateStyleState);
+        editor.off('selectionUpdate', handleSelectionUpdate);
+        editor.off('focus', handleSelectionUpdate);
+        editor.off('transaction', handleSelectionUpdate);
       };
     }
   }, [editor]);

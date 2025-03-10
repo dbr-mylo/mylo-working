@@ -8,6 +8,7 @@ import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { DesignerToolbar } from "@/components/design/DesignerToolbar";
 import { DesignerContent } from "@/components/design/DesignerContent";
 import { DesignerPreview } from "@/components/design/DesignerPreview";
+import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { useDesignPanel } from "@/components/design/hooks/useDesignPanel";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {

@@ -130,6 +130,26 @@ export const EditorStyles = () => {
         font-size: attr(data-font-size px) !important;
       }
       
+      /* Data style attribute selector for additional compatibility */
+      .ProseMirror [data-style-fontSize] {
+        font-size: attr(data-style-fontSize) !important;
+      }
+      
+      /* Override any existing Tailwind prose classes that might set font sizes */
+      .prose *, .prose-sm * {
+        --tw-prose-body: none !important;
+      }
+      
+      /* Ensure that parent font-size doesn't override child with explicit size */
+      .prose [style*="font-size"], 
+      .prose-sm [style*="font-size"],
+      .prose [data-font-size], 
+      .prose-sm [data-font-size],
+      .prose .custom-font-size, 
+      .prose-sm .custom-font-size {
+        font-size: unset !important;
+      }
+      
       /* Comprehensive color preservation rules - enhanced for bold text */
       /* Base rule to ensure all elements inherit their parent's color */
       .ProseMirror * {

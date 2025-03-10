@@ -33,10 +33,36 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     }
   }, [value, size]);
 
-  // Clear caches on component mount to reset any stored values
+  // Listen for font size events from the editor
   useEffect(() => {
+    const handleFontSizeParsed = (event: CustomEvent) => {
+      if (event.detail && event.detail.fontSize) {
+        const parsedSize = getNumericValue(event.detail.fontSize);
+        console.log("FontSizeInput: Received parsed font size event:", event.detail.fontSize, "parsed to:", parsedSize);
+        setSize(parsedSize);
+      }
+    };
+    
+    const handleFontSizeChanged = (event: CustomEvent) => {
+      if (event.detail && event.detail.fontSize) {
+        const newSize = getNumericValue(event.detail.fontSize);
+        console.log("FontSizeInput: Received font size changed event:", event.detail.fontSize, "parsed to:", newSize);
+        setSize(newSize);
+      }
+    };
+    
+    // Add event listeners for custom font size events
+    document.addEventListener('tiptap-font-size-parsed', handleFontSizeParsed as EventListener);
+    document.addEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
+    
+    // Clear caches on component mount
     clearCachedStylesByPattern(['font-size']);
-    localStorage.removeItem('editor_font_size');
+    
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeParsed as EventListener);
+      document.removeEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
+    };
   }, []);
 
   const incrementSize = () => {

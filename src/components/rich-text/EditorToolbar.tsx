@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,6 +45,24 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     }
   }, []);
   
+  // Listen for font size change events from the FontSize extension
+  useEffect(() => {
+    const handleFontSizeChanged = (event: CustomEvent) => {
+      if (event.detail && event.detail.fontSize) {
+        console.log("EditorToolbar: Font size change event detected:", event.detail.fontSize);
+        setCurrentFontSize(event.detail.fontSize);
+      }
+    };
+    
+    document.addEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
+    document.addEventListener('tiptap-font-size-parsed', handleFontSizeChanged as EventListener);
+    
+    return () => {
+      document.removeEventListener('tiptap-font-size-changed', handleFontSizeChanged as EventListener);
+      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeChanged as EventListener);
+    };
+  }, []);
+  
   useEffect(() => {
     if (!editor) return;
     
@@ -56,6 +73,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       if (fontSize) {
         console.log("EditorToolbar: Font size from editor:", fontSize);
         setCurrentFontSize(fontSize);
+        
+        // Update localStorage to keep things in sync
+        localStorage.setItem('editor_font_size', fontSize);
       } else {
         // Check if we have a stored value to fall back on
         const storedFontSize = localStorage.getItem('editor_font_size');
@@ -80,6 +100,27 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     // Add a log of the HTML content whenever selection changes
     const logHtmlContent = () => {
       console.log("Current HTML at selection:", editor.getHTML().substring(0, 100));
+      
+      // Check for font-size style in the current selection
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (range) {
+          const span = document.createElement('span');
+          range.surroundContents(span);
+          const computedStyle = window.getComputedStyle(span);
+          console.log("Computed font-size at selection:", computedStyle.fontSize);
+          
+          // Unwrap the span to restore the original DOM
+          const parent = span.parentNode;
+          if (parent) {
+            while (span.firstChild) {
+              parent.insertBefore(span.firstChild, span);
+            }
+            parent.removeChild(span);
+          }
+        }
+      }
     };
     
     editor.on('selectionUpdate', updateFontSize);

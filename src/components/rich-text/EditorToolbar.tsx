@@ -29,6 +29,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const isDesigner = role === "designer";
   const buttonSize = isDesigner ? "xxs" : "sm";
   const [currentFontSize, setCurrentFontSize] = useState("16px");
+  const [isTextSelected, setIsTextSelected] = useState(false);
   
   // Clear all cached styles/preferences on component mount
   useEffect(() => {
@@ -64,15 +65,24 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         }
       }
     };
+
+    const updateTextSelection = () => {
+      const { from, to } = editor.state.selection;
+      const isSelected = from !== to;
+      setIsTextSelected(isSelected);
+    };
     
     editor.on('selectionUpdate', updateFontSize);
+    editor.on('selectionUpdate', updateTextSelection);
     editor.on('transaction', updateFontSize);
     
     // Initial update
     updateFontSize();
+    updateTextSelection();
     
     return () => {
       editor.off('selectionUpdate', updateFontSize);
+      editor.off('selectionUpdate', updateTextSelection);
       editor.off('transaction', updateFontSize);
     };
   }, [editor]);
@@ -103,7 +113,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <FontSizeInput 
           value={currentFontSize} 
           onChange={handleFontSizeChange} 
-          className="ml-1 mr-1" 
+          className="ml-1 mr-1"
+          disabled={!isTextSelected}
         />
       )}
       

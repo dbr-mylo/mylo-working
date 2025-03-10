@@ -10,6 +10,10 @@ interface FontSizeControlProps {
 }
 
 export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
+  // Constants for min/max font size values according to requirements
+  const MIN_FONT_SIZE = 1;
+  const MAX_FONT_SIZE = 99;
+
   // Format pixel values to numbers for sliders
   const getNumberFromPixelValue = (value: string): number => {
     return parseFloat(value.replace("px", ""));
@@ -25,8 +29,8 @@ export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
         <Slider 
           id="font-size"
           value={[getNumberFromPixelValue(value)]} 
-          min={8} 
-          max={72} 
+          min={MIN_FONT_SIZE} 
+          max={MAX_FONT_SIZE} 
           step={1}
           onValueChange={(val) => onChange(`${val[0]}px`)}
           className="flex-1"
@@ -34,10 +38,15 @@ export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
         <Input
           type="number"
           value={getNumberFromPixelValue(value)}
-          onChange={(e) => onChange(`${e.target.value}px`)}
+          onChange={(e) => {
+            const numValue = parseInt(e.target.value, 10);
+            if (!isNaN(numValue) && numValue >= MIN_FONT_SIZE && numValue <= MAX_FONT_SIZE) {
+              onChange(`${numValue}px`);
+            }
+          }}
           className="w-14"
-          min={8}
-          max={72}
+          min={MIN_FONT_SIZE}
+          max={MAX_FONT_SIZE}
         />
       </div>
     </div>

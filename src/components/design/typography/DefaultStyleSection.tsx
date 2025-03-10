@@ -37,13 +37,15 @@ export const DefaultStyleSection = ({
       y: e.clientY,
       isOpen: true
     });
-    
-    // Also call the parent's onContextMenu
     onContextMenu(e, style);
   };
   
   const handleCloseContextMenu = () => {
     setContextMenu(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleCloseModal = () => {
+    setDefaultFontModalOpen(false);
   };
   
   return (
@@ -55,7 +57,6 @@ export const DefaultStyleSection = ({
         isDefaultStyleSection={true}
       />
       
-      {/* Context menu for default style */}
       <StyleContextMenu
         x={contextMenu.x}
         y={contextMenu.y}
@@ -68,10 +69,9 @@ export const DefaultStyleSection = ({
         onDefaultFontChange={handleOpenDefaultFontModal}
       />
       
-      {/* Modal for changing default font */}
       <DefaultFontModal 
         isOpen={defaultFontModalOpen}
-        onClose={() => setDefaultFontModalOpen(false)}
+        onClose={handleCloseModal}
         defaultStyle={defaultStyle}
       />
     </div>

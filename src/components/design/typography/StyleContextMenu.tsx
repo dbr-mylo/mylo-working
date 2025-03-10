@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -64,7 +63,6 @@ export const StyleContextMenu = ({
   const handleChangeFontClick = () => {
     if (onDefaultFontChange) {
       onDefaultFontChange();
-      onClose();
     }
   };
 
@@ -87,7 +85,7 @@ export const StyleContextMenu = ({
       <Card className="w-48 p-1 text-xs">
         {isDefaultStyle ? (
           <button
-            className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
+            className="w-full text-left px-2 py-1.5 hover:bg-accent rounded"
             onClick={handleChangeFontClick}
           >
             Change Default Font

@@ -70,6 +70,17 @@ export const PreferencesDialog = ({
         title: "Font unit updated",
         description: `All text styles have been converted to ${value === 'px' ? 'pixels' : 'points'}.`,
       });
+      
+      // Force refresh the application by briefly closing and reopening the dialog
+      onOpenChange(false);
+      setTimeout(() => {
+        onOpenChange(true);
+      }, 100);
+      
+      // Force a window reload to ensure all components reflect the new unit
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error("Error updating font unit:", error);
       toast({
@@ -122,6 +133,10 @@ export const PreferencesDialog = ({
             Converting text styles...
           </div>
         )}
+        
+        <div className="mt-4 text-xs text-muted-foreground">
+          <p>Note: Changing the font unit will refresh the application to apply changes to all components.</p>
+        </div>
       </DialogContent>
     </Dialog>
   );

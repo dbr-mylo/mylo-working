@@ -36,16 +36,19 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
     
     if (inputValue === '') {
       setSize(0);
       return;
     }
     
-    const parsedValue = parseInt(inputValue, 10);
-    const newSize = Math.min(parsedValue, 99); // Ensure we don't exceed 99
+    // Ensure the value doesn't exceed 99
+    if (parseInt(inputValue, 10) > 99) {
+      inputValue = '99';
+    }
     
+    const newSize = parseInt(inputValue, 10);
     setSize(newSize);
     onChange(`${newSize}px`);
   };

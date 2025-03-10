@@ -23,7 +23,6 @@ export const StyleListItemCard = ({
       key={style.id}
       className={`p-1.5 hover:bg-accent cursor-pointer ${isDefaultStyleSection ? 'bg-slate-50' : ''} ${isPersistentDefaultStyle ? 'bg-gray-50 border-dashed' : ''}`}
       onClick={() => onStyleClick(style)}
-      onContextMenu={(e) => onContextMenu(e, style)}
     >
       <div className="flex items-center gap-1.5">
         {isPersistentDefaultStyle ? (

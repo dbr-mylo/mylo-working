@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Copy, Trash, Edit, Settings } from "lucide-react";
-import { FontPicker } from "@/components/rich-text/FontPicker";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +15,7 @@ export interface StyleContextMenuProps {
   onDelete: (id: string) => void;
   onDuplicate: (style: TextStyle) => void;
   onClose: () => void;
+  onDefaultFontChange?: () => void;
   containerRef?: React.RefObject<HTMLDivElement>;
 }
 
@@ -29,10 +28,10 @@ export const StyleContextMenu = ({
   onDelete,
   onDuplicate,
   onClose,
+  onDefaultFontChange,
   containerRef
 }: StyleContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,29 +62,10 @@ export const StyleContextMenu = ({
     onDelete(style.id);
   };
 
-  const handleFontChange = async (font: string) => {
-    try {
-      // Update the default style with the new font
-      const updatedStyle = {
-        ...style,
-        fontFamily: font
-      };
-      
-      await textStyleStore.saveTextStyle(updatedStyle);
-      
-      toast({
-        title: "Default font updated",
-        description: `Template will now use ${font} as the default font`
-      });
-      
+  const handleChangeFontClick = () => {
+    if (onDefaultFontChange) {
+      onDefaultFontChange();
       onClose();
-    } catch (error) {
-      console.error("Error updating default font:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update default font",
-        variant: "destructive"
-      });
     }
   };
 
@@ -107,14 +87,13 @@ export const StyleContextMenu = ({
     >
       <Card className="w-48 p-1 text-xs">
         {isDefaultStyle ? (
-          <div className="p-2">
-            <div className="mb-2 font-medium">Default Font</div>
-            <FontPicker 
-              value={style.fontFamily || 'Inter'} 
-              onChange={handleFontChange}
-              className="w-full"
-            />
-          </div>
+          <button
+            className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
+            onClick={handleChangeFontClick}
+          >
+            <Settings className="h-3.5 w-3.5" />
+            Change Default Font
+          </button>
         ) : (
           <>
             <button

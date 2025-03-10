@@ -18,13 +18,13 @@ export const useStyleContextMenu = (
     y: 0,
     isOpen: false
   });
+  
+  const [defaultFontModalOpen, setDefaultFontModalOpen] = useState(false);
 
   const handleContextMenu = (
     e: React.MouseEvent,
     style: TextStyle
   ) => {
-    if (style.isPersistent) return;
-    
     e.preventDefault();
     setContextMenu({
       style,
@@ -62,12 +62,23 @@ export const useStyleContextMenu = (
       handleCloseContextMenu();
     }
   };
+  
+  const handleOpenDefaultFontModal = () => {
+    setDefaultFontModalOpen(true);
+  };
+  
+  const handleCloseDefaultFontModal = () => {
+    setDefaultFontModalOpen(false);
+  };
 
   return {
     contextMenu,
+    defaultFontModalOpen,
     handleContextMenu,
     handleCloseContextMenu,
     handleDelete,
-    handleDuplicate
+    handleDuplicate,
+    handleOpenDefaultFontModal,
+    handleCloseDefaultFontModal
   };
 };

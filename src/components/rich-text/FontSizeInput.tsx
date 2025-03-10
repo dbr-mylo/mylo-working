@@ -63,16 +63,17 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
 
   return (
     <div className={`flex items-center ${className || ''}`}>
-      <div className="relative flex items-center w-full">
+      <div className="relative flex items-center">
         <Input
           type="text"
           value={size}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          className="pr-8 h-7 text-center"
+          className="w-10 h-7 px-0 text-center"
           maxLength={2}
           style={{ 
-            textAlign: 'center'
+            textAlign: 'center',
+            padding: '0.25rem 0'
           }}
         />
         <div className="absolute right-0 flex flex-col h-full">

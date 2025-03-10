@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -113,33 +112,12 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         }
       };
       
-      // Add more detailed logging for debugging
-      const logStyleChanges = () => {
-        const textStyleAttrs = editor.getAttributes('textStyle');
-        const isBoldActive = editor.isActive('bold');
-        const boldAttrs = isBoldActive ? editor.getAttributes('bold') : 'not active';
-        const html = editor.getHTML();
-        
-        console.log("Style change detected:", {
-          textStyle: textStyleAttrs,
-          isBold: isBoldActive,
-          boldAttrs,
-          selectionHtml: html.substring(0, 100) + (html.length > 100 ? '...' : '')
-        });
-      };
-      
       editor.on('selectionUpdate', updateStyleState);
       editor.on('transaction', updateStyleState);
-      
-      // Add debug logging
-      editor.on('selectionUpdate', logStyleChanges);
-      editor.on('transaction', logStyleChanges);
       
       return () => {
         editor.off('selectionUpdate', updateStyleState);
         editor.off('transaction', updateStyleState);
-        editor.off('selectionUpdate', logStyleChanges);
-        editor.off('transaction', logStyleChanges);
       };
     }
   }, [editor]);

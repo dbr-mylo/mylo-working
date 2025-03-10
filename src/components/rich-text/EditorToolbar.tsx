@@ -59,6 +59,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-2">
         <FontPicker value={currentFont} onChange={handleFontChange} />
+        
         {isDesigner && (
           <div className="flex items-center gap-1">
             <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>

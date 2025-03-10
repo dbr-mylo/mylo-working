@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { useDocument } from "@/hooks/document";
 import { useParams } from "react-router-dom";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
+import { useTextStyleOperations, useTextStyleCSS } from "@/stores/textStyles";
 
 interface UseDesignPanelProps {
   content: string;
@@ -19,7 +19,6 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
   const currentUnit = preferences?.typography?.fontUnit || 'px';
   
   const [designContent, setDesignContent] = useState(content);
-  const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   
   const [isPreviewVisible, setIsPreviewVisible] = useState(() => {
@@ -29,16 +28,11 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
     return true;
   });
   
-  // Update CSS when preferences change
-  useEffect(() => {
-    const generateStyles = async () => {
-      const styles = await textStyleStore.getTextStyles();
-      const css = textStyleStore.generateCSSFromTextStyles(styles, currentUnit);
-      setCustomStyles(css);
-    };
-    
-    generateStyles();
-  }, [currentUnit]);
+  // Use the new useTextStyleCSS hook instead of generating CSS directly
+  const { css: customStyles } = useTextStyleCSS(currentUnit);
+  
+  // Get the text style operations
+  const { saveTextStyle } = useTextStyleOperations();
   
   useEffect(() => {
     if (isStandalone) {
@@ -56,10 +50,6 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
   const handleContentChange = (newContent: string) => {
     setDesignContent(newContent);
   };
-  
-  const handleStylesChange = (styles: string) => {
-    setCustomStyles(styles);
-  };
 
   const handleElementSelect = (element: HTMLElement | null) => {
     setSelectedElement(element);
@@ -75,11 +65,7 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
 
   const handleSaveStyle = async (styleData: any) => {
     try {
-      await textStyleStore.saveTextStyle(styleData);
-      
-      const styles = await textStyleStore.getTextStyles();
-      const css = textStyleStore.generateCSSFromTextStyles(styles, currentUnit);
-      setCustomStyles(css);
+      await saveTextStyle(styleData);
       
       toast({
         title: "Style saved",
@@ -106,7 +92,6 @@ export const useDesignPanel = ({ content, isEditable, isStandalone }: UseDesignP
     isPreviewVisible,
     currentUnit,
     handleContentChange,
-    handleStylesChange,
     handleElementSelect,
     handleStyleChange,
     handleSaveStyle,

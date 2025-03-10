@@ -10,7 +10,7 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
 
   const defaultTextStyle: TextStyle = useMemo(() => ({
     id: 'default-text-reset',
-    name: 'Default Text',
+    name: 'Clear to Default',
     fontFamily: 'Inter',
     fontSize: '16px',
     fontWeight: '400',

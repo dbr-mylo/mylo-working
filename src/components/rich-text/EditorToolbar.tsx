@@ -57,23 +57,25 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <FontPicker value={currentFont} onChange={handleFontChange} />
-      <ColorPicker value={currentColor} onChange={onColorChange} />
+      <div className="flex items-center gap-2">
+        <FontPicker value={currentFont} onChange={handleFontChange} />
+        {isDesigner && (
+          <div className="flex items-center gap-1">
+            <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
+            <Input
+              id="font-size"
+              type="number"
+              min={8}
+              max={72}
+              value={getCurrentFontSize()}
+              onChange={handleFontSizeChange}
+              className="w-14 h-7 text-xs"
+            />
+          </div>
+        )}
+      </div>
       
-      {isDesigner && (
-        <div className="flex items-center gap-1">
-          <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
-          <Input
-            id="font-size"
-            type="number"
-            min={8}
-            max={72}
-            value={getCurrentFontSize()}
-            onChange={handleFontSizeChange}
-            className="w-14 h-7 text-xs"
-          />
-        </div>
-      )}
+      <ColorPicker value={currentColor} onChange={onColorChange} />
       
       <FormatButtons 
         editor={editor}

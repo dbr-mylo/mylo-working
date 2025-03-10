@@ -11,6 +11,7 @@ import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
+import { PreferencesButton } from "@/components/design/preferences/PreferencesButton";
 
 export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
   const { width } = useWindowSize();
@@ -111,7 +112,8 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
                     />
                   </div>
                 )}
-                <div className="flex items-center h-full">
+                <div className="flex items-center gap-2 h-full">
+                  <PreferencesButton />
                   <button
                     onClick={handleTogglePreview}
                     className="flex items-center gap-2 h-7 px-3 text-xs border border-gray-200 rounded bg-white hover:bg-gray-50"

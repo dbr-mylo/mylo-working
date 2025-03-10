@@ -19,7 +19,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Main heading style',
     isSystem: true,
     isDefault: false,
-    isUsed: true,  // Default header is considered used
+    isUsed: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -36,14 +36,14 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Secondary heading style',
     isSystem: true,
     isDefault: false,
-    isUsed: true,  // Default header is considered used
+    isUsed: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
   {
     id: 'body',
     name: 'Body Text',
-    fontFamily: 'Inter',
+    fontFamily: 'Merriweather',
     fontSize: '16px',
     fontWeight: '400',
     color: '#333333',
@@ -53,14 +53,14 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Default paragraph style',
     isSystem: true,
     isDefault: true,
-    isUsed: true,  // Default body text is considered used
+    isUsed: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
   {
     id: 'caption',
     name: 'Caption',
-    fontFamily: 'Inter',
+    fontFamily: 'Merriweather',
     fontSize: '14px',
     fontWeight: '400',
     color: '#666666',
@@ -70,7 +70,7 @@ export const DEFAULT_TEXT_STYLES: TextStyle[] = [
     description: 'Caption text style',
     isSystem: true,
     isDefault: false,
-    isUsed: false,  // Caption may not be used by default
+    isUsed: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }

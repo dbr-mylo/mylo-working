@@ -28,7 +28,7 @@ export const FontFamily = Extension.create({
         types: this.options.types,
         attributes: {
           fontFamily: {
-            default: 'Inter',
+            default: 'Merriweather',
             parseHTML: element => element.style.fontFamily?.replace(/['"]/g, ''),
             renderHTML: attributes => {
               if (!attributes.fontFamily) return {};

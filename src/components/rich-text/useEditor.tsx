@@ -18,7 +18,7 @@ export interface UseEditorProps {
 }
 
 export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorProps) => {
-  const [currentFont, setCurrentFont] = useState('Inter');
+  const [currentFont, setCurrentFont] = useState('Merriweather');
   const [currentColor, setCurrentColor] = useState('#000000');
   const { role } = useAuth();
   const isDesigner = role === "designer";

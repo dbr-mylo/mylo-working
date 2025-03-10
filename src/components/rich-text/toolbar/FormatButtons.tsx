@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, List, ListOrdered, TextIcon, RemoveFormatting } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, RemoveFormatting, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -12,20 +11,40 @@ interface FormatButtonsProps {
   buttonSize: "default" | "sm" | "xs" | "xxs" | "lg" | "icon" | null | undefined;
 }
 
-const fontSizes = [
-  { label: 'Small', value: '12px' },
-  { label: 'Normal', value: '16px' },
-  { label: 'Large', value: '20px' },
-  { label: 'Extra Large', value: '24px' },
-];
+// Define font size increments in pixels
+const fontSizeIncrements = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 60, 72];
 
 export const FormatButtons: React.FC<FormatButtonsProps> = ({ 
   editor, 
   currentColor,
   buttonSize 
 }) => {
-  const handleFontSizeChange = (size: string) => {
-    editor.chain().focus().setFontSize(size).run();
+  const getCurrentFontSize = (): number => {
+    const attrs = editor.getAttributes('textStyle');
+    if (attrs.fontSize) {
+      // Extract numeric value from fontSize (e.g., '16px' -> 16)
+      const size = parseInt(attrs.fontSize.replace('px', ''));
+      return isNaN(size) ? 16 : size; // Default to 16 if parsing fails
+    }
+    return 16; // Default font size
+  };
+
+  const increaseFontSize = () => {
+    const currentSize = getCurrentFontSize();
+    // Find the next size up
+    const nextSize = fontSizeIncrements.find(size => size > currentSize);
+    if (nextSize) {
+      editor.chain().focus().setFontSize(`${nextSize}px`).run();
+    }
+  };
+
+  const decreaseFontSize = () => {
+    const currentSize = getCurrentFontSize();
+    // Find the next size down (reverse search)
+    const nextSize = [...fontSizeIncrements].reverse().find(size => size < currentSize);
+    if (nextSize) {
+      editor.chain().focus().setFontSize(`${nextSize}px`).run();
+    }
   };
 
   const clearFormatting = () => {
@@ -39,20 +58,24 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
 
   return (
     <>
-      <Select onValueChange={handleFontSizeChange}>
-        <SelectTrigger className="w-[100px] h-7">
-          <SelectValue placeholder="Size">
-            <TextIcon className="h-4 w-4" />
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {fontSizes.map((size) => (
-            <SelectItem key={size.value} value={size.value}>
-              {size.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex items-center space-x-1">
+        <Button
+          variant="outline"
+          size={buttonSize}
+          onClick={decreaseFontSize}
+          title="Decrease font size"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size={buttonSize}
+          onClick={increaseFontSize}
+          title="Increase font size"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+      </div>
 
       <Button
         variant="outline"

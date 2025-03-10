@@ -10,6 +10,9 @@ import { TextAlignmentControl } from "./TextAlignmentControl";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Link2 } from "lucide-react";
+import { useDocument } from "@/hooks/document";
+import { useParams } from "react-router-dom";
+import { convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
 
 interface StyleFormControlsProps {
   styles: TypographyStyles;
@@ -18,12 +21,30 @@ interface StyleFormControlsProps {
 }
 
 export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleFormControlsProps) => {
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const currentUnit = preferences?.typography?.fontUnit || 'px';
+  
   // Function to determine if a property is inherited from parent
   const isInherited = (property: keyof TypographyStyles): boolean => {
     if (!parentStyle) return false;
     
     // Check if this property matches the parent's property
     return parentStyle[property] === styles[property];
+  };
+
+  // Handle font size changes
+  const handleFontSizeChange = (value: string) => {
+    onStyleChange("fontSize", value);
+  };
+  
+  // Get the display font size according to the current unit
+  const getDisplayFontSize = (): string => {
+    const { value, unit } = extractFontSizeValue(styles.fontSize);
+    if (unit === currentUnit) {
+      return styles.fontSize;
+    }
+    return convertFontSize(styles.fontSize, unit, currentUnit);
   };
   
   return (
@@ -59,8 +80,8 @@ export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleF
           {/* Font Size */}
           <div className="space-y-1">
             <FontSizeControl 
-              value={styles.fontSize} 
-              onChange={(value) => onStyleChange("fontSize", value)} 
+              value={getDisplayFontSize()} 
+              onChange={handleFontSizeChange} 
             />
             {isInherited("fontSize") && (
               <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">

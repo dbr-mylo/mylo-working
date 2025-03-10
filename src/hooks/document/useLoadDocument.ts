@@ -3,19 +3,22 @@ import { useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Document } from "@/lib/types";
 import { loadDocument as loadDocumentUtil } from "@/utils/documentFetchUtils";
+import { TemplatePreferences } from "@/lib/types/preferences";
 
 interface UseLoadDocumentProps {
   setContent: (content: string) => void;
   setInitialContent: (content: string) => void;
   setDocumentTitle: (title: string) => void;
   setCurrentDocumentId: (id: string | null) => void;
+  setPreferences: (preferences: TemplatePreferences | null) => void;
 }
 
 export function useLoadDocument({
   setContent,
   setInitialContent,
   setDocumentTitle,
-  setCurrentDocumentId
+  setCurrentDocumentId,
+  setPreferences
 }: UseLoadDocumentProps) {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -35,11 +38,12 @@ export function useLoadDocument({
     setInitialContent(loadedDoc.initialContent);
     setDocumentTitle(loadedDoc.documentTitle);
     setCurrentDocumentId(loadedDoc.currentDocumentId);
+    setPreferences(loadedDoc.preferences);
     
     setTimeout(() => {
       console.log("Verification - content after setting:", loadedDoc.content.substring(0, 100));
     }, 100);
-  }, [setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, role]);
+  }, [setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setPreferences, role]);
 
   return { loadDocument };
 }

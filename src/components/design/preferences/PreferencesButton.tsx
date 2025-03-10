@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PreferencesDialog } from "./PreferencesDialog";
 import { TemplatePreferences } from "@/lib/types/preferences";
+import { useDocument } from "@/hooks/document";
 
 const defaultPreferences: TemplatePreferences = {
   typography: {
@@ -13,12 +14,20 @@ const defaultPreferences: TemplatePreferences = {
 
 export const PreferencesButton = () => {
   const [open, setOpen] = useState(false);
-  const [preferences, setPreferences] = useState<TemplatePreferences>(defaultPreferences);
+  const { preferences, setPreferences } = useDocument();
+
+  // Initialize preferences if they don't exist
+  useEffect(() => {
+    if (!preferences) {
+      setPreferences?.(defaultPreferences);
+    }
+  }, [preferences, setPreferences]);
 
   const handlePreferencesChange = (newPreferences: TemplatePreferences) => {
-    setPreferences(newPreferences);
-    // TODO: Save preferences to template
-    console.log('New preferences:', newPreferences);
+    if (setPreferences) {
+      setPreferences(newPreferences);
+      console.log('New preferences:', newPreferences);
+    }
   };
 
   return (
@@ -36,7 +45,7 @@ export const PreferencesButton = () => {
       <PreferencesDialog
         open={open}
         onOpenChange={setOpen}
-        preferences={preferences}
+        preferences={preferences || defaultPreferences}
         onPreferencesChange={handlePreferencesChange}
       />
     </>

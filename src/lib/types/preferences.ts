@@ -1,7 +1,7 @@
 
 export interface TemplatePreferences {
   typography: {
-    fontUnit: 'px' | 'pt';
+    fontUnit: FontUnit;
   };
 }
 

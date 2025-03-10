@@ -7,6 +7,7 @@ import {
   fetchDocumentFromLocalStorage 
 } from "@/utils/documentFetchUtils";
 import { UserRole } from "@/lib/types";
+import { TemplatePreferences } from "@/lib/types/preferences";
 
 interface UseFetchDocumentProps {
   setContent: (content: string) => void;
@@ -14,6 +15,7 @@ interface UseFetchDocumentProps {
   setDocumentTitle: (title: string) => void;
   setCurrentDocumentId: (id: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
+  setPreferences: (preferences: TemplatePreferences | null) => void;
   user: any | null;
   role: UserRole | null;
   navigate: NavigateFunction;
@@ -25,6 +27,7 @@ export function useFetchDocument({
   setDocumentTitle,
   setCurrentDocumentId,
   setIsLoading,
+  setPreferences,
   user,
   role,
   navigate
@@ -59,6 +62,22 @@ export function useFetchDocument({
             setDocumentTitle(data.title);
           }
           setCurrentDocumentId(data.id);
+          
+          // Handle preferences
+          if (data.preferences) {
+            try {
+              const parsedPreferences = typeof data.preferences === 'string' 
+                ? JSON.parse(data.preferences) 
+                : data.preferences;
+              setPreferences(parsedPreferences);
+              console.log("Loaded preferences:", parsedPreferences);
+            } catch (error) {
+              console.error("Error parsing preferences:", error);
+              setPreferences(null);
+            }
+          } else {
+            setPreferences(null);
+          }
         } else {
           navigate('/');
           return;
@@ -87,6 +106,22 @@ export function useFetchDocument({
           
           setDocumentTitle(doc.title || "");
           setCurrentDocumentId(doc.id);
+          
+          // Handle preferences
+          if (doc.preferences) {
+            try {
+              const parsedPreferences = typeof doc.preferences === 'string' 
+                ? JSON.parse(doc.preferences) 
+                : doc.preferences;
+              setPreferences(parsedPreferences);
+              console.log("Loaded preferences:", parsedPreferences);
+            } catch (error) {
+              console.error("Error parsing preferences:", error);
+              setPreferences(null);
+            }
+          } else {
+            setPreferences(null);
+          }
         } else {
           console.error(`${isDesigner ? "Template" : "Document"} not found in localStorage for ${role}, redirecting to home`);
           navigate('/');
@@ -103,7 +138,7 @@ export function useFetchDocument({
     } finally {
       setIsLoading(false);
     }
-  }, [user, role, setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, navigate, toast]);
+  }, [user, role, setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, setPreferences, navigate, toast]);
 
   return { fetchDocument };
 }

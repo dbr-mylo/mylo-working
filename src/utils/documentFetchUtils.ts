@@ -2,12 +2,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
+import { TemplatePreferences } from "@/lib/types/preferences";
 
 export async function fetchDocumentFromSupabase(id: string, userId: string, toast: ReturnType<typeof useToast>["toast"]) {
   try {
     const { data, error } = await supabase
       .from('documents')
-      .select('id, content, title, updated_at')
+      .select('id, content, title, updated_at, preferences')
       .eq('id', id)
       .eq('owner_id', userId)
       .single();
@@ -110,10 +111,25 @@ export function loadDocument(doc: Document) {
   
   console.log("Loading document content:", docContent ? docContent.substring(0, 50) + "..." : "empty");
   
+  // Parse preferences if they exist
+  let preferences = null;
+  if (doc.preferences) {
+    try {
+      if (typeof doc.preferences === 'string') {
+        preferences = JSON.parse(doc.preferences);
+      } else {
+        preferences = doc.preferences;
+      }
+    } catch (error) {
+      console.error("Error parsing preferences:", error);
+    }
+  }
+  
   return {
     content: docContent,
     initialContent: docContent,
     documentTitle: doc.title || "",
-    currentDocumentId: doc.id
+    currentDocumentId: doc.id,
+    preferences: preferences as TemplatePreferences | null
   };
 }

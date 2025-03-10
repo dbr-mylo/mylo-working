@@ -2,6 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import type { Document } from "@/lib/types";
+import { TemplatePreferences } from "@/lib/types/preferences";
 
 export async function saveDocumentToSupabase(
   documentId: string | null,
@@ -9,7 +10,8 @@ export async function saveDocumentToSupabase(
   title: string,
   userId: string,
   toast: any,
-  isTemplate: boolean = false
+  isTemplate: boolean = false,
+  preferences?: TemplatePreferences
 ): Promise<Document | null> {
   try {
     const now = new Date().toISOString();
@@ -25,7 +27,8 @@ export async function saveDocumentToSupabase(
           title: documentTitle,
           content: content,
           updated_at: now,
-          is_template: isTemplate
+          is_template: isTemplate,
+          preferences: preferences ? JSON.stringify(preferences) : null
         })
         .eq('id', documentId)
         .eq('owner_id', userId)
@@ -49,7 +52,8 @@ export async function saveDocumentToSupabase(
           owner_id: userId,
           created_at: now,
           updated_at: now,
-          is_template: isTemplate
+          is_template: isTemplate,
+          preferences: preferences ? JSON.stringify(preferences) : null
         })
         .select()
         .single();
@@ -75,7 +79,8 @@ export function saveDocumentToLocalStorage(
   content: string,
   title: string,
   role: string,
-  toast: any
+  toast: any,
+  preferences?: TemplatePreferences
 ): Document | null {
   try {
     const now = new Date().toISOString();
@@ -106,7 +111,8 @@ export function saveDocumentToLocalStorage(
           ...documents[documentIndex],
           title: documentTitle,
           content: content,
-          updated_at: now
+          updated_at: now,
+          preferences: preferences ? JSON.stringify(preferences) : null
         };
         
         documents[documentIndex] = savedDocument;
@@ -117,7 +123,8 @@ export function saveDocumentToLocalStorage(
           id: documentId,
           title: documentTitle,
           content: content,
-          updated_at: now
+          updated_at: now,
+          preferences: preferences ? JSON.stringify(preferences) : null
         };
         
         documents.push(savedDocument);
@@ -131,7 +138,8 @@ export function saveDocumentToLocalStorage(
         id: uuidv4(),
         title: documentTitle,
         content: content,
-        updated_at: now
+        updated_at: now,
+        preferences: preferences ? JSON.stringify(preferences) : null
       };
       
       documents.push(savedDocument);

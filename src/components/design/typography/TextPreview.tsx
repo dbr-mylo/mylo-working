@@ -21,14 +21,17 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
   const { preferences } = useDocument(documentId);
   const currentUnit = preferences?.typography?.fontUnit || 'px';
   
-  // Format font size for display
-  const displayFontSize = () => {
-    const { value, unit } = extractFontSizeValue(styles.fontSize);
+  // Format font size for display and ensure it's in the correct unit
+  const formatFontSize = (fontSize: string): string => {
+    const { value, unit } = extractFontSizeValue(fontSize);
     if (unit === currentUnit) {
-      return styles.fontSize;
+      return fontSize;
     }
-    return convertFontSize(styles.fontSize, unit, currentUnit);
+    return convertFontSize(fontSize, unit, currentUnit);
   };
+  
+  // Get the converted font size
+  const displayFontSize = formatFontSize(styles.fontSize);
   
   return (
     <div className="flex flex-col space-y-0.5">
@@ -37,7 +40,7 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
         <div className="flex items-center space-x-1 text-xs text-muted-foreground">
           <span>{styles.fontFamily}</span>
           <span>•</span>
-          <span>{displayFontSize()}</span>
+          <span>{displayFontSize}</span>
           <span>•</span>
           <span>Weight: {styles.fontWeight}</span>
         </div>
@@ -47,7 +50,7 @@ export const TextPreview = ({ styles }: TextPreviewProps) => {
         className="py-1"
         style={{ 
           fontFamily: styles.fontFamily,
-          fontSize: styles.fontSize,
+          fontSize: displayFontSize,
           fontWeight: styles.fontWeight,
           color: styles.color,
           lineHeight: styles.lineHeight,

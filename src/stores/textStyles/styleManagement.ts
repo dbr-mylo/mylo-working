@@ -71,13 +71,27 @@ export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyl
       created_at: style.id ? undefined : now
     };
     
-    // If this style is being set as default, update all other styles
+    // If this style is being set as default, update all other styles and convert their units
     if (styleToSave.isDefault) {
       await setDefaultStyle(styleToSave.id);
+      
+      // Convert all existing styles to the new unit
+      const updatedStyles = existingStyles.map(existingStyle => {
+        if (existingStyle.fontSize) {
+          const { value, unit } = extractFontSizeValue(existingStyle.fontSize);
+          if (unit !== currentUnit) {
+            existingStyle.fontSize = convertFontSize(existingStyle.fontSize, unit, currentUnit);
+          }
+        }
+        return existingStyle;
+      });
+      
+      // Save all updated styles
+      localStorage.setItem('text_styles', JSON.stringify(updatedStyles));
+    } else {
+      // Save just this style
+      saveLocalTextStyle(styleToSave);
     }
-    
-    // Save locally
-    saveLocalTextStyle(styleToSave);
     
     console.log("Saved style with fontSize:", styleToSave.fontSize, "unit:", currentUnit);
     

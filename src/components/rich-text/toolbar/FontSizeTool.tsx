@@ -13,7 +13,15 @@ interface FontSizeToolProps {
 export const FontSizeTool = ({ editor, currentUnit = 'px' }: FontSizeToolProps) => {
   const getCurrentFontSize = (): string => {
     const attrs = editor.getAttributes('textStyle');
-    return attrs.fontSize || `16${currentUnit}`;
+    const fontSize = attrs.fontSize || `16${currentUnit}`;
+    
+    // Convert to current unit if needed
+    const { value, unit } = extractFontSizeValue(fontSize);
+    if (unit === currentUnit) {
+      return fontSize;
+    }
+    const convertedValue = currentUnit === 'pt' ? value * 0.75 : value * 1.333;
+    return `${Math.round(convertedValue)}${currentUnit}`;
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -3,15 +3,9 @@ import { Editor } from "@tiptap/react";
 import { TextStyle } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { textStyleStore } from "@/stores/textStyles";
-import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
-import { useDocument } from "@/hooks/document";
-import { useParams } from "react-router-dom";
 
 export const useStyleApplication = (editor: Editor | null) => {
   const { toast } = useToast();
-  const { documentId } = useParams<{ documentId?: string }>();
-  const { preferences } = useDocument(documentId);
-  const currentUnit = preferences?.typography?.fontUnit || 'px';
 
   /**
    * Apply a text style to the currently selected text in the editor
@@ -44,21 +38,10 @@ export const useStyleApplication = (editor: Editor | null) => {
         toast({
           title: "No text selected",
           description: "Please select some text to apply the style",
-          variant: "default",
+          variant: "default", // Changed from "warning" to "default"
         });
         return;
       }
-
-      // Convert font size to the current unit if needed
-      let fontSize = styleToApply.fontSize;
-      if (currentUnit) {
-        const { value, unit } = extractFontSizeValue(fontSize);
-        if (unit !== currentUnit) {
-          fontSize = convertFontSize(fontSize, unit, currentUnit);
-        }
-      }
-
-      console.log(`Applying style to selection with font size: ${fontSize} (${currentUnit})`);
 
       // Start a chain to apply multiple style properties
       let chain = editor.chain().focus();
@@ -68,8 +51,8 @@ export const useStyleApplication = (editor: Editor | null) => {
         chain = chain.setFontFamily(styleToApply.fontFamily);
       }
       
-      if (fontSize) {
-        chain = chain.setFontSize(fontSize);
+      if (styleToApply.fontSize) {
+        chain = chain.setFontSize(styleToApply.fontSize);
       }
       
       if (styleToApply.color) {
@@ -93,6 +76,10 @@ export const useStyleApplication = (editor: Editor | null) => {
         title: "Style applied",
         description: `Applied "${styleToApply.name}" to selected text`,
       });
+      
+      // Log to console for debugging
+      console.log(`Applied style "${styleToApply.name}" to selection:`, styleToApply);
+      
     } catch (error) {
       console.error("Error applying style:", error);
       toast({

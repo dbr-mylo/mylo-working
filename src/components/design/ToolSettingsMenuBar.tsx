@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
-import { PreferencesButton } from './preferences/PreferencesButton';
+import { cn } from '@/lib/utils';
 
 interface ToolSettingsMenuBarProps {
   children?: React.ReactNode;
@@ -31,9 +31,8 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
               <div className="flex-1">
                 {toolbar}
               </div>
-              <div className="flex items-center gap-2 h-full pr-4">
-                {isDesigner && <PreferencesButton />}
-                {onTogglePreview && (
+              {onTogglePreview && (
+                <div className="flex items-center h-full pr-4">
                   <Button
                     variant="outline"
                     size={buttonSize}
@@ -44,28 +43,23 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
                     {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     Preview
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           ) : children || (
             <div className="flex items-center justify-between h-10 px-4">
               <span className="text-sm text-slate-500">Tool settings will appear here</span>
-              {isDesigner && (
-                <div className="flex items-center gap-2">
-                  <PreferencesButton />
-                  {onTogglePreview && (
-                    <Button
-                      variant="outline"
-                      size={buttonSize}
-                      onClick={onTogglePreview}
-                      title={isPreviewVisible ? "Hide preview" : "Show preview"}
-                      className="flex items-center gap-2"
-                    >
-                      {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      Preview
-                    </Button>
-                  )}
-                </div>
+              {isDesigner && onTogglePreview && (
+                <Button
+                  variant="outline"
+                  size={buttonSize}
+                  onClick={onTogglePreview}
+                  title={isPreviewVisible ? "Hide preview" : "Show preview"}
+                  className="flex items-center gap-2"
+                >
+                  {isPreviewVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Preview
+                </Button>
               )}
             </div>
           )}

@@ -7,24 +7,15 @@ import { useTextStyles } from "@/components/design/typography/hooks/useTextStyle
 import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Text } from "lucide-react";
-import { useDocument } from "@/hooks/document";
-import { useParams } from "react-router-dom";
-import { FontUnit } from "@/lib/types/preferences";
 
 interface StyleDropdownProps {
   editor: Editor;
-  currentUnit?: FontUnit;
 }
 
-export const StyleDropdown = ({ editor, currentUnit }: StyleDropdownProps) => {
+export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles, isLoading } = useTextStyles();
   const { applyStyleToSelection } = useStyleApplication(editor);
-  const { documentId } = useParams<{ documentId?: string }>();
-  const { preferences } = useDocument(documentId);
-  
-  // Use either provided unit or document preferences
-  const effectiveUnit = currentUnit || preferences?.typography?.fontUnit || 'px';
 
   const handleStyleSelect = (styleId: string) => {
     applyStyleToSelection(styleId);

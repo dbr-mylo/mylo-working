@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
-import { TemplatePreferences } from "@/lib/types/preferences";
 
 export async function fetchDocumentFromSupabase(id: string, userId: string, toast: ReturnType<typeof useToast>["toast"]) {
   try {
@@ -11,7 +10,7 @@ export async function fetchDocumentFromSupabase(id: string, userId: string, toas
       .select('id, content, title, updated_at')
       .eq('id', id)
       .eq('owner_id', userId)
-      .maybeSingle();
+      .single();
     
     if (error) {
       if (error.code === 'PGRST116') {
@@ -29,17 +28,12 @@ export async function fetchDocumentFromSupabase(id: string, userId: string, toas
       console.log("Loaded document from Supabase:", data);
       console.log("Content from Supabase:", data.content ? data.content.substring(0, 100) : "empty");
       
-      const documentWithPreferences: Document = {
-        ...data,
-        preferences: null
-      };
-      
       toast({
         title: "Document loaded",
         description: "Your document has been loaded.",
       });
       
-      return documentWithPreferences;
+      return data;
     }
     return null;
   } catch (error) {
@@ -67,6 +61,7 @@ export function fetchDocumentFromLocalStorage(id: string, role: string, toast: R
         console.log(`Found ${role} document in localStorage:`, doc);
         console.log(`Document content from localStorage:`, doc.content ? doc.content.substring(0, 100) : "empty");
         
+        // Ensure content is a string
         if (doc.content && typeof doc.content === 'object') {
           doc.content = JSON.stringify(doc.content);
         } else if (doc.content === null || doc.content === undefined) {
@@ -108,38 +103,17 @@ export function loadDocument(doc: Document) {
     if (typeof doc.content === 'string') {
       docContent = doc.content;
     } else {
+      // If not a string, convert to string (e.g., if it's an object)
       docContent = JSON.stringify(doc.content);
     }
   }
   
   console.log("Loading document content:", docContent ? docContent.substring(0, 50) + "..." : "empty");
   
-  // Transform the preferences to match the expected structure
-  let typedPreferences: TemplatePreferences | null = null;
-  
-  if (doc.preferences) {
-    // Either parse from string or use the object directly
-    const rawPreferences = typeof doc.preferences === 'string' 
-      ? JSON.parse(doc.preferences) 
-      : doc.preferences;
-    
-    // Ensure the object has the required typography property
-    if (!rawPreferences.typography) {
-      typedPreferences = {
-        typography: {
-          fontUnit: 'px' // Default value
-        }
-      };
-    } else {
-      typedPreferences = rawPreferences as TemplatePreferences;
-    }
-  }
-  
   return {
     content: docContent,
     initialContent: docContent,
     documentTitle: doc.title || "",
-    currentDocumentId: doc.id,
-    preferences: typedPreferences
+    currentDocumentId: doc.id
   };
 }

@@ -9,10 +9,6 @@ declare module '@tiptap/core' {
        * Set the font family
        */
       setFontFamily: (fontFamily: string) => ReturnType;
-      /**
-       * Unset the font family
-       */
-      unsetFontFamily: () => ReturnType;
     }
   }
 }
@@ -80,11 +76,6 @@ export const FontFamily = Extension.create({
     return {
       setFontFamily: (fontFamily: string) => ({ commands }) => {
         return commands.setMark('textStyle', { fontFamily });
-      },
-      unsetFontFamily: () => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontFamily: null })
-          .run();
       },
     };
   },

@@ -7,13 +7,11 @@ import {
   saveDocumentToSupabase, 
   saveDocumentToLocalStorage 
 } from "@/utils/documentSaveUtils";
-import { TemplatePreferences } from "@/lib/types/preferences";
 
 interface UseSaveDocumentProps {
   content: string;
   currentDocumentId: string | null;
   documentTitle: string;
-  preferences: TemplatePreferences | null;
   user: any | null;
   role: UserRole | null;
   setInitialContent: (content: string) => void;
@@ -25,7 +23,6 @@ export function useSaveDocument({
   content,
   currentDocumentId,
   documentTitle,
-  preferences,
   user,
   role,
   setInitialContent,
@@ -40,7 +37,6 @@ export function useSaveDocument({
     try {
       console.log(`Saving ${itemType} with content length:`, content ? content.length : 0);
       console.log("Content preview:", content ? content.substring(0, 100) : "empty");
-      console.log("Preferences:", preferences);
       
       if (!content || !content.trim()) {
         toast({
@@ -61,8 +57,7 @@ export function useSaveDocument({
           documentTitle, 
           user.id,
           toast,
-          isDesigner,
-          preferences
+          isDesigner
         );
       } else if (role) {
         console.log(`Saving ${itemType} for ${role} user`);
@@ -71,8 +66,7 @@ export function useSaveDocument({
           content,
           documentTitle,
           role,
-          toast,
-          preferences
+          toast
         );
       } else {
         toast({
@@ -111,7 +105,7 @@ export function useSaveDocument({
       });
       return;
     }
-  }, [content, currentDocumentId, documentTitle, preferences, user, role, setInitialContent, setCurrentDocumentId, navigate, toast]);
+  }, [content, currentDocumentId, documentTitle, user, role, setInitialContent, setCurrentDocumentId, navigate, toast]);
 
   return { saveDocument };
 }

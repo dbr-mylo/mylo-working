@@ -1,3 +1,4 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -14,7 +15,6 @@ export interface Document {
   title: string;
   content: string;
   updated_at: string;
-  preferences?: TemplatePreferences | null;
 }
 
 export interface UseDocumentReturn {
@@ -25,8 +25,6 @@ export interface UseDocumentReturn {
   setDocumentTitle: React.Dispatch<React.SetStateAction<string>>;
   currentDocumentId: string | null;
   isLoading: boolean;
-  preferences: TemplatePreferences | null;
-  setPreferences: React.Dispatch<React.SetStateAction<TemplatePreferences | null>>;
   saveDocument: () => Promise<void>;
   loadDocument: (doc: Document) => void;
 }
@@ -121,7 +119,3 @@ export interface TypographyStyles {
   letterSpacing: string;
   textAlign: string;
 }
-
-// Import and re-export the TemplatePreferences type using 'export type'
-import type { TemplatePreferences } from "./types/preferences";
-export type { TemplatePreferences };

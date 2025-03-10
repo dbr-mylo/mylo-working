@@ -10,47 +10,20 @@ import { TextAlignmentControl } from "./TextAlignmentControl";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Link2 } from "lucide-react";
-import { useDocument } from "@/hooks/document";
-import { useParams } from "react-router-dom";
-import { convertFontSize, extractFontSizeValue, FontUnit } from "@/lib/types/preferences";
 
 interface StyleFormControlsProps {
   styles: TypographyStyles;
   onStyleChange: (property: keyof TypographyStyles, value: string) => void;
   parentStyle?: TextStyle | null;
-  currentUnit?: FontUnit;
 }
 
-export const StyleFormControls = ({ 
-  styles, 
-  onStyleChange, 
-  parentStyle,
-  currentUnit: propCurrentUnit
-}: StyleFormControlsProps) => {
-  const { documentId } = useParams<{ documentId?: string }>();
-  const { preferences } = useDocument(documentId);
-  const currentUnit = propCurrentUnit || preferences?.typography?.fontUnit || 'px';
-  
+export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleFormControlsProps) => {
   // Function to determine if a property is inherited from parent
   const isInherited = (property: keyof TypographyStyles): boolean => {
     if (!parentStyle) return false;
     
     // Check if this property matches the parent's property
     return parentStyle[property] === styles[property];
-  };
-
-  // Handle font size changes
-  const handleFontSizeChange = (value: string) => {
-    onStyleChange("fontSize", value);
-  };
-  
-  // Get the display font size according to the current unit
-  const getDisplayFontSize = (): string => {
-    const { value, unit } = extractFontSizeValue(styles.fontSize);
-    if (unit === currentUnit) {
-      return styles.fontSize;
-    }
-    return convertFontSize(styles.fontSize, unit, currentUnit);
   };
   
   return (
@@ -86,9 +59,8 @@ export const StyleFormControls = ({
           {/* Font Size */}
           <div className="space-y-1">
             <FontSizeControl 
-              value={getDisplayFontSize()} 
-              onChange={handleFontSizeChange}
-              currentUnit={currentUnit}
+              value={styles.fontSize} 
+              onChange={(value) => onStyleChange("fontSize", value)} 
             />
             {isInherited("fontSize") && (
               <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">

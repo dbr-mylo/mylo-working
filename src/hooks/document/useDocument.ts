@@ -7,7 +7,6 @@ import type { Document, UseDocumentReturn } from "@/lib/types";
 import { useFetchDocument } from "./useFetchDocument";
 import { useSaveDocument } from "./useSaveDocument";
 import { useLoadDocument } from "./useLoadDocument";
-import { TemplatePreferences } from "@/lib/types/preferences";
 
 export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const [content, setContent] = useState("");
@@ -15,7 +14,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const [documentTitle, setDocumentTitle] = useState("");
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [preferences, setPreferences] = useState<TemplatePreferences | null>(null);
   const { user, role } = useAuth();
   const navigate = useNavigate();
   
@@ -32,7 +30,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setDocumentTitle,
     setCurrentDocumentId,
     setIsLoading,
-    setPreferences,
     user,
     role,
     navigate
@@ -43,7 +40,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     content,
     currentDocumentId,
     documentTitle,
-    preferences,
     user,
     role,
     setInitialContent,
@@ -56,8 +52,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setContent,
     setInitialContent,
     setDocumentTitle,
-    setCurrentDocumentId,
-    setPreferences
+    setCurrentDocumentId
   });
 
   // Fetch document when documentId changes
@@ -70,7 +65,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       setInitialContent("");
       setDocumentTitle("");
       setCurrentDocumentId(null);
-      setPreferences(null);
       setIsLoading(false);
     }
   }, [documentId, user, role, fetchDocument]);
@@ -83,8 +77,6 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setDocumentTitle,
     currentDocumentId,
     isLoading,
-    preferences,
-    setPreferences,
     saveDocument,
     loadDocument
   };

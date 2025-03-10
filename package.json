@@ -44,14 +44,8 @@
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-bullet-list": "^2.11.5",
     "@tiptap/extension-color": "^2.11.5",
-    "@tiptap/extension-font-family": "^2.1.16",
-    "@tiptap/extension-image": "^2.1.16",
-    "@tiptap/extension-link": "^2.1.16",
     "@tiptap/extension-list-item": "^2.11.5",
     "@tiptap/extension-ordered-list": "^2.11.5",
-    "@tiptap/extension-placeholder": "^2.1.16",
-    "@tiptap/extension-text-align": "^2.1.16",
-    "@tiptap/extension-underline": "^2.1.16",
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
@@ -76,8 +70,7 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
     "vaul": "^0.9.3",
-    "zod": "^3.23.8",
-    "zustand": "^4.4.7"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

@@ -10,9 +10,6 @@ import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
 import { StyleInheritance } from "./StyleInheritance";
-import { useDocument } from "@/hooks/document";
-import { useParams } from "react-router-dom";
-import { convertFontSize, extractFontSizeValue, FontUnit } from "@/lib/types/preferences";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -30,15 +27,6 @@ export const StyleForm = ({
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
   const [parentStyle, setParentStyle] = useState<TextStyle | null>(null);
-  const { documentId } = useParams<{ documentId?: string }>();
-  const { preferences } = useDocument(documentId);
-  const currentUnit = preferences?.typography?.fontUnit || 'px';
-  
-  // Convert initial values if needed
-  const convertedInitialValues = initialValues ? {
-    ...initialValues,
-    fontSize: convertInitialFontSize(initialValues.fontSize, currentUnit)
-  } : undefined;
   
   const {
     name,
@@ -48,22 +36,10 @@ export const StyleForm = ({
     styles,
     handleStyleChange
   } = useStyleForm({
-    initialValues: convertedInitialValues,
+    initialValues,
     externalStyles,
-    externalStyleChange,
-    currentUnit
+    externalStyleChange
   });
-
-  // Convert font size when preference changes
-  useEffect(() => {
-    if (!initialValues || externalStyles) return;
-    
-    const { value, unit } = extractFontSizeValue(initialValues.fontSize);
-    if (unit !== currentUnit) {
-      const convertedSize = convertFontSize(initialValues.fontSize, unit, currentUnit);
-      handleStyleChange('fontSize', convertedSize);
-    }
-  }, [currentUnit, initialValues, externalStyles]);
 
   // Fetch parent style details when parentId changes
   useEffect(() => {
@@ -76,14 +52,7 @@ export const StyleForm = ({
       try {
         // Get the style with all inherited properties
         const style = await textStyleStore.getStyleWithInheritance(parentId);
-        if (style) {
-          // Convert font size of parent style if needed
-          const { unit } = extractFontSizeValue(style.fontSize);
-          if (unit !== currentUnit) {
-            style.fontSize = convertFontSize(style.fontSize, unit, currentUnit);
-          }
-          setParentStyle(style);
-        }
+        setParentStyle(style);
       } catch (error) {
         console.error("Error fetching parent style:", error);
         setParentStyle(null);
@@ -91,28 +60,18 @@ export const StyleForm = ({
     };
     
     fetchParentStyle();
-  }, [parentId, currentUnit]);
+  }, [parentId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     if (!onSubmit) return;
     
     e.preventDefault();
-    
-    // Ensure font size is in the correct format before saving
-    const stylesToSave = { ...styles };
-    
-    // Convert to the appropriate unit if necessary
-    const { unit } = extractFontSizeValue(stylesToSave.fontSize);
-    if (unit !== currentUnit) {
-      stylesToSave.fontSize = convertFontSize(stylesToSave.fontSize, unit, currentUnit);
-    }
-    
     onSubmit({
       name,
       selector: "", // Providing empty string as default
       description: "", // Providing empty string as default
       parentId,
-      ...stylesToSave,
+      ...styles,
     });
   };
 
@@ -165,7 +124,6 @@ export const StyleForm = ({
             styles={styles}
             onStyleChange={handleStyleChange}
             parentStyle={parentStyle}
-            currentUnit={currentUnit}
           />
         </TabsContent>
       </Tabs>
@@ -188,11 +146,4 @@ export const StyleForm = ({
       )}
     </form>
   );
-};
-
-// Helper function to convert initial font size to the current unit
-const convertInitialFontSize = (fontSize: string, currentUnit: string) => {
-  const { unit, value } = extractFontSizeValue(fontSize);
-  if (unit === currentUnit) return fontSize;
-  return convertFontSize(fontSize, unit, currentUnit as 'px' | 'pt');
 };

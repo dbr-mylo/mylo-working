@@ -1,8 +1,8 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { TextStyle } from "@/lib/types";
 import { getLocalTextStyles, saveLocalTextStyle } from "./storage";
 import { DEFAULT_STYLE_ID_KEY } from "./constants";
-import { FontUnit, convertFontSize, extractFontSizeValue } from "@/lib/types/preferences";
 
 export interface SaveTextStyleInput {
   id?: string;
@@ -32,26 +32,11 @@ export interface SaveTextStyleInput {
 export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyle> => {
   try {
     const now = new Date().toISOString();
-    
-    // Get current font unit preference from stored styles
-    const existingStyles = getLocalTextStyles();
-    const defaultStyle = existingStyles.find(s => s.isDefault);
-    const currentUnit: FontUnit = defaultStyle?.fontSize?.endsWith('pt') ? 'pt' : 'px';
-    
-    // Convert font size to current unit if needed
-    let fontSize = style.fontSize;
-    if (fontSize) {
-      const { value, unit } = extractFontSizeValue(fontSize);
-      if (unit !== currentUnit) {
-        fontSize = convertFontSize(fontSize, unit, currentUnit);
-      }
-    }
-    
     const styleToSave: TextStyle = {
       id: style.id || uuidv4(),
       name: style.name,
       fontFamily: style.fontFamily,
-      fontSize: fontSize,
+      fontSize: style.fontSize,
       fontWeight: style.fontWeight,
       color: style.color,
       lineHeight: style.lineHeight,
@@ -60,7 +45,7 @@ export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyl
       description: style.description,
       parentId: style.parentId,
       isDefault: style.isDefault || false,
-      isUsed: style.isUsed !== undefined ? style.isUsed : false,
+      isUsed: style.isUsed !== undefined ? style.isUsed : false, // Default to false if not specified
       textAlign: style.textAlign,
       textTransform: style.textTransform,
       textDecoration: style.textDecoration,
@@ -68,33 +53,16 @@ export const saveTextStyle = async (style: SaveTextStyleInput): Promise<TextStyl
       marginBottom: style.marginBottom,
       customProperties: style.customProperties,
       updated_at: now,
-      created_at: style.id ? undefined : now
+      created_at: style.id ? undefined : now // Only set created_at for new styles
     };
     
-    // If this style is being set as default, update all other styles and convert their units
+    // If this style is being set as default, update all other styles
     if (styleToSave.isDefault) {
       await setDefaultStyle(styleToSave.id);
-      
-      // Convert all existing styles to the new unit
-      const updatedStyles = existingStyles.map(existingStyle => {
-        if (existingStyle.fontSize) {
-          const { value, unit } = extractFontSizeValue(existingStyle.fontSize);
-          if (unit !== currentUnit) {
-            existingStyle.fontSize = convertFontSize(existingStyle.fontSize, unit, currentUnit);
-          }
-        }
-        return existingStyle;
-      });
-      
-      // Save all updated styles
-      localStorage.setItem('text_styles', JSON.stringify(updatedStyles));
-    } else {
-      // Save just this style
-      saveLocalTextStyle(styleToSave);
     }
     
-    console.log("Saved style with fontSize:", styleToSave.fontSize, "unit:", currentUnit);
-    
+    // Save locally for now
+    saveLocalTextStyle(styleToSave);
     return styleToSave;
   } catch (error) {
     console.error('Error in saveTextStyle:', error);

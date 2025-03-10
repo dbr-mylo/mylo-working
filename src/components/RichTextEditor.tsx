@@ -83,7 +83,7 @@ export const RichTextEditor = ({
   };
 
   return (
-    <div className={`prose prose-sm max-w-none ${isDesigner ? 'designer-editor' : ''}`}>
+    <div className={`prose prose-sm max-w-none font-editor ${isDesigner ? 'designer-editor' : ''}`}>
       <EditorStyles />
       <style>
         {`
@@ -121,7 +121,7 @@ export const RichTextEditor = ({
         </div>
       )}
       
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="font-editor" />
     </div>
   );
 };

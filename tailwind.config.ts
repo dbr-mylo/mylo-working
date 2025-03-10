@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -70,7 +71,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Merriweather", "system-ui", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"], // UI font is Inter
+        editor: ["Merriweather", "serif"], // Editor font is Merriweather
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,5 +102,10 @@
   
   [data-role="designer"] .designer-specific-element {
     border-bottom: none !important;
+  }
+  
+  /* Apply editor font specifically to editor content */
+  .ProseMirror {
+    font-family: theme('fontFamily.editor');
   }
 }

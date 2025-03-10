@@ -17,8 +17,8 @@ export const clearFormatting = (editor: Editor) => {
     editor.chain()
       .focus()
       .unsetAllMarks() // Remove all marks (bold, italic, etc.)
-      .unsetFontFamily() // Clear font family
-      .unsetColor() // Clear color
+      .setFontFamily('Inter') // Reset font family to default
+      .setColor('#000000') // Reset color to default
       .setFontSize('16px') // Reset font size to default
       .run();
       

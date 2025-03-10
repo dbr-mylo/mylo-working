@@ -23,7 +23,7 @@ export const StyleListItemCard = ({
       key={style.id}
       className={`p-1.5 hover:bg-accent cursor-pointer ${isDefaultStyleSection ? 'bg-slate-50' : ''} ${isPersistentDefaultStyle ? 'bg-gray-50 border-dashed' : ''}`}
       onClick={() => onStyleClick(style)}
-      onContextMenu={(e) => !isPersistentDefaultStyle && onContextMenu(e, style)}
+      onContextMenu={(e) => onContextMenu(e, style)}
     >
       <div className="flex items-center gap-1.5">
         {isPersistentDefaultStyle ? (
@@ -44,17 +44,15 @@ export const StyleListItemCard = ({
               <Check className="h-3 w-3" />
             </span>
           )}
-          {!isPersistentDefaultStyle && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onContextMenu(e, style);
-              }}
-              className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
-            >
-              <MoreHorizontal className="h-3 w-3" />
-            </button>
-          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onContextMenu(e, style);
+            }}
+            className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
+          >
+            <MoreHorizontal className="h-3 w-3" />
+          </button>
         </div>
       </div>
     </Card>

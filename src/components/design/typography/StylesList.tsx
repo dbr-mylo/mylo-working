@@ -1,11 +1,9 @@
-
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import { useStylesList } from "./hooks/useStylesList";
 import { EmptyState } from "./EmptyState";
 import { DefaultStyleSection } from "./DefaultStyleSection";
 import { OtherStylesSection } from "./OtherStylesSection";
 import { StyleContextMenu } from "./StyleContextMenu";
-import { useToast } from "@/hooks/use-toast";
 import { Editor } from "@tiptap/react";
 import { TextStyle } from "@/lib/types";
 
@@ -26,7 +24,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     handleDuplicate,
   } = useStylesList(onEditStyle, editorInstance);
 
-  const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
   if (isLoading) {
@@ -45,7 +42,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
       <DefaultStyleSection 
         defaultStyle={defaultStyle} 
         onStyleClick={handleStyleClick}
-        onContextMenu={handleContextMenu}
       />
       
       {/* Other Styles Section */}
@@ -57,7 +53,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         />
       )}
       
-      {/* Only render this context menu when the active item is not the default style */}
+      {/* Only render context menu for non-default styles */}
       {contextMenu.isOpen && contextMenu.style && contextMenu.style.id !== 'default-text-reset' && (
         <StyleContextMenu
           x={contextMenu.x}

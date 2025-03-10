@@ -6,7 +6,7 @@ import { Check, Pilcrow, MoreHorizontal, Eraser } from "lucide-react";
 interface StyleListItemCardProps {
   style: TextStyle;
   onStyleClick: (style: TextStyle) => void;
-  onContextMenu: (e: React.MouseEvent, style: TextStyle) => void;
+  onContextMenu?: (e: React.MouseEvent, style: TextStyle) => void;
   isDefaultStyleSection?: boolean;
 }
 
@@ -43,15 +43,17 @@ export const StyleListItemCard = ({
               <Check className="h-3 w-3" />
             </span>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onContextMenu(e, style);
-            }}
-            className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </button>
+          {onContextMenu && !isPersistentDefaultStyle && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e, style);
+              }}
+              className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
+            >
+              <MoreHorizontal className="h-3 w-3" />
+            </button>
+          )}
         </div>
       </div>
     </Card>

@@ -9,7 +9,7 @@ import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect } from "react";
 import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
-import { clearDefaultResetStyle } from "@/stores/textStyles/styleCache";
+import { clearDefaultResetStyle, clearEditorCache } from "@/stores/textStyles/styleCache";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -45,9 +45,10 @@ const Index = () => {
     return Promise.resolve();
   };
   
-  // Clear the "Clear to Default" style from cache on component mount
+  // Clear editor cache on component mount to reset problematic styles
   useEffect(() => {
     clearDefaultResetStyle();
+    clearEditorCache();
     console.log("Index component rendered with documentId:", documentId);
     console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
   }, []);

@@ -65,3 +65,24 @@ export const clearEditorCache = (): void => {
     console.error('Error clearing editor cache:', error);
   }
 };
+
+/**
+ * Completely resets the text styles to defaults
+ * This will remove any custom styles and restore only the default ones
+ */
+export const resetTextStylesToDefaults = (): void => {
+  try {
+    // Remove the text_styles entry completely
+    localStorage.removeItem('text_styles');
+    
+    // Remove any default style ID
+    localStorage.removeItem('default_text_style_id');
+    
+    // Clear any other related caches
+    clearEditorCache();
+    
+    console.log('Text styles have been reset to defaults');
+  } catch (error) {
+    console.error('Error resetting text styles:', error);
+  }
+};

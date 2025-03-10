@@ -11,7 +11,12 @@ import {
   getStyleWithInheritance,
   SaveTextStyleInput
 } from './styleOperations';
-import { clearCachedStylesByPattern, clearDefaultResetStyle } from './styleCache';
+import { 
+  clearCachedStylesByPattern, 
+  clearDefaultResetStyle, 
+  clearEditorCache,
+  resetTextStylesToDefaults
+} from './styleCache';
 
 // Re-export the SaveTextStyleInput interface
 export type { SaveTextStyleInput };
@@ -30,5 +35,7 @@ export const textStyleStore = {
   getStyleWithInheritance,
   generateCSSFromTextStyles,
   clearCachedStylesByPattern,
-  clearDefaultResetStyle
+  clearDefaultResetStyle,
+  clearEditorCache,
+  resetTextStylesToDefaults
 };

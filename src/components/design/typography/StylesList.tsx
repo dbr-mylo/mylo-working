@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { StyleContextMenu } from "./StyleContextMenu";
 import { Editor } from "@tiptap/react";
 import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { useToast } from "@/hooks/use-toast";
+import { resetTextStylesToDefaults } from "@/stores/textStyles/styleCache";
 
 export interface StylesListProps {
   onEditStyle: (style: TextStyle) => void;
@@ -29,25 +29,62 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     ? useStyleApplication(editorInstance) 
     : null;
 
+  // Function to deduplicate styles by name
+  const deduplicateStyles = (styles: TextStyle[]): TextStyle[] => {
+    const uniqueStylesMap = new Map<string, TextStyle>();
+    
+    // Keep only the most recently updated style with a given name
+    styles.forEach(style => {
+      const existingStyle = uniqueStylesMap.get(style.name);
+      if (!existingStyle || (style.updated_at && existingStyle.updated_at && style.updated_at > existingStyle.updated_at)) {
+        uniqueStylesMap.set(style.name, style);
+      }
+    });
+    
+    return Array.from(uniqueStylesMap.values());
+  };
+
   useEffect(() => {
     const loadTextStyles = async () => {
       try {
+        setIsLoading(true);
         const styles = await textStyleStore.getTextStyles();
+        
         // Filter out any system styles or unwanted default reset styles
-        const filteredStyles = styles.filter(style => 
+        let filteredStyles = styles.filter(style => 
           !style.name.includes("Clear to Default") && 
           !style.name.includes("Reset")
         );
+        
+        // Deduplicate styles by name
+        filteredStyles = deduplicateStyles(filteredStyles);
+        
         setTextStyles(filteredStyles);
       } catch (error) {
         console.error("Error loading text styles:", error);
+        toast({
+          title: "Error loading styles",
+          description: "Could not load text styles properly. Trying to reset...",
+          variant: "destructive"
+        });
+        
+        // Try to reset the styles to defaults
+        resetTextStylesToDefaults();
+        
+        // Try to load the styles again
+        try {
+          const defaultStyles = await textStyleStore.getTextStyles();
+          setTextStyles(defaultStyles);
+        } catch (innerError) {
+          console.error("Error loading default text styles:", innerError);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     loadTextStyles();
-  }, []);
+  }, [toast]);
 
   const handleContextMenu = (
     e: React.MouseEvent,

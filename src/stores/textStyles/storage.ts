@@ -25,7 +25,31 @@ export const getLocalTextStyles = (): TextStyle[] => {
   try {
     const stylesJSON = localStorage.getItem(TEXT_STYLE_STORAGE_KEY);
     if (stylesJSON) {
-      return JSON.parse(stylesJSON);
+      const parsedStyles = JSON.parse(stylesJSON);
+      
+      // Check if parsed styles is an array
+      if (!Array.isArray(parsedStyles)) {
+        console.error('Invalid text styles format in localStorage:', parsedStyles);
+        localStorage.removeItem(TEXT_STYLE_STORAGE_KEY);
+        return DEFAULT_TEXT_STYLES;
+      }
+      
+      // Validate each style has required properties
+      const validatedStyles = parsedStyles.filter(style => 
+        style && 
+        typeof style === 'object' && 
+        style.id && 
+        style.name && 
+        style.fontFamily
+      );
+      
+      // If we lost styles during validation, save the valid ones back
+      if (validatedStyles.length !== parsedStyles.length) {
+        console.warn(`Found ${parsedStyles.length - validatedStyles.length} invalid styles, removing them.`);
+        localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(validatedStyles));
+      }
+      
+      return validatedStyles;
     } else {
       // Initialize with default styles if none exist
       localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(DEFAULT_TEXT_STYLES));
@@ -33,6 +57,8 @@ export const getLocalTextStyles = (): TextStyle[] => {
     }
   } catch (error) {
     console.error('Error parsing text styles from localStorage:', error);
+    // Reset to defaults on error
+    localStorage.setItem(TEXT_STYLE_STORAGE_KEY, JSON.stringify(DEFAULT_TEXT_STYLES));
     return DEFAULT_TEXT_STYLES;
   }
 };

@@ -93,7 +93,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
         y={contextMenu.y}
         isOpen={contextMenu.isOpen}
         onClose={handleCloseContextMenu}
-        style={contextMenu.selectedStyle}
+        style={contextMenu.style}
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
         onEdit={onEditStyle}

@@ -9,8 +9,15 @@ export const useStyleContextMenu = (
 ) => {
   const [contextMenu, setContextMenu] = useState<{
     style: TextStyle;
-    position: { x: number; y: number };
-  } | null>(null);
+    x: number;
+    y: number;
+    isOpen: boolean;
+  }>({
+    style: {} as TextStyle,
+    x: 0,
+    y: 0,
+    isOpen: false
+  });
 
   const handleContextMenu = (
     e: React.MouseEvent,
@@ -21,12 +28,17 @@ export const useStyleContextMenu = (
     e.preventDefault();
     setContextMenu({
       style,
-      position: { x: e.clientX, y: e.clientY },
+      x: e.clientX,
+      y: e.clientY,
+      isOpen: true
     });
   };
 
   const handleCloseContextMenu = () => {
-    setContextMenu(null);
+    setContextMenu(prev => ({
+      ...prev,
+      isOpen: false
+    }));
   };
 
   const handleDelete = async (id: string) => {

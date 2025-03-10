@@ -1,15 +1,31 @@
+
 import { useEffect, useRef } from "react";
-import { StyleContextMenuProps, TextStyle } from "@/lib/types";
+import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Copy, Trash, Edit } from "lucide-react";
 
+export interface StyleContextMenuProps {
+  x: number;
+  y: number;
+  isOpen: boolean;
+  style: TextStyle;
+  onEdit: (style: TextStyle) => void;
+  onDelete: (id: string) => void;
+  onDuplicate: (style: TextStyle) => void;
+  onClose: () => void;
+  containerRef?: React.RefObject<HTMLDivElement>;
+}
+
 export const StyleContextMenu = ({
+  x,
+  y,
+  isOpen,
   style,
   onEdit,
   onDelete,
   onDuplicate,
-  position,
   onClose,
+  containerRef
 }: StyleContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +42,7 @@ export const StyleContextMenu = ({
     };
   }, [onClose]);
 
-  if (!position) return null;
+  if (!isOpen || !style) return null;
 
   const handleEditClick = () => {
     onEdit(style);
@@ -42,8 +58,8 @@ export const StyleContextMenu = ({
   };
 
   const adjustedPosition = {
-    x: Math.min(position.x, window.innerWidth - 200),
-    y: Math.min(position.y, window.innerHeight - 200),
+    x: Math.min(x, window.innerWidth - 200),
+    y: Math.min(y, window.innerHeight - 200),
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,11 +39,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let size = e.target.value;
-    size = size.replace(/\D/g, '').substring(0, 2);
-    const numericSize = parseInt(size, 10);
-    if (!isNaN(numericSize) && editor) {
-      editor.chain().focus().setFontSize(`${numericSize}px`).run();
+    const size = e.target.value.replace(/\D/g, '').substring(0, 2);
+    if (size && editor) {
+      editor.chain().focus().setFontSize(`${size}px`).run();
     }
   };
 
@@ -68,10 +67,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              maxLength={2}
               value={getCurrentFontSize()}
               onChange={handleFontSizeChange}
-              className="w-14 h-7 text-xs"
+              className="w-12 h-7 text-xs"
             />
           </div>
         )}

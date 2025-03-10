@@ -1,8 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
-import { Card } from "@/components/ui/card";
-import { Check, Pilcrow, MoreHorizontal } from "lucide-react";
 import { textStyleStore } from "@/stores/textStyles";
 import { EmptyState } from "./EmptyState";
 import { StyleContextMenu } from "./StyleContextMenu";
@@ -10,6 +7,8 @@ import { Editor } from "@tiptap/react";
 import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { useToast } from "@/hooks/use-toast";
 import { resetTextStylesToDefaults } from "@/stores/textStyles/styleCache";
+import { StyleListItemCard } from "./StyleListItemCard";
+import { useStyleContextMenu } from "./hooks/useStyleContextMenu";
 
 export interface StylesListProps {
   onEditStyle: (style: TextStyle) => void;
@@ -19,16 +18,15 @@ export interface StylesListProps {
 export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => {
   const [textStyles, setTextStyles] = useState<TextStyle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [contextMenu, setContextMenu] = useState<{
-    style: TextStyle;
-    position: { x: number; y: number };
-  } | null>(null);
   const { toast } = useToast();
   
   // Set up the style application hook if we have an editor instance
   const styleApplication = editorInstance 
     ? useStyleApplication(editorInstance) 
     : null;
+
+  // Use the context menu hook
+  const { contextMenu, handleContextMenu, handleCloseContextMenu } = useStyleContextMenu();
 
   // Function to deduplicate styles by name
   const deduplicateStyles = (styles: TextStyle[]): TextStyle[] => {
@@ -92,21 +90,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     loadTextStyles();
   }, [toast]);
 
-  const handleContextMenu = (
-    e: React.MouseEvent,
-    style: TextStyle
-  ) => {
-    e.preventDefault();
-    setContextMenu({
-      style,
-      position: { x: e.clientX, y: e.clientY },
-    });
-  };
-
-  const handleCloseContextMenu = () => {
-    setContextMenu(null);
-  };
-
   const handleDelete = async (id: string) => {
     try {
       await textStyleStore.deleteTextStyle(id);
@@ -169,53 +152,12 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
   return (
     <div className="space-y-0.5">
       {textStyles.map((style) => (
-        <Card
+        <StyleListItemCard
           key={style.id}
-          className="p-1 hover:bg-accent cursor-pointer"
+          style={style}
           onClick={() => handleStyleClick(style)}
           onContextMenu={(e) => handleContextMenu(e, style)}
-        >
-          <div className="flex items-center gap-1.5">
-            <Pilcrow className="h-3 w-3 text-muted-foreground" />
-            <span 
-              className="text-xs"
-              style={{
-                fontFamily: style.fontFamily || 'inherit',
-                fontWeight: style.fontWeight || 'inherit'
-              }}
-            >
-              {style.name}
-            </span>
-
-            <div className="flex ml-auto items-center space-x-1">
-              {style.isUsed && (
-                <span
-                  className="text-[10px] text-green-500 flex items-center"
-                  title="This style is used in documents"
-                >
-                  <Check className="h-3 w-3" />
-                </span>
-              )}
-              {style.isDefault && (
-                <span
-                  className="text-[10px] text-blue-500"
-                  title="Default style"
-                >
-                  Default
-                </span>
-              )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContextMenu(e, style);
-                }}
-                className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
-              >
-                <MoreHorizontal className="h-3 w-3" />
-              </button>
-            </div>
-          </div>
-        </Card>
+        />
       ))}
 
       {contextMenu && (

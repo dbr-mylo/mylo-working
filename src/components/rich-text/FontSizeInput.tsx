@@ -69,8 +69,9 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
           value={size}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          className="w-10 px-2 text-center h-7"
+          className="w-10 px-2 text-center h-7 flex items-center justify-center"
           maxLength={2}
+          style={{ textAlign: 'center', paddingLeft: 0, paddingRight: 0 }}
         />
         <div className="absolute right-0 flex flex-col h-full">
           <button 

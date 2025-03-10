@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
+import { FontUnit } from "@/lib/types/preferences";
 
 interface SelectedElementBarProps {
   selectedElement: HTMLElement | null;
   onApplyStyle: (styleId: string) => Promise<void>;
+  currentUnit?: FontUnit;
 }
 
-export const SelectedElementBar = ({ selectedElement, onApplyStyle }: SelectedElementBarProps) => {
+export const SelectedElementBar = ({ selectedElement, onApplyStyle, currentUnit }: SelectedElementBarProps) => {
   const [appliedStyle, setAppliedStyle] = useState<TextStyle | null>(null);
   
   useEffect(() => {

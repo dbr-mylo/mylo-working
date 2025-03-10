@@ -2,6 +2,7 @@
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 import { Editor } from "@tiptap/react";
+import { FontUnit } from "@/lib/types/preferences";
 
 interface EditableContentProps {
   content: string;
@@ -10,6 +11,7 @@ interface EditableContentProps {
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
   editorInstance?: Editor | null;
+  currentUnit?: FontUnit;
 }
 
 export const EditableContent = ({ 
@@ -18,7 +20,8 @@ export const EditableContent = ({
   hideToolbar = false,
   renderToolbarOutside = false,
   externalToolbar = false,
-  editorInstance = null
+  editorInstance = null,
+  currentUnit
 }: EditableContentProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";

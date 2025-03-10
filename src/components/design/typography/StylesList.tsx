@@ -1,8 +1,8 @@
+
 import { TextStyle } from "@/lib/types";
 import { Editor } from "@tiptap/react";
 import { EmptyState } from "./EmptyState";
 import { StyleContextMenu } from "./StyleContextMenu";
-import { DefaultStyleSection } from "./DefaultStyleSection";
 import { OtherStylesSection } from "./OtherStylesSection";
 import { useStylesList } from "./hooks/useStylesList";
 
@@ -14,8 +14,7 @@ export interface StylesListProps {
 export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => {
   const {
     isLoading,
-    defaultStyle,
-    otherStyles,
+    styles,
     contextMenu,
     handleStyleClick,
     handleContextMenu,
@@ -28,27 +27,18 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     return <p className="text-xs text-editor-text py-1">Loading styles...</p>;
   }
 
-  if (!defaultStyle && otherStyles.length === 0) {
+  if (styles.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <div className="space-y-2">
-      {/* Default Style Section */}
-      <DefaultStyleSection 
-        defaultStyle={defaultStyle} 
+      {/* All Styles Section */}
+      <OtherStylesSection 
+        styles={styles} 
         onStyleClick={handleStyleClick} 
         onContextMenu={handleContextMenu} 
       />
-
-      {/* Other Styles Section */}
-      {otherStyles.length > 0 && (
-        <OtherStylesSection 
-          styles={otherStyles} 
-          onStyleClick={handleStyleClick} 
-          onContextMenu={handleContextMenu} 
-        />
-      )}
 
       {/* Context Menu */}
       {contextMenu && (

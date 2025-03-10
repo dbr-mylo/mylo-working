@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
@@ -9,7 +10,7 @@ export const useStylesList = (
   onEditStyle: (style: TextStyle) => void,
   editorInstance?: Editor | null
 ) => {
-  const [textStyles, setTextStyles] = useState<TextStyle[]>([]);
+  const [styles, setStyles] = useState<TextStyle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState<{
     style: TextStyle;
@@ -25,8 +26,9 @@ export const useStylesList = (
   useEffect(() => {
     const loadTextStyles = async () => {
       try {
-        const styles = await textStyleStore.getTextStyles();
-        setTextStyles(styles);
+        const fetchedStyles = await textStyleStore.getTextStyles();
+        // Show all styles together without separating default style
+        setStyles(fetchedStyles);
       } catch (error) {
         console.error("Error loading text styles:", error);
       } finally {
@@ -55,7 +57,7 @@ export const useStylesList = (
   const handleDelete = async (id: string) => {
     try {
       await textStyleStore.deleteTextStyle(id);
-      setTextStyles(textStyles.filter((style) => style.id !== id));
+      setStyles(styles.filter((style) => style.id !== id));
     } catch (error) {
       console.error("Error deleting style:", error);
     } finally {
@@ -66,7 +68,7 @@ export const useStylesList = (
   const handleDuplicate = async (style: TextStyle) => {
     try {
       const newStyle = await textStyleStore.duplicateTextStyle(style.id);
-      setTextStyles([...textStyles, newStyle]);
+      setStyles([...styles, newStyle]);
     } catch (error) {
       console.error("Error duplicating style:", error);
     } finally {
@@ -103,15 +105,9 @@ export const useStylesList = (
     }
   };
 
-  // Find default style and other styles
-  const defaultStyle = textStyles.find(style => style.isDefault);
-  // Filter out the default style from the main list
-  const otherStyles = textStyles.filter(style => !style.isDefault);
-
   return {
     isLoading,
-    defaultStyle,
-    otherStyles,
+    styles,
     contextMenu,
     handleStyleClick,
     handleContextMenu,

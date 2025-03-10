@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { TextStyle } from "@/lib/types";
-import { MoreHorizontal, Pilcrow, Check } from "lucide-react";
+import { Check, Pilcrow, MoreHorizontal } from "lucide-react";
 
 interface StyleListItemCardProps {
   style: TextStyle;
@@ -34,14 +34,6 @@ export const StyleListItemCard = ({
             <span
               className="text-[10px] text-green-500 flex items-center"
               title="This style is used in documents"
-            >
-              <Check className="h-3 w-3" />
-            </span>
-          )}
-          {style.isDefault && !isDefaultStyleSection && (
-            <span
-              className="text-[10px] text-blue-500 flex items-center"
-              title="Default style"
             >
               <Check className="h-3 w-3" />
             </span>

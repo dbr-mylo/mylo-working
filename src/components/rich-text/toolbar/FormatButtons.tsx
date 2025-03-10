@@ -5,6 +5,7 @@ import { Bold, Italic, List, ListOrdered, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../utils/colorPreservation';
 import { textStyleStore } from '@/stores/textStyles';
+import { useDefaultStyle } from '@/components/design/typography/hooks/useDefaultStyle';
 
 interface FormatButtonsProps {
   editor: Editor;
@@ -17,42 +18,12 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   currentColor,
   buttonSize 
 }) => {
+  // Use the useDefaultStyle hook to access the applyDefaultTextStyle function
+  const { applyDefaultTextStyle } = useDefaultStyle(editor);
+
   const clearFormatting = async () => {
-    // First get the default style
-    try {
-      const defaultStyle = await textStyleStore.getDefaultStyle();
-      
-      // Clear all existing formatting
-      editor.chain()
-        .focus()
-        .unsetAllMarks()
-        .setFontFamily(null)
-        .setFontSize(null)
-        .setColor(null)
-        .run();
-        
-      // If we have a default style, apply it
-      if (defaultStyle) {
-        // Apply default style properties
-        editor.chain()
-          .focus()
-          .setFontFamily(defaultStyle.fontFamily || 'Inter')
-          .setFontSize(defaultStyle.fontSize || '16px')
-          .setColor(defaultStyle.color || '#000000')
-          .run();
-      }
-    } catch (error) {
-      console.error('Error applying default style after clearing formatting:', error);
-      
-      // Fallback to basic clearing if getting default style fails
-      editor.chain()
-        .focus()
-        .unsetAllMarks()
-        .setFontFamily(null)
-        .setFontSize(null)
-        .setColor(null)
-        .run();
-    }
+    // Use the hook's function to apply default style
+    await applyDefaultTextStyle();
   };
 
   return (

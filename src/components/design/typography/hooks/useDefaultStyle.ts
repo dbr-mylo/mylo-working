@@ -41,6 +41,12 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
         .unsetAllMarks()
         .run();
       
+      // Reset text alignment and other paragraph attributes
+      editorInstance.chain()
+        .focus()
+        .setParagraph()
+        .run();
+      
       if (storedDefaultStyle) {
         // Apply stored default style if available
         editorInstance.chain()
@@ -49,6 +55,13 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
           .setFontSize(storedDefaultStyle.fontSize || '16px')
           .setColor(storedDefaultStyle.color || '#000000')
           .run();
+          
+        // Force an update to the selection to refresh the toolbar state
+        const currentSelection = editorInstance.state.selection;
+        editorInstance.commands.setTextSelection({
+          from: currentSelection.from,
+          to: currentSelection.to
+        });
           
         toast({
           title: "Default style applied",
@@ -62,6 +75,13 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
           .setFontSize(defaultTextStyle.fontSize)
           .setColor(defaultTextStyle.color)
           .run();
+          
+        // Force an update to the selection to refresh the toolbar state
+        const currentSelection = editorInstance.state.selection;
+        editorInstance.commands.setTextSelection({
+          from: currentSelection.from,
+          to: currentSelection.to
+        });
           
         toast({
           title: "Default style applied",

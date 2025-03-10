@@ -1,9 +1,8 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { TextStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
-import { Copy, Trash, Edit, Settings } from "lucide-react";
-import { textStyleStore } from "@/stores/textStyles";
+import { Copy, Trash, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface StyleContextMenuProps {
@@ -91,7 +90,6 @@ export const StyleContextMenu = ({
             className="w-full text-left px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
             onClick={handleChangeFontClick}
           >
-            <Settings className="h-3.5 w-3.5" />
             Change Default Font
           </button>
         ) : (

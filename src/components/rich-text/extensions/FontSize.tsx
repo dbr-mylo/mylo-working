@@ -48,10 +48,11 @@ export const FontSize = Extension.create<FontSizeOptions>({
               }
               console.log("FontSize: Rendering fontSize to HTML:", attributes.fontSize);
               
-              // Use !important flag and override any Tailwind styles
+              // Enhanced styling with even higher specificity
               return {
                 style: `font-size: ${attributes.fontSize} !important; --tw-prose-body: none !important;`,
-                class: 'custom-font-size'
+                class: 'custom-font-size',
+                'data-font-size': attributes.fontSize.replace('px', '') // Add data attribute for easier debugging
               };
             },
           },
@@ -71,6 +72,14 @@ export const FontSize = Extension.create<FontSizeOptions>({
             // Store the current font size in localStorage 
             localStorage.setItem('editor_font_size', fontSize);
             
+            // Force clear any cached styles that might interfere
+            try {
+              const clearCacheEvent = new CustomEvent('tiptap-clear-font-cache');
+              document.dispatchEvent(clearCacheEvent);
+            } catch (e) {
+              console.log("Error dispatching cache clear event:", e);
+            }
+            
             // Apply the font size with the text style mark
             const result = commands.setMark('textStyle', { fontSize });
             
@@ -81,6 +90,14 @@ export const FontSize = Extension.create<FontSizeOptions>({
                 editor.chain().focus().setMark('textStyle', { fontSize }).run();
               }
             }, 50);
+            
+            // Force a third update with a slightly longer delay for persistent styles
+            setTimeout(() => {
+              if (editor && editor.isActive) {
+                console.log("FontSize: Final reinforcement of font size:", fontSize);
+                editor.chain().focus().setMark('textStyle', { fontSize }).run();
+              }
+            }, 200);
             
             return result;
           }

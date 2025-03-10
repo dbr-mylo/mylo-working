@@ -1,7 +1,23 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export const EditorStyles = () => {
+  // Add an event listener to clear font cache when the extension requests it
+  useEffect(() => {
+    const handleClearFontCache = () => {
+      console.log("EditorStyles: Clearing font cache from event");
+      // Force refresh specific styles by toggling a class briefly
+      const editors = document.querySelectorAll('.ProseMirror');
+      editors.forEach(editor => {
+        editor.classList.add('refresh-fonts');
+        setTimeout(() => editor.classList.remove('refresh-fonts'), 10);
+      });
+    };
+    
+    document.addEventListener('tiptap-clear-font-cache', handleClearFontCache);
+    return () => document.removeEventListener('tiptap-clear-font-cache', handleClearFontCache);
+  }, []);
+
   return (
     <>
       <style>{`
@@ -15,6 +31,8 @@ export const EditorStyles = () => {
         -webkit-font-variant-ligatures: none;
         font-variant-ligatures: none;
         font-feature-settings: "liga" 0;
+        /* Critical - establish base font-size */
+        font-size: initial !important;
       }
       
       /* Placeholder */
@@ -58,7 +76,7 @@ export const EditorStyles = () => {
       
       /* Base rule for all elements to ensure they inherit font size by default */
       .ProseMirror * {
-        font-size: inherit;
+        font-size: inherit !important;
       }
       
       /* Override the Tailwind prose-sm font size explicitly */
@@ -77,12 +95,18 @@ export const EditorStyles = () => {
         font-size: unset !important;
       }
       
-      /* Custom class for our font-size extension */
+      /* Custom class for our font-size extension with maximum specificity */
       .ProseMirror .custom-font-size {
         font-size: unset !important;
       }
       
-      /* Additional specific selectors for common elements */
+      /* Force refresh for elements when cache is cleared */
+      .ProseMirror.refresh-fonts [style*="font-size"],
+      .ProseMirror.refresh-fonts .custom-font-size {
+        opacity: 0.999; /* Trigger a repaint without visual change */
+      }
+      
+      /* Additional specific selectors for common elements with max specificity */
       .ProseMirror span[style*="font-size"],
       .ProseMirror p[style*="font-size"],
       .ProseMirror div[style*="font-size"],
@@ -95,10 +119,15 @@ export const EditorStyles = () => {
         font-size: unset !important;
       }
       
-      /* Specifically target the preserve-styling spans */
+      /* Specifically target the preserve-styling spans with inline styles */
       .ProseMirror .preserve-styling,
       .ProseMirror .preserve-styling[style*="font-size"] {
         font-size: unset !important;
+      }
+      
+      /* Data attribute selector for maximum compatibility */
+      .ProseMirror [data-font-size] {
+        font-size: attr(data-font-size px) !important;
       }
       
       /* Comprehensive color preservation rules - enhanced for bold text */

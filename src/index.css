@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -106,38 +107,54 @@
   /* Apply editor font specifically to editor content */
   .ProseMirror {
     font-family: theme('fontFamily.editor');
-    /* Set an explicit initial font size */
+    /* Set an explicit initial font size to override Tailwind */
     font-size: initial !important;
   }
 
-  /* Override Tailwind prose classes for proper font size handling */
+  /* Critical override for Tailwind prose classes to prevent font size interference */
   .prose, .prose-sm {
-    --tw-prose-body: none;
+    --tw-prose-body: none !important;
   }
   
-  /* Explicitly override prose text sizes */
+  /* Ensure prose doesn't enforce its own font sizes */
   .prose *, .prose-sm * {
-    font-size: inherit;
+    font-size: inherit !important;
   }
   
-  /* Ensure proper font-size inheritance in the editor */
+  /* Extra-high specificity for paragraphs to override prose styles */
   .prose p, .prose-sm p {
     font-size: inherit !important;
     margin-bottom: 4px;
   }
   
-  /* Make sure inline styles take precedence - crucial fix */
+  /* Ensure inline styles take precedence over everything */
   [style*="font-size"] {
     font-size: unset !important;
   }
   
-  /* Specifically target the preserve-styling spans */
+  /* Target preserve-styling spans with highest specificity */
   .preserve-styling[style*="font-size"] {
     font-size: unset !important;
   }
   
-  /* Special class for our font size extension */
+  /* Special class for our font size extension with max specificity */
   .custom-font-size {
     font-size: unset !important;
+  }
+  
+  /* Ensure we override any Tailwind prose-sm styles that set font sizes */
+  .prose-sm .ProseMirror {
+    font-size: initial !important;
+  }
+  
+  /* Make sure no parent can override font sizes of styled elements */
+  .prose-sm [style*="font-size"],
+  .prose [style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Override for data-font-size attribute - this is a new addition */
+  [data-font-size] {
+    font-size: attr(data-font-size px) !important;
   }
 }

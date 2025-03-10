@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { TextStyle } from "@/lib/types";
-import { MoreHorizontal, Check } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { StyleListItem } from "./StyleListItem";
 
 interface StyleListItemCardProps {
@@ -36,30 +36,12 @@ export const StyleListItemCard = ({ style, onClick, onContextMenu }: StyleListIt
           />
         </div>
         
-        <div className="flex items-center space-x-1 ml-1">
-          {style.isUsed && (
-            <span
-              className="text-[10px] text-green-500 flex items-center"
-              title="This style is used in documents"
-            >
-              <Check className="h-3 w-3" />
-            </span>
-          )}
-          {style.isDefault && (
-            <span
-              className="text-[10px] text-blue-500"
-              title="Default style"
-            >
-              Default
-            </span>
-          )}
-          <button
-            onClick={handleOptionsClick}
-            className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </button>
-        </div>
+        <button
+          onClick={handleOptionsClick}
+          className="h-5 w-5 inline-flex items-center justify-center rounded-sm hover:bg-muted"
+        >
+          <MoreHorizontal className="h-3 w-3" />
+        </button>
       </div>
     </Card>
   );

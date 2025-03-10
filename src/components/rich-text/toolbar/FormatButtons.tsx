@@ -20,9 +20,9 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
     editor.chain()
       .focus()
       .unsetAllMarks()
-      .unsetFontFamily()
-      .unsetFontSize()
-      .unsetColor()
+      .setFontFamily(null)  // Use setFontFamily(null) instead of unsetFontFamily
+      .setFontSize(null)    // Use setFontSize(null) instead of unsetFontSize
+      .setColor(null)      // Use setColor(null) instead of unsetColor
       .run();
   };
 

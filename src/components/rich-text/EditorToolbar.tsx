@@ -94,7 +94,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           <div className="flex items-center gap-1">
             <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
             <div className="relative flex items-center">
-              <div className="relative w-10">
+              <div className="relative w-14">
                 <Input
                   id="font-size"
                   type="text"
@@ -104,7 +104,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   onChange={handleFontSizeChange}
                   onKeyDown={handleKeyDown}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-10 h-7 text-xs pr-5 text-right"
+                  className="w-14 h-7 text-xs pr-5 text-right"
                 />
                 <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center">
                   <button

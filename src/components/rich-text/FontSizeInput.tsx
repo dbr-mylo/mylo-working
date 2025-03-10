@@ -24,14 +24,26 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
 
   const [size, setSize] = useState<number>(getNumericValue(value));
   
-  // Handler for font size events
+  // Handler for font size events with priority for DOM-sourced values
   const handleFontSizeEvent = useCallback((event: CustomEvent) => {
-    if (event.detail && event.detail.fontSize) {
+    if (event.detail) {
+      // Prioritize DOM-sourced values for accurate representation
+      const isDomSource = event.detail.source === 'dom';
       const newSize = getNumericValue(event.detail.fontSize);
-      console.log("FontSizeInput: Received font size event:", event.detail.fontSize, "parsed to:", newSize);
-      setSize(newSize);
+      
+      console.log(`FontSizeInput: Received font size event (${isDomSource ? 'DOM source' : 'command source'})`, 
+        event.detail.fontSize, "parsed to:", newSize);
+      
+      // Always update from DOM source or if size is different
+      if (isDomSource || newSize !== size) {
+        setSize(newSize);
+        // Only propagate changes from DOM to ensure toolbar matches DOM
+        if (isDomSource && onChange && !disabled) {
+          onChange(`${newSize}px`);
+        }
+      }
     }
-  }, []);
+  }, [size, onChange, disabled]);
   
   // Update internal state when external value changes
   useEffect(() => {
@@ -62,6 +74,55 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     };
   }, [handleFontSizeEvent]);
 
+  // Directly check DOM for font size in selection
+  useEffect(() => {
+    if (disabled) return;
+    
+    const checkDomFontSize = () => {
+      try {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          if (!range.collapsed) {
+            const span = document.createElement('span');
+            range.surroundContents(span);
+            const computedStyle = window.getComputedStyle(span);
+            const domFontSize = computedStyle.fontSize;
+            
+            if (domFontSize) {
+              const newSize = getNumericValue(domFontSize);
+              console.log("FontSizeInput: DOM font size check:", domFontSize, "parsed to:", newSize);
+              
+              if (newSize !== size) {
+                setSize(newSize);
+                onChange(`${newSize}px`);
+              }
+            }
+            
+            // Remove the temporary span
+            const parent = span.parentNode;
+            while (span.firstChild) {
+              parent?.insertBefore(span.firstChild, span);
+            }
+            parent?.removeChild(span);
+          }
+        }
+      } catch (error) {
+        // Safely ignore errors during DOM inspection
+      }
+    };
+    
+    // Check DOM on focus
+    const handleFocus = () => {
+      checkDomFontSize();
+    };
+    
+    document.addEventListener('selectionchange', handleFocus);
+    return () => {
+      document.removeEventListener('selectionchange', handleFocus);
+    };
+  }, [size, onChange, disabled]);
+
   const incrementSize = () => {
     if (disabled) return;
     const newSize = Math.min(size + 1, MAX_FONT_SIZE);
@@ -72,7 +133,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     // Dispatch event for other components
     try {
       const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px` }
+        detail: { fontSize: `${newSize}px`, source: 'input' }
       });
       document.dispatchEvent(fontSizeEvent);
     } catch (error) {
@@ -90,7 +151,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
     // Dispatch event for other components
     try {
       const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px` }
+        detail: { fontSize: `${newSize}px`, source: 'input' }
       });
       document.dispatchEvent(fontSizeEvent);
     } catch (error) {
@@ -122,7 +183,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
       // Dispatch event for other components
       try {
         const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px` }
+          detail: { fontSize: `${newSize}px`, source: 'input' }
         });
         document.dispatchEvent(fontSizeEvent);
       } catch (error) {
@@ -144,7 +205,7 @@ export const FontSizeInput = ({ value, onChange, className, disabled = false }: 
       // Dispatch event for other components
       try {
         const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px` }
+          detail: { fontSize: `${newSize}px`, source: 'input' }
         });
         document.dispatchEvent(fontSizeEvent);
       } catch (error) {

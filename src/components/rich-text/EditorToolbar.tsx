@@ -46,13 +46,69 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     }
   }, []);
   
+  // Function to get font size directly from DOM
+  const getDomFontSize = useCallback(() => {
+    if (!editor || !editor.view) return null;
+    
+    try {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // If no real selection, try to get from cursor position
+        if (range.collapsed) {
+          // Get the node at cursor position
+          const node = range.startContainer;
+          if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
+            const style = window.getComputedStyle(node.parentElement);
+            return style.fontSize;
+          }
+        } else {
+          // For text selection, create a temporary span to compute style
+          const span = document.createElement('span');
+          const clonedRange = range.cloneRange();
+          const fragment = clonedRange.cloneContents();
+          
+          if (fragment.firstChild) {
+            // Check direct style on first child if it's an element
+            if (fragment.firstChild.nodeType === Node.ELEMENT_NODE) {
+              const style = window.getComputedStyle(fragment.firstChild as Element);
+              return style.fontSize;
+            }
+            
+            // Otherwise check computed style
+            span.appendChild(fragment);
+            document.body.appendChild(span);
+            const style = window.getComputedStyle(span);
+            const fontSize = style.fontSize;
+            document.body.removeChild(span);
+            return fontSize;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error getting DOM font size:", error);
+    }
+    
+    return null;
+  }, [editor]);
+  
   // Function to update font size from events
   const handleFontSizeEvent = useCallback((event: CustomEvent) => {
     if (event.detail && event.detail.fontSize) {
-      console.log("EditorToolbar: Font size change event detected:", event.detail.fontSize);
+      console.log(`EditorToolbar: Font size change event (${event.detail.source || 'unknown'})`, event.detail.fontSize);
       setCurrentFontSize(event.detail.fontSize);
+      
+      // If size comes from DOM, immediately verify with editor and update if needed
+      if (event.detail.source === 'dom' && editor && editor.isActive) {
+        setTimeout(() => {
+          if (editor.isActive) {
+            editor.chain().focus().setFontSize(event.detail.fontSize).run();
+          }
+        }, 10);
+      }
     }
-  }, []);
+  }, [editor]);
   
   // Listen for font size change events from the FontSize extension
   useEffect(() => {
@@ -67,62 +123,38 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     };
   }, [handleFontSizeEvent]);
   
-  // Monitor editor for font size changes
+  // Monitor editor for font size changes and check DOM for actual values
   useEffect(() => {
     if (!editor) return;
     
     const updateFontSize = () => {
-      // Get font size from editor attributes
-      const fontSize = editor.getAttributes('textStyle').fontSize;
+      // First try to get from editor attributes
+      const editorFontSize = editor.getAttributes('textStyle').fontSize;
       
-      if (fontSize) {
-        console.log("EditorToolbar: Font size from editor attributes:", fontSize);
-        setCurrentFontSize(fontSize);
+      // Then check actual DOM for the real font size (highest priority)
+      const domFontSize = getDomFontSize();
+      
+      if (domFontSize) {
+        // DOM font size takes precedence as it's the most accurate
+        console.log("EditorToolbar: DOM font size:", domFontSize, 
+          editorFontSize ? `(editor reports: ${editorFontSize})` : '');
         
-        // Dispatch an event to keep other components in sync
-        try {
-          const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-            detail: { fontSize }
-          });
-          document.dispatchEvent(fontSizeEvent);
-        } catch (e) {
-          console.error("Error dispatching font size event:", e);
-        }
-      } else {
-        // Try to get font size from computed style of selected element
-        try {
-          const selection = window.getSelection();
-          if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            
-            // Only try to surround if there's actual content
-            if (range && !range.collapsed) {
-              try {
-                // Clone the range to avoid modifying the actual DOM
-                const clonedRange = range.cloneRange();
-                const tempDiv = document.createElement('div');
-                tempDiv.appendChild(clonedRange.cloneContents());
-                
-                // Get computed style from the first text node
-                const textNodes = tempDiv.querySelectorAll('*');
-                if (textNodes.length > 0) {
-                  const computedStyle = window.getComputedStyle(textNodes[0]);
-                  const computedFontSize = computedStyle.fontSize;
-                  console.log("EditorToolbar: Computed font size:", computedFontSize);
-                  
-                  if (computedFontSize && computedFontSize !== currentFontSize) {
-                    setCurrentFontSize(computedFontSize);
-                  }
-                }
-              } catch (err) {
-                console.error("Error getting computed style:", err);
+        if (domFontSize !== currentFontSize) {
+          setCurrentFontSize(domFontSize);
+          
+          // Also update the editor's font size attribute to match DOM
+          if (editor.isActive && (!editorFontSize || editorFontSize !== domFontSize)) {
+            setTimeout(() => {
+              if (editor.isActive) {
+                editor.chain().focus().setFontSize(domFontSize).run();
               }
-            }
+            }, 10);
           }
-        } catch (error) {
-          console.error("Error analyzing selection:", error);
         }
+      } else if (editorFontSize) {
+        // Fall back to editor's font size if DOM check failed
+        console.log("EditorToolbar: Using editor font size:", editorFontSize);
+        setCurrentFontSize(editorFontSize);
       }
     };
 
@@ -152,7 +184,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       editor.off('selectionUpdate', updateTextSelection);
       editor.off('transaction', updateFontSize);
     };
-  }, [editor, currentFontSize]);
+  }, [editor, currentFontSize, getDomFontSize]);
   
   const handleFontChange = (font: string) => {
     onFontChange(font);
@@ -166,13 +198,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     setCurrentFontSize(fontSize);
     editor.chain().focus().setFontSize(fontSize).run();
     
-    // Force a second font size update to ensure it takes effect
+    // Force a refresh of font cache
     setTimeout(() => {
-      if (editor && editor.isActive) {
-        console.log("EditorToolbar: Re-applying font size:", fontSize);
-        editor.chain().focus().setFontSize(fontSize).run();
-      }
-    }, 50);
+      const refreshEvent = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(refreshEvent);
+    }, 10);
   };
 
   if (!editor) {

@@ -38,14 +38,14 @@ export const FontSize = Extension.create<FontSizeOptions>({
           fontSize: {
             default: null,
             parseHTML: element => {
-              // Get font size from element style
-              const fontSize = element.style.fontSize;
+              // Get font size from element style (with higher priority than computed style)
+              const fontSize = element.style.fontSize || window.getComputedStyle(element).fontSize;
               
-              // Create and dispatch a custom event with the parsed font size
-              if (fontSize && typeof window !== 'undefined') {
+              if (fontSize) {
                 try {
+                  // Create and dispatch an event with accurate font size from DOM
                   const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
-                    detail: { fontSize }
+                    detail: { fontSize, source: 'dom' }
                   });
                   document.dispatchEvent(fontSizeEvent);
                   console.log("FontSize Extension: Parsed fontSize from HTML:", fontSize);
@@ -64,12 +64,17 @@ export const FontSize = Extension.create<FontSizeOptions>({
               // Log the font size being rendered
               console.log("FontSize Extension: Rendering fontSize to HTML:", attributes.fontSize);
               
+              // Ensure consistent formatting of font size (px format)
+              const formattedSize = attributes.fontSize.endsWith('px') 
+                ? attributes.fontSize 
+                : `${attributes.fontSize}px`;
+              
               // Use multiple attributes to ensure font size is applied consistently
               return {
-                style: `font-size: ${attributes.fontSize} !important;`,
-                class: 'custom-font-size',
-                'data-font-size': attributes.fontSize.replace('px', ''),
-                'data-style-fontSize': attributes.fontSize
+                style: `font-size: ${formattedSize} !important;`,
+                class: 'custom-font-size preserve-styling',
+                'data-font-size': formattedSize.replace('px', ''),
+                'data-style-fontSize': formattedSize
               };
             },
           },
@@ -83,32 +88,36 @@ export const FontSize = Extension.create<FontSizeOptions>({
       setFontSize:
         (fontSize: string) =>
         ({ commands, editor }) => {
-          if (fontSize) {
-            console.log("FontSize Extension: Setting fontSize command:", fontSize);
+          if (!fontSize) return false;
+          
+          // Ensure consistent px format
+          const normalizedFontSize = fontSize.endsWith('px') 
+            ? fontSize 
+            : `${fontSize}px`;
+          
+          console.log("FontSize Extension: Setting fontSize command:", normalizedFontSize);
+          
+          try {
+            // Store the current font size in localStorage
+            localStorage.setItem('editor_font_size', normalizedFontSize);
             
-            // Store the current font size in localStorage to persist across sessions
-            try {
-              localStorage.setItem('editor_font_size', fontSize);
-              
-              // Dispatch an event to notify components about the font size change
-              const fontSizeChangeEvent = new CustomEvent('tiptap-font-size-changed', {
-                detail: { fontSize }
-              });
-              document.dispatchEvent(fontSizeChangeEvent);
-              
-              // Also refresh the extension's cache
-              setTimeout(() => {
-                const refreshEvent = new CustomEvent('tiptap-clear-font-cache');
-                document.dispatchEvent(refreshEvent);
-              }, 10);
-            } catch (e) {
-              console.error("Error in font size handling:", e);
-            }
+            // Dispatch a reliable event for toolbar and other components
+            const fontSizeChangeEvent = new CustomEvent('tiptap-font-size-changed', {
+              detail: { fontSize: normalizedFontSize, source: 'command' }
+            });
+            document.dispatchEvent(fontSizeChangeEvent);
             
-            // Apply the font size with the text style mark
-            return commands.setMark('textStyle', { fontSize });
+            // Refresh font cache immediately
+            setTimeout(() => {
+              const refreshEvent = new CustomEvent('tiptap-clear-font-cache');
+              document.dispatchEvent(refreshEvent);
+            }, 10);
+          } catch (e) {
+            console.error("Error in font size handling:", e);
           }
-          return commands.setMark('textStyle', { fontSize });
+          
+          // Apply the font size with the text style mark
+          return commands.setMark('textStyle', { fontSize: normalizedFontSize });
         },
       unsetFontSize:
         () =>
@@ -118,7 +127,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
           // Notify components that font size has been unset
           try {
             const fontSizeChangeEvent = new CustomEvent('tiptap-font-size-changed', {
-              detail: { fontSize: null }
+              detail: { fontSize: null, source: 'command' }
             });
             document.dispatchEvent(fontSizeChangeEvent);
           } catch (e) {

@@ -1,6 +1,6 @@
 
 import { EditorContent } from '@tiptap/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { EditorToolbar } from './rich-text/EditorToolbar';
 import { EditorStyles } from './rich-text/styles';
 import { useEditorSetup } from './rich-text/useEditor';
@@ -29,6 +29,7 @@ export const RichTextEditor = ({
   externalToolbar = false,
   externalEditorInstance = null
 }: RichTextEditorProps) => {
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     console.log("RichTextEditor: Clearing cache and resetting styles on mount");
@@ -60,32 +61,45 @@ export const RichTextEditor = ({
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
+  // Extra check to ensure font sizes are in sync between DOM and editor
   useEffect(() => {
-    if (editor && isEditable) {
-      console.log("Editor initialized with content:", content.substring(0, 100));
-      
-      // After editor is mounted, scan for any font sizes in the content
-      setTimeout(() => {
-        if (editor) {
-          console.log("Initial editor HTML:", editor.getHTML().substring(0, 100));
+    if (!editor || !isEditable) return;
+    
+    const syncFontSizes = () => {
+      try {
+        // Get all elements with font size styles in the editor
+        if (editorContainerRef.current) {
+          const elements = editorContainerRef.current.querySelectorAll('[style*="font-size"]');
           
-          // Force editor to update font size if needed
-          try {
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0) {
-              const range = selection.getRangeAt(0);
-              if (range) {
-                const fontSizeEvent = new CustomEvent('tiptap-clear-font-cache');
-                document.dispatchEvent(fontSizeEvent);
-              }
-            }
-          } catch (e) {
-            console.error("Error handling editor initialization:", e);
-          }
+          elements.forEach(element => {
+            const computedStyle = window.getComputedStyle(element);
+            const fontSize = computedStyle.fontSize;
+            
+            console.log("RichTextEditor: Found element with font-size:", fontSize, element);
+            
+            // Dispatch an event to notify components about this font size
+            const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
+              detail: { fontSize, source: 'dom' }
+            });
+            document.dispatchEvent(fontSizeEvent);
+          });
         }
-      }, 100);
-    }
-  }, [editor, content, isEditable]);
+      } catch (error) {
+        console.error("Error synchronizing font sizes:", error);
+      }
+    };
+    
+    // Sync after editor is fully initialized and content is loaded
+    const timeoutId = setTimeout(() => {
+      syncFontSizes();
+      
+      // Force editor to update font size if needed
+      const fontSizeEvent = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(fontSizeEvent);
+    }, 200);
+    
+    return () => clearTimeout(timeoutId);
+  }, [editor, isEditable, content]);
 
   if (!editor) {
     return null;
@@ -110,7 +124,10 @@ export const RichTextEditor = ({
   };
 
   return (
-    <div className={`prose prose-sm max-w-none font-editor ${isDesigner ? 'designer-editor' : ''}`}>
+    <div 
+      className={`prose prose-sm max-w-none font-editor ${isDesigner ? 'designer-editor' : ''}`}
+      ref={editorContainerRef}
+    >
       <EditorStyles />
       <style>
         {`

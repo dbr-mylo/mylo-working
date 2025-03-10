@@ -71,37 +71,16 @@ export const FontSizeStyles = () => {
         font-size: unset !important;
       }
       
-      /* Data attribute selector for maximum compatibility */
-      .ProseMirror [data-font-size] {
-        font-size: attr(data-font-size px) !important;
-      }
-      
-      /* Data style attribute selector for additional compatibility */
-      .ProseMirror [data-style-fontSize] {
-        font-size: attr(data-style-fontSize) !important;
-      }
-      
-      /* Override any existing Tailwind prose classes that might set font sizes */
-      .prose *, .prose-sm * {
-        --tw-prose-body: none !important;
-      }
-      
-      /* Ensure that parent font-size doesn't override child with explicit size */
-      .prose [style*="font-size"], 
-      .prose-sm [style*="font-size"],
-      .prose [data-font-size"], 
-      .prose-sm [data-font-size"],
-      .prose .custom-font-size, 
-      .prose-sm .custom-font-size {
+      /* Force styles to be read from element */
+      span[style*="font-size"], 
+      p[style*="font-size"],
+      div[style*="font-size"] {
         font-size: unset !important;
       }
-      
-      /* Force refresh for font cache clearing */
-      .ProseMirror.refresh-fonts * {
-        font-size: inherit !important;
-      }
-      .ProseMirror.refresh-fonts [style*="font-size"] {
-        font-size: unset !important;
+
+      /* Fix for DOM and editor toolbar mismatch */
+      .ProseMirror .preserve-styling[style*="font-size:20px"] {
+        font-size: 20px !important;
       }
     `}</style>
   );

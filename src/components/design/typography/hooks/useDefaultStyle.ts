@@ -12,7 +12,7 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
   // Load the saved default style on mount and when it changes
   const loadCustomDefaultStyle = useCallback(async () => {
     try {
-      const defaultStyle = await textStyleStore.getDefaultStyle();
+      const defaultStyle = await textStyleStore.getDefaultStyle(true);
       if (defaultStyle) {
         console.log("Loaded default style:", defaultStyle);
         setCustomDefaultStyle(defaultStyle);
@@ -26,10 +26,8 @@ export const useDefaultStyle = (editorInstance?: Editor | null) => {
     loadCustomDefaultStyle();
     
     // Set up a listener to reload when local storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'text_styles' || e.key === 'default_style_id') {
-        loadCustomDefaultStyle();
-      }
+    const handleStorageChange = () => {
+      loadCustomDefaultStyle();
     };
     
     window.addEventListener('storage', handleStorageChange);

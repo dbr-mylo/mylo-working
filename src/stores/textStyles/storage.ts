@@ -68,6 +68,9 @@ export const saveLocalTextStyle = (style: TextStyle): void => {
     
     // Update the cache
     textStylesCache = styles;
+    
+    // Dispatch storage event to notify other components
+    window.dispatchEvent(new Event('storage'));
   } catch (error) {
     console.error('Error saving text style to localStorage:', error);
     throw error;
@@ -77,4 +80,6 @@ export const saveLocalTextStyle = (style: TextStyle): void => {
 // Clear the cache (useful when needing to force a refresh)
 export const clearTextStylesCache = (): void => {
   textStylesCache = null;
+  // Dispatch storage event to notify other components
+  window.dispatchEvent(new Event('storage'));
 };

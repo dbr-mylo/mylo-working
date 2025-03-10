@@ -6,6 +6,7 @@ import { FontPicker } from "@/components/rich-text/FontPicker";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { TextStyle } from "@/lib/types";
+import { clearTextStylesCache } from "@/stores/textStyles/storage";
 
 interface DefaultFontModalProps {
   isOpen: boolean;
@@ -37,6 +38,8 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
         updated_at: new Date().toISOString()
       };
       
+      console.log("Saving updated default style:", updatedStyle);
+      
       // Save the updated style
       await textStyleStore.saveTextStyle(updatedStyle);
       
@@ -45,6 +48,9 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
         await textStyleStore.setDefaultStyle(defaultStyle.id);
       }
       
+      // Clear the cache to force a refresh
+      clearTextStylesCache();
+      
       toast({
         title: "Default font updated",
         description: `Template will now use ${selectedFont} as the default font`
@@ -52,8 +58,8 @@ export const DefaultFontModal = ({ isOpen, onClose, defaultStyle }: DefaultFontM
       
       onClose();
       
-      // Force a refresh of the text styles to update UI
-      textStyleStore.getTextStyles(true);
+      // Force a window storage event to trigger updates in other components
+      window.dispatchEvent(new Event('storage'));
     } catch (error) {
       console.error("Error updating default font:", error);
       toast({

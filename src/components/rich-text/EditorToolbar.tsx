@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,10 +36,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       const fontSize = editor.getAttributes('textStyle').fontSize;
       if (fontSize) {
         console.log("EditorToolbar: Font size from editor:", fontSize);
-        // Only update if the font size is different from current state
-        if (fontSize !== currentFontSize) {
-          setCurrentFontSize(fontSize);
-        }
+        setCurrentFontSize(fontSize);
       }
     };
     
@@ -51,23 +47,20 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       editor.off('selectionUpdate', updateFontSize);
       editor.off('transaction', updateFontSize);
     };
-  }, [editor, currentFontSize]);
+  }, [editor]);
   
-  if (!editor) {
-    return null;
-  }
-
   const handleFontChange = (font: string) => {
     onFontChange(font);
   };
   
   const handleFontSizeChange = (fontSize: string) => {
-    console.log("EditorToolbar: Changing font size to:", fontSize);
-    // Set the font size in the editor
+    console.log("EditorToolbar: Setting font size to:", fontSize);
     editor.chain().focus().setFontSize(fontSize).run();
-    // Update local state
-    setCurrentFontSize(fontSize);
   };
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

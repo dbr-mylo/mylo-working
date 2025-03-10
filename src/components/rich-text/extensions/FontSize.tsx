@@ -1,4 +1,3 @@
-
 import { Extension } from '@tiptap/core';
 import '@tiptap/extension-text-style';
 
@@ -38,17 +37,15 @@ export const FontSize = Extension.create<FontSizeOptions>({
           fontSize: {
             default: null,
             parseHTML: element => {
-              // Ensure we're correctly parsing the fontSize attribute from HTML
               const fontSize = element.style.fontSize;
-              console.log("FontSizeExt: Parsing font size from HTML:", fontSize);
+              console.log("FontSize: Parsing fontSize from HTML:", fontSize);
               return fontSize;
             },
             renderHTML: attributes => {
               if (!attributes.fontSize) {
                 return {};
               }
-
-              console.log("FontSizeExt: Rendering font size to HTML:", attributes.fontSize);
+              console.log("FontSize: Rendering fontSize to HTML:", attributes.fontSize);
               return {
                 style: `font-size: ${attributes.fontSize}`,
               };
@@ -63,12 +60,9 @@ export const FontSize = Extension.create<FontSizeOptions>({
     return {
       setFontSize:
         (fontSize: string) =>
-        ({ chain }) => {
-          console.log("FontSizeExt: Setting font size command:", fontSize);
-          // First remove the current font size to ensure the update is applied
-          return chain()
-            .setMark('textStyle', { fontSize })
-            .run();
+        ({ commands }) => {
+          console.log("FontSize: Applying fontSize:", fontSize);
+          return commands.setMark('textStyle', { fontSize });
         },
       unsetFontSize:
         () =>

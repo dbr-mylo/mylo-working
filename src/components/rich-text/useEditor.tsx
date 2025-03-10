@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEditor as useTipTapEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -20,6 +21,7 @@ export interface UseEditorProps {
 export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorProps) => {
   const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
+  const [currentFontSize, setCurrentFontSize] = useState('16px');
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
@@ -68,6 +70,13 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
+  const handleFontSizeChange = (size: string) => {
+    setCurrentFontSize(size);
+    if (editor) {
+      editor.chain().focus().setFontSize(size).run();
+    }
+  };
+
   const handleColorChange = (color: string) => {
     setCurrentColor(color);
     if (editor) {
@@ -84,14 +93,23 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     }
   };
 
-  // Monitor selection changes to update color state
+  // Monitor selection changes to update state
   useEffect(() => {
     if (editor) {
-      const updateColorState = () => {
-        const { color } = editor.getAttributes('textStyle');
+      const updateStyleState = () => {
+        // Update color state
+        const { color, fontSize, fontFamily } = editor.getAttributes('textStyle');
+        
         if (color) {
           setCurrentColor(color);
-          console.log("Color state updated to:", color);
+        }
+        
+        if (fontSize) {
+          setCurrentFontSize(fontSize);
+        }
+        
+        if (fontFamily) {
+          setCurrentFont(fontFamily);
         }
       };
       
@@ -110,16 +128,16 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
         });
       };
       
-      editor.on('selectionUpdate', updateColorState);
-      editor.on('transaction', updateColorState);
+      editor.on('selectionUpdate', updateStyleState);
+      editor.on('transaction', updateStyleState);
       
       // Add debug logging
       editor.on('selectionUpdate', logStyleChanges);
       editor.on('transaction', logStyleChanges);
       
       return () => {
-        editor.off('selectionUpdate', updateColorState);
-        editor.off('transaction', updateColorState);
+        editor.off('selectionUpdate', updateStyleState);
+        editor.off('transaction', updateStyleState);
         editor.off('selectionUpdate', logStyleChanges);
         editor.off('transaction', logStyleChanges);
       };
@@ -130,7 +148,9 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
     editor,
     currentFont,
     currentColor,
+    currentFontSize,
     handleFontChange,
-    handleColorChange
+    handleColorChange,
+    handleFontSizeChange
   };
 };

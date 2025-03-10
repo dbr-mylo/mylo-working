@@ -8,6 +8,8 @@ import { FormatButtons } from './toolbar/FormatButtons';
 import { IndentButtons } from './toolbar/IndentButtons';
 import { StyleDropdown } from './StyleDropdown';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -36,10 +38,42 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     onFontChange(font);
   };
 
+  const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const size = e.target.value;
+    if (editor) {
+      editor.chain().focus().setFontSize(`${size}px`).run();
+    }
+  };
+
+  // Get current font size from editor (if available)
+  const getCurrentFontSize = () => {
+    if (!editor) return "16";
+    const attrs = editor.getAttributes('textStyle');
+    if (attrs.fontSize) {
+      return attrs.fontSize.replace('px', '');
+    }
+    return "16";
+  };
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <FontPicker value={currentFont} onChange={handleFontChange} />
       <ColorPicker value={currentColor} onChange={onColorChange} />
+      
+      {isDesigner && (
+        <div className="flex items-center gap-1">
+          <Label htmlFor="font-size" className="text-xs whitespace-nowrap">Size:</Label>
+          <Input
+            id="font-size"
+            type="number"
+            min={8}
+            max={72}
+            value={getCurrentFontSize()}
+            onChange={handleFontSizeChange}
+            className="w-14 h-7 text-xs"
+          />
+        </div>
+      )}
       
       <FormatButtons 
         editor={editor}
@@ -54,7 +88,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
 
       <Separator orientation="vertical" className="mx-1 h-6" />
       
-      {/* Add the new StyleDropdown component */}
       <StyleDropdown editor={editor} />
     </div>
   );

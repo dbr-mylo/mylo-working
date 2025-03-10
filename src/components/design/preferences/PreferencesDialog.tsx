@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TemplatePreferences } from "@/lib/types/preferences";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface PreferencesDialogProps {
   open: boolean;
@@ -42,6 +43,9 @@ export const PreferencesDialog = ({
         title: "Font unit updated",
         description: `All text styles have been converted to ${value === 'px' ? 'pixels' : 'points'}.`,
       });
+      
+      // Force a refresh of the page to ensure all components show the updated unit
+      window.location.reload();
     } catch (error) {
       console.error("Error updating font unit:", error);
       toast({
@@ -79,6 +83,9 @@ export const PreferencesDialog = ({
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="text-xs text-muted-foreground mt-2">
+          Note: Changing the font unit will reload the page to apply changes across all components.
         </div>
       </DialogContent>
     </Dialog>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,10 +31,6 @@ export const EditorToolbar = ({ editor, currentFont, currentColor, onFontChange,
   if (!editor) {
     return null;
   }
-
-  const handleFontChange = (font: string) => {
-    onFontChange?.(font);
-  };
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-1">

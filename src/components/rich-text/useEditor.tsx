@@ -12,7 +12,7 @@ import ListItem from '@tiptap/extension-list-item';
 import OrderedList from '@tiptap/extension-ordered-list';
 import BulletList from '@tiptap/extension-bullet-list';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FontSize } from './extensions/FontSize';
 import { useDocument } from "@/hooks/document";
 import { useParams } from "react-router-dom";
@@ -92,6 +92,22 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true, cu
       }
     },
   });
+  
+  // Update the FontSize extension's defaultUnit when preferences change
+  useEffect(() => {
+    if (editor && editor.isActive) {
+      const fontSizeExtension = editor.extensionManager.extensions.find(
+        ext => ext.name === 'fontSize'
+      );
+      
+      if (fontSizeExtension) {
+        fontSizeExtension.options.defaultUnit = editorUnit;
+        
+        // Force a re-render of the editor
+        editor.view.updateState(editor.view.state);
+      }
+    }
+  }, [editor, editorUnit]);
 
   return {
     editor,

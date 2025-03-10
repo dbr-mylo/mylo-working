@@ -7,6 +7,8 @@ import { useEditorSetup } from './rich-text/useEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { Editor } from '@tiptap/react';
 import { FontUnit } from '@/lib/types/preferences';
+import { useParams } from 'react-router-dom';
+import { useDocument } from '@/hooks/document';
 
 interface RichTextEditorProps {
   content: string;
@@ -29,8 +31,13 @@ export const RichTextEditor = ({
   renderToolbarOutside = false,
   externalToolbar = false,
   externalEditorInstance = null,
-  currentUnit
+  currentUnit: propCurrentUnit
 }: RichTextEditorProps) => {
+  // Get document preferences for font unit
+  const { documentId } = useParams<{ documentId?: string }>();
+  const { preferences } = useDocument(documentId);
+  const defaultUnit = preferences?.typography?.fontUnit || 'px';
+  const currentUnit = propCurrentUnit || defaultUnit;
   
   // Use external editor if provided, otherwise create a new one
   const useOwnEditor = !externalEditorInstance;
@@ -54,6 +61,7 @@ export const RichTextEditor = ({
     // Test color preservation on editor initialization
     if (editor && isEditable) {
       console.log("Editor initialized with content:", content.substring(0, 100));
+      console.log("Current font unit:", currentUnit);
       
       // Log initial editor state
       setTimeout(() => {
@@ -62,7 +70,7 @@ export const RichTextEditor = ({
         }
       }, 100);
     }
-  }, [editor, content, isEditable]);
+  }, [editor, content, isEditable, currentUnit]);
 
   if (!editor) {
     return null;

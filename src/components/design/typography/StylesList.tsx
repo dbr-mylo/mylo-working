@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useStylesList } from "./hooks/useStylesList";
 import { EmptyState } from "./EmptyState";
@@ -45,7 +44,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
     <div className="space-y-4" ref={containerRef}>
       {/* Default Style Section */}
       <DefaultStyleSection 
-        defaultStyle={defaultStyle}  {/* Changed from style to defaultStyle */}
+        style={defaultStyle} 
         onStyleClick={handleStyleClick}
         onContextMenu={handleContextMenu}
       />
@@ -56,7 +55,6 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
           styles={otherStyles}
           onStyleClick={handleStyleClick}
           onContextMenu={handleContextMenu}
-          showHeading={false}
         />
       )}
       

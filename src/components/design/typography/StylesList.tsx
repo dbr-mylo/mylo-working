@@ -55,6 +55,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
           styles={otherStyles}
           onStyleClick={handleStyleClick}
           onContextMenu={handleContextMenu}
+          showHeading={false}
         />
       )}
       

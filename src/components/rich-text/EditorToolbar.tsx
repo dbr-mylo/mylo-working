@@ -40,25 +40,34 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const size = e.target.value.replace(/\D/g, '').substring(0, 2);
-    if (size && editor) {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop propagation to prevent editor from capturing the input
+    
+    const size = e.target.value.replace(/\D/g, '');
+    if (editor) {
       editor.chain().focus().setFontSize(`${size}px`).run();
     }
   };
 
-  const increaseFontSize = () => {
+  const increaseFontSize = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event propagation
+    
     const currentSize = parseInt(getCurrentFontSize(), 10);
     const newSize = Math.min(currentSize + 1, 72); // Max size 72px
     if (editor) {
-      editor.chain().focus().setFontSize(`${newSize}px`).run();
+      editor.chain().setFontSize(`${newSize}px`).run();
     }
   };
 
-  const decreaseFontSize = () => {
+  const decreaseFontSize = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event propagation
+    
     const currentSize = parseInt(getCurrentFontSize(), 10);
     const newSize = Math.max(currentSize - 1, 8); // Min size 8px
     if (editor) {
-      editor.chain().focus().setFontSize(`${newSize}px`).run();
+      editor.chain().setFontSize(`${newSize}px`).run();
     }
   };
 
@@ -69,6 +78,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       return attrs.fontSize.replace('px', '');
     }
     return "16";
+  };
+
+  // Handler for keydown to prevent propagation to editor
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -87,6 +101,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 pattern="[0-9]*"
                 value={getCurrentFontSize()}
                 onChange={handleFontSizeChange}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
                 className="w-12 h-7 text-xs pr-5"
               />
               <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center">
@@ -94,6 +110,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   type="button"
                   className="flex items-center justify-center h-3.5 w-5 text-gray-500 hover:text-gray-700"
                   onClick={increaseFontSize}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <ChevronUp className="h-3 w-3" />
                 </button>
@@ -101,6 +118,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   type="button"
                   className="flex items-center justify-center h-3.5 w-5 text-gray-500 hover:text-gray-700"
                   onClick={decreaseFontSize}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <ChevronDown className="h-3 w-3" />
                 </button>

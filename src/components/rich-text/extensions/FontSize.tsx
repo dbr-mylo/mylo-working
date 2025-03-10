@@ -40,7 +40,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
             parseHTML: element => {
               // Ensure we're correctly parsing the fontSize attribute from HTML
               const fontSize = element.style.fontSize;
-              console.log("Parsing font size from HTML:", fontSize);
+              console.log("FontSizeExt: Parsing font size from HTML:", fontSize);
               return fontSize;
             },
             renderHTML: attributes => {
@@ -48,7 +48,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
                 return {};
               }
 
-              console.log("Rendering font size to HTML:", attributes.fontSize);
+              console.log("FontSizeExt: Rendering font size to HTML:", attributes.fontSize);
               return {
                 style: `font-size: ${attributes.fontSize}`,
               };
@@ -64,8 +64,11 @@ export const FontSize = Extension.create<FontSizeOptions>({
       setFontSize:
         (fontSize: string) =>
         ({ chain }) => {
-          console.log("Setting font size command:", fontSize);
-          return chain().setMark('textStyle', { fontSize }).run();
+          console.log("FontSizeExt: Setting font size command:", fontSize);
+          // First remove the current font size to ensure the update is applied
+          return chain()
+            .setMark('textStyle', { fontSize })
+            .run();
         },
       unsetFontSize:
         () =>

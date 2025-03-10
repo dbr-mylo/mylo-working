@@ -36,9 +36,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     const updateFontSize = () => {
       const fontSize = editor.getAttributes('textStyle').fontSize;
       if (fontSize) {
-        // Only update if the font size has actually changed
-        setCurrentFontSize(fontSize);
-        console.log("Font size from editor:", fontSize);
+        console.log("EditorToolbar: Font size from editor:", fontSize);
+        // Only update if the font size is different from current state
+        if (fontSize !== currentFontSize) {
+          setCurrentFontSize(fontSize);
+        }
       }
     };
     
@@ -49,7 +51,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       editor.off('selectionUpdate', updateFontSize);
       editor.off('transaction', updateFontSize);
     };
-  }, [editor]);
+  }, [editor, currentFontSize]);
   
   if (!editor) {
     return null;
@@ -60,9 +62,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
   
   const handleFontSizeChange = (fontSize: string) => {
-    console.log("Changing font size to:", fontSize);
-    setCurrentFontSize(fontSize);
+    console.log("EditorToolbar: Changing font size to:", fontSize);
+    // Set the font size in the editor
     editor.chain().focus().setFontSize(fontSize).run();
+    // Update local state
+    setCurrentFontSize(fontSize);
   };
 
   return (

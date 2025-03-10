@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -17,26 +17,39 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
   };
 
   const [size, setSize] = useState<number>(getNumericValue(value));
+  const isUpdatingRef = useRef(false);
 
   // Update internal state when external value changes
   useEffect(() => {
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false;
+      return;
+    }
+    
     const newSize = getNumericValue(value);
     if (newSize !== size) {
       setSize(newSize);
+      console.log("FontSizeInput: Updating internal state from prop:", newSize);
     }
   }, [value, size]);
 
   const incrementSize = () => {
     const newSize = size + 1;
+    isUpdatingRef.current = true;
     setSize(newSize);
+    
     // Ensure we call onChange with the new value
+    console.log("FontSizeInput: Incrementing to:", newSize);
     onChange(`${newSize}px`);
   };
 
   const decrementSize = () => {
     const newSize = Math.max(size - 1, 1); // Keep minimum size at 1
+    isUpdatingRef.current = true;
     setSize(newSize);
+    
     // Ensure we call onChange with the new value
+    console.log("FontSizeInput: Decrementing to:", newSize);
     onChange(`${newSize}px`);
   };
 
@@ -49,13 +62,16 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
     }
     
     const newSize = parseInt(inputValue, 10);
+    isUpdatingRef.current = true;
     setSize(newSize);
+    console.log("FontSizeInput: Manual change to:", newSize);
     onChange(`${newSize}px`);
   };
 
   const handleBlur = () => {
     // Ensure minimum value is 1 when user leaves field
     if (size < 1) {
+      isUpdatingRef.current = true;
       setSize(1);
       onChange("1px");
     }

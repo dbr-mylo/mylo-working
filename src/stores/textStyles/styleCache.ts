@@ -37,3 +37,31 @@ export const clearCachedStylesByPattern = (patterns: string[]): void => {
 export const clearDefaultResetStyle = (): void => {
   clearCachedStylesByPattern(['Clear to Default', 'Reset to Default']);
 };
+
+/**
+ * Clears all editor-related caches and storage
+ */
+export const clearEditorCache = (): void => {
+  try {
+    // Clear font size related storage
+    localStorage.removeItem('editor_font_size');
+    
+    // Clear any stored text styles that might be causing issues
+    clearCachedStylesByPattern(['font-size', 'fontSize']);
+    
+    // Clear any other editor-related items
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('editor') || key.includes('font') || key.includes('style'))) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    console.log('Editor cache cleared successfully');
+  } catch (error) {
+    console.error('Error clearing editor cache:', error);
+  }
+};

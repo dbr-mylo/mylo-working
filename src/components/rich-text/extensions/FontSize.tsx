@@ -1,3 +1,4 @@
+
 import { Extension } from '@tiptap/core';
 import '@tiptap/extension-text-style';
 
@@ -61,12 +62,18 @@ export const FontSize = Extension.create<FontSizeOptions>({
       setFontSize:
         (fontSize: string) =>
         ({ commands }) => {
-          console.log("FontSize: Applying fontSize:", fontSize);
+          // Store the current font size in localStorage 
+          // as a temporary solution until state syncing is fully fixed
+          if (fontSize) {
+            console.log("FontSize: Applying fontSize:", fontSize);
+            localStorage.setItem('editor_font_size', fontSize);
+          }
           return commands.setMark('textStyle', { fontSize });
         },
       unsetFontSize:
         () =>
         ({ chain }) => {
+          localStorage.removeItem('editor_font_size');
           return chain()
             .setMark('textStyle', { fontSize: null })
             .removeEmptyTextStyle()

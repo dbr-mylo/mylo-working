@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,19 +30,46 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const buttonSize = isDesigner ? "xxs" : "sm";
   const [currentFontSize, setCurrentFontSize] = useState("16px");
   
+  // Clear all cached styles/preferences on component mount
+  useEffect(() => {
+    try {
+      // Clear any potentially stored font sizes from localStorage
+      localStorage.removeItem('editor_font_size');
+      
+      // Clear session storage as well
+      sessionStorage.clear();
+      
+      console.log("EditorToolbar: Cleared cache and storage");
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+    }
+  }, []);
+  
   useEffect(() => {
     if (!editor) return;
     
     const updateFontSize = () => {
+      // First check the editor's attributes
       const fontSize = editor.getAttributes('textStyle').fontSize;
+      
       if (fontSize) {
         console.log("EditorToolbar: Font size from editor:", fontSize);
         setCurrentFontSize(fontSize);
+      } else {
+        // Check if we have a stored value to fall back on
+        const storedFontSize = localStorage.getItem('editor_font_size');
+        if (storedFontSize) {
+          console.log("EditorToolbar: Using stored font size:", storedFontSize);
+          setCurrentFontSize(storedFontSize);
+        }
       }
     };
     
     editor.on('selectionUpdate', updateFontSize);
     editor.on('transaction', updateFontSize);
+    
+    // Initial update
+    updateFontSize();
     
     return () => {
       editor.off('selectionUpdate', updateFontSize);
@@ -54,7 +82,12 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   };
   
   const handleFontSizeChange = (fontSize: string) => {
+    if (!editor) return;
+    
     console.log("EditorToolbar: Setting font size to:", fontSize);
+    // Set state first for immediate UI update
+    setCurrentFontSize(fontSize);
+    // Then update the editor
     editor.chain().focus().setFontSize(fontSize).run();
   };
 

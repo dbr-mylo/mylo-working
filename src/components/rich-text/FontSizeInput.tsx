@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { clearCachedStylesByPattern } from '@/stores/textStyles/styleCache';
 
 interface FontSizeInputProps {
   value: string;
@@ -21,9 +22,17 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
   // Update internal state when external value changes
   useEffect(() => {
     const newSize = getNumericValue(value);
-    setSize(newSize);
-    console.log("FontSizeInput: Value prop changed to:", value, "internal size updated to:", newSize);
-  }, [value]);
+    if (newSize !== size) {
+      setSize(newSize);
+      console.log("FontSizeInput: Value prop changed to:", value, "internal size updated to:", newSize);
+    }
+  }, [value, size]);
+
+  // Clear caches on component mount to reset any stored values
+  useEffect(() => {
+    clearCachedStylesByPattern(['font-size']);
+    localStorage.removeItem('editor_font_size');
+  }, []);
 
   const incrementSize = () => {
     const newSize = size + 1;
@@ -46,6 +55,7 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
     }
     
     const newSize = parseInt(inputValue, 10);
+    setSize(newSize);
     console.log("FontSizeInput: Manual change to:", newSize);
     onChange(`${newSize}px`);
   };
@@ -94,4 +104,3 @@ export const FontSizeInput = ({ value, onChange, className }: FontSizeInputProps
     </div>
   );
 };
-

@@ -6,6 +6,7 @@ import { EditorStyles } from './rich-text/EditorStyles';
 import { useEditorSetup } from './rich-text/useEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { Editor } from '@tiptap/react';
+import { clearEditorCache } from '@/stores/textStyles/styleCache';
 
 interface RichTextEditorProps {
   content: string;
@@ -28,6 +29,11 @@ export const RichTextEditor = ({
   externalToolbar = false,
   externalEditorInstance = null // Default to null
 }: RichTextEditorProps) => {
+  
+  // Clear editor cache on component mount
+  useEffect(() => {
+    clearEditorCache();
+  }, []);
   
   // Use external editor if provided, otherwise create a new one
   const useOwnEditor = !externalEditorInstance;

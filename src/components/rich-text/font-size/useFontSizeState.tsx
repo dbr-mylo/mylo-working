@@ -1,6 +1,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { textStyleStore } from '@/stores/textStyles';
+import { 
+  parseFontSize, 
+  formatFontSize, 
+  dispatchFontSizeEvent, 
+  clampFontSize 
+} from './utils';
+import { 
+  MIN_FONT_SIZE, 
+  MAX_FONT_SIZE, 
+  DEFAULT_FONT_SIZE,
+  FONT_SIZE_CHANGE_EVENT,
+  FONT_SIZE_PARSED_EVENT,
+  EVENT_SOURCES
+} from './constants';
 
 interface UseFontSizeStateProps {
   initialValue: string;
@@ -9,18 +23,8 @@ interface UseFontSizeStateProps {
 }
 
 export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSizeStateProps) => {
-  // Constants for min/max font size values according to requirements
-  const MIN_FONT_SIZE = 1;
-  const MAX_FONT_SIZE = 99;
-
-  // Extract the numeric value from the font size string (e.g., "16px" -> 16)
-  const getNumericValue = (fontSizeValue: string): number => {
-    if (!fontSizeValue) return 16; // Default size if no value provided
-    const match = String(fontSizeValue).match(/^(\d+(\.\d+)?)/);
-    return match ? parseFloat(match[1]) : 16; // Default to 16 if parsing fails
-  };
-
-  const initialSize = getNumericValue(initialValue);
+  // Get initial numeric value from the font size string
+  const initialSize = parseFontSize(initialValue, DEFAULT_FONT_SIZE);
   const [size, setSize] = useState<number>(initialSize);
   
   // Log initial value received
@@ -33,9 +37,9 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     if (!event.detail || !event.detail.fontSize) return;
     
     // Prioritize DOM-sourced values for accurate representation
-    const source = event.detail.source || 'unknown';
+    const source = event.detail.source || EVENT_SOURCES.UNKNOWN;
     const isDomSource = source.includes('dom');
-    const newSize = getNumericValue(event.detail.fontSize);
+    const newSize = parseFontSize(event.detail.fontSize, DEFAULT_FONT_SIZE);
     
     console.log(`FontSizeInput: Received font size event (${source})`, 
       event.detail.fontSize, "parsed to:", newSize, "current size:", size);
@@ -45,14 +49,14 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
       setSize(newSize);
       // Propagate changes from DOM to ensure toolbar matches DOM
       if (!disabled) {
-        onChange(`${newSize}px`);
+        onChange(formatFontSize(newSize));
       }
     }
   }, [size, onChange, disabled]);
   
   // Update internal state when external value changes
   useEffect(() => {
-    const newSize = getNumericValue(initialValue);
+    const newSize = parseFontSize(initialValue, DEFAULT_FONT_SIZE);
     if (Math.abs(newSize - size) > 0.1) {
       console.log("FontSizeInput: Value prop changed to:", initialValue, "internal size updated to:", newSize);
       setSize(newSize);
@@ -69,18 +73,99 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     }
     
     // Add event listeners with proper typing
-    document.addEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
-    document.addEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
+    document.addEventListener(FONT_SIZE_CHANGE_EVENT, handleFontSizeEvent as EventListener);
+    document.addEventListener(FONT_SIZE_PARSED_EVENT, handleFontSizeEvent as EventListener);
     
     return () => {
       // Clean up event listeners
-      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
-      document.removeEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
+      document.removeEventListener(FONT_SIZE_CHANGE_EVENT, handleFontSizeEvent as EventListener);
+      document.removeEventListener(FONT_SIZE_PARSED_EVENT, handleFontSizeEvent as EventListener);
     };
   }, [handleFontSizeEvent]);
 
   // Check DOM directly for font size in selection whenever selection changes
-  useEffect(() => {
+  useEffect(useDomFontSizeDetection(size, setSize, onChange, disabled), [size, onChange, disabled]);
+
+  // Handle incrementing the font size
+  const incrementSize = () => {
+    if (disabled) return;
+    const newSize = clampFontSize(size + 1, MIN_FONT_SIZE, MAX_FONT_SIZE);
+    console.log("FontSizeInput: Incrementing from", size, "to", newSize);
+    setSize(newSize);
+    onChange(formatFontSize(newSize));
+    
+    // Dispatch event for other components
+    dispatchFontSizeEvent(formatFontSize(newSize), EVENT_SOURCES.INPUT);
+  };
+
+  // Handle decrementing the font size
+  const decrementSize = () => {
+    if (disabled) return;
+    const newSize = clampFontSize(size - 1, MIN_FONT_SIZE, MAX_FONT_SIZE);
+    console.log("FontSizeInput: Decrementing from", size, "to", newSize);
+    setSize(newSize);
+    onChange(formatFontSize(newSize));
+    
+    // Dispatch event for other components
+    dispatchFontSizeEvent(formatFontSize(newSize), EVENT_SOURCES.INPUT);
+  };
+
+  // Handle direct input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    
+    let inputValue = e.target.value.replace(/[^\d.]/g, ''); // Allow digits and decimal point
+    
+    if (inputValue === '') {
+      setSize(0);
+      return;
+    }
+    
+    let newSize = parseFloat(inputValue);
+    // Round to one decimal place for better usability
+    newSize = Math.round(newSize * 10) / 10;
+    
+    setSize(newSize);
+    console.log("FontSizeInput: Manual change to:", newSize);
+    
+    // Only update if value is within acceptable range
+    if (newSize >= MIN_FONT_SIZE) {
+      onChange(formatFontSize(newSize));
+      dispatchFontSizeEvent(formatFontSize(newSize), EVENT_SOURCES.INPUT);
+    }
+  };
+
+  // Handle blur events for validation
+  const handleBlur = () => {
+    if (disabled) return;
+    
+    // When blurring, ensure the value is within range
+    if (size < MIN_FONT_SIZE) {
+      const newSize = MIN_FONT_SIZE;
+      console.log("FontSizeInput: Correcting size to minimum:", newSize);
+      setSize(newSize);
+      onChange(formatFontSize(newSize));
+      dispatchFontSizeEvent(formatFontSize(newSize), EVENT_SOURCES.INPUT);
+    }
+  };
+
+  return {
+    size,
+    handleInputChange,
+    handleBlur,
+    incrementSize,
+    decrementSize,
+  };
+};
+
+// Extract DOM font size detection to a separate function for clarity
+const useDomFontSizeDetection = (
+  size: number, 
+  setSize: (size: number) => void,
+  onChange: (value: string) => void, 
+  disabled: boolean
+) => {
+  return () => {
     if (disabled) return;
     
     const checkDomFontSize = () => {
@@ -109,16 +194,19 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
               }
               
               if (domFontSize) {
-                const newSize = getNumericValue(domFontSize);
+                const newSize = parseFontSize(domFontSize, DEFAULT_FONT_SIZE);
                 console.log("FontSizeInput: DOM font size check:", domFontSize, "parsed to:", newSize);
                 
                 if (Math.abs(newSize - size) > 0.1) {
                   setSize(newSize);
-                  onChange(`${newSize}px`);
+                  onChange(formatFontSize(newSize));
                   
                   // Broadcast to other components
-                  const fontSizeEvent = new CustomEvent('tiptap-font-size-parsed', {
-                    detail: { fontSize: domFontSize, source: 'direct-dom-check' }
+                  const fontSizeEvent = new CustomEvent(FONT_SIZE_PARSED_EVENT, {
+                    detail: { 
+                      fontSize: domFontSize, 
+                      source: EVENT_SOURCES.DIRECT_DOM_CHECK 
+                    }
                   });
                   document.dispatchEvent(fontSizeEvent);
                 }
@@ -137,107 +225,5 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     return () => {
       document.removeEventListener('selectionchange', checkDomFontSize);
     };
-  }, [size, onChange, disabled]);
-
-  const incrementSize = () => {
-    if (disabled) return;
-    const newSize = Math.min(size + 1, MAX_FONT_SIZE);
-    console.log("FontSizeInput: Incrementing from", size, "to", newSize);
-    setSize(newSize);
-    onChange(`${newSize}px`);
-    
-    // Dispatch event for other components
-    try {
-      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px`, source: 'input' }
-      });
-      document.dispatchEvent(fontSizeEvent);
-    } catch (error) {
-      console.error("Error dispatching font size event:", error);
-    }
-  };
-
-  const decrementSize = () => {
-    if (disabled) return;
-    const newSize = Math.max(size - 1, MIN_FONT_SIZE);
-    console.log("FontSizeInput: Decrementing from", size, "to", newSize);
-    setSize(newSize);
-    onChange(`${newSize}px`);
-    
-    // Dispatch event for other components
-    try {
-      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px`, source: 'input' }
-      });
-      document.dispatchEvent(fontSizeEvent);
-    } catch (error) {
-      console.error("Error dispatching font size event:", error);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return;
-    
-    let inputValue = e.target.value.replace(/[^\d.]/g, ''); // Allow digits and decimal point
-    
-    if (inputValue === '') {
-      setSize(0);
-      return;
-    }
-    
-    let newSize = parseFloat(inputValue);
-    // Enforce min/max limits
-    newSize = Math.max(Math.min(newSize, MAX_FONT_SIZE), 0);
-    
-    // Round to one decimal place for better usability
-    newSize = Math.round(newSize * 10) / 10;
-    
-    setSize(newSize);
-    console.log("FontSizeInput: Manual change to:", newSize);
-    
-    // Only update if value is within acceptable range
-    if (newSize >= MIN_FONT_SIZE) {
-      onChange(`${newSize}px`);
-      
-      // Dispatch event for other components
-      try {
-        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px`, source: 'input' }
-        });
-        document.dispatchEvent(fontSizeEvent);
-      } catch (error) {
-        console.error("Error dispatching font size event:", error);
-      }
-    }
-  };
-
-  const handleBlur = () => {
-    if (disabled) return;
-    
-    // When blurring, ensure the value is within range
-    if (size < MIN_FONT_SIZE) {
-      const newSize = MIN_FONT_SIZE;
-      console.log("FontSizeInput: Correcting size to minimum:", newSize);
-      setSize(newSize);
-      onChange(`${newSize}px`);
-      
-      // Dispatch event for other components
-      try {
-        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px`, source: 'input' }
-        });
-        document.dispatchEvent(fontSizeEvent);
-      } catch (error) {
-        console.error("Error dispatching font size event:", error);
-      }
-    }
-  };
-
-  return {
-    size,
-    handleInputChange,
-    handleBlur,
-    incrementSize,
-    decrementSize,
   };
 };

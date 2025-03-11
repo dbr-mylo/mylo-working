@@ -1,7 +1,5 @@
 
-/**
- * Utility functions for font size manipulation
- */
+import { MIN_FONT_SIZE, MAX_FONT_SIZE, FONT_SIZE_CHANGE_EVENT } from './constants';
 
 /**
  * Extracts a numeric value from a font size string
@@ -31,7 +29,7 @@ export const formatFontSize = (value: number): string => {
  */
 export const dispatchFontSizeEvent = (fontSize: string, source = 'input'): void => {
   try {
-    const event = new CustomEvent('tiptap-font-size-changed', {
+    const event = new CustomEvent(FONT_SIZE_CHANGE_EVENT, {
       detail: { 
         fontSize, 
         source 
@@ -50,6 +48,6 @@ export const dispatchFontSizeEvent = (fontSize: string, source = 'input'): void 
  * @param max - Maximum allowed value
  * @returns The clamped value
  */
-export const clampFontSize = (value: number, min = 1, max = 99): number => {
+export const clampFontSize = (value: number, min = MIN_FONT_SIZE, max = MAX_FONT_SIZE): number => {
   return Math.max(Math.min(value, max), min);
 };

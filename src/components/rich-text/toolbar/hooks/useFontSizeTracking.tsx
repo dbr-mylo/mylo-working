@@ -1,6 +1,11 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Editor } from '@tiptap/react';
 import { textStyleStore } from '@/stores/textStyles';
+import { 
+  FONT_SIZE_CHANGE_EVENT,
+  FONT_SIZE_PARSED_EVENT
+} from '../../font-size/constants';
 
 export const useFontSizeTracking = (editor: Editor | null) => {
   const [currentFontSize, setCurrentFontSize] = useState("16px");
@@ -73,13 +78,13 @@ export const useFontSizeTracking = (editor: Editor | null) => {
   // Listen for font size change events from the FontSize extension
   useEffect(() => {
     // Add event listeners with proper typing
-    document.addEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
-    document.addEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
+    document.addEventListener(FONT_SIZE_CHANGE_EVENT, handleFontSizeEvent as EventListener);
+    document.addEventListener(FONT_SIZE_PARSED_EVENT, handleFontSizeEvent as EventListener);
     
     return () => {
       // Clean up event listeners
-      document.removeEventListener('tiptap-font-size-changed', handleFontSizeEvent as EventListener);
-      document.removeEventListener('tiptap-font-size-parsed', handleFontSizeEvent as EventListener);
+      document.removeEventListener(FONT_SIZE_CHANGE_EVENT, handleFontSizeEvent as EventListener);
+      document.removeEventListener(FONT_SIZE_PARSED_EVENT, handleFontSizeEvent as EventListener);
     };
   }, [handleFontSizeEvent]);
   

@@ -1,8 +1,9 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useEditorFontSizeState } from './useEditorFontSizeState';
 import { useFontSizeEventHandling } from './useFontSizeEventHandling';
+import { getDomFontSize } from './utils/domFontSizeUtils';
 
 export const useFontSizeTracking = (editor: Editor | null) => {
   const [currentFontSize, setCurrentFontSize] = useState("16px");
@@ -11,7 +12,7 @@ export const useFontSizeTracking = (editor: Editor | null) => {
   const editorFontSizeState = useEditorFontSizeState(editor);
   
   // Update current font size when editor state changes
-  useCallback(() => {
+  useEffect(() => {
     if (editorFontSizeState.currentFontSize !== currentFontSize) {
       setCurrentFontSize(editorFontSizeState.currentFontSize);
     }

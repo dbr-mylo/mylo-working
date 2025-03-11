@@ -4,6 +4,8 @@ export * from './useFontSizeEventHandling';
 export * from './useFontSizeTracking';
 export * from './useEditorFontSizeState';
 
-// Note: useDomFontSizeDetection was moved to utils/domFontSizeUtils.ts
-// We re-export it from there
+// Re-export utils 
 export { getDomFontSize } from './utils/domFontSizeUtils';
+
+// Import and re-export from font-size module to avoid duplication
+export { useDomFontSizeDetection } from '../../../font-size/hooks/useDomFontSizeDetection';

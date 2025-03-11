@@ -8,4 +8,4 @@ export * from './useEditorFontSizeState';
 export { getDomFontSize } from './utils/domFontSizeUtils';
 
 // Import and re-export from font-size module to avoid duplication
-export { useDomFontSizeDetection } from '../../../font-size/hooks/useDomFontSizeDetection';
+export { useDomFontSizeDetection } from '../../font-size/hooks/useDomFontSizeDetection';

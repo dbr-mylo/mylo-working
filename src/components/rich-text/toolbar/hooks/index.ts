@@ -1,10 +1,11 @@
 
-// Re-export hooks for easier imports
-export * from './useFontSizeEventHandling';
-export * from './useFontSizeTracking';
-export * from './useEditorFontSizeState';
+// Re-export hooks for central access
+export { useFontSizeTracking } from './useFontSizeTracking';
+export { useEditorFontSizeState } from './useEditorFontSizeState';
+export { useFontSizeEventHandling } from './useFontSizeEventHandling';
+export { useToolbarInitialization } from './useToolbarInitialization';
 
-// Re-export utils 
+// Re-export utility functions
 export { getDomFontSize } from './utils/domFontSizeUtils';
 
 // Import and re-export from font-size module to avoid duplication

@@ -1,7 +1,6 @@
-
 import type { DesignPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { textStyleStore } from "@/stores/textStyles";

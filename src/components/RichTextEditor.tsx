@@ -1,13 +1,11 @@
 
 import { EditorContent } from '@tiptap/react';
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { Editor } from '@tiptap/react';
 import { useEditorSetup } from './rich-text/useEditor';
-import { EditorStyles } from './rich-text/styles';
 import { EditorContainer } from './rich-text/EditorContainer';
-import { EditorInitializer } from './rich-text/EditorInitializer';
-import { FontSizeInitializer } from './rich-text/FontSizeInitializer';
 import { EditorToolbarWrapper } from './rich-text/EditorToolbarWrapper';
+import { EditorCacheManager } from './rich-text/EditorCacheManager';
 
 interface RichTextEditorProps {
   content: string;
@@ -55,14 +53,8 @@ export const RichTextEditor = ({
       fixedToolbar={fixedToolbar}
       refProp={editorContainerRef}
     >
-      {/* Initialize editor and clear caches */}
-      <EditorInitializer />
-      
-      {/* Add necessary styles */}
-      <EditorStyles />
-      
-      {/* Handle font size initialization */}
-      <FontSizeInitializer 
+      {/* Handle cache management and initialization */}
+      <EditorCacheManager 
         editor={editor}
         isEditable={isEditable}
         editorContainerRef={editorContainerRef}

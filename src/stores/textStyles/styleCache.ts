@@ -66,3 +66,45 @@ export const resetTextStylesToDefaults = (): void => {
     console.error('Error resetting text styles:', error);
   }
 };
+
+/**
+ * Clears default reset style from cache
+ */
+export const clearDefaultResetStyle = (): void => {
+  try {
+    localStorage.removeItem('default_reset_style');
+    console.log('Default reset style cleared from cache');
+  } catch (error) {
+    console.error('Error clearing default reset style:', error);
+  }
+};
+
+/**
+ * Deep clean all storage related to text styles
+ */
+export const deepCleanStorage = (): void => {
+  try {
+    // Clear all text style related items
+    localStorage.removeItem(TEXT_STYLE_STORAGE_KEY);
+    localStorage.removeItem(DEFAULT_STYLE_ID_KEY);
+    localStorage.removeItem('editor_font_size');
+    localStorage.removeItem('default_reset_style');
+    
+    // Also clear any items that might be related
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('font') || 
+        key.includes('style') || 
+        key.includes('text') ||
+        key.includes('editor')
+      )) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    console.log('Deep storage cleaning completed');
+  } catch (error) {
+    console.error('Error performing deep storage cleaning:', error);
+  }
+};

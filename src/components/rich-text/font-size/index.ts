@@ -5,3 +5,5 @@ export * from './FontSizeControls';
 export * from './useFontSizeState';
 export * from './utils';
 export * from './constants';
+export * from './hooks/useFontSizeEventHandling';
+export * from './hooks/useDomFontSizeDetection';

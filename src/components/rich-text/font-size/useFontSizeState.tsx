@@ -15,6 +15,8 @@ import {
   FONT_SIZE_PARSED_EVENT,
   EVENT_SOURCES
 } from './constants';
+import { useFontSizeEventHandling } from './hooks/useFontSizeEventHandling';
+import { useDomFontSizeDetection } from './hooks/useDomFontSizeDetection';
 
 interface UseFontSizeStateProps {
   initialValue: string;
@@ -32,37 +34,14 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     console.log("FontSizeInput: Initialized with value:", initialValue, "parsed to size:", initialSize);
   }, []);
   
-  // Handler for font size events with priority for DOM-sourced values
-  const handleFontSizeEvent = useCallback((event: CustomEvent) => {
-    if (!event.detail || !event.detail.fontSize) return;
-    
-    // Prioritize DOM-sourced values for accurate representation
-    const source = event.detail.source || EVENT_SOURCES.UNKNOWN;
-    const isDomSource = source.includes('dom');
-    const newSize = parseFontSize(event.detail.fontSize, DEFAULT_FONT_SIZE);
-    
-    console.log(`FontSizeInput: Received font size event (${source})`, 
-      event.detail.fontSize, "parsed to:", newSize, "current size:", size);
-    
-    // Always update from DOM source or if size is different
-    if (isDomSource || Math.abs(newSize - size) > 0.1) {
-      setSize(newSize);
-      // Propagate changes from DOM to ensure toolbar matches DOM
-      if (!disabled) {
-        onChange(formatFontSize(newSize));
-      }
-    }
-  }, [size, onChange, disabled]);
+  // Use font size event handling from separate hook
+  const handleFontSizeEvent = useFontSizeEventHandling({
+    size,
+    setSize,
+    onChange,
+    disabled
+  });
   
-  // Update internal state when external value changes
-  useEffect(() => {
-    const newSize = parseFontSize(initialValue, DEFAULT_FONT_SIZE);
-    if (Math.abs(newSize - size) > 0.1) {
-      console.log("FontSizeInput: Value prop changed to:", initialValue, "internal size updated to:", newSize);
-      setSize(newSize);
-    }
-  }, [initialValue]);
-
   // Listen for font size events from the editor
   useEffect(() => {
     // Clear any cached styles
@@ -83,8 +62,22 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     };
   }, [handleFontSizeEvent]);
 
+  // Update internal state when external value changes
+  useEffect(() => {
+    const newSize = parseFontSize(initialValue, DEFAULT_FONT_SIZE);
+    if (Math.abs(newSize - size) > 0.1) {
+      console.log("FontSizeInput: Value prop changed to:", initialValue, "internal size updated to:", newSize);
+      setSize(newSize);
+    }
+  }, [initialValue, size]);
+
   // Check DOM directly for font size in selection whenever selection changes
-  useEffect(useDomFontSizeDetection(size, setSize, onChange, disabled), [size, onChange, disabled]);
+  useDomFontSizeDetection({
+    size,
+    setSize,
+    onChange,
+    disabled
+  });
 
   // Handle incrementing the font size
   const incrementSize = () => {
@@ -155,75 +148,5 @@ export const useFontSizeState = ({ initialValue, onChange, disabled }: UseFontSi
     handleBlur,
     incrementSize,
     decrementSize,
-  };
-};
-
-// Extract DOM font size detection to a separate function for clarity
-const useDomFontSizeDetection = (
-  size: number, 
-  setSize: (size: number) => void,
-  onChange: (value: string) => void, 
-  disabled: boolean
-) => {
-  return () => {
-    if (disabled) return;
-    
-    const checkDomFontSize = () => {
-      try {
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          if (!range.collapsed) {
-            // For text selection, get a direct DOM measurement
-            const selectedNode = range.commonAncestorContainer;
-            let targetElement: HTMLElement | null = null;
-            
-            if (selectedNode.nodeType === Node.TEXT_NODE && selectedNode.parentElement) {
-              targetElement = selectedNode.parentElement;
-            } else if (selectedNode.nodeType === Node.ELEMENT_NODE) {
-              targetElement = selectedNode as HTMLElement;
-            }
-            
-            if (targetElement) {
-              // Check if element has inline style first
-              let domFontSize = targetElement.style.fontSize;
-              
-              // If no inline style, use computed style
-              if (!domFontSize) {
-                domFontSize = window.getComputedStyle(targetElement).fontSize;
-              }
-              
-              if (domFontSize) {
-                const newSize = parseFontSize(domFontSize, DEFAULT_FONT_SIZE);
-                console.log("FontSizeInput: DOM font size check:", domFontSize, "parsed to:", newSize);
-                
-                if (Math.abs(newSize - size) > 0.1) {
-                  setSize(newSize);
-                  onChange(formatFontSize(newSize));
-                  
-                  // Broadcast to other components
-                  const fontSizeEvent = new CustomEvent(FONT_SIZE_PARSED_EVENT, {
-                    detail: { 
-                      fontSize: domFontSize, 
-                      source: EVENT_SOURCES.DIRECT_DOM_CHECK 
-                    }
-                  });
-                  document.dispatchEvent(fontSizeEvent);
-                }
-              }
-            }
-          }
-        }
-      } catch (error) {
-        // Safely ignore errors during DOM inspection
-        console.error("Error checking DOM font size:", error);
-      }
-    };
-    
-    // Check DOM on selection change
-    document.addEventListener('selectionchange', checkDomFontSize);
-    return () => {
-      document.removeEventListener('selectionchange', checkDomFontSize);
-    };
   };
 };

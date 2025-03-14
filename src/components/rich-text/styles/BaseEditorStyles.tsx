@@ -24,6 +24,7 @@ export const BaseEditorStyles = () => {
         font-size: initial !important;
         font-family: Inter, sans-serif !important;
         box-sizing: border-box;
+        padding-top: 0.25rem;
       }
       
       /* Placeholder */

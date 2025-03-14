@@ -29,7 +29,7 @@ export const EditorView = ({
           <ToolSettingsMenuBar />
         </div>
       )}
-      <div className="p-4 pt-0 md:p-8 md:pt-0 flex-grow">
+      <div className="p-4 pt-6 md:p-8 md:pt-6 flex-grow">
         <div className="mx-auto mt-0">
           <DocumentPreview 
             content={content}

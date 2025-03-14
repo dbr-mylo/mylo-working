@@ -45,7 +45,7 @@ export const EditorPanel = ({
   }
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 pt-0 md:p-8 md:pt-0 bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto h-full flex flex-col`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 pt-6 md:p-8 md:pt-6 bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto h-full flex flex-col`}>
       <div className="mx-auto mt-0 flex-grow">
         {/* Document container */}
         <div className="bg-editor-bg rounded-md">

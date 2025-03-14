@@ -27,7 +27,7 @@ export const MobileEditor = ({
   return (
     <main className="animate-fade-in px-0">
       <div className="w-full">
-        <div className="auth-tabs-list h-[40px]">
+        <div className="auth-tabs-list h-[40px] border-b border-gray-200">
           <button 
             className="auth-tab-trigger h-[40px]"
             data-state={activeTab === "editor" ? "active" : "inactive"}

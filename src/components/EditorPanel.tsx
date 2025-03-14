@@ -1,14 +1,45 @@
 
+import { useState } from "react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPanelProps) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
   
+  // Setup multi-page handling
+  const [pages, setPages] = useState<string[]>([content || ""]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  
+  // Add a new blank page
+  const handleAddPage = () => {
+    const newPages = [...pages, ""];
+    setPages(newPages);
+    setCurrentPageIndex(newPages.length - 1);
+  };
+  
+  // Navigate between pages
+  const handlePageChange = (newIndex: number) => {
+    if (newIndex >= 0 && newIndex < pages.length) {
+      // Save current page content first
+      const updatedPages = [...pages];
+      updatedPages[currentPageIndex] = content;
+      setPages(updatedPages);
+      
+      // Move to the new page
+      setCurrentPageIndex(newIndex);
+      onContentChange(updatedPages[newIndex]);
+    }
+  };
+  
+  // Handle content updates on the current page
   const handleContentUpdate = (newContent: string) => {
-    console.log("Content updated in EditorPanel");
+    const updatedPages = [...pages];
+    updatedPages[currentPageIndex] = newContent;
+    setPages(updatedPages);
     onContentChange(newContent);
   };
   
@@ -31,12 +62,47 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
         )}
         <div className="bg-editor-bg p-4 rounded-md">
           <RichTextEditor 
-            content={content} 
+            content={pages[currentPageIndex]} 
             onUpdate={handleContentUpdate}
             isEditable={isEditable}
             hideToolbar={!isEditable} // Hide toolbar if not editable
           />
         </div>
+        
+        {/* Page navigation */}
+        {isEditable && (
+          <div className="flex items-center justify-between mt-4 border-t pt-3 border-gray-200">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handlePageChange(currentPageIndex - 1)}
+                disabled={currentPageIndex === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="flex items-center text-sm">
+                Page {currentPageIndex + 1} of {pages.length}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handlePageChange(currentPageIndex + 1)}
+                disabled={currentPageIndex === pages.length - 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleAddPage}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Page
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

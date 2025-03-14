@@ -21,6 +21,8 @@ interface DocumentPreviewProps {
   externalToolbar?: boolean;
   editorInstance?: Editor | null;
   templateId?: string;
+  currentPage?: number;
+  totalPages?: number;
 }
 
 export const DocumentPreview = ({ 
@@ -32,7 +34,9 @@ export const DocumentPreview = ({
   renderToolbarOutside = false,
   externalToolbar = false,
   editorInstance = null,
-  templateId = ''
+  templateId = '',
+  currentPage = 0,
+  totalPages = 1
 }: DocumentPreviewProps) => {
   const { role } = useAuth();
   const { toast } = useToast();
@@ -81,6 +85,21 @@ export const DocumentPreview = ({
     }
   };
   
+  // Default page dimensions if not specified in template
+  const defaultPageStyles = `
+    .default-page {
+      min-height: 11in;
+      width: 8.5in;
+      padding: 1in;
+      margin: 0 auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+  `;
+  
+  // Combine default styles with template styles
+  const combinedStyles = templateStyles ? templateStyles : defaultPageStyles;
+  
   return (
     <div className="bg-editor-panel p-4 rounded-md">
       {/* Show selection bar only when not editable and has selected element */}
@@ -91,8 +110,15 @@ export const DocumentPreview = ({
         />
       )}
       
+      {/* Page indicator for multi-page documents */}
+      {totalPages > 1 && (
+        <div className="text-center mb-2 text-sm text-gray-500">
+          Page {currentPage + 1} of {totalPages}
+        </div>
+      )}
+      
       <div className="prose prose-sm max-w-none">
-        <DocumentStyles customStyles={isEditable ? '' : templateStyles} />
+        <DocumentStyles customStyles={isEditable ? '' : combinedStyles} />
         
         {isEditable ? (
           <EditableContent
@@ -109,7 +135,7 @@ export const DocumentPreview = ({
             content={content}
             previewRef={previewRef}
             onClick={handlePreviewClick}
-            templateStyles={templateStyles}
+            templateStyles={combinedStyles}
             templateName={templateName}
           />
         ) : (

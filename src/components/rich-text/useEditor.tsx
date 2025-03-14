@@ -7,7 +7,24 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export type { UseEditorCoreProps as UseEditorProps };
 
-export const useEditorSetup = ({ content, onContentChange, isEditable = true }: UseEditorCoreProps) => {
+export interface PageDimensions {
+  width: string;
+  height: string;
+}
+
+export interface UseEditorSetupProps extends UseEditorCoreProps {
+  pageDimensions?: PageDimensions;
+}
+
+export const useEditorSetup = ({ 
+  content, 
+  onContentChange, 
+  isEditable = true,
+  pageDimensions = {
+    width: '8.5in',
+    height: '11in'
+  }
+}: UseEditorSetupProps) => {
   // Perform initial cleanup
   useEditorCleanup();
   
@@ -15,7 +32,8 @@ export const useEditorSetup = ({ content, onContentChange, isEditable = true }: 
   const editor = useEditorCore({ 
     content, 
     onContentChange, 
-    isEditable 
+    isEditable,
+    pageDimensions
   });
   
   // Handle font and color state

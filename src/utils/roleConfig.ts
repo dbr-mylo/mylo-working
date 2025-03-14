@@ -85,13 +85,18 @@ export const getRoleFeatures = (role: UserRole | null): RoleFeatureFlags => {
  */
 export const isFeatureEnabled = (role: UserRole | null, feature: keyof RoleFeatureFlags): boolean => {
   const features = getRoleFeatures(role);
-  return features[feature];
+  // Need to explicitly check for boolean type to fix the type error
+  if (typeof features[feature] === 'boolean') {
+    return features[feature] as boolean;
+  }
+  // For non-boolean values, return false
+  return false;
 };
 
 /**
  * Get role-specific UI configuration values
  */
-export const getRoleUIConfig = (role: UserRole | null, configKey: keyof RoleFeatureFlags): any => {
+export const getRoleUIConfig = <T extends keyof RoleFeatureFlags>(role: UserRole | null, configKey: T): RoleFeatureFlags[T] => {
   const features = getRoleFeatures(role);
   return features[configKey];
 };

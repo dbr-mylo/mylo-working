@@ -1,3 +1,5 @@
+import { Editor } from "@tiptap/react";
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
@@ -78,19 +80,18 @@ export interface TextStyle {
   selector: string;
   description?: string;
   
-  // New fields for style management
-  parentId?: string;           // For style inheritance
-  isDefault?: boolean;         // To mark a default style
-  isSystem?: boolean;          // To identify system styles that cannot be deleted
-  isUsed?: boolean;            // To track if the style is used in any documents
-  created_at?: string;         // Creation timestamp
-  updated_at?: string;         // Last update timestamp
-  textAlign?: string;          // Text alignment property
-  textTransform?: string;      // For uppercase, lowercase, etc.
-  textDecoration?: string;     // For underline, strikethrough, etc.
-  marginTop?: string;          // Spacing above
-  marginBottom?: string;       // Spacing below
-  customProperties?: Record<string, string>; // For any additional CSS properties
+  parentId?: string;
+  isDefault?: boolean;
+  isSystem?: boolean;
+  isUsed?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  textAlign?: string;
+  textTransform?: string;
+  textDecoration?: string;
+  marginTop?: string;
+  marginBottom?: string;
+  customProperties?: Record<string, string>;
 }
 
 export interface StyleFormData {

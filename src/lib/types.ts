@@ -1,6 +1,8 @@
+
 export interface DesignPanelProps {
   content: string;
   isEditable: boolean;
+  templateId?: string;
 }
 
 export interface EditorPanelProps {
@@ -14,6 +16,13 @@ export interface Document {
   title: string;
   content: string;
   updated_at: string;
+  template_id?: string;
+  meta?: DocumentMeta;
+}
+
+export interface DocumentMeta {
+  template_id?: string;
+  [key: string]: any;
 }
 
 export interface UseDocumentReturn {
@@ -26,6 +35,7 @@ export interface UseDocumentReturn {
   isLoading: boolean;
   saveDocument: () => Promise<void>;
   loadDocument: (doc: Document) => void;
+  documentMeta?: DocumentMeta;
 }
 
 export interface EditorNavProps {
@@ -36,6 +46,8 @@ export interface EditorNavProps {
   onSave?: () => Promise<void>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
+  templateId?: string;
+  onTemplateChange?: (templateId: string) => void;
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';

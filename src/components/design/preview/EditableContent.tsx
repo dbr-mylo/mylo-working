@@ -10,6 +10,7 @@ interface EditableContentProps {
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
   editorInstance?: Editor | null;
+  templateStyles?: string;
 }
 
 export const EditableContent = ({ 
@@ -18,10 +19,14 @@ export const EditableContent = ({
   hideToolbar = false,
   renderToolbarOutside = false,
   externalToolbar = false,
-  editorInstance = null
+  editorInstance = null,
+  templateStyles = ''
 }: EditableContentProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
+  
+  // For editor role, we don't apply template styling to the editable content
+  const shouldApplyTemplate = false;
 
   if (isDesigner) {
     // For designer role, don't wrap in the white div
@@ -33,7 +38,9 @@ export const EditableContent = ({
         hideToolbar={false} // Always show toolbar for designers
         renderToolbarOutside={renderToolbarOutside}
         externalToolbar={externalToolbar}
-        externalEditorInstance={editorInstance} // Pass the external editor instance
+        externalEditorInstance={editorInstance}
+        applyTemplateStyling={shouldApplyTemplate}
+        templateStyles={templateStyles}
       />
     );
   } 
@@ -47,6 +54,8 @@ export const EditableContent = ({
           onUpdate={onContentChange}
           isEditable={true}
           hideToolbar={hideToolbar}
+          applyTemplateStyling={shouldApplyTemplate}
+          templateStyles={templateStyles}
         />
       </div>
     </div>

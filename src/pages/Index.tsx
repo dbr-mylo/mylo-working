@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +6,7 @@ import { useDocument } from "@/hooks/document";
 import { MobileEditor } from "@/components/MobileEditor";
 import { DesktopEditor } from "@/components/DesktopEditor";
 import { DesignPanel } from "@/components/DesignPanel";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
 import { textStyleStore } from "@/stores/textStyles";
 
@@ -16,6 +15,9 @@ const Index = () => {
   const { role } = useAuth();
   const { width } = useWindowSize();
   const isMobile = width < 1281;
+  
+  // State for template ID
+  const [templateId, setTemplateId] = useState<string | undefined>(undefined);
   
   // Check if this is the style test route
   const isStyleTestRoute = documentId === "style-test";
@@ -28,8 +30,16 @@ const Index = () => {
     setDocumentTitle,
     saveDocument,
     loadDocument,
-    isLoading
+    isLoading,
+    documentMeta
   } = useDocument(documentId);
+  
+  // When document metadata is loaded, extract template ID
+  useEffect(() => {
+    if (documentMeta && documentMeta.template_id) {
+      setTemplateId(documentMeta.template_id);
+    }
+  }, [documentMeta]);
   
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
@@ -120,6 +130,7 @@ const Index = () => {
           onContentChange={setContent}
           isEditorEditable={isEditorEditable}
           isDesignEditable={isDesignEditable}
+          templateId={templateId}
         />
       ) : (
         <DesktopEditor
@@ -127,6 +138,7 @@ const Index = () => {
           onContentChange={setContent}
           isEditorEditable={isEditorEditable}
           isDesignEditable={isDesignEditable}
+          templateId={templateId}
         />
       );
     }
@@ -142,6 +154,8 @@ const Index = () => {
         onSave={saveDocument}
         onLoadDocument={loadDocument}
         initialContent={initialContent}
+        templateId={templateId}
+        onTemplateChange={setTemplateId}
       />
       
       <main className="animate-fade-in">

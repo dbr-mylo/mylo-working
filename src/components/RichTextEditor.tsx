@@ -17,6 +17,8 @@ interface RichTextEditorProps {
   renderToolbarOutside?: boolean;
   externalToolbar?: boolean;
   externalEditorInstance?: Editor | null;
+  applyTemplateStyling?: boolean;
+  templateStyles?: string;
 }
 
 export const RichTextEditor = ({
@@ -27,6 +29,8 @@ export const RichTextEditor = ({
   renderToolbarOutside = false,
   externalToolbar = false,
   externalEditorInstance = null,
+  applyTemplateStyling = false,
+  templateStyles = '',
 }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
@@ -64,10 +68,18 @@ export const RichTextEditor = ({
       {/* Include the color preservation styles */}
       <ColorPreservationStyles />
       
+      {/* Add template styles when enabled */}
+      {applyTemplateStyling && templateStyles && (
+        <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
+      )}
+      
       {!hideToolbar && isEditable && !externalToolbar && (
         <Toolbar editor={activeEditor} />
       )}
-      <EditorContent editor={activeEditor} className="prose prose-sm max-w-none p-4" />
+      <EditorContent 
+        editor={activeEditor} 
+        className={`prose prose-sm max-w-none p-4 ${applyTemplateStyling ? 'template-styled' : ''}`} 
+      />
     </div>
   );
 };

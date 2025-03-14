@@ -10,13 +10,21 @@ import { ToolSettingsMenuBar } from "@/components/design/ToolSettingsMenuBar";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
+import { templateStore } from "@/stores/templateStore";
 
-export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
+interface DesignPanelProps {
+  content: string;
+  isEditable: boolean;
+  templateId?: string;
+}
+
+export const DesignPanel = ({ content, isEditable, templateId }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const { role } = useAuth();
   const { toast } = useToast();
   const isMobile = width < 1281;
   const isStandalone = role === "designer";
+  const isEditor = role === "editor";
   const [designContent, setDesignContent] = useState(content);
   const [customStyles, setCustomStyles] = useState<string>("");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
@@ -27,6 +35,28 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
     }
     return true;
   });
+  
+  useEffect(() => {
+    const loadTemplateStyles = async () => {
+      if (templateId && isEditor) {
+        try {
+          const template = await templateStore.getTemplateById(templateId);
+          if (template) {
+            setCustomStyles(template.styles);
+            toast({
+              title: "Template Applied",
+              description: `The "${template.name}" template is applied to the preview.`,
+              duration: 3000,
+            });
+          }
+        } catch (error) {
+          console.error("Error loading template:", error);
+        }
+      }
+    };
+    
+    loadTemplateStyles();
+  }, [templateId, isEditor, toast]);
   
   useEffect(() => {
     if (isStandalone) {
@@ -96,7 +126,6 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
       <div className="w-full flex flex-col">
         {isEditable && (
           <div className="w-full">
-            {/* Combined toolbar with proper alignment */}
             <div className="bg-white border-b border-slate-200 z-10">
               <div className="flex items-center justify-between px-4">
                 {editorSetup?.editor && (
@@ -190,6 +219,7 @@ export const DesignPanel = ({ content, isEditable }: DesignPanelProps) => {
             isEditable={isEditable}
             onContentChange={handleContentChange}
             onElementSelect={handleElementSelect}
+            templateId={templateId}
           />
         </div>
       </div>

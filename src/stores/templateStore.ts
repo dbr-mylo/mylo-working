@@ -1,136 +1,79 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from "@/integrations/supabase/client";
 
 export interface Template {
   id: string;
   name: string;
   styles: string;
+  owner_id?: string;
 }
 
-export interface SaveTemplateInput {
-  id?: string;
-  name: string;
-  styles: string;
-}
-
-const TEMPLATE_STORAGE_KEY = 'design_templates';
-
-export const templateStore = {
-  async getTemplates(): Promise<Template[]> {
-    try {
-      // For authenticated designers, fetch from Supabase
-      const { data: session } = await supabase.auth.getSession();
-      if (session.session?.user) {
-        const { data, error } = await supabase
-          .from('design_templates')
-          .select('id, name, styles');
-          
-        if (error) {
-          console.error('Error fetching templates from Supabase:', error);
-          return this.getLocalTemplates();
-        }
-        
-        return data as Template[];
-      }
-      
-      // For guest designers, fetch from localStorage
-      return this.getLocalTemplates();
-    } catch (error) {
-      console.error('Error in getTemplates:', error);
-      return this.getLocalTemplates();
-    }
-  },
-  
-  getLocalTemplates(): Template[] {
-    try {
-      const templatesJSON = localStorage.getItem(TEMPLATE_STORAGE_KEY);
-      if (templatesJSON) {
-        return JSON.parse(templatesJSON);
-      }
-    } catch (error) {
-      console.error('Error parsing templates from localStorage:', error);
-    }
+// Get templates from localStorage
+export const getTemplates = async (): Promise<Template[]> => {
+  try {
+    const templatesJson = localStorage.getItem('templates') || '[]';
+    return JSON.parse(templatesJson);
+  } catch (error) {
+    console.error('Error loading templates:', error);
     return [];
-  },
-  
-  async saveTemplate(template: SaveTemplateInput): Promise<Template> {
-    try {
-      const templateToSave: Template = {
-        id: template.id || uuidv4(),
-        name: template.name,
-        styles: template.styles
-      };
-      
-      // For authenticated designers, save to Supabase
-      const { data: session } = await supabase.auth.getSession();
-      if (session.session?.user) {
-        const { error } = await supabase
-          .from('design_templates')
-          .upsert({
-            id: templateToSave.id,
-            name: templateToSave.name,
-            styles: templateToSave.styles,
-            owner_id: session.session.user.id
-          });
-          
-        if (error) {
-          console.error('Error saving template to Supabase:', error);
-          this.saveLocalTemplate(templateToSave);
-        }
-        
-        return templateToSave;
-      }
-      
-      // For guest designers, save to localStorage
-      this.saveLocalTemplate(templateToSave);
-      return templateToSave;
-    } catch (error) {
-      console.error('Error in saveTemplate:', error);
-      throw error;
-    }
-  },
-  
-  saveLocalTemplate(template: Template): void {
-    try {
-      const templates = this.getLocalTemplates();
-      const existingIndex = templates.findIndex(t => t.id === template.id);
-      
-      if (existingIndex >= 0) {
-        templates[existingIndex] = template;
-      } else {
-        templates.push(template);
-      }
-      
-      localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
-    } catch (error) {
-      console.error('Error saving template to localStorage:', error);
-      throw error;
-    }
-  },
-  
-  async deleteTemplate(id: string): Promise<void> {
-    try {
-      // For authenticated designers, delete from Supabase
-      const { data: session } = await supabase.auth.getSession();
-      if (session.session?.user) {
-        const { error } = await supabase
-          .from('design_templates')
-          .delete()
-          .eq('id', id);
-          
-        if (error) {
-          console.error('Error deleting template from Supabase:', error);
-        }
-      }
-      
-      // Also delete from localStorage (for both authenticated and guest users)
-      const templates = this.getLocalTemplates();
-      const filteredTemplates = templates.filter(t => t.id !== id);
-      localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(filteredTemplates));
-    } catch (error) {
-      console.error('Error in deleteTemplate:', error);
-      throw error;
-    }
   }
+};
+
+// Get a single template by ID
+export const getTemplateById = async (id: string): Promise<Template | null> => {
+  try {
+    const templates = await getTemplates();
+    return templates.find(template => template.id === id) || null;
+  } catch (error) {
+    console.error('Error getting template by ID:', error);
+    return null;
+  }
+};
+
+// Save a template to localStorage
+export const saveTemplate = async (template: Omit<Template, 'id'> & { id?: string }): Promise<Template> => {
+  try {
+    const templates = await getTemplates();
+    
+    const newTemplate: Template = {
+      id: template.id || uuidv4(),
+      name: template.name,
+      styles: template.styles,
+      owner_id: template.owner_id,
+    };
+    
+    // Update existing or add new
+    const existingIndex = templates.findIndex(t => t.id === newTemplate.id);
+    if (existingIndex >= 0) {
+      templates[existingIndex] = newTemplate;
+    } else {
+      templates.push(newTemplate);
+    }
+    
+    localStorage.setItem('templates', JSON.stringify(templates));
+    return newTemplate;
+  } catch (error) {
+    console.error('Error saving template:', error);
+    throw new Error('Failed to save template');
+  }
+};
+
+// Delete a template by ID
+export const deleteTemplate = async (id: string): Promise<void> => {
+  try {
+    const templates = await getTemplates();
+    const updatedTemplates = templates.filter(template => template.id !== id);
+    localStorage.setItem('templates', JSON.stringify(updatedTemplates));
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    throw new Error('Failed to delete template');
+  }
+};
+
+// Export the templateStore object
+export const templateStore = {
+  getTemplates,
+  getTemplateById,
+  saveTemplate,
+  deleteTemplate,
 };

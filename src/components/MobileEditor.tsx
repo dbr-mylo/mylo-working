@@ -8,13 +8,15 @@ type MobileEditorProps = {
   onContentChange: (content: string) => void;
   isEditorEditable: boolean;
   isDesignEditable: boolean;
+  templateId?: string;
 };
 
 export const MobileEditor = ({ 
   content, 
   onContentChange, 
   isEditorEditable, 
-  isDesignEditable 
+  isDesignEditable,
+  templateId
 }: MobileEditorProps) => {
   return (
     <main className="animate-fade-in p-4">
@@ -34,6 +36,7 @@ export const MobileEditor = ({
           <DesignPanel 
             content={content}
             isEditable={isDesignEditable}
+            templateId={templateId}
           />
         </TabsContent>
       </Tabs>

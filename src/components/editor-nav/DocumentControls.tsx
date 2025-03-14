@@ -79,7 +79,7 @@ export const DocumentControls = ({
           <Button 
             variant="default" 
             size={buttonSize} 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-[7.5px]"
             disabled={isLoadingDocs}
           >
             <FolderOpen className="w-4 h-4" />
@@ -109,7 +109,7 @@ export const DocumentControls = ({
       <Button 
         variant="default" 
         size={buttonSize} 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 rounded-[7.5px]"
         onClick={handleSave}
         disabled={isSaving}
       >

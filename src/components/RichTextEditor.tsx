@@ -78,6 +78,10 @@ export const RichTextEditor = ({
     return null;
   }
 
+  // Get the width and height (defaulting to 8.5in x 11in)
+  const width = dimensions?.width || '8.5in';
+  const height = dimensions?.height || '11in';
+
   return (
     <div className="rich-text-editor">
       {/* Include the color preservation styles */}
@@ -98,11 +102,12 @@ export const RichTextEditor = ({
       <style>
         {`
           .ProseMirror {
-            ${dimensions ? `
-              width: ${dimensions.width};
-              min-height: ${dimensions.height};
-            ` : ''}
-            padding: 0;
+            width: ${width};
+            min-height: ${height};
+            padding: 1in;
+            box-sizing: border-box;
+            background-color: white;
+            margin: 0 auto;
           }
         `}
       </style>
@@ -112,9 +117,8 @@ export const RichTextEditor = ({
       )}
       <EditorContent 
         editor={activeEditor} 
-        className={`prose prose-sm max-w-none p-4 ${applyTemplateStyling ? 'template-styled' : ''}`} 
+        className="prose prose-sm max-w-none"
       />
     </div>
   );
 };
-

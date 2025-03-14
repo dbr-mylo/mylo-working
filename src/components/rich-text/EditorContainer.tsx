@@ -100,6 +100,8 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           padding: 1in;
           margin: 0 auto;
           overflow-wrap: break-word;
+          box-sizing: border-box;
+          background-color: white;
         }
         `}
       </style>

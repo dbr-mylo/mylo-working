@@ -65,7 +65,7 @@ export const EditableContent = ({
   // EDITOR PATH - Safe to modify
   // For editor role, create the white div with shadow and dimensions
   return (
-    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+    <div style={{ width: width, margin: '0 auto' }} className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
       <div className="font-editor">
         <RichTextEditor
           content={content}

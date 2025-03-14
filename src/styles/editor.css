@@ -1,4 +1,3 @@
-
 /* =============================================
    Designer Mode Specific Styles
 ============================================= */
@@ -108,6 +107,27 @@
   /* Explicitly target Radix popover content */
   [data-radix-popper-content] {
     z-index: 9999 !important;
+  }
+  
+  /* Ensure toast notifications appear above everything */
+  [role="status"].toast,
+  [role="status"].Toaster__toast,
+  [id^="toast-"],
+  .Toaster,
+  .toast-container,
+  .sonner-toast-container,
+  .sonner-toast,
+  div[data-sonner-toast],
+  div[data-toast-container] {
+    z-index: 99999 !important; /* Super high z-index */
+    position: relative !important;
+  }
+  
+  /* Ensure toast container is above all other elements */
+  [data-sonner-toaster] {
+    position: fixed !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
   }
   
   /* Ensure consistent editor component border styling with higher specificity */

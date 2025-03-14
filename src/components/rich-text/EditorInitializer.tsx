@@ -2,6 +2,12 @@
 import { useEffect } from 'react';
 import { textStyleStore } from '@/stores/textStyles';
 
+/**
+ * EditorInitializer Component
+ * 
+ * Handles initialization, cleanup, and cache management for the rich text editor.
+ * This helps maintain consistent styling and behavior across editor instances.
+ */
 export const EditorInitializer = () => {
   useEffect(() => {
     console.log("RichTextEditor: Initializing and clearing font caches");

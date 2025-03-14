@@ -1,6 +1,12 @@
 
 import React from 'react';
 
+/**
+ * BaseEditorStyles Component
+ * 
+ * Provides foundational styling for the editor that all other styles build upon.
+ * These styles handle the core editor appearance, behavior, and interactions.
+ */
 export const BaseEditorStyles = () => {
   return (
     <style>{`

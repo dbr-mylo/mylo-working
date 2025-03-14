@@ -15,11 +15,9 @@ import FontFamily from '@tiptap/extension-font-family';
 import Color from '@tiptap/extension-color';
 import TextAlign from '@tiptap/extension-text-align';
 import { Toolbar } from './editor/Toolbar';
-import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationStyles';
+import { EditorStyles } from './rich-text/styles';
 import { IndentExtension } from './rich-text/extensions/IndentExtension';
-import { ListAndIndentStyles } from './rich-text/styles/ListAndIndentStyles';
 import { extractDimensionsFromCSS } from '@/utils/templateUtils';
-import { BaseEditorStyles } from './rich-text/styles/BaseEditorStyles';
 
 interface RichTextEditorProps {
   content: string;
@@ -91,11 +89,8 @@ export const RichTextEditor = ({
 
   return (
     <div className="rich-text-editor">
-      <ColorPreservationStyles />
-      
-      <ListAndIndentStyles />
-      
-      <BaseEditorStyles />
+      {/* Consolidated styles component */}
+      <EditorStyles />
       
       {applyTemplateStyling && templateStyles && (
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />

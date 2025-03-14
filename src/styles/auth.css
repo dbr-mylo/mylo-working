@@ -58,8 +58,8 @@
 }
 
 /* Special background handling for design preview tab */
-.auth-tabs-list.bg-editor-bg .auth-tab-trigger[data-state="active"] {
-  background-color: #F5F5F5; /* Use the editor sidebar color from tailwind config */
+.auth-tabs-list.bg-editor-panel .auth-tab-trigger[data-state="active"] {
+  background-color: rgb(249, 250, 251); /* Use the editor panel color from tailwind config */
   box-shadow: none;
 }
 

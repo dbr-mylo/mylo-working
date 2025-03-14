@@ -25,9 +25,9 @@ export const MobileEditor = ({
   const [activeTab, setActiveTab] = useState<"editor" | "design">("editor");
 
   return (
-    <main className={`animate-fade-in px-0 ${activeTab === "design" ? "bg-editor-sidebar" : ""}`}>
+    <main className={`animate-fade-in px-0 ${activeTab === "design" ? "bg-editor-panel" : ""}`}>
       <div className="w-full">
-        <div className={`auth-tabs-list mobile-editor-tabs h-[40px] relative z-20 ${activeTab === "design" ? "bg-editor-sidebar" : ""}`}>
+        <div className={`auth-tabs-list mobile-editor-tabs h-[40px] relative z-20 ${activeTab === "design" ? "bg-editor-panel" : ""}`}>
           <button 
             className="auth-tab-trigger h-[40px]"
             data-state={activeTab === "editor" ? "active" : "inactive"}
@@ -57,7 +57,7 @@ export const MobileEditor = ({
         )}
         
         {activeTab === "design" && (
-          <div className="bg-editor-sidebar">
+          <div className="bg-editor-panel">
             <DesignPanel 
               content={content}
               isEditable={isDesignEditable}

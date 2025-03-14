@@ -39,7 +39,7 @@ export default {
           border: "#E5E7EB",
           text: "#1F2937",
           heading: "#111827",
-          panel: "#F9FAFB",
+          panel: "rgb(249, 250, 251)",  // F9FAFB - Consistent panel color
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",

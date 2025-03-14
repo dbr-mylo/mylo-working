@@ -1,4 +1,3 @@
-
 /**
  * DesignerStandaloneView Component
  * 
@@ -104,7 +103,7 @@ export const DesignerStandaloneView = ({
         </div>
         
         {isPreviewVisible && (
-          <div className="w-1/2 bg-white overflow-auto">
+          <div className="w-1/2 bg-editor-panel overflow-auto">
             <div className="p-4 md:p-8">
               <div className="mb-3">
                 <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>

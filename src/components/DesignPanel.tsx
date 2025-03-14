@@ -1,4 +1,3 @@
-
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -96,7 +95,7 @@ export const DesignPanel = ({ content, isEditable, templateId }: DesignPanelProp
       customStyles={customStyles}
       isEditable={isEditable}
       onContentChange={handleContentChange}
-      onElementSelect={handleElementSelect}
+      onElementSelect={onElementSelect}
       templateId={templateId}
       isMobile={isMobile}
     />

@@ -1,18 +1,34 @@
 
-// Define event names for font size changes
-export const FONT_SIZE_CHANGE_EVENT = 'tiptap-font-size-changed';
-export const FONT_SIZE_PARSED_EVENT = 'tiptap-font-size-parsed';
-export const CLEAR_FONT_CACHE_EVENT = 'tiptap-clear-font-cache';
+/**
+ * Constants related to font size functionality
+ */
 
-// Define min and max font size according to requirements
+/** Minimum allowed font size */
 export const MIN_FONT_SIZE = 1;
+
+/** Maximum allowed font size */
 export const MAX_FONT_SIZE = 99;
 
-// Define standard font size presets
-export const FONT_SIZE_PRESETS = [
-  '8px', '9px', '10px', '11px', '12px', '14px', '16px', '18px', 
-  '20px', '22px', '24px', '26px', '28px', '36px', '48px', '72px'
-];
+/** Default font size used when no valid size is provided */
+export const DEFAULT_FONT_SIZE = 16;
 
-// Default font size
-export const DEFAULT_FONT_SIZE = '16px';
+/** Custom event name for font size changes */
+export const FONT_SIZE_CHANGE_EVENT = 'tiptap-font-size-changed';
+
+/** Custom event name for font size parsed from DOM */
+export const FONT_SIZE_PARSED_EVENT = 'tiptap-font-size-parsed';
+
+/** Custom event name for clearing font cache */
+export const CLEAR_FONT_CACHE_EVENT = 'tiptap-clear-font-cache';
+
+/** Event sources for better debugging */
+export const EVENT_SOURCES = {
+  INPUT: 'input',
+  DOM: 'dom',
+  DOM_INIT: 'dom-init',
+  DOM_COMPUTED: 'dom-computed',
+  DOM_VERIFY: 'dom-verify',
+  EDITOR_UPDATE: 'editor-update',
+  DIRECT_DOM_CHECK: 'direct-dom-check',
+  UNKNOWN: 'unknown'
+};

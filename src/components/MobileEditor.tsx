@@ -45,7 +45,7 @@ export const MobileEditor = ({
         </div>
         
         {activeTab === "editor" && (
-          <div className="p-4 relative z-10">
+          <div className="bg-editor-bg">
             <EditorPanel 
               content={content}
               onContentChange={onContentChange}
@@ -57,7 +57,7 @@ export const MobileEditor = ({
         )}
         
         {activeTab === "design" && (
-          <div className="p-4 relative z-10">
+          <div className="bg-editor-bg">
             <DesignPanel 
               content={content}
               isEditable={isDesignEditable}

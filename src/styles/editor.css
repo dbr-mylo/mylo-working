@@ -12,6 +12,14 @@
     margin-bottom: 0.75rem;
   }
   
+  /* Standard document container styles across all views */
+  .document-container {
+    margin: 0 auto;
+    background-color: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  
   /* =============================================
      Font Size Enforcement Rules
   ============================================= */

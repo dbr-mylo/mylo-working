@@ -45,7 +45,10 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   return (
     <div className={`flex items-center ${className || ''}`}>
       <Select value={value} onValueChange={handleFontChange}>
-        <SelectTrigger className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs border-editor-border rounded-md`}>
+        <SelectTrigger 
+          className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs border-editor-border rounded-md overflow-hidden`}
+          style={{ borderRadius: '0.375rem' }}
+        >
           <div className="flex items-center gap-1 w-full">
             <Type className="h-3 w-3 flex-shrink-0" />
             <span style={{ fontFamily: value }} className="truncate">
@@ -53,7 +56,7 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="rounded-md overflow-hidden">
           {fonts.map((font) => (
             <SelectItem 
               key={font.value} 

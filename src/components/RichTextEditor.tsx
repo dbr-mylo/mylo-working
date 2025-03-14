@@ -10,6 +10,7 @@ import { Toolbar } from './editor/Toolbar';
 import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationStyles';
 import { IndentExtension } from './rich-text/extensions/IndentExtension';
 import { ListAndIndentStyles } from './rich-text/styles/ListAndIndentStyles';
+import { extractDimensionsFromCSS } from '@/utils/templateUtils';
 
 interface RichTextEditorProps {
   content: string;
@@ -34,6 +35,8 @@ export const RichTextEditor = ({
   applyTemplateStyling = false,
   templateStyles = '',
 }: RichTextEditorProps) => {
+  const dimensions = extractDimensionsFromCSS(templateStyles);
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -85,8 +88,11 @@ export const RichTextEditor = ({
       <EditorContent 
         editor={activeEditor} 
         className={`prose prose-sm max-w-none p-4 ${applyTemplateStyling ? 'template-styled' : ''}`} 
+        style={dimensions ? {
+          width: dimensions.width,
+          minHeight: dimensions.height
+        } : undefined}
       />
     </div>
   );
 };
-

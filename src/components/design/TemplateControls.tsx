@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { templateStore, Template } from "@/stores/templateStore";
+import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
 
 interface TemplateControlsProps {
   onStylesChange: (styles: string) => void;
@@ -23,6 +24,8 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [customStyles, setCustomStyles] = useState<string>("");
+  const [width, setWidth] = useState<string>("8.5in");
+  const [height, setHeight] = useState<string>("11in");
   
   // Load templates when component mounts
   useEffect(() => {
@@ -35,6 +38,13 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
         setSelectedTemplate(loadedTemplates[0].id);
         setCustomStyles(loadedTemplates[0].styles);
         onStylesChange(loadedTemplates[0].styles);
+        
+        // Extract dimensions if available
+        const dimensions = extractDimensionsFromCSS(loadedTemplates[0].styles);
+        if (dimensions) {
+          setWidth(dimensions.width);
+          setHeight(dimensions.height);
+        }
       }
     };
     
@@ -47,12 +57,38 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
     if (template) {
       setCustomStyles(template.styles);
       onStylesChange(template.styles);
+      
+      // Extract dimensions if available
+      const dimensions = extractDimensionsFromCSS(template.styles);
+      if (dimensions) {
+        setWidth(dimensions.width);
+        setHeight(dimensions.height);
+      } else {
+        // Default dimensions
+        setWidth("8.5in");
+        setHeight("11in");
+      }
     }
   };
   
   const handleStylesChange = (styles: string) => {
     setCustomStyles(styles);
     onStylesChange(styles);
+  };
+  
+  const handleDimensionsChange = () => {
+    // Generate dimensions CSS
+    const dimensionsCSS = generateDimensionsCSS(width, height);
+    
+    // Remove any existing dimensions CSS
+    let updatedStyles = customStyles.replace(/\.template-styled\s*{\s*width:.*?;\s*height:.*?;\s*min-height:.*?;\s*}/gs, '');
+    
+    // Add new dimensions CSS
+    updatedStyles += dimensionsCSS;
+    
+    // Update styles
+    setCustomStyles(updatedStyles);
+    onStylesChange(updatedStyles);
   };
   
   const saveTemplate = async () => {
@@ -66,10 +102,17 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
     }
     
     try {
+      // Ensure the template has dimensions
+      let stylesToSave = customStyles;
+      const dimensions = extractDimensionsFromCSS(stylesToSave);
+      if (!dimensions) {
+        stylesToSave += generateDimensionsCSS(width, height);
+      }
+      
       const savedTemplate = await templateStore.saveTemplate({
         id: selectedTemplate || undefined,
         name: templateName,
-        styles: customStyles
+        styles: stylesToSave
       });
       
       if (!selectedTemplate) {
@@ -96,8 +139,10 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
   const handleNewTemplate = () => {
     setSelectedTemplate(null);
     setTemplateName("");
-    setCustomStyles("");
-    onStylesChange("");
+    setCustomStyles(generateDimensionsCSS());
+    setWidth("8.5in");
+    setHeight("11in");
+    onStylesChange(generateDimensionsCSS());
   };
   
   return (
@@ -136,6 +181,30 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
           <Button variant="outline" size="sm" onClick={handleNewTemplate}>
             New
           </Button>
+        </div>
+        
+        <div className="flex gap-2 items-center">
+          <div className="flex-1">
+            <label className="text-xs text-gray-600 block mb-1">Width</label>
+            <Input 
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+              placeholder="8.5in"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-gray-600 block mb-1">Height</label>
+            <Input 
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              placeholder="11in"
+            />
+          </div>
+          <div className="pt-5">
+            <Button size="sm" onClick={handleDimensionsChange}>
+              Apply
+            </Button>
+          </div>
         </div>
         
         <div>

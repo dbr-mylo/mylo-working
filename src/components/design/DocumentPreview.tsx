@@ -10,6 +10,7 @@ import { useDocumentPreview } from "./preview/useDocumentPreview";
 import { Editor } from "@tiptap/react";
 import { templateStore } from "@/stores/templateStore";
 import { useToast } from "@/hooks/use-toast";
+import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
 
 interface DocumentPreviewProps {
   content: string;
@@ -43,6 +44,19 @@ export const DocumentPreview = ({
   const [templateName, setTemplateName] = useState('');
   const [isTemplateLoading, setIsTemplateLoading] = useState(false);
   
+  // Add default dimensions if the template doesn't specify them
+  useEffect(() => {
+    if (templateStyles) {
+      const dimensions = extractDimensionsFromCSS(templateStyles);
+      
+      // If dimensions aren't specified in the template, add default dimensions
+      if (!dimensions) {
+        const defaultDimensionsCSS = generateDimensionsCSS();
+        setTemplateStyles(prev => prev + defaultDimensionsCSS);
+      }
+    }
+  }, [templateStyles]);
+  
   const {
     previewRef,
     selectedElement,
@@ -58,7 +72,15 @@ export const DocumentPreview = ({
         try {
           const template = await templateStore.getTemplateById(templateId);
           if (template) {
-            setTemplateStyles(template.styles);
+            let styles = template.styles;
+            
+            // Ensure template has dimensions
+            const dimensions = extractDimensionsFromCSS(styles);
+            if (!dimensions) {
+              styles += generateDimensionsCSS();
+            }
+            
+            setTemplateStyles(styles);
             setTemplateName(template.name);
           }
         } catch (error) {
@@ -102,7 +124,7 @@ export const DocumentPreview = ({
             renderToolbarOutside={renderToolbarOutside}
             externalToolbar={externalToolbar}
             editorInstance={editorInstance}
-            templateStyles={''} // Don't apply template styles to editable content
+            templateStyles={templateStyles}
           />
         ) : content ? (
           <ViewableContent

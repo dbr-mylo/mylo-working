@@ -6,15 +6,21 @@ interface EditorContainerProps {
   children: React.ReactNode;
   fixedToolbar?: boolean;
   refProp?: React.RefObject<HTMLDivElement>;
+  templateDimensions?: { width: string; height: string };
 }
 
 export const EditorContainer: React.FC<EditorContainerProps> = ({ 
   children, 
   fixedToolbar = false,
-  refProp
+  refProp,
+  templateDimensions
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
+  
+  // Default dimensions (8.5 x 11 inches)
+  const width = templateDimensions?.width || '8.5in';
+  const height = templateDimensions?.height || '11in';
 
   return (
     <div 
@@ -24,8 +30,8 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
       <style>
         {`
         .designer-editor .ProseMirror {
-          min-height: 11in;
-          width: 8.5in;
+          min-height: ${height};
+          width: ${width};
           padding: 1in;
           margin: 0 auto;
           background-color: white;
@@ -45,6 +51,16 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           top: 0;
           z-index: 10;
           width: 100%;
+        }
+
+        .ProseMirror {
+          min-height: ${height};
+          width: ${width};
+          padding: 1in;
+          margin: 0 auto;
+          background-color: white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          overflow-wrap: break-word;
         }
         `}
       </style>

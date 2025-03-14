@@ -2,6 +2,7 @@
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 import { Editor } from "@tiptap/react";
+import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
 interface EditableContentProps {
   content: string;
@@ -27,6 +28,11 @@ export const EditableContent = ({
   
   // For editor role, we don't apply template styling to the editable content
   const shouldApplyTemplate = false;
+  
+  // Extract dimensions from template styles
+  const dimensions = extractDimensionsFromCSS(templateStyles);
+  const width = dimensions?.width || '8.5in';
+  const height = dimensions?.height || '11in';
 
   if (isDesigner) {
     // For designer role, don't wrap in the white div
@@ -47,7 +53,7 @@ export const EditableContent = ({
 
   // For editor role, keep the white div with shadow
   return (
-    <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
       <div className="font-editor">
         <RichTextEditor
           content={content}

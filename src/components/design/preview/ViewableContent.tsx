@@ -2,6 +2,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
 interface ViewableContentProps {
   content: string;
@@ -22,6 +23,11 @@ export const ViewableContent = ({
   const { toast } = useToast();
   const isDesigner = role === "designer";
   const [prevTemplateName, setPrevTemplateName] = useState(templateName);
+  
+  // Extract dimensions from template styles
+  const dimensions = extractDimensionsFromCSS(templateStyles);
+  const width = dimensions?.width || '8.5in';
+  const height = dimensions?.height || '11in';
 
   // Notify user when template changes
   useEffect(() => {
@@ -44,7 +50,7 @@ export const ViewableContent = ({
           ref={previewRef} 
           onClick={onClick}
           dangerouslySetInnerHTML={{ __html: content }} 
-          className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto template-styled" 
+          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto template-styled`}
         />
       </>
     );
@@ -52,7 +58,7 @@ export const ViewableContent = ({
 
   // For editor role viewing mode, keep the white div with shadow
   return (
-    <div className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
       {templateStyles && <style dangerouslySetInnerHTML={{ __html: templateStyles }} />}
       <div 
         ref={previewRef} 

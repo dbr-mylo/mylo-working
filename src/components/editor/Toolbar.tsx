@@ -79,7 +79,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     toast({
       title: "Formatting cleared",
       description: "All formatting has been removed from the selected text.",
-      variant: "success",
+      variant: "default", // Changed from "success" to "default" to match allowed variants
       duration: 2000,
     });
     

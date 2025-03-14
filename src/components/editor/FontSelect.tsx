@@ -43,7 +43,10 @@ export const FontSelect: React.FC<FontSelectProps> = ({ editor }) => {
           </span>
         </div>
       </SelectTrigger>
-      <SelectContent className="rounded-md overflow-hidden">
+      <SelectContent 
+        className="rounded-md overflow-hidden"
+        style={{ zIndex: 9999, backgroundColor: 'white' }}
+      >
         {fonts.map((font) => (
           <SelectItem 
             key={font.value} 

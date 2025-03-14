@@ -41,6 +41,16 @@ export const BaseEditorStyles = () => {
       .ProseMirror.refresh-fonts .custom-font-size {
         opacity: 0.999; /* Trigger a repaint without visual change */
       }
+      
+      /* Critical z-index overrides */
+      [data-radix-popper-content-wrapper] {
+        z-index: 9999 !important;
+      }
+      
+      /* Ensure dropdown backgrounds are solid */
+      [data-radix-popper-content-wrapper] > div {
+        background-color: white !important;
+      }
     `}</style>
   );
 };

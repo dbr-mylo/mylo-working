@@ -85,6 +85,7 @@ const SelectContent = React.forwardRef<
       )}
       style={{ 
         borderRadius: '0.375rem',
+        zIndex: 9999, // Explicitly set highest z-index
         ...style 
       }}
       position={position}

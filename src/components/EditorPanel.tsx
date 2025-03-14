@@ -57,7 +57,9 @@ export const EditorPanel = ({
                 View Only
               </span>}
           </div>}
-        <div className="bg-editor-bg rounded-md">
+        
+        {/* Added a significant vertical gap here */}
+        <div className="bg-editor-bg rounded-md mt-12">
           {/* Document container with exact dimensions applied */}
           <div className="mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]" style={{ width: pageWidth }}>
             <RichTextEditor 

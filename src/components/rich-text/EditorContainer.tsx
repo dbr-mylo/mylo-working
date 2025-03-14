@@ -1,4 +1,3 @@
-
 /**
  * EditorContainer Component
  * 
@@ -84,7 +83,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           background-color: white;
           border-bottom: 1px solid #e2e8f0;
           padding: 0;
-          margin: 0 0 2rem 0; /* Increased margin below toolbar from 1rem to 2rem */
+          margin: 0 0 3rem 0; /* Significantly increased margin below toolbar */
           z-index: 10;
         }
         
@@ -109,7 +108,9 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
         /* Toolbar container styles */
         .toolbar-container {
           width: ${width};
-          margin: 0 auto 2rem auto; /* Increased bottom margin from 1rem to 2rem */
+          margin: 0 auto 3rem auto; /* Significantly increased bottom margin */
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #eaeaea;
         }
         `}
       </style>

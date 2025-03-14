@@ -1,4 +1,3 @@
-
 .auth-container {
   min-height: 100vh;
   display: flex;
@@ -24,7 +23,6 @@
 
 /* New class specifically for mobile editor tabs */
 .mobile-editor-tabs {
-  border-bottom: 5px solid #ea384c !important;
   margin-bottom: 0;
   padding: 0;
   position: relative;

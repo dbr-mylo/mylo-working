@@ -8,6 +8,8 @@ import Color from '@tiptap/extension-color';
 import TextAlign from '@tiptap/extension-text-align';
 import { Toolbar } from './editor/Toolbar';
 import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationStyles';
+import { IndentExtension } from './rich-text/extensions/IndentExtension';
+import { ListAndIndentStyles } from './rich-text/styles/ListAndIndentStyles';
 
 interface RichTextEditorProps {
   content: string;
@@ -41,6 +43,7 @@ export const RichTextEditor = ({
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      IndentExtension,
     ],
     content,
     editable: isEditable,
@@ -68,6 +71,9 @@ export const RichTextEditor = ({
       {/* Include the color preservation styles */}
       <ColorPreservationStyles />
       
+      {/* Include list and indent styles */}
+      <ListAndIndentStyles />
+      
       {/* Add template styles when enabled */}
       {applyTemplateStyling && templateStyles && (
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
@@ -83,3 +89,4 @@ export const RichTextEditor = ({
     </div>
   );
 };
+

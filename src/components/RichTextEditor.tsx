@@ -91,7 +91,7 @@ export const RichTextEditor = ({
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
       )}
       
-      {/* Toolbar positioned outside document with significant spacing */}
+      {/* Toolbar positioned outside document with spacing but no bottom border */}
       {!hideToolbar && isEditable && !externalToolbar && (
         <div className="toolbar-container mb-16">
           <Toolbar editor={activeEditor} />
@@ -112,7 +112,6 @@ export const RichTextEditor = ({
           .toolbar-container {
             margin-bottom: 3rem !important;
             padding-bottom: 1rem;
-            border-bottom: 1px solid #eaeaea;
           }
         `}
       </style>

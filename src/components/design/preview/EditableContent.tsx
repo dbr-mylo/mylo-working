@@ -66,7 +66,7 @@ export const EditableContent = ({
   // For editor role, render toolbar outside the document container with added spacing
   return (
     <div className="editor-content-container mt-12 mb-10">
-      {/* Main document container with increased spacing */}
+      {/* Main document container with increased spacing but no extra border */}
       <div style={{ width: width, margin: '0 auto' }} className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
         <div className="font-editor">
           <RichTextEditor

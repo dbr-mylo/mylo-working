@@ -47,7 +47,7 @@ export const EditorPanel = ({
   }
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
         {!isMobile && <div className="flex justify-between items-center mb-8">
             <h2 className="text-sm font-medium text-editor-text">Editor Panel</h2>
@@ -58,7 +58,7 @@ export const EditorPanel = ({
               </span>}
           </div>}
         
-        {/* Added a significant vertical gap here */}
+        {/* Added vertical gap with no border */}
         <div className="bg-editor-bg rounded-md mt-12">
           {/* Document container with exact dimensions applied */}
           <div className="mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]" style={{ width: pageWidth }}>

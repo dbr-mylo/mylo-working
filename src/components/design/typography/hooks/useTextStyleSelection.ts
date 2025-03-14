@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { TextStyle, TypographyStyles } from "@/lib/types";
+import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 
 interface UseTextStyleSelectionProps {

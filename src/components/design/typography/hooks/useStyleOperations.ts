@@ -9,7 +9,7 @@ interface UseStyleOperationsProps {
   textStyles: TextStyle[];
   selectedStyleId: string | null;
   selectedElement: HTMLElement | null;
-  setTextStyles: (styles: TextStyle[]) => void;
+  setTextStyles: React.Dispatch<React.SetStateAction<TextStyle[]>>;
   setSelectedStyleId: (id: string | null) => void;
   onSaveStyle?: (style: Partial<TextStyle>) => void;
   onStylesChange?: (styles: string) => void;

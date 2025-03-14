@@ -56,7 +56,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   };
 
   return (
-    <div className="border border-input rounded-md bg-background p-1 flex flex-wrap gap-1 items-center">
+    <div className="rounded-md bg-background p-1 flex flex-wrap gap-1 items-center">
       <div className="flex items-center gap-1">
         <FontSelect editor={editor} />
         <ColorPicker editor={editor} />

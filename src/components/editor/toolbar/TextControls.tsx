@@ -14,7 +14,7 @@ export const TextControls: React.FC<TextControlsProps> = ({ editor }) => {
     <div className="flex items-center gap-1">
       <FontSelect editor={editor} />
       <ColorPicker editor={editor} />
-      <DesignerFontSizeControls editor={editor} />
+      <DesignerFontSizeControls editor={editor} className="ml-1 mr-1" />
     </div>
   );
 };

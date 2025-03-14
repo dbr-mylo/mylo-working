@@ -2,13 +2,17 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
-import { FontSizeControls } from '@/components/rich-text/toolbar/FontSizeControls';
+import { FontSizeSection } from '@/components/rich-text/toolbar/FontSizeSection';
 
 interface DesignerFontSizeControlsProps {
   editor: Editor;
+  className?: string;
 }
 
-export const DesignerFontSizeControls: React.FC<DesignerFontSizeControlsProps> = ({ editor }) => {
+export const DesignerFontSizeControls: React.FC<DesignerFontSizeControlsProps> = ({ 
+  editor,
+  className 
+}) => {
   const { role } = useAuth();
   
   // Only render for designer role
@@ -20,12 +24,14 @@ export const DesignerFontSizeControls: React.FC<DesignerFontSizeControlsProps> =
   const isTextSelected = !editor.state.selection.empty;
   
   return (
-    <FontSizeControls 
+    <FontSizeSection 
+      editor={editor}
       currentFontSize={currentFontSize}
       isTextSelected={isTextSelected}
       onFontSizeChange={(fontSize) => {
         editor.chain().focus().setFontSize(fontSize).run();
       }}
+      className={className}
     />
   );
 };

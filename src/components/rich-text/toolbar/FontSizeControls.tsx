@@ -6,18 +6,20 @@ interface FontSizeControlsProps {
   currentFontSize: string;
   isTextSelected: boolean;
   onFontSizeChange: (fontSize: string) => void;
+  className?: string;
 }
 
 export const FontSizeControls: React.FC<FontSizeControlsProps> = ({
   currentFontSize,
   isTextSelected,
-  onFontSizeChange
+  onFontSizeChange,
+  className = "ml-1 mr-1"
 }) => {
   return (
     <FontSizeInput 
       value={currentFontSize} 
       onChange={onFontSizeChange} 
-      className="ml-1 mr-1"
+      className={className}
       disabled={!isTextSelected}
     />
   );

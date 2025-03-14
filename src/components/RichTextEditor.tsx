@@ -1,4 +1,3 @@
-
 /**
  * RichTextEditor Component
  * 
@@ -64,48 +63,39 @@ export const RichTextEditor = ({
     },
   });
 
-  // Update content from props when it changes externally
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
     }
   }, [content, editor]);
 
-  // Use external editor instance if provided
   const activeEditor = externalEditorInstance || editor;
 
   if (!activeEditor) {
     return null;
   }
 
-  // Get the width and height (defaulting to 8.5in x 11in)
   const width = dimensions?.width || '8.5in';
   const height = dimensions?.height || '11in';
 
   return (
     <div className="rich-text-editor">
-      {/* Include the color preservation styles */}
       <ColorPreservationStyles />
       
-      {/* Include list and indent styles */}
       <ListAndIndentStyles />
       
-      {/* Include base editor styles */}
       <BaseEditorStyles />
       
-      {/* Add template styles when enabled */}
       {applyTemplateStyling && templateStyles && (
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
       )}
       
-      {/* Render toolbar outside document dimensions */}
       {!hideToolbar && isEditable && !externalToolbar && (
-        <div className="toolbar-container mb-2">
+        <div className="toolbar-container mb-4">
           <Toolbar editor={activeEditor} />
         </div>
       )}
       
-      {/* Document styles for ProseMirror editor dimensions */}
       <style>
         {`
           .ProseMirror {

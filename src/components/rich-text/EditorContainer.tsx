@@ -28,7 +28,6 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
         .designer-editor .ProseMirror {
           min-height: 11in;
           width: 8.5in;
-          padding: 1in;
           margin: 0 auto;
           background-color: white;
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
@@ -38,10 +37,8 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
         .ProseMirror {
           min-height: 11in;
           width: 8.5in;
-          padding: 1in;
           margin: 0 auto;
           background-color: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
         
         .editor-toolbar {

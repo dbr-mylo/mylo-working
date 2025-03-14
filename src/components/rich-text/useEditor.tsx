@@ -56,6 +56,7 @@ export const useEditorSetup = ({
     currentFont,
     currentColor,
     handleFontChange,
-    handleColorChange
+    handleColorChange,
+    pageDimensions
   };
 };

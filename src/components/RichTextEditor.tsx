@@ -62,11 +62,21 @@ export const RichTextEditor = ({
     onUpdate: ({ editor }) => {
       onUpdate(editor.getHTML());
     },
+    editorProps: {
+      attributes: {
+        class: 'font-sans' // Add Inter font explicitly
+      }
+    }
   });
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
+    }
+    
+    // Set default font to Inter when editor is first created
+    if (editor && editor.isEditable) {
+      editor.chain().focus().setFontFamily('Inter').run();
     }
   }, [content, editor]);
 
@@ -109,6 +119,7 @@ export const RichTextEditor = ({
             margin: 0 auto;
             border: 1px solid var(--border);
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            font-family: Inter, sans-serif !important;
           }
           
           .toolbar-container {
@@ -120,7 +131,7 @@ export const RichTextEditor = ({
       
       <EditorContent 
         editor={activeEditor} 
-        className="prose prose-sm max-w-none"
+        className="prose prose-sm max-w-none font-sans"
       />
     </div>
   );

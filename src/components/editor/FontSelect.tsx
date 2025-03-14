@@ -11,7 +11,7 @@ import {
 import { Type } from 'lucide-react';
 
 const fonts = [
-  { name: 'Default', value: 'Inter' },
+  { name: 'Inter', value: 'Inter' },
   { name: 'Merriweather', value: 'Merriweather' },
   { name: 'Georgia', value: 'Georgia' },
   { name: 'Arial', value: 'Arial' },
@@ -36,7 +36,7 @@ export const FontSelect: React.FC<FontSelectProps> = ({ editor }) => {
         <div className="flex items-center gap-1">
           <Type className="h-3 w-3 flex-shrink-0" />
           <span style={{ fontFamily: currentFont }} className="truncate text-xs">
-            {currentFont || 'Default'}
+            {currentFont || 'Inter'}
           </span>
         </div>
       </SelectTrigger>

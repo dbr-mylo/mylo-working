@@ -72,7 +72,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"], // UI font is Inter
-        editor: ["Merriweather", "serif"], // Editor font is Merriweather
+        editor: ["Inter", "system-ui", "sans-serif"], // Changed from Merriweather to Inter
       },
       borderRadius: {
         lg: "var(--radius)",

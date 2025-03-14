@@ -137,9 +137,9 @@
   /* =============================================
      Editor Font & Typography Overrides
   ============================================= */
-  /* Apply editor font specifically to editor content */
+  /* Apply Inter font specifically to editor content */
   .ProseMirror {
-    font-family: theme('fontFamily.editor');
+    font-family: theme('fontFamily.sans');
     /* Set an explicit initial font size to override Tailwind */
     font-size: initial !important;
   }

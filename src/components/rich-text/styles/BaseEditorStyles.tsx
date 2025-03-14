@@ -16,6 +16,7 @@ export const BaseEditorStyles = () => {
         font-feature-settings: "liga" 0;
         /* Critical - establish base font-size */
         font-size: initial !important;
+        font-family: Inter, sans-serif !important;
         box-sizing: border-box;
       }
       

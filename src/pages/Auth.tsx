@@ -29,9 +29,10 @@ export default function Auth() {
           <p className="text-gray-500 mb-6">Sign in to access your documents</p>
           
           <div>
-            <div className="auth-tabs-list">
+            <div className="auth-tabs-list" style={{ borderRadius: "0.5rem", border: "1px solid #e5e7eb" }}>
               <button 
                 className="auth-tab-trigger" 
+                style={{ borderRadius: "0.375rem" }}
                 data-state={activeTab === "signin" ? "active" : "inactive"}
                 onClick={() => setActiveTab("signin")}
               >
@@ -39,6 +40,7 @@ export default function Auth() {
               </button>
               <button 
                 className="auth-tab-trigger" 
+                style={{ borderRadius: "0.375rem" }}
                 data-state={activeTab === "signup" ? "active" : "inactive"}
                 onClick={() => setActiveTab("signup")}
               >

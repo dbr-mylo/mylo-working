@@ -10,6 +10,9 @@ import { Separator } from '@/components/ui/separator';
 import { FontSizeSection } from './FontSizeSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFontSizeTracking } from './hooks/useFontSizeTracking';
+import { Button } from '@/components/ui/button';
+import { RemoveFormatting } from 'lucide-react';
+import { clearFormatting } from '../utils/textFormatting';
 
 interface EditorToolbarContentProps {
   editor: Editor;
@@ -62,6 +65,19 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
         buttonSize={buttonSize}
       />
 
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      
+      <Button
+        variant="ghost"
+        size={buttonSize}
+        onClick={() => clearFormatting(editor)}
+        title="Clear formatting"
+        className="flex items-center gap-1"
+      >
+        <RemoveFormatting className="h-4 w-4" />
+        Clear
+      </Button>
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
       
       <StyleDropdown editor={editor} />

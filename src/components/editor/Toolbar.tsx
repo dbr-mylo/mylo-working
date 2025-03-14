@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, RemoveFormatting } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FontSelect } from './FontSelect';
 import { ColorPicker } from './ColorPicker';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../rich-text/utils/colorPreservation';
+import { clearFormatting } from '../rich-text/utils/textFormatting';
 
 interface ToolbarProps {
   editor: Editor;
@@ -101,6 +102,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           <AlignRight className="h-4 w-4" />
         </Button>
       </div>
+      
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => clearFormatting(editor)}
+        title="Clear formatting"
+      >
+        <RemoveFormatting className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

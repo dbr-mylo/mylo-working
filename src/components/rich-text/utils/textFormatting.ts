@@ -20,6 +20,7 @@ export const clearFormatting = (editor: Editor) => {
       .setFontFamily('Inter') // Reset font family to default
       .setColor('#000000') // Reset color to default
       .setFontSize('16px') // Reset font size to default
+      .setTextAlign('left') // Reset text alignment
       .run();
       
     console.log("Formatting cleared");

@@ -2,6 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
+import { Editor } from "@tiptap/react";
 
 type MobileEditorProps = {
   content: string;
@@ -9,6 +10,7 @@ type MobileEditorProps = {
   isEditorEditable: boolean;
   isDesignEditable: boolean;
   templateId?: string;
+  editorInstance?: Editor | null;
 };
 
 export const MobileEditor = ({ 
@@ -16,7 +18,8 @@ export const MobileEditor = ({
   onContentChange, 
   isEditorEditable, 
   isDesignEditable,
-  templateId
+  templateId,
+  editorInstance
 }: MobileEditorProps) => {
   return (
     <main className="animate-fade-in p-4">
@@ -30,6 +33,8 @@ export const MobileEditor = ({
             content={content}
             onContentChange={onContentChange}
             isEditable={isEditorEditable}
+            templateId={templateId}
+            editorInstance={editorInstance}
           />
         </TabsContent>
         <TabsContent value="design" className="mt-0">

@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +10,9 @@ import { DesignPanel } from "@/components/DesignPanel";
 import { useEffect, useState } from "react";
 import { StyleApplicatorTest } from "@/components/design/typography/StyleApplicatorTest";
 import { textStyleStore } from "@/stores/textStyles";
+import { Editor } from "@tiptap/react";
+import { EditorToolbarContainer } from "@/components/EditorToolbarContainer";
+import { useEditorSetup } from "@/components/rich-text/useEditor";
 
 const Index = () => {
   const { documentId } = useParams();
@@ -16,8 +20,9 @@ const Index = () => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
   
-  // State for template ID
+  // State for template ID and shared editor instance
   const [templateId, setTemplateId] = useState<string | undefined>(undefined);
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
   
   // Check if this is the style test route
   const isStyleTestRoute = documentId === "style-test";
@@ -43,6 +48,20 @@ const Index = () => {
   
   const isEditorEditable = role === "editor";
   const isDesignEditable = role === "designer";
+  
+  // Initialize editor setup for the shared toolbar
+  const editorSetup = useEditorSetup({
+    content: content || '',
+    onContentChange: setContent,
+    isEditable: isEditorEditable
+  });
+  
+  // Store the editor instance for sharing
+  useEffect(() => {
+    if (editorSetup.editor) {
+      setEditorInstance(editorSetup.editor);
+    }
+  }, [editorSetup.editor]);
   
   // Add a console log to track content changes
   useEffect(() => {
@@ -131,6 +150,7 @@ const Index = () => {
           isEditorEditable={isEditorEditable}
           isDesignEditable={isDesignEditable}
           templateId={templateId}
+          editorInstance={editorInstance}
         />
       ) : (
         <DesktopEditor
@@ -139,6 +159,7 @@ const Index = () => {
           isEditorEditable={isEditorEditable}
           isDesignEditable={isDesignEditable}
           templateId={templateId}
+          editorInstance={editorInstance}
         />
       );
     }
@@ -157,6 +178,14 @@ const Index = () => {
         templateId={templateId}
         onTemplateChange={setTemplateId}
       />
+      
+      {/* Add the toolbar container below the nav when in editor mode */}
+      {role === "editor" && (
+        <EditorToolbarContainer 
+          editor={editorInstance} 
+          isEditable={isEditorEditable}
+        />
+      )}
       
       <main className="animate-fade-in">
         {renderContent()}

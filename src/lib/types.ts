@@ -7,8 +7,9 @@ export interface DesignPanelProps {
 export interface EditorPanelProps {
   content: string;
   onContentChange: (content: string) => void;
-  isEditable?: boolean;
+  isEditable: boolean;
   templateId?: string;
+  editorInstance?: Editor | null;
 }
 
 export interface Document {

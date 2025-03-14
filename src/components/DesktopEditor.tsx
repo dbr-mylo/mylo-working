@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { EditorPanel } from "@/components/EditorPanel";
 import { DesignPanel } from "@/components/DesignPanel";
 import { useToast } from "@/hooks/use-toast";
+import { Editor } from "@tiptap/react";
 
 type DesktopEditorProps = {
   content: string;
@@ -10,6 +11,7 @@ type DesktopEditorProps = {
   isEditorEditable: boolean;
   isDesignEditable: boolean;
   templateId?: string;
+  editorInstance?: Editor | null;
 };
 
 export const DesktopEditor = ({ 
@@ -17,14 +19,17 @@ export const DesktopEditor = ({
   onContentChange, 
   isEditorEditable, 
   isDesignEditable,
-  templateId
+  templateId,
+  editorInstance
 }: DesktopEditorProps) => {
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] animate-fade-in">
+    <main className="flex min-h-[calc(100vh-7rem)] animate-fade-in">
       <EditorPanel 
         content={content}
         onContentChange={onContentChange}
         isEditable={isEditorEditable}
+        templateId={templateId}
+        editorInstance={editorInstance}
       />
       <DesignPanel 
         content={content}

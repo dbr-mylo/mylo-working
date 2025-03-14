@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { textStyleStore } from '@/stores/textStyles';
+import { dispatchFontSizeEvent } from '../utils';
 
 interface UseFontSizeEventsProps {
   size: number;

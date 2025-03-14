@@ -1,5 +1,7 @@
 
 import { useCallback } from 'react';
+import { dispatchFontSizeEvent, formatFontSize, clampFontSize } from '../utils';
+import { EVENT_SOURCES } from '../constants';
 
 interface UseFontSizeActionsProps {
   size: number;
@@ -27,10 +29,7 @@ export const useFontSizeActions = ({
     
     // Dispatch event for other components
     try {
-      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px`, source: 'input' }
-      });
-      document.dispatchEvent(fontSizeEvent);
+      dispatchFontSizeEvent(`${newSize}px`, EVENT_SOURCES.INPUT);
     } catch (error) {
       console.error("Error dispatching font size event:", error);
     }
@@ -45,10 +44,7 @@ export const useFontSizeActions = ({
     
     // Dispatch event for other components
     try {
-      const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-        detail: { fontSize: `${newSize}px`, source: 'input' }
-      });
-      document.dispatchEvent(fontSizeEvent);
+      dispatchFontSizeEvent(`${newSize}px`, EVENT_SOURCES.INPUT);
     } catch (error) {
       console.error("Error dispatching font size event:", error);
     }
@@ -66,7 +62,7 @@ export const useFontSizeActions = ({
     
     let newSize = parseFloat(inputValue);
     // Enforce min/max limits
-    newSize = Math.max(Math.min(newSize, MAX_FONT_SIZE), 0);
+    newSize = clampFontSize(newSize, 0, MAX_FONT_SIZE);
     
     // Round to one decimal place for better usability
     newSize = Math.round(newSize * 10) / 10;
@@ -76,14 +72,12 @@ export const useFontSizeActions = ({
     
     // Only update if value is within acceptable range
     if (newSize >= MIN_FONT_SIZE) {
-      onChange(`${newSize}px`);
+      const formattedSize = formatFontSize(newSize);
+      onChange(formattedSize);
       
       // Dispatch event for other components
       try {
-        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px`, source: 'input' }
-        });
-        document.dispatchEvent(fontSizeEvent);
+        dispatchFontSizeEvent(formattedSize, EVENT_SOURCES.INPUT);
       } catch (error) {
         console.error("Error dispatching font size event:", error);
       }
@@ -98,14 +92,13 @@ export const useFontSizeActions = ({
       const newSize = MIN_FONT_SIZE;
       console.log("FontSizeInput: Correcting size to minimum:", newSize);
       setSize(newSize);
-      onChange(`${newSize}px`);
+      
+      const formattedSize = formatFontSize(newSize);
+      onChange(formattedSize);
       
       // Dispatch event for other components
       try {
-        const fontSizeEvent = new CustomEvent('tiptap-font-size-changed', {
-          detail: { fontSize: `${newSize}px`, source: 'input' }
-        });
-        document.dispatchEvent(fontSizeEvent);
+        dispatchFontSizeEvent(formattedSize, EVENT_SOURCES.INPUT);
       } catch (error) {
         console.error("Error dispatching font size event:", error);
       }

@@ -76,4 +76,12 @@
   [style*="font-size"][data-font-size] {
     font-size: unset !important;
   }
+  
+  /* Ensure consistent editor component border styling */
+  .editor-toolbar,
+  .editor-toolbar-container select,
+  .editor-toolbar-container button {
+    border-color: #D9DADC;
+    border-radius: 0.375rem;
+  }
 }

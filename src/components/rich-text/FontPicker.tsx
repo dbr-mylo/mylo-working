@@ -45,7 +45,7 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   return (
     <div className={`flex items-center ${className || ''}`}>
       <Select value={value} onValueChange={handleFontChange}>
-        <SelectTrigger className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs`}>
+        <SelectTrigger className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs border-editor-border rounded-md`}>
           <div className="flex items-center gap-1 w-full">
             <Type className="h-3 w-3 flex-shrink-0" />
             <span style={{ fontFamily: value }} className="truncate">

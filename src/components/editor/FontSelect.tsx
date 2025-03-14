@@ -32,7 +32,7 @@ export const FontSelect: React.FC<FontSelectProps> = ({ editor }) => {
 
   return (
     <Select value={currentFont} onValueChange={handleFontChange}>
-      <SelectTrigger className="w-[120px] h-7">
+      <SelectTrigger className="w-[120px] h-7 border-editor-border rounded-md">
         <div className="flex items-center gap-1">
           <Type className="h-3 w-3 flex-shrink-0" />
           <span style={{ fontFamily: currentFont }} className="truncate text-xs">

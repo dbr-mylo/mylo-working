@@ -135,7 +135,7 @@ const DocumentSelection = () => {
         <div className="mb-6">
           <Button 
             onClick={handleCreateNewDocument}
-            className="text-base"
+            className="text-base bg-black text-white hover:bg-black/80"
           >
             Create New {isDesigner ? "Template" : "Document"}
           </Button>

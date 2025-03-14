@@ -1,3 +1,4 @@
+
 /**
  * ViewableContent Component
  * 
@@ -50,9 +51,8 @@ export const ViewableContent = ({
     }
   }, [templateName, prevTemplateName, toast, role]);
 
-  // DESIGNER PATH - DO NOT MODIFY
+  // DESIGNER PATH - Modified to match dimensions and show outline
   if (isDesigner) {
-    // For designer role viewing mode, don't wrap in the white div
     return (
       <>
         {templateStyles && <style dangerouslySetInnerHTML={{ __html: templateStyles }} />}
@@ -60,7 +60,7 @@ export const ViewableContent = ({
           ref={previewRef} 
           onClick={onClick}
           dangerouslySetInnerHTML={{ __html: content }} 
-          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto template-styled`}
+          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto template-styled bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}
         />
       </>
     );

@@ -103,6 +103,9 @@ export const DocumentPreview = ({
     }
   };
   
+  // Extract dimensions for EmptyContent
+  const dimensions = extractDimensionsFromCSS(templateStyles);
+  
   return (
     <div className="bg-editor-panel p-4 rounded-md">
       {/* Show selection bar only when not editable and has selected element */}
@@ -135,7 +138,7 @@ export const DocumentPreview = ({
             templateName={templateName}
           />
         ) : (
-          <EmptyContent />
+          <EmptyContent dimensions={dimensions} />
         )}
       </div>
     </div>

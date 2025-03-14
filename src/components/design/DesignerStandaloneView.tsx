@@ -14,6 +14,7 @@ import { Editor } from "@tiptap/react";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { PreviewToggleButton } from "@/components/design/PreviewToggleButton";
 import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
+import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
 interface DesignerStandaloneViewProps {
   content: string;
@@ -51,6 +52,11 @@ export const DesignerStandaloneView = ({
   const handleTogglePreview = () => {
     setIsPreviewVisible(prev => !prev);
   };
+
+  // Extract dimensions from template styles
+  const dimensions = extractDimensionsFromCSS(customStyles);
+  const width = dimensions?.width || '8.5in';
+  const height = dimensions?.height || '11in';
 
   return (
     <div className="w-full flex flex-col">
@@ -104,7 +110,7 @@ export const DesignerStandaloneView = ({
                 <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
                 <div 
                   dangerouslySetInnerHTML={{ __html: designContent }} 
-                  className="min-h-[11in] w-[8.5in] p-[1in] mx-auto bg-gray-50 border border-gray-200 rounded-md prose prose-sm max-w-none"
+                  className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)] prose prose-sm max-w-none`}
                 />
               </div>
             </div>

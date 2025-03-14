@@ -23,14 +23,14 @@ export const EditorView = ({
   isMobile
 }: EditorViewProps) => {
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto h-full flex flex-col`}>
       {isEditable && (
         <div className="w-full">
           <ToolSettingsMenuBar />
         </div>
       )}
-      <div className="p-4 md:p-8">
-        <div className="mx-auto">
+      <div className="p-4 pt-0 md:p-8 md:pt-0 flex-grow">
+        <div className="mx-auto mt-0">
           <DocumentPreview 
             content={content}
             customStyles={customStyles}

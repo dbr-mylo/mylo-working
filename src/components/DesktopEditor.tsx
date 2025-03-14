@@ -24,18 +24,20 @@ export const DesktopEditor = ({
 }: DesktopEditorProps) => {
   return (
     <main className="flex min-h-[calc(100vh-7rem)] animate-fade-in">
-      <EditorPanel 
-        content={content}
-        onContentChange={onContentChange}
-        isEditable={isEditorEditable}
-        templateId={templateId}
-        editorInstance={editorInstance}
-      />
-      <DesignPanel 
-        content={content}
-        isEditable={isDesignEditable}
-        templateId={templateId}
-      />
+      <div className="flex w-full h-full">
+        <EditorPanel 
+          content={content}
+          onContentChange={onContentChange}
+          isEditable={isEditorEditable}
+          templateId={templateId}
+          editorInstance={editorInstance}
+        />
+        <DesignPanel 
+          content={content}
+          isEditable={isDesignEditable}
+          templateId={templateId}
+        />
+      </div>
     </main>
   );
 };

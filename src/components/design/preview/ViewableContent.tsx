@@ -60,7 +60,7 @@ export const ViewableContent = ({
           ref={previewRef} 
           onClick={onClick}
           dangerouslySetInnerHTML={{ __html: content }} 
-          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto template-styled bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}
+          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 template-styled bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}
         />
       </>
     );
@@ -69,7 +69,7 @@ export const ViewableContent = ({
   // EDITOR PATH - Safe to modify
   // For editor role viewing mode, keep the white div with shadow
   return (
-    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
       {templateStyles && <style dangerouslySetInnerHTML={{ __html: templateStyles }} />}
       <div 
         ref={previewRef} 

@@ -25,9 +25,9 @@ export const MobileEditor = ({
   const [activeTab, setActiveTab] = useState<"editor" | "design">("editor");
 
   return (
-    <main className="animate-fade-in px-0">
+    <main className={`animate-fade-in px-0 ${activeTab === "design" ? "bg-editor-bg" : ""}`}>
       <div className="w-full">
-        <div className="auth-tabs-list mobile-editor-tabs h-[40px] relative z-20">
+        <div className={`auth-tabs-list mobile-editor-tabs h-[40px] relative z-20 ${activeTab === "design" ? "bg-editor-bg" : ""}`}>
           <button 
             className="auth-tab-trigger h-[40px]"
             data-state={activeTab === "editor" ? "active" : "inactive"}

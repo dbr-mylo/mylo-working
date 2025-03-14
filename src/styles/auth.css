@@ -28,6 +28,7 @@
   padding: 0;
   position: relative;
   z-index: 20;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .auth-tab-trigger {
@@ -54,6 +55,12 @@
 
 .animate-fade-in .auth-tab-trigger {
   padding: 0 1rem;
+}
+
+/* Special background handling for design preview tab */
+.auth-tabs-list.bg-editor-bg .auth-tab-trigger[data-state="active"] {
+  background-color: var(--editor-bg);
+  box-shadow: none;
 }
 
 .auth-form {

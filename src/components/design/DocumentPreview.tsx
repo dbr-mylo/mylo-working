@@ -107,7 +107,7 @@ export const DocumentPreview = ({
   const dimensions = extractDimensionsFromCSS(templateStyles);
   
   return (
-    <div className="bg-editor-panel p-4 rounded-md">
+    <div className="bg-editor-panel rounded-md">
       {/* Show selection bar only when not editable and has selected element */}
       {!isEditable && selectedElement && (
         <SelectedElementBar 

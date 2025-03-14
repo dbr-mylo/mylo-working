@@ -1,6 +1,6 @@
 
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast"; 
@@ -13,17 +13,9 @@ interface DesignPanelProps {
   content: string;
   isEditable: boolean;
   templateId?: string;
-  multiPageContent?: string[];
-  currentPageIndex?: number;
 }
 
-export const DesignPanel = ({ 
-  content, 
-  isEditable, 
-  templateId,
-  multiPageContent = [],
-  currentPageIndex = 0
-}: DesignPanelProps) => {
+export const DesignPanel = ({ content, isEditable, templateId }: DesignPanelProps) => {
   const { width } = useWindowSize();
   const { role } = useAuth();
   const { toast } = useToast();
@@ -35,12 +27,9 @@ export const DesignPanel = ({
   
   const { customStyles, handleStylesChange } = useTemplateStyles(templateId);
   
-  // Handle content change from EditorPanel
-  useEffect(() => {
-    if (content !== designContent && !isEditable) {
-      setDesignContent(content);
-    }
-  }, [content, designContent, isEditable]);
+  if (content !== designContent && !isEditable) {
+    setDesignContent(content);
+  }
   
   const handleContentChange = (newContent: string) => {
     setDesignContent(newContent);
@@ -80,16 +69,9 @@ export const DesignPanel = ({
     }
   };
   
-  // Determine if we have multi-page content
-  const hasMultiplePages = multiPageContent.length > 1;
-  const totalPages = hasMultiplePages ? multiPageContent.length : 1;
-  const displayContent = hasMultiplePages ? 
-    multiPageContent[currentPageIndex] : 
-    designContent;
-  
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
-      content: displayContent, 
+      content: designContent, 
       onContentChange: handleContentChange,
       isEditable 
     }) : null;
@@ -98,7 +80,7 @@ export const DesignPanel = ({
     return (
       <DesignerStandaloneView
         content={content}
-        designContent={displayContent}
+        designContent={designContent}
         customStyles={customStyles}
         isEditable={isEditable}
         editorSetup={editorSetup}
@@ -110,15 +92,13 @@ export const DesignPanel = ({
   
   return (
     <EditorView
-      content={displayContent}
+      content={designContent}
       customStyles={customStyles}
       isEditable={isEditable}
       onContentChange={handleContentChange}
       onElementSelect={handleElementSelect}
       templateId={templateId}
       isMobile={isMobile}
-      currentPage={currentPageIndex}
-      totalPages={totalPages}
     />
   );
 };

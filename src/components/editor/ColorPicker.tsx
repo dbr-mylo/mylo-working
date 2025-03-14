@@ -33,7 +33,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ editor }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="xs" className="h-7 flex gap-1 items-center px-2">
+        <Button variant="ghost" size="xs" className="h-7 flex gap-1 items-center">
           <Paintbrush className="h-3 w-3" />
           <div 
             className="w-3 h-3 rounded-full border border-gray-300" 

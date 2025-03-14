@@ -11,8 +11,6 @@ interface EditorViewProps {
   onElementSelect: (element: HTMLElement | null) => void;
   templateId?: string;
   isMobile: boolean;
-  currentPage?: number;
-  totalPages?: number;
 }
 
 export const EditorView = ({
@@ -22,9 +20,7 @@ export const EditorView = ({
   onContentChange,
   onElementSelect,
   templateId,
-  isMobile,
-  currentPage = 0,
-  totalPages = 1
+  isMobile
 }: EditorViewProps) => {
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
@@ -42,8 +38,6 @@ export const EditorView = ({
             onContentChange={onContentChange}
             onElementSelect={onElementSelect}
             templateId={templateId}
-            currentPage={currentPage}
-            totalPages={totalPages}
           />
         </div>
       </div>

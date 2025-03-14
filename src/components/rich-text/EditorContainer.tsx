@@ -6,14 +6,12 @@ interface EditorContainerProps {
   children: React.ReactNode;
   fixedToolbar?: boolean;
   refProp?: React.RefObject<HTMLDivElement>;
-  templateStyles?: string;
 }
 
 export const EditorContainer: React.FC<EditorContainerProps> = ({ 
   children, 
   fixedToolbar = false,
-  refProp,
-  templateStyles = ''
+  refProp
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
@@ -26,16 +24,6 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
       <style>
         {`
         .designer-editor .ProseMirror {
-          min-height: 11in;
-          width: 8.5in;
-          padding: 1in;
-          margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-        
-        /* Default page size for all editor roles if no template styles */
-        .ProseMirror {
           min-height: 11in;
           width: 8.5in;
           padding: 1in;
@@ -58,9 +46,6 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           z-index: 10;
           width: 100%;
         }
-
-        /* Apply custom template styles if available */
-        ${templateStyles}
         `}
       </style>
       {children}

@@ -22,20 +22,12 @@ export interface UseEditorCoreProps {
   content: string;
   onContentChange: (content: string) => void;
   isEditable?: boolean;
-  pageDimensions?: {
-    width: string;
-    height: string;
-  };
 }
 
 export const useEditorCore = ({ 
   content, 
   onContentChange, 
-  isEditable = true,
-  pageDimensions = {
-    width: '8.5in',
-    height: '11in'
-  }
+  isEditable = true 
 }: UseEditorCoreProps) => {
   
   const editor = useTipTapEditor({

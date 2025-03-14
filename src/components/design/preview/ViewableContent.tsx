@@ -34,12 +34,6 @@ export const ViewableContent = ({
       setPrevTemplateName(templateName);
     }
   }, [templateName, prevTemplateName, toast, role]);
-  
-  // Default styling to ensure 8.5x11 if no template
-  const hasTemplateStyles = templateStyles && templateStyles.trim() !== '';
-  const containerClassName = hasTemplateStyles 
-    ? "template-styled" 
-    : "default-page template-styled";
 
   if (isDesigner) {
     // For designer role viewing mode, don't wrap in the white div
@@ -50,7 +44,7 @@ export const ViewableContent = ({
           ref={previewRef} 
           onClick={onClick}
           dangerouslySetInnerHTML={{ __html: content }} 
-          className={`cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto ${containerClassName}`} 
+          className="cursor-pointer min-h-[11in] w-[8.5in] p-[1in] mx-auto template-styled" 
         />
       </>
     );
@@ -64,7 +58,7 @@ export const ViewableContent = ({
         ref={previewRef} 
         onClick={onClick}
         dangerouslySetInnerHTML={{ __html: content }} 
-        className={`cursor-pointer ${containerClassName}`} 
+        className="cursor-pointer template-styled" 
       />
     </div>
   );

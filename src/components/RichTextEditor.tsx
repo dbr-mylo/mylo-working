@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import Color from '@tiptap/extension-color';
+import TextAlign from '@tiptap/extension-text-align';
 import { Toolbar } from './editor/Toolbar';
 import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationStyles';
 
@@ -29,14 +30,13 @@ export const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        textAlign: {
-          types: ['heading', 'paragraph'],
-        },
-      }),
+      StarterKit,
       TextStyle,
       FontFamily,
       Color,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content,
     editable: isEditable,

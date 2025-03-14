@@ -60,16 +60,13 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
             )}
           </div>
         )}
-        {/* Editor container with exact 8.5x11 inch dimensions */}
-        <div className="bg-white min-h-[11in] w-[8.5in] mx-auto shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
-          <div className="p-[1in]">
-            <RichTextEditor 
-              content={pages[currentPageIndex]} 
-              onUpdate={handleContentUpdate}
-              isEditable={isEditable}
-              hideToolbar={!isEditable} // Hide toolbar if not editable
-            />
-          </div>
+        <div className="bg-editor-bg p-4 rounded-md">
+          <RichTextEditor 
+            content={pages[currentPageIndex]} 
+            onUpdate={handleContentUpdate}
+            isEditable={isEditable}
+            hideToolbar={!isEditable} // Hide toolbar if not editable
+          />
         </div>
         
         {/* Page navigation */}

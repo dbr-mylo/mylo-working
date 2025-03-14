@@ -77,6 +77,31 @@
     font-size: unset !important;
   }
   
+  /* =============================================
+     Z-Index and Dropdown Corrections
+  ============================================= */
+  /* Ensure editor toolbar is always above all content panels */
+  .editor-toolbar-container, 
+  .editor-toolbar,
+  nav + .editor-toolbar-container,
+  nav + div .editor-toolbar {
+    position: relative;
+    z-index: 50 !important;
+  }
+  
+  /* Ensure the Radix select dropdown shows above content */
+  [data-radix-popper-content-wrapper] {
+    z-index: 100 !important;
+  }
+  
+  /* Fix for menus and dropdowns to appear correctly */
+  .SelectContent, 
+  [role="dialog"],
+  [role="tooltip"],
+  [role="menu"] {
+    z-index: 100 !important;
+  }
+  
   /* Ensure consistent editor component border styling with higher specificity */
   .editor-toolbar .SelectTrigger,
   .editor-toolbar button[data-state],

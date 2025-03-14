@@ -55,13 +55,14 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
             ${!isDesigner ? 'border-bottom: 1px solid #e2e8f0;' : ''}
             padding: 0;
             margin: 0;
-            z-index: 10;
+            z-index: 50;
+            position: relative;
           }
           
           .fixed-toolbar {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 50;
             width: 100%;
           }
           `}
@@ -84,13 +85,14 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           background-color: white;
           padding: 0;
           margin: 0 0 1rem 0;
-          z-index: 10;
+          z-index: 50;
+          position: relative;
         }
         
         .fixed-toolbar {
           position: sticky;
           top: 0;
-          z-index: 10;
+          z-index: 50;
           width: 100%;
         }
 
@@ -105,6 +107,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           background-color: white;
           border: 1px solid var(--border);
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          z-index: 10;
         }
 
         /* Toolbar container styles */
@@ -112,6 +115,8 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           width: ${width};
           margin: 0 auto 1rem auto;
           padding-bottom: 0.5rem;
+          position: relative;
+          z-index: 50;
         }
         `}
       </style>

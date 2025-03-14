@@ -7,12 +7,15 @@ import { FontSelect } from './FontSelect';
 import { ColorPicker } from './ColorPicker';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../rich-text/utils/colorPreservation';
 import { clearFormatting } from '../rich-text/utils/textFormatting';
+import { useToast } from '@/hooks/use-toast';
 
 interface ToolbarProps {
   editor: Editor;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
+  const { toast } = useToast();
+  
   if (!editor) {
     return null;
   }
@@ -53,6 +56,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         }).run();
       }
     }
+  };
+
+  const handleClearFormatting = () => {
+    if (!editor) return;
+    
+    // Check if text is selected
+    if (editor.state.selection.empty) {
+      toast({
+        title: "No text selected",
+        description: "Please select some text to clear its formatting.",
+        variant: "default",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Clear the formatting
+    clearFormatting(editor);
   };
 
   return (
@@ -168,8 +189,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       <Button
         variant="ghost"
         size="xs"
-        onClick={() => clearFormatting(editor)}
+        onClick={handleClearFormatting}
         title="Clear formatting"
+        disabled={!editor || editor.state.selection.empty}
       >
         <RemoveFormatting className="h-3.5 w-3.5" />
       </Button>

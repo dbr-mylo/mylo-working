@@ -27,16 +27,16 @@ export const MobileEditor = ({
   return (
     <main className="animate-fade-in px-0">
       <div className="w-full">
-        <div className="auth-tabs-list">
+        <div className="auth-tabs-list h-[40px] flex">
           <button 
-            className="auth-tab-trigger" 
+            className="auth-tab-trigger h-[40px] flex items-center justify-center"
             data-state={activeTab === "editor" ? "active" : "inactive"}
             onClick={() => setActiveTab("editor")}
           >
             Editor
           </button>
           <button 
-            className="auth-tab-trigger" 
+            className="auth-tab-trigger h-[40px] flex items-center justify-center"
             data-state={activeTab === "design" ? "active" : "inactive"}
             onClick={() => setActiveTab("design")}
           >

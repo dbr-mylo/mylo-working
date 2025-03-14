@@ -1,4 +1,3 @@
-
 .auth-container {
   min-height: 100vh;
   display: flex;
@@ -36,6 +35,16 @@
   background-color: #f1f1f1;
   color: #111827;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile editor specific overrides */
+.animate-fade-in .auth-tabs-list {
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.animate-fade-in .auth-tab-trigger {
+  padding: 0 1rem;
 }
 
 .auth-form {

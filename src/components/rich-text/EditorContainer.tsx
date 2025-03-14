@@ -97,7 +97,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
         .ProseMirror {
           min-height: ${height};
           width: ${width};
-          padding: 0;
+          padding: 1in;
           margin: 0 auto;
           overflow-wrap: break-word;
         }

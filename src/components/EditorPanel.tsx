@@ -57,7 +57,7 @@ export const EditorPanel = ({
               </span>}
           </div>}
         <div className="bg-editor-bg rounded-md">
-          <div className={`min-h-[${pageHeight}] w-[${pageWidth}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+          <div className={`w-[${pageWidth}] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
             <RichTextEditor 
               content={content} 
               onUpdate={handleContentUpdate}

@@ -19,6 +19,7 @@ import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationSty
 import { IndentExtension } from './rich-text/extensions/IndentExtension';
 import { ListAndIndentStyles } from './rich-text/styles/ListAndIndentStyles';
 import { extractDimensionsFromCSS } from '@/utils/templateUtils';
+import { BaseEditorStyles } from './rich-text/styles/BaseEditorStyles';
 
 interface RichTextEditorProps {
   content: string;
@@ -85,10 +86,26 @@ export const RichTextEditor = ({
       {/* Include list and indent styles */}
       <ListAndIndentStyles />
       
+      {/* Include base editor styles */}
+      <BaseEditorStyles />
+      
       {/* Add template styles when enabled */}
       {applyTemplateStyling && templateStyles && (
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
       )}
+      
+      {/* Custom styles for ProseMirror editor dimensions */}
+      <style>
+        {`
+          .ProseMirror {
+            ${dimensions ? `
+              width: ${dimensions.width};
+              min-height: ${dimensions.height};
+            ` : ''}
+            padding: 0;
+          }
+        `}
+      </style>
       
       {!hideToolbar && isEditable && !externalToolbar && (
         <Toolbar editor={activeEditor} />
@@ -96,11 +113,8 @@ export const RichTextEditor = ({
       <EditorContent 
         editor={activeEditor} 
         className={`prose prose-sm max-w-none p-4 ${applyTemplateStyling ? 'template-styled' : ''}`} 
-        style={dimensions ? {
-          width: dimensions.width,
-          minHeight: dimensions.height
-        } : undefined}
       />
     </div>
   );
 };
+

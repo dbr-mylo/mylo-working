@@ -11,12 +11,12 @@ interface FontSizeInputProps {
   disabled?: boolean;
 }
 
-export const FontSizeInput = ({ 
+export const FontSizeInput: React.FC<FontSizeInputProps> = ({ 
   value, 
   onChange, 
   className, 
   disabled = false 
-}: FontSizeInputProps) => {
+}) => {
   const {
     size,
     incrementSize,
@@ -37,7 +37,7 @@ export const FontSizeInput = ({
           value={size}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          className="w-10 h-7 px-0"
+          className="w-10 h-7 px-0 text-xs"
           maxLength={4} // Allow for decimals like "10.5"
           disabled={disabled}
           style={{ 

@@ -33,7 +33,7 @@ export const FontSelect: React.FC<FontSelectProps> = ({ editor }) => {
   return (
     <Select value={currentFont} onValueChange={handleFontChange}>
       <SelectTrigger 
-        className="w-[120px] h-7 border-editor-border rounded-md overflow-hidden" 
+        className="w-[200px] h-7 border-editor-border rounded-md overflow-hidden" 
         style={{ borderRadius: '0.375rem' }}
       >
         <div className="flex items-center gap-1">

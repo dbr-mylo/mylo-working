@@ -1,0 +1,39 @@
+
+/* =============================================
+   Global Base Styles
+============================================= */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* =============================================
+     Editor Font & Typography Overrides
+  ============================================= */
+  /* Apply Inter font specifically to editor content */
+  .ProseMirror {
+    font-family: theme('fontFamily.sans');
+    /* Set an explicit initial font size to override Tailwind */
+    font-size: initial !important;
+  }
+
+  /* Critical override for Tailwind prose classes to prevent font size interference */
+  .prose, .prose-sm {
+    --tw-prose-body: none !important;
+  }
+  
+  /* Ensure prose doesn't enforce its own font sizes */
+  .prose *, .prose-sm * {
+    font-size: inherit !important;
+  }
+  
+  /* Extra-high specificity for paragraphs to override prose styles */
+  .prose p, .prose-sm p {
+    font-size: inherit !important;
+    margin-bottom: 4px;
+  }
+}

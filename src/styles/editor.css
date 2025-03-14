@@ -1,0 +1,66 @@
+
+/* =============================================
+   Designer Mode Specific Styles
+============================================= */
+@layer base {
+  [data-role="designer"] .designer-specific-element {
+    border-bottom: none !important;
+  }
+  
+  /* =============================================
+     Font Size Enforcement Rules
+  ============================================= */
+  /* Ensure inline styles take precedence over everything */
+  [style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Target preserve-styling spans with highest specificity */
+  .preserve-styling[style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Special class for our font size extension with max specificity */
+  .custom-font-size {
+    font-size: unset !important;
+  }
+  
+  /* Ensure we override any Tailwind prose-sm styles that set font sizes */
+  .prose-sm .ProseMirror {
+    font-size: initial !important;
+  }
+  
+  /* Make sure no parent can override font sizes of styled elements */
+  .prose-sm [style*="font-size"],
+  .prose [style*="font-size"] {
+    font-size: unset !important;
+  }
+  
+  /* Override for data-font-size attribute */
+  [data-font-size] {
+    font-size: attr(data-font-size px) !important;
+  }
+  
+  /* New more specific rules to ensure font size consistency */
+  .prose .custom-font-size,
+  .prose-sm .custom-font-size {
+    font-size: unset !important;
+  }
+  
+  /* Ensure font size is applied when using data attributes */
+  [data-style-fontSize] {
+    font-size: attr(data-style-fontSize) !important;
+  }
+  
+  /* Override for any DOM elements with custom font size attributes */
+  [style*="font-size"].custom-font-size,
+  span[style*="font-size"].custom-font-size,
+  p[style*="font-size"].custom-font-size {
+    font-size: unset !important;
+  }
+  
+  /* Enforce that any element that has both a style and a data attribute uses the style */
+  [style*="font-size"][data-font-size] {
+    font-size: unset !important;
+  }
+}

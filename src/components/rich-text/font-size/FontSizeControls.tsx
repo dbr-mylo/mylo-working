@@ -2,6 +2,9 @@
 import React from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { FontSizeDropdown } from './FontSizeDropdown';
+import { clampFontSize, parseFontSize } from './utils';
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from './constants';
 
 interface FontSizeControlsProps {
   size: number;
@@ -9,6 +12,7 @@ interface FontSizeControlsProps {
   onBlur: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onPresetSelect: (fontSize: string) => void;
   disabled: boolean;
 }
 
@@ -18,29 +22,41 @@ export const FontSizeControls = ({
   onBlur,
   onIncrement,
   onDecrement,
+  onPresetSelect,
   disabled
 }: FontSizeControlsProps) => {
+  // Format current size as string with px
+  const sizeWithUnit = `${size}px`;
+  
   return (
-    <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>
-      <Input
-        type="text"
-        value={size}
-        onChange={onInputChange}
-        onBlur={onBlur}
-        className="w-10 h-7 px-0"
-        maxLength={4} // Allow for decimals like "10.5"
-        disabled={disabled}
-        style={{ 
-          textAlign: 'left',
-          paddingLeft: '0.375rem',
-          padding: '0.25rem 0 0.25rem 0.375rem'
-        }}
-      />
-      <FontSizeStepper 
-        onIncrement={onIncrement}
-        onDecrement={onDecrement}
+    <div className="flex items-center gap-1">
+      <FontSizeDropdown
+        value={sizeWithUnit}
+        onChange={onPresetSelect}
         disabled={disabled}
       />
+      
+      <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>
+        <Input
+          type="text"
+          value={size}
+          onChange={onInputChange}
+          onBlur={onBlur}
+          className="w-10 h-7 px-0 text-xs"
+          maxLength={4} // Allow for decimals like "10.5"
+          disabled={disabled}
+          style={{ 
+            textAlign: 'left',
+            paddingLeft: '0.375rem',
+            padding: '0.25rem 0 0.25rem 0.375rem'
+          }}
+        />
+        <FontSizeStepper 
+          onIncrement={onIncrement}
+          onDecrement={onDecrement}
+          disabled={disabled}
+        />
+      </div>
     </div>
   );
 };

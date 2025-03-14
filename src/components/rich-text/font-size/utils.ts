@@ -22,20 +22,37 @@ export const formatFontSize = (value: number): string => {
   return `${value}px`;
 };
 
+// Debounce timer reference
+let fontSizeDebounceTimer: number | null = null;
+
 /**
- * Dispatches a font size change event with optional source information
+ * Dispatches a font size change event with debouncing and optional source information
  * @param fontSize - The font size value to broadcast
  * @param source - Source of the change (e.g., 'input', 'dom')
+ * @param debounceTime - Debounce time in milliseconds (default: 100ms)
  */
-export const dispatchFontSizeEvent = (fontSize: string, source = 'input'): void => {
+export const dispatchFontSizeEvent = (
+  fontSize: string, 
+  source = 'input',
+  debounceTime = 100
+): void => {
   try {
-    const event = new CustomEvent(FONT_SIZE_CHANGE_EVENT, {
-      detail: { 
-        fontSize, 
-        source 
-      }
-    });
-    document.dispatchEvent(event);
+    // Clear any existing timer
+    if (fontSizeDebounceTimer !== null) {
+      window.clearTimeout(fontSizeDebounceTimer);
+    }
+    
+    // Set a new timer
+    fontSizeDebounceTimer = window.setTimeout(() => {
+      const event = new CustomEvent(FONT_SIZE_CHANGE_EVENT, {
+        detail: { 
+          fontSize, 
+          source 
+        }
+      });
+      document.dispatchEvent(event);
+      fontSizeDebounceTimer = null;
+    }, debounceTime);
   } catch (error) {
     console.error("Error dispatching font size event:", error);
   }
@@ -50,4 +67,48 @@ export const dispatchFontSizeEvent = (fontSize: string, source = 'input'): void 
  */
 export const clampFontSize = (value: number, min = MIN_FONT_SIZE, max = MAX_FONT_SIZE): number => {
   return Math.max(Math.min(value, max), min);
+};
+
+/**
+ * Validates a font size and returns information about its validity
+ * @param size - The numeric font size to validate
+ * @returns Object with validation info
+ */
+export const validateFontSize = (size: number): { 
+  isValid: boolean;
+  message: string | null;
+  correctedSize?: number;
+} => {
+  // Check if size is NaN
+  if (isNaN(size)) {
+    return {
+      isValid: false,
+      message: "Please enter a valid number",
+      correctedSize: MIN_FONT_SIZE
+    };
+  }
+  
+  // Check if size is too small
+  if (size < MIN_FONT_SIZE) {
+    return {
+      isValid: false,
+      message: `Minimum font size is ${MIN_FONT_SIZE}px`,
+      correctedSize: MIN_FONT_SIZE
+    };
+  }
+  
+  // Check if size is too large
+  if (size > MAX_FONT_SIZE) {
+    return {
+      isValid: false,
+      message: `Maximum font size is ${MAX_FONT_SIZE}px`,
+      correctedSize: MAX_FONT_SIZE
+    };
+  }
+  
+  // Font size is valid
+  return {
+    isValid: true,
+    message: null
+  };
 };

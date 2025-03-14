@@ -4,9 +4,11 @@ import { Editor } from '@tiptap/react';
 import { useEditorFontSizeState } from './useEditorFontSizeState';
 import { useFontSizeEventHandling } from './useFontSizeEventHandling';
 import { getDomFontSize } from './utils/domFontSizeUtils';
+import { useToast } from '@/hooks/use-toast';
 
 export const useFontSizeTracking = (editor: Editor | null) => {
   const [currentFontSize, setCurrentFontSize] = useState("16px");
+  const { toast } = useToast();
   
   // Get font size state from editor
   const editorFontSizeState = useEditorFontSizeState(editor);
@@ -38,6 +40,7 @@ export const useFontSizeTracking = (editor: Editor | null) => {
     if (!editor) return;
     
     console.log("EditorToolbar: Setting font size to:", fontSize);
+    
     // Update state and editor
     setCurrentFontSize(fontSize);
     editor.chain().focus().setFontSize(fontSize).run();

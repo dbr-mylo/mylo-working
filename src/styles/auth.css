@@ -17,7 +17,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   margin-bottom: 1.5rem;
-  background-color: #f3f4f6;
+  background-color: white;
   border-radius: 0.5rem;
   padding: 0.25rem;
   border: 1px solid #e5e7eb;

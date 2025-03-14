@@ -1,17 +1,14 @@
 
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { FontSizeInput } from '../font-size/FontSizeInput';
 
 interface FontSizeControlsProps {
-  editor: Editor;
   currentFontSize: string;
   isTextSelected: boolean;
   onFontSizeChange: (fontSize: string) => void;
 }
 
 export const FontSizeControls: React.FC<FontSizeControlsProps> = ({
-  editor,
   currentFontSize,
   isTextSelected,
   onFontSizeChange

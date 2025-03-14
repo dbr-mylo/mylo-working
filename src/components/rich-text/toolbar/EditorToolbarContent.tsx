@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { FontPicker } from '../FontPicker';
@@ -5,7 +6,7 @@ import { ColorPicker } from '../ColorPicker';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFontSizeTracking } from './hooks/useFontSizeTracking';
-import { FontSizeControls } from '../font-size/FontSizeControls';
+import { FontSizeSection } from './FontSizeSection';
 import { FormatControls } from './FormatControls';
 import { ClearFormattingControl } from './ClearFormattingControl';
 import { StyleControls } from './StyleControls';
@@ -40,7 +41,7 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
       <FontPicker value={currentFont} onChange={onFontChange} />
       
       {isDesigner && (
-        <FontSizeControls 
+        <FontSizeSection 
           editor={editor}
           currentFontSize={currentFontSize}
           isTextSelected={isTextSelected}

@@ -22,7 +22,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         variant="outline"
         size={buttonSize}
         onClick={() => handleBoldWithColorPreservation(editor, currentColor)}
-        className={editor.isActive('bold') ? 'bg-accent' : ''}
+        className={editor.isActive('bold') ? 'bg-gray-100' : ''}
       >
         <Bold className="h-3.5 w-3.5" />
       </Button>
@@ -35,7 +35,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
             editor.chain().focus().toggleItalic().run();
           }, currentColor);
         }}
-        className={editor.isActive('italic') ? 'bg-accent' : ''}
+        className={editor.isActive('italic') ? 'bg-gray-100' : ''}
       >
         <Italic className="h-3.5 w-3.5" />
       </Button>
@@ -48,7 +48,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
           () => editor.chain().focus().toggleBulletList().run(), 
           currentColor
         )}
-        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+        className={editor.isActive('bulletList') ? 'bg-gray-100' : ''}
       >
         <List className="h-3.5 w-3.5" />
       </Button>
@@ -61,7 +61,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
           () => editor.chain().focus().toggleOrderedList().run(), 
           currentColor
         )}
-        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+        className={editor.isActive('orderedList') ? 'bg-gray-100' : ''}
       >
         <ListOrdered className="h-3.5 w-3.5" />
       </Button>

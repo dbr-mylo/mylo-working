@@ -77,9 +77,9 @@ export const DocumentControls = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
-            variant="outline" 
+            variant="default" 
             size={buttonSize} 
-            className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
+            className="flex items-center gap-2"
             disabled={isLoadingDocs}
           >
             <FolderOpen className="w-4 h-4" />
@@ -107,9 +107,9 @@ export const DocumentControls = ({
       </DropdownMenu>
 
       <Button 
-        variant="outline" 
+        variant="default" 
         size={buttonSize} 
-        className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
+        className="flex items-center gap-2"
         onClick={handleSave}
         disabled={isSaving}
       >

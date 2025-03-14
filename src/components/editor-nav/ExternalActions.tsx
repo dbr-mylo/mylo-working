@@ -12,9 +12,9 @@ export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsP
     <>
       {isAuthenticated && onSignOut && (
         <Button 
-          variant="outline" 
+          variant="default" 
           size="sm" 
-          className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
+          className="flex items-center gap-2"
           onClick={onSignOut}
         >
           <LogOut className="w-4 h-4" />

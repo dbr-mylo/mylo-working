@@ -36,7 +36,7 @@ export const DocumentTitle = ({
     <>
       {isEditable ? (
         <Input 
-          className="h-7 w-48 text-editor-heading font-medium focus-visible:ring-1 rounded-[7.5px]"
+          className="h-[28px] w-48 text-editor-heading font-medium focus-visible:ring-1 rounded-[7.5px]"
           value={localTitle}
           onChange={handleTitleChange}
           onBlur={handleTitleBlur}

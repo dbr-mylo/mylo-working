@@ -59,7 +59,7 @@
 
 /* Special background handling for design preview tab */
 .auth-tabs-list.bg-editor-bg .auth-tab-trigger[data-state="active"] {
-  background-color: var(--editor-bg);
+  background-color: #F5F5F5; /* Use the editor sidebar color from tailwind config */
   box-shadow: none;
 }
 

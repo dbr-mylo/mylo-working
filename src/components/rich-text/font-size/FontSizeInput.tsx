@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { useFontSizeState } from './useFontSizeState';
-import { FontSizeControls } from './FontSizeControls';
-import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { useFontSizeState } from './hooks/useFontSizeState';
+import { FontSizeStepper } from './components/FontSizeStepper';
 
 interface FontSizeInputProps {
   value: string;
@@ -11,51 +11,47 @@ interface FontSizeInputProps {
   disabled?: boolean;
 }
 
-export const FontSizeInput = ({ value, onChange, className, disabled = false }: FontSizeInputProps) => {
-  const { toast } = useToast();
-  
+export const FontSizeInput = ({ 
+  value, 
+  onChange, 
+  className, 
+  disabled = false 
+}: FontSizeInputProps) => {
   const {
     size,
-    handleInputChange,
-    handleBlur,
     incrementSize,
     decrementSize,
-    handlePresetSelect,
-    lastValidSize,
+    handleInputChange,
+    handleBlur
   } = useFontSizeState({
-    initialValue: value,
+    value,
     onChange,
-    disabled,
-    onInvalidSize: (message) => {
-      toast({
-        title: "Invalid font size",
-        description: message,
-        variant: "destructive",
-      });
-    },
-    onFontSizeChange: (newSize) => {
-      // Only show feedback for significant changes or when using presets
-      if (Math.abs(parseFloat(newSize) - lastValidSize) >= 2) {
-        toast({
-          title: "Font size updated",
-          description: `Text size set to ${newSize}`,
-          duration: 1500,
-        });
-      }
-    },
+    disabled
   });
 
   return (
     <div className={`flex items-center ${className || ''}`}>
-      <FontSizeControls
-        size={size}
-        onInputChange={handleInputChange}
-        onBlur={handleBlur}
-        onIncrement={incrementSize}
-        onDecrement={decrementSize}
-        onPresetSelect={handlePresetSelect}
-        disabled={disabled}
-      />
+      <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>
+        <Input
+          type="text"
+          value={size}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          className="w-10 h-7 px-0"
+          maxLength={4} // Allow for decimals like "10.5"
+          disabled={disabled}
+          style={{ 
+            textAlign: 'left',
+            paddingLeft: '0.375rem',
+            padding: '0.25rem 0 0.25rem 0.375rem'
+          }}
+        />
+        <FontSizeStepper
+          onIncrement={incrementSize}
+          onDecrement={decrementSize}
+          disabled={disabled}
+        />
+      </div>
     </div>
   );
 };

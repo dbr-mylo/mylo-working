@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { FontSizeInput } from '../font-size';
+import { FontSizeInput } from '../font-size/FontSizeInput';
 
 interface FontSizeSectionProps {
   editor: Editor;

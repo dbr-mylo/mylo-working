@@ -27,7 +27,7 @@ export const MobileEditor = ({
   return (
     <main className="animate-fade-in px-0">
       <div className="w-full">
-        <div className="auth-tabs-list mobile-editor-tabs h-[40px]">
+        <div className="auth-tabs-list mobile-editor-tabs h-[40px] relative z-20">
           <button 
             className="auth-tab-trigger h-[40px]"
             data-state={activeTab === "editor" ? "active" : "inactive"}
@@ -45,7 +45,7 @@ export const MobileEditor = ({
         </div>
         
         {activeTab === "editor" && (
-          <div className="p-4 relative z-0 mt-1">
+          <div className="p-4 relative z-10 mt-2">
             <EditorPanel 
               content={content}
               onContentChange={onContentChange}
@@ -57,7 +57,7 @@ export const MobileEditor = ({
         )}
         
         {activeTab === "design" && (
-          <div className="p-4 relative z-0 mt-1">
+          <div className="p-4 relative z-10 mt-2">
             <DesignPanel 
               content={content}
               isEditable={isDesignEditable}

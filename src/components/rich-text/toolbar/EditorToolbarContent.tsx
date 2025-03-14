@@ -6,7 +6,7 @@ import { ColorPicker } from '../ColorPicker';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFontSizeTracking } from './hooks/useFontSizeTracking';
-import { FontSizeControls } from './FontSizeControls';
+import { FontSizeControls } from '../font-size/FontSizeControls';
 import { FormatControls } from './FormatControls';
 import { ClearFormattingControl } from './ClearFormattingControl';
 import { StyleControls } from './StyleControls';

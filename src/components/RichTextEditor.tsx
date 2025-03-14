@@ -98,7 +98,14 @@ export const RichTextEditor = ({
         <style dangerouslySetInnerHTML={{ __html: templateStyles }} />
       )}
       
-      {/* Custom styles for ProseMirror editor dimensions */}
+      {/* Render toolbar outside document dimensions */}
+      {!hideToolbar && isEditable && !externalToolbar && (
+        <div className="toolbar-container mb-2">
+          <Toolbar editor={activeEditor} />
+        </div>
+      )}
+      
+      {/* Document styles for ProseMirror editor dimensions */}
       <style>
         {`
           .ProseMirror {
@@ -112,9 +119,6 @@ export const RichTextEditor = ({
         `}
       </style>
       
-      {!hideToolbar && isEditable && !externalToolbar && (
-        <Toolbar editor={activeEditor} />
-      )}
       <EditorContent 
         editor={activeEditor} 
         className="prose prose-sm max-w-none"

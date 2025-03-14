@@ -79,11 +79,12 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
     >
       <style>
         {`
+        /* Toolbar styles - outside document dimensions */
         .editor-toolbar {
           background-color: white;
           border-bottom: 1px solid #e2e8f0;
           padding: 0;
-          margin: 0;
+          margin: 0 0 0.5rem 0; /* Add margin below toolbar */
           z-index: 10;
         }
         
@@ -94,6 +95,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           width: 100%;
         }
 
+        /* Document content styles */
         .ProseMirror {
           min-height: ${height};
           width: ${width};
@@ -102,6 +104,12 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
           overflow-wrap: break-word;
           box-sizing: border-box;
           background-color: white;
+        }
+
+        /* Toolbar container styles */
+        .toolbar-container {
+          width: ${width};
+          margin: 0 auto;
         }
         `}
       </style>

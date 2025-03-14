@@ -60,8 +60,8 @@ export const EditorPanel = ({
         
         {/* Document container */}
         <div className="bg-editor-bg rounded-md">
-          {/* Document container with exact dimensions applied */}
-          <div className="mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]" style={{ width: pageWidth }}>
+          {/* Document container with shadow removed */}
+          <div className="mx-auto" style={{ width: pageWidth }}>
             <RichTextEditor 
               content={content} 
               onUpdate={handleContentUpdate}

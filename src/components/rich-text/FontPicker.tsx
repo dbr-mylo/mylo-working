@@ -34,8 +34,8 @@ interface FontPickerProps {
 export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
-  const dropdownWidth = isDesigner ? 'w-[220px]' : 'w-[180px]';
-  const dropdownHeight = isDesigner ? 'h-7' : 'h-9';
+  const dropdownWidth = isDesigner ? 'w-[180px]' : 'w-[150px]';
+  const dropdownHeight = isDesigner ? 'h-7' : 'h-8';
   
   const handleFontChange = (newFont: string) => {
     console.log("FontPicker: Font selected:", newFont);
@@ -46,8 +46,8 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
     <div className={`flex items-center ${className || ''}`}>
       <Select value={value} onValueChange={handleFontChange}>
         <SelectTrigger className={`${dropdownHeight} ${dropdownWidth} bg-white text-xs`}>
-          <div className="flex items-center gap-2 w-full">
-            <Type className="h-3.5 w-3.5 flex-shrink-0" />
+          <div className="flex items-center gap-1 w-full">
+            <Type className="h-3 w-3 flex-shrink-0" />
             <span style={{ fontFamily: value }} className="truncate">
               {value || 'Select Font'}
             </span>
@@ -58,7 +58,7 @@ export const FontPicker = ({ value, onChange, className }: FontPickerProps) => {
             <SelectItem 
               key={font.value} 
               value={font.value}
-              className="flex items-center"
+              className="flex items-center text-xs"
             >
               <span style={{ fontFamily: font.value }} className="truncate">
                 {font.name}

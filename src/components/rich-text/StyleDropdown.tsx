@@ -7,6 +7,7 @@ import { useTextStyles } from "@/components/design/typography/hooks/useTextStyle
 import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Text } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface StyleDropdownProps {
   editor: Editor;
@@ -16,6 +17,8 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles, isLoading } = useTextStyles();
   const { applyStyleToSelection } = useStyleApplication(editor);
+  const { role } = useAuth();
+  const isDesigner = role === "designer";
 
   const handleStyleSelect = (styleId: string) => {
     applyStyleToSelection(styleId);
@@ -27,10 +30,10 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          size="sm" 
-          className="h-7 gap-1 px-2 font-normal"
+          size={isDesigner ? "xxs" : "xs"}
+          className={`${isDesigner ? 'h-7' : 'h-8'} gap-1 px-2 font-normal`}
         >
-          <Text className="h-3.5 w-3.5" />
+          <Text className="h-3 w-3" />
           <span className="text-xs">Styles</span>
         </Button>
       </PopoverTrigger>
@@ -46,7 +49,7 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
                   <Button
                     key={style.id}
                     variant="ghost"
-                    size="sm"
+                    size="xs"
                     className="w-full justify-start font-normal"
                     onClick={() => handleStyleSelect(style.id)}
                   >

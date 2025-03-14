@@ -17,14 +17,14 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
   buttonSize 
 }) => {
   return (
-    <>
+    <div className="flex items-center">
       <Button
         variant="outline"
         size={buttonSize}
         onClick={() => handleBoldWithColorPreservation(editor, currentColor)}
         className={editor.isActive('bold') ? 'bg-accent' : ''}
       >
-        <Bold className="h-4 w-4" />
+        <Bold className="h-3.5 w-3.5" />
       </Button>
       
       <Button
@@ -37,7 +37,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         }}
         className={editor.isActive('italic') ? 'bg-accent' : ''}
       >
-        <Italic className="h-4 w-4" />
+        <Italic className="h-3.5 w-3.5" />
       </Button>
       
       <Button
@@ -50,7 +50,7 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         )}
         className={editor.isActive('bulletList') ? 'bg-accent' : ''}
       >
-        <List className="h-4 w-4" />
+        <List className="h-3.5 w-3.5" />
       </Button>
       
       <Button
@@ -63,8 +63,8 @@ export const FormatButtons: React.FC<FormatButtonsProps> = ({
         )}
         className={editor.isActive('orderedList') ? 'bg-accent' : ''}
       >
-        <ListOrdered className="h-4 w-4" />
+        <ListOrdered className="h-3.5 w-3.5" />
       </Button>
-    </>
+    </div>
   );
 };

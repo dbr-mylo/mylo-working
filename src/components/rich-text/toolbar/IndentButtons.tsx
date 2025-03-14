@@ -47,14 +47,14 @@ export const IndentButtons: React.FC<IndentButtonsProps> = ({ editor, buttonSize
   };
 
   return (
-    <>
+    <div className="flex items-center">
       <Button
         variant="outline"
         size={buttonSize}
         onClick={handleIndent}
         title="Indent paragraph"
       >
-        <Indent className="h-4 w-4" />
+        <Indent className="h-3.5 w-3.5" />
       </Button>
       <Button
         variant="outline"
@@ -62,8 +62,8 @@ export const IndentButtons: React.FC<IndentButtonsProps> = ({ editor, buttonSize
         onClick={handleOutdent}
         title="Outdent paragraph"
       >
-        <Outdent className="h-4 w-4" />
+        <Outdent className="h-3.5 w-3.5" />
       </Button>
-    </>
+    </div>
   );
 };

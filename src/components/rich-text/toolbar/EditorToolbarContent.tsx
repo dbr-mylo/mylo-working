@@ -31,7 +31,7 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
 }) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
-  const buttonSize = isDesigner ? "xxs" : "sm";
+  const buttonSize = isDesigner ? "xxs" : "xs";
   
   const { 
     currentFontSize, 
@@ -40,7 +40,7 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
   } = useFontSizeTracking(editor);
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-1 flex-wrap">
       <FontPicker value={currentFont} onChange={onFontChange} />
       
       {isDesigner && (
@@ -65,7 +65,7 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
         buttonSize={buttonSize}
       />
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Separator orientation="vertical" className="mx-0.5 h-5" />
       
       <Button
         variant="ghost"
@@ -74,11 +74,11 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
         title="Clear formatting"
         className="flex items-center gap-1"
       >
-        <RemoveFormatting className="h-4 w-4" />
-        Clear
+        <RemoveFormatting className="h-3.5 w-3.5" />
+        {!isDesigner && <span className="text-xs">Clear</span>}
       </Button>
       
-      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Separator orientation="vertical" className="mx-0.5 h-5" />
       
       <StyleDropdown editor={editor} />
     </div>

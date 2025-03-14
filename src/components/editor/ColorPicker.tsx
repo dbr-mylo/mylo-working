@@ -33,20 +33,20 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ editor }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex gap-1 items-center">
-          <Paintbrush className="h-4 w-4" />
+        <Button variant="ghost" size="xs" className="h-7 flex gap-1 items-center">
+          <Paintbrush className="h-3 w-3" />
           <div 
-            className="w-4 h-4 rounded-full border border-gray-300" 
+            className="w-3 h-3 rounded-full border border-gray-300" 
             style={{ backgroundColor: currentColor }}
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-2">
+      <PopoverContent className="w-56 p-2">
         <div className="grid grid-cols-7 gap-1">
           {colors.map((color) => (
             <button
               key={color.value}
-              className={`w-8 h-8 rounded-full border ${currentColor === color.value ? 'ring-2 ring-blue-500' : 'border-gray-300'}`}
+              className={`w-7 h-7 rounded-full border ${currentColor === color.value ? 'ring-1 ring-blue-500' : 'border-gray-300'}`}
               style={{ backgroundColor: color.value }}
               onClick={() => handleColorChange(color.value)}
               title={color.name}

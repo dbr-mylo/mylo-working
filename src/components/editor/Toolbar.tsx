@@ -56,23 +56,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   };
 
   return (
-    <div className="border border-border rounded-t-md bg-background p-2 flex flex-wrap gap-2 items-center">
-      <FontSelect editor={editor} />
-      <ColorPicker editor={editor} />
-      
+    <div className="border border-border rounded-t-md bg-background p-1 flex flex-wrap gap-1 items-center">
       <div className="flex items-center gap-1">
+        <FontSelect editor={editor} />
+        <ColorPicker editor={editor} />
+      </div>
+      
+      {/* Format buttons group */}
+      <div className="flex items-center">
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => handleBoldWithColorPreservation(editor, currentColor)}
           disabled={!editor.can().chain().focus().toggleBold().run()}
           className={editor.isActive('bold') ? 'bg-accent' : ''}
         >
-          <Bold className="h-4 w-4" />
+          <Bold className="h-3.5 w-3.5" />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => {
             preserveColorAfterFormatting(editor, () => {
               editor.chain().focus().toggleItalic().run();
@@ -81,14 +84,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           disabled={!editor.can().chain().focus().toggleItalic().run()}
           className={editor.isActive('italic') ? 'bg-accent' : ''}
         >
-          <Italic className="h-4 w-4" />
+          <Italic className="h-3.5 w-3.5" />
         </Button>
       </div>
 
-      <div className="flex items-center gap-1">
+      {/* List buttons group */}
+      <div className="flex items-center">
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => preserveColorAfterFormatting(
             editor, 
             () => editor.chain().focus().toggleBulletList().run(), 
@@ -96,11 +100,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           )}
           className={editor.isActive('bulletList') ? 'bg-accent' : ''}
         >
-          <List className="h-4 w-4" />
+          <List className="h-3.5 w-3.5" />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => preserveColorAfterFormatting(
             editor, 
             () => editor.chain().focus().toggleOrderedList().run(), 
@@ -108,65 +112,67 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           )}
           className={editor.isActive('orderedList') ? 'bg-accent' : ''}
         >
-          <ListOrdered className="h-4 w-4" />
+          <ListOrdered className="h-3.5 w-3.5" />
         </Button>
       </div>
       
-      <div className="flex items-center gap-1">
+      {/* Alignment buttons group */}
+      <div className="flex items-center">
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
           className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
         >
-          <AlignLeft className="h-4 w-4" />
+          <AlignLeft className="h-3.5 w-3.5" />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
           className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
         >
-          <AlignCenter className="h-4 w-4" />
+          <AlignCenter className="h-3.5 w-3.5" />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
           className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
         >
-          <AlignRight className="h-4 w-4" />
+          <AlignRight className="h-3.5 w-3.5" />
         </Button>
       </div>
       
-      <div className="flex items-center gap-1">
+      {/* Indent/Outdent buttons group */}
+      <div className="flex items-center">
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={handleIndent}
           title="Indent paragraph"
         >
-          <Indent className="h-4 w-4" />
+          <Indent className="h-3.5 w-3.5" />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           onClick={handleOutdent}
           title="Outdent paragraph"
         >
-          <Outdent className="h-4 w-4" />
+          <Outdent className="h-3.5 w-3.5" />
         </Button>
       </div>
       
+      {/* Clear formatting button */}
       <Button
         variant="ghost"
-        size="sm"
+        size="xs"
         onClick={() => clearFormatting(editor)}
         title="Clear formatting"
       >
-        <RemoveFormatting className="h-4 w-4" />
+        <RemoveFormatting className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
 };
-

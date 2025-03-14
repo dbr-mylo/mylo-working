@@ -31,7 +31,7 @@ const COLORS = [
 export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
-  const buttonSize = isDesigner ? "xxs" : "sm";
+  const buttonSize = isDesigner ? "xxs" : "xs";
   
   return (
     <Popover>
@@ -39,22 +39,22 @@ export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
         <Button 
           variant="outline" 
           size={buttonSize} 
-          className="flex items-center gap-2 w-[90px]"
+          className={`flex items-center gap-1 ${isDesigner ? 'w-[70px] h-7' : 'w-[80px] h-8'}`}
         >
           <div 
-            className="w-4 h-4 rounded-sm border border-gray-300" 
+            className="w-3 h-3 rounded-sm border border-gray-300" 
             style={{ backgroundColor: value }}
           />
-          <Palette className="h-4 w-4" />
+          <Palette className="h-3 w-3" />
           <span className="sr-only">Color</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-2">
-        <div className="grid grid-cols-4 gap-2">
+      <PopoverContent className="w-56 p-2">
+        <div className="grid grid-cols-4 gap-1">
           {COLORS.map((color) => (
             <button
               key={color}
-              className={`w-12 h-12 rounded-md border-2 ${
+              className={`w-11 h-11 rounded-md border-2 ${
                 color === value ? "border-black" : "border-transparent"
               }`}
               style={{ backgroundColor: color }}

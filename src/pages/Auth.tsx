@@ -1,15 +1,12 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import "../styles/auth.css";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const { signIn, signUp, continueAsGuestEditor, continueAsGuestDesigner } = useAuth();
 
   const handleSubmit = async (action: "signin" | "signup") => {
@@ -25,117 +22,117 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-editor-bg p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-          <CardDescription>Sign in to access your documents</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signin"); }}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-base">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="h-10 py-2"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-base">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="h-10 py-2"
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-[#111827] hover:bg-[#111827]/90 h-12 mt-4 text-white"
-                  >
-                    Sign In
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup">
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signup"); }}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-base">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="h-10 py-2"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-base">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="h-10 py-2"
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-[#111827] hover:bg-[#111827]/90 h-12 mt-4 text-white"
-                  >
-                    Sign Up
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-          </Tabs>
-          <div className="mt-6 text-center">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue as guest
-                </span>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                onClick={continueAsGuestEditor}
-                className="w-full h-10 bg-white hover:bg-slate-50"
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-1">Welcome</h1>
+          <p className="text-gray-500 mb-6">Sign in to access your documents</p>
+          
+          <div>
+            <div className="auth-tabs-list">
+              <button 
+                className="auth-tab-trigger" 
+                data-state={activeTab === "signin" ? "active" : "inactive"}
+                onClick={() => setActiveTab("signin")}
               >
-                Editor
-              </Button>
-              <Button
-                variant="outline"
-                onClick={continueAsGuestDesigner}
-                className="w-full h-10 bg-white hover:bg-slate-50"
+                Sign In
+              </button>
+              <button 
+                className="auth-tab-trigger" 
+                data-state={activeTab === "signup" ? "active" : "inactive"}
+                onClick={() => setActiveTab("signup")}
               >
-                Designer
-              </Button>
+                Sign Up
+              </button>
             </div>
+            
+            {activeTab === "signin" && (
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signin"); }} className="auth-form">
+                <div className="auth-input-group">
+                  <label htmlFor="signin-email" className="auth-input-label">Email</label>
+                  <input
+                    id="signin-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <div className="auth-input-group">
+                  <label htmlFor="signin-password" className="auth-input-label">Password</label>
+                  <input
+                    id="signin-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="auth-submit-button"
+                >
+                  Sign In
+                </button>
+              </form>
+            )}
+            
+            {activeTab === "signup" && (
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signup"); }} className="auth-form">
+                <div className="auth-input-group">
+                  <label htmlFor="signup-email" className="auth-input-label">Email</label>
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <div className="auth-input-group">
+                  <label htmlFor="signup-password" className="auth-input-label">Password</label>
+                  <input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="auth-submit-button"
+                >
+                  Sign Up
+                </button>
+              </form>
+            )}
           </div>
-        </CardContent>
-      </Card>
+          
+          <div className="auth-divider">
+            <span className="auth-divider-text">Or continue as guest</span>
+          </div>
+          
+          <div className="auth-guest-buttons">
+            <button
+              onClick={continueAsGuestEditor}
+              className="auth-guest-button"
+            >
+              Editor
+            </button>
+            <button
+              onClick={continueAsGuestDesigner}
+              className="auth-guest-button"
+            >
+              Designer
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

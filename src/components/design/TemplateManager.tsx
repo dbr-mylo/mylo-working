@@ -74,7 +74,7 @@ export const TemplateManager = ({ onLoadTemplate, onClose }: TemplateManagerProp
         <Button
           onClick={handleCreateNewTemplate}
           variant="default"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
         >
           <FileEdit className="h-4 w-4" />
           New Template

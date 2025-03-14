@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Save, FolderOpen } from "lucide-react";
 import { useState } from "react";
@@ -78,7 +79,7 @@ export const DocumentControls = ({
           <Button 
             variant="outline" 
             size={buttonSize} 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
             disabled={isLoadingDocs}
           >
             <FolderOpen className="w-4 h-4" />
@@ -108,7 +109,7 @@ export const DocumentControls = ({
       <Button 
         variant="outline" 
         size={buttonSize} 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
         onClick={handleSave}
         disabled={isSaving}
       >

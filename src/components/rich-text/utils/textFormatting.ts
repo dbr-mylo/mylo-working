@@ -50,7 +50,10 @@ export const clearFormatting = (editor: Editor) => {
     
     // 6. Lift the selection out of lists, if in a list
     // This removes bullet points and numbering
-    chain.lift();
+    // Fix: Pass appropriate parameters or use the correct method
+    if (editor.isActive('bulletList') || editor.isActive('orderedList')) {
+      chain.liftListItem('listItem');
+    }
     
     // 7. Reset any indentation by explicitly setting indent to 0
     // For paragraphs
@@ -133,7 +136,10 @@ export const resetSpecificFormatting = (
     }
     
     if (options.lists) {
-      chain.lift();
+      // Fix: Check if in a list and use the appropriate method with parameters
+      if (editor.isActive('bulletList') || editor.isActive('orderedList')) {
+        chain.liftListItem('listItem');
+      }
     }
     
     if (options.indent) {

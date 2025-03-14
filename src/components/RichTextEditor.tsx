@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { EditorContent, useEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
@@ -12,6 +12,9 @@ interface RichTextEditorProps {
   onUpdate: (content: string) => void;
   isEditable?: boolean;
   hideToolbar?: boolean;
+  renderToolbarOutside?: boolean;
+  externalToolbar?: boolean;
+  externalEditorInstance?: Editor | null;
 }
 
 export const RichTextEditor = ({
@@ -19,10 +22,17 @@ export const RichTextEditor = ({
   onUpdate,
   isEditable = true,
   hideToolbar = false,
+  renderToolbarOutside = false,
+  externalToolbar = false,
+  externalEditorInstance = null,
 }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        textAlign: {
+          types: ['heading', 'paragraph'],
+        },
+      }),
       TextStyle,
       FontFamily,
       Color,
@@ -41,16 +51,19 @@ export const RichTextEditor = ({
     }
   }, [content, editor]);
 
-  if (!editor) {
+  // Use external editor instance if provided
+  const activeEditor = externalEditorInstance || editor;
+
+  if (!activeEditor) {
     return null;
   }
 
   return (
     <div className="rich-text-editor">
-      {!hideToolbar && isEditable && (
-        <Toolbar editor={editor} />
+      {!hideToolbar && isEditable && !externalToolbar && (
+        <Toolbar editor={activeEditor} />
       )}
-      <EditorContent editor={editor} className="prose prose-sm max-w-none p-4" />
+      <EditorContent editor={activeEditor} className="prose prose-sm max-w-none p-4" />
     </div>
   );
 };

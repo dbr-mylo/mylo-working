@@ -64,7 +64,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          onClick={() => editor.commands.setTextAlign('left')}
           className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
         >
           <AlignLeft className="h-4 w-4" />
@@ -72,7 +72,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          onClick={() => editor.commands.setTextAlign('center')}
           className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
         >
           <AlignCenter className="h-4 w-4" />
@@ -80,7 +80,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          onClick={() => editor.commands.setTextAlign('right')}
           className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
         >
           <AlignRight className="h-4 w-4" />

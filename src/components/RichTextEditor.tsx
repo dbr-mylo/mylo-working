@@ -6,6 +6,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import Color from '@tiptap/extension-color';
 import { Toolbar } from './editor/Toolbar';
+import { ColorPreservationStyles } from './rich-text/styles/ColorPreservationStyles';
 
 interface RichTextEditorProps {
   content: string;
@@ -60,6 +61,9 @@ export const RichTextEditor = ({
 
   return (
     <div className="rich-text-editor">
+      {/* Include the color preservation styles */}
+      <ColorPreservationStyles />
+      
       {!hideToolbar && isEditable && !externalToolbar && (
         <Toolbar editor={activeEditor} />
       )}

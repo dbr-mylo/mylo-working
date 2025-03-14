@@ -5,6 +5,7 @@ import { Bold, Italic, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } f
 import { Button } from '@/components/ui/button';
 import { FontSelect } from './FontSelect';
 import { ColorPicker } from './ColorPicker';
+import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../rich-text/utils/colorPreservation';
 
 interface ToolbarProps {
   editor: Editor;
@@ -15,6 +16,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     return null;
   }
 
+  const currentColor = editor.getAttributes('textStyle').color || '#000000';
+
   return (
     <div className="border border-border rounded-t-md bg-background p-2 flex flex-wrap gap-2 items-center">
       <FontSelect editor={editor} />
@@ -24,7 +27,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => handleBoldWithColorPreservation(editor, currentColor)}
           disabled={!editor.can().chain().focus().toggleBold().run()}
           className={editor.isActive('bold') ? 'bg-accent' : ''}
         >
@@ -33,7 +36,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => {
+            preserveColorAfterFormatting(editor, () => {
+              editor.chain().focus().toggleItalic().run();
+            }, currentColor);
+          }}
           disabled={!editor.can().chain().focus().toggleItalic().run()}
           className={editor.isActive('italic') ? 'bg-accent' : ''}
         >
@@ -45,7 +52,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => preserveColorAfterFormatting(
+            editor, 
+            () => editor.chain().focus().toggleBulletList().run(), 
+            currentColor
+          )}
           className={editor.isActive('bulletList') ? 'bg-accent' : ''}
         >
           <List className="h-4 w-4" />
@@ -53,7 +64,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => preserveColorAfterFormatting(
+            editor, 
+            () => editor.chain().focus().toggleOrderedList().run(), 
+            currentColor
+          )}
           className={editor.isActive('orderedList') ? 'bg-accent' : ''}
         >
           <ListOrdered className="h-4 w-4" />

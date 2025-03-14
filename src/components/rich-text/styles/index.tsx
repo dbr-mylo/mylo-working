@@ -4,6 +4,7 @@ import { FontSizeStyles } from './typography/FontSizeStyles';
 import { ColorPreservationStyles } from './formatting/ColorPreservationStyles';
 import { ListAndIndentStyles } from './layout/ListAndIndentStyles';
 import { TemplateStyleOverrides } from './theme/TemplateStyleOverrides';
+import { DesignerPreviewFonts } from './theme/DesignerPreviewFonts';
 
 /**
  * EditorStyles Component
@@ -19,6 +20,7 @@ export const EditorStyles = () => {
       <ColorPreservationStyles />
       <ListAndIndentStyles />
       <TemplateStyleOverrides />
+      <DesignerPreviewFonts />
     </>
   );
 };

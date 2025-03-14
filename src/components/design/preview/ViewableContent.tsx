@@ -51,11 +51,36 @@ export const ViewableContent = ({
     }
   }, [templateName, prevTemplateName, toast, role]);
 
-  // DESIGNER PATH - Modified to match dimensions and show outline
+  // Apply Google Fonts for testing
+  const testingFontStyles = `
+    /* Test font styles for Designer preview */
+    .template-styled {
+      font-family: 'Playfair Display', serif !important;
+      color: #333 !important;
+    }
+    
+    .template-styled h1 {
+      font-family: 'Playfair Display', serif !important;
+      font-weight: 700 !important;
+      color: #1a365d !important;
+      font-size: 2.25rem !important;
+    }
+    
+    .template-styled h2 {
+      font-family: 'Playfair Display', serif !important;
+      font-weight: 700 !important;
+      color: #2a4365 !important;
+      font-size: 1.875rem !important;
+    }
+  `;
+
+  // DESIGNER PATH - Apply test fonts for demonstration
   if (isDesigner) {
+    const designerStyles = templateStyles || testingFontStyles;
+    
     return (
       <>
-        {templateStyles && <style dangerouslySetInnerHTML={{ __html: templateStyles }} />}
+        {designerStyles && <style dangerouslySetInnerHTML={{ __html: designerStyles }} />}
         <div 
           ref={previewRef} 
           onClick={onClick}

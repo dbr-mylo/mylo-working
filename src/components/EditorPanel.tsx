@@ -8,7 +8,7 @@ export const EditorPanel = ({ content, onContentChange, isEditable }: EditorPane
   const isMobile = width < 1281;
   
   const handleContentUpdate = (newContent: string) => {
-    console.log("Content updated in EditorPanel:", newContent);
+    console.log("Content updated in EditorPanel");
     onContentChange(newContent);
   };
   

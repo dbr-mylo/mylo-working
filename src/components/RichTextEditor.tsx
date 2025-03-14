@@ -1,82 +1,56 @@
 
-import { EditorContent } from '@tiptap/react';
-import { useRef } from 'react';
-import { Editor } from '@tiptap/react';
-import { useEditorSetup } from './rich-text/useEditor';
-import { EditorContainer } from './rich-text/EditorContainer';
-import { EditorToolbarWrapper } from './rich-text/EditorToolbarWrapper';
-import { EditorCacheManager } from './rich-text/EditorCacheManager';
+import React, { useEffect } from 'react';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
+import FontFamily from '@tiptap/extension-font-family';
+import Color from '@tiptap/extension-color';
+import { Toolbar } from './editor/Toolbar';
 
 interface RichTextEditorProps {
   content: string;
   onUpdate: (content: string) => void;
   isEditable?: boolean;
   hideToolbar?: boolean;
-  fixedToolbar?: boolean;
-  renderToolbarOutside?: boolean;
-  externalToolbar?: boolean;
-  externalEditorInstance?: Editor | null;
 }
 
-export const RichTextEditor = ({ 
-  content, 
-  onUpdate, 
-  isEditable = true, 
+export const RichTextEditor = ({
+  content,
+  onUpdate,
+  isEditable = true,
   hideToolbar = false,
-  fixedToolbar = false,
-  renderToolbarOutside = false,
-  externalToolbar = false,
-  externalEditorInstance = null
 }: RichTextEditorProps) => {
-  const editorContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Initialize editor or use external instance
-  const useOwnEditor = !externalEditorInstance;
-  
-  const editorSetup = useOwnEditor 
-    ? useEditorSetup({ 
-        content, 
-        onContentChange: onUpdate,
-        isEditable 
-      })
-    : null;
-  
-  const editor = externalEditorInstance || (editorSetup?.editor);
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TextStyle,
+      FontFamily,
+      Color,
+    ],
+    content,
+    editable: isEditable,
+    onUpdate: ({ editor }) => {
+      onUpdate(editor.getHTML());
+    },
+  });
 
-  // Early return if editor is not available
+  // Update content from props when it changes externally
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   if (!editor) {
     return null;
   }
 
   return (
-    <EditorContainer 
-      fixedToolbar={fixedToolbar}
-      refProp={editorContainerRef}
-    >
-      {/* Handle cache management and initialization */}
-      <EditorCacheManager 
-        editor={editor}
-        isEditable={isEditable}
-        editorContainerRef={editorContainerRef}
-        content={content}
-      />
-      
-      {/* Conditionally render toolbar */}
-      {!externalEditorInstance && editorSetup && (
-        <EditorToolbarWrapper 
-          editor={editorSetup.editor}
-          hideToolbar={hideToolbar}
-          fixedToolbar={fixedToolbar}
-          externalToolbar={externalToolbar}
-          currentFont={editorSetup.currentFont}
-          currentColor={editorSetup.currentColor}
-          onFontChange={editorSetup.handleFontChange}
-          onColorChange={editorSetup.handleColorChange}
-        />
+    <div className="rich-text-editor">
+      {!hideToolbar && isEditable && (
+        <Toolbar editor={editor} />
       )}
-      
-      {/* Editor content */}
-      <EditorContent editor={editor} className="font-editor" />
-    </EditorContainer>
+      <EditorContent editor={editor} className="prose prose-sm max-w-none p-4" />
+    </div>
   );
 };

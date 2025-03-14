@@ -1,4 +1,14 @@
 
+/**
+ * EditableContent Component
+ * 
+ * WARNING: This component contains role-specific rendering logic.
+ * Changes to the designer role functionality (isDesigner === true) should be avoided.
+ * Only modify the editor role section unless absolutely necessary.
+ * 
+ * To make changes to editor functionality only, focus on the non-designer code path.
+ */
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 import { Editor } from "@tiptap/react";
@@ -34,6 +44,7 @@ export const EditableContent = ({
   const width = dimensions?.width || '8.5in';
   const height = dimensions?.height || '11in';
 
+  // DESIGNER PATH - DO NOT MODIFY
   if (isDesigner) {
     // For designer role, don't wrap in the white div
     return (
@@ -51,6 +62,7 @@ export const EditableContent = ({
     );
   } 
 
+  // EDITOR PATH - Safe to modify
   // For editor role, create the white div with shadow and dimensions
   return (
     <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>

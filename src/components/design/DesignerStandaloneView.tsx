@@ -1,4 +1,12 @@
 
+/**
+ * DesignerStandaloneView Component
+ * 
+ * WARNING: CORE DESIGNER COMPONENT
+ * This component is specifically for the designer role and should not be modified
+ * unless absolutely necessary. Changes here directly impact the designer experience.
+ */
+
 import { useState, useEffect } from "react";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";

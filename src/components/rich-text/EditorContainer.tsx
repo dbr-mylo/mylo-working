@@ -1,4 +1,14 @@
 
+/**
+ * EditorContainer Component
+ * 
+ * WARNING: This component contains role-specific rendering logic.
+ * Changes to the designer role functionality (isDesigner === true) should be avoided.
+ * Only modify the editor role section unless absolutely necessary.
+ * 
+ * The designer code path (first return statement) should remain unchanged.
+ */
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -22,7 +32,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
   const width = templateDimensions?.width || '8.5in';
   const height = templateDimensions?.height || '11in';
 
-  // Don't change behavior for designer role
+  // DESIGNER PATH - DO NOT MODIFY
   if (isDesigner) {
     return (
       <div 
@@ -61,7 +71,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
     );
   }
 
-  // For editor role
+  // EDITOR PATH - Safe to modify
   return (
     <div 
       className="prose prose-sm max-w-none font-editor"

@@ -1,4 +1,12 @@
 
+/**
+ * RichTextEditor Component
+ * 
+ * This component is used by both designer and editor roles.
+ * Be extremely careful when modifying this component as it affects both user types.
+ * Test any changes with both designer and editor roles before committing.
+ */
+
 import React, { useEffect } from 'react';
 import { EditorContent, useEditor, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';

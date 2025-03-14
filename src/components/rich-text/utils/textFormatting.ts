@@ -46,8 +46,11 @@ export const clearFormatting = (editor: Editor) => {
     // 4. Clear custom font size
     chain.setFontSize('16px');
     
-    // 5. Reset text alignment to left
-    chain.setTextAlign('left');
+    // 5. Reset text alignment if the extension is available
+    // Check if the setTextAlign method exists before calling it
+    if (typeof chain.setTextAlign === 'function') {
+      chain.setTextAlign('left');
+    }
     
     // 6. Lift the selection out of lists, if in a list
     // This removes bullet points and numbering
@@ -79,7 +82,6 @@ export const clearFormatting = (editor: Editor) => {
         .setFontFamily('Inter')
         .setColor('#000000')
         .setFontSize('16px')
-        .setTextAlign('left')
         .run();
       
       console.log("Formatting cleared successfully");
@@ -134,7 +136,7 @@ export const resetSpecificFormatting = (
       chain.setFontSize('16px');
     }
     
-    if (options.alignment) {
+    if (options.alignment && typeof chain.setTextAlign === 'function') {
       chain.setTextAlign('left');
     }
     

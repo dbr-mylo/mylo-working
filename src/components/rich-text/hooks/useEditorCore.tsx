@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import ListItem from '@tiptap/extension-list-item';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import TextAlign from '@tiptap/extension-text-align';
 import { CustomBulletList, CustomOrderedList } from '../extensions/CustomLists';
 import { IndentExtension } from '../extensions/IndentExtension';
 import { FontFamily } from '../extensions/FontFamily';
@@ -53,6 +54,9 @@ export const useEditorCore = ({
       CustomBulletList,
       CustomOrderedList,
       Color,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
       IndentExtension,
     ],
     content: content,

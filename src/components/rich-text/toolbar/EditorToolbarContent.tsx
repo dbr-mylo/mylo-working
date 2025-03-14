@@ -58,6 +58,15 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
     // Clear the formatting
     clearFormatting(editor);
     
+    // We need to update the state to reflect cleared formatting
+    if (editor.getAttributes('textStyle').fontFamily !== 'Inter') {
+      onFontChange('Inter');
+    }
+    
+    if (editor.getAttributes('textStyle').color !== '#000000') {
+      onColorChange('#000000');
+    }
+    
     // Show success toast
     toast({
       title: "Formatting cleared",

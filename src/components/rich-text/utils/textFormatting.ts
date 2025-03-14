@@ -1,5 +1,6 @@
 
 import { Editor } from "@tiptap/react";
+import { CLEAR_FONT_CACHE_EVENT } from "../font-size/constants";
 
 /**
  * Clears all formatting from the selected text
@@ -50,7 +51,6 @@ export const clearFormatting = (editor: Editor) => {
     
     // 6. Lift the selection out of lists, if in a list
     // This removes bullet points and numbering
-    // Fix: Pass appropriate parameters or use the correct method
     if (editor.isActive('bulletList') || editor.isActive('orderedList')) {
       chain.liftListItem('listItem');
     }
@@ -67,6 +67,9 @@ export const clearFormatting = (editor: Editor) => {
     
     // Forcefully reapply the selection to ensure it's maintained
     editor.commands.setTextSelection({ from, to });
+    
+    // Trigger the font cache clear event to ensure font sizes are properly refreshed
+    document.dispatchEvent(new CustomEvent(CLEAR_FONT_CACHE_EVENT));
     
     // Final check to ensure all formatting is cleared
     // Sometimes we need to reapply the default values after unsetAllMarks
@@ -148,7 +151,11 @@ export const resetSpecificFormatting = (
       chain.updateAttributes('orderedList', { indent: 0 });
     }
     
+    // Execute all commands
     chain.run();
+    
+    // Trigger the font cache clear event to ensure refreshed view
+    document.dispatchEvent(new CustomEvent(CLEAR_FONT_CACHE_EVENT));
     
     console.log("Specific formatting reset");
   } catch (error) {

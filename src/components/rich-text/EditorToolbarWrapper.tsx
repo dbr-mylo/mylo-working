@@ -29,7 +29,7 @@ export const EditorToolbarWrapper: React.FC<EditorToolbarWrapperProps> = ({
   }
 
   return (
-    <div className={`editor-toolbar ${fixedToolbar ? 'fixed-toolbar' : ''}`}>
+    <div className={`editor-toolbar ${fixedToolbar ? 'fixed-toolbar' : ''} py-1.5`}>
       <EditorToolbar 
         editor={editor}
         currentFont={currentFont}

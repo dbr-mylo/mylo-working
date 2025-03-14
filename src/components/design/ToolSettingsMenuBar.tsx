@@ -47,7 +47,7 @@ export const ToolSettingsMenuBar: React.FC<ToolSettingsMenuBarProps> = ({
               )}
             </div>
           ) : children || (
-            <div className="flex items-center justify-between h-10 px-4">
+            <div className="flex items-center justify-between h-9 px-4">
               <span className="text-sm text-slate-500">Tool settings will appear here</span>
               {isDesigner && onTogglePreview && (
                 <Button

@@ -40,7 +40,7 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
   } = useFontSizeTracking(editor);
 
   return (
-    <div className="flex items-center gap-1 flex-wrap">
+    <div className="flex items-center gap-1 flex-wrap p-0.5">
       <FontPicker value={currentFont} onChange={onFontChange} />
       
       {isDesigner && (

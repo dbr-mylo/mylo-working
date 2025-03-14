@@ -80,7 +80,9 @@
   /* Ensure consistent editor component border styling */
   .editor-toolbar,
   .editor-toolbar-container select,
-  .editor-toolbar-container button {
+  .editor-toolbar-container button,
+  .editor-toolbar-container .radix-select-trigger,
+  .SelectTrigger {
     border-color: #D9DADC;
     border-radius: 0.375rem;
   }

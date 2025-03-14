@@ -1,3 +1,4 @@
+
 /**
  * EditorPanel Component
  * 
@@ -12,6 +13,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/components/design/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { useIsEditor } from "@/utils/roleSpecificRendering";
+
 export const EditorPanel = ({
   content,
   onContentChange,
@@ -33,6 +35,7 @@ export const EditorPanel = ({
   const dimensions = extractDimensionsFromCSS(customStyles);
   const pageWidth = dimensions?.width || '8.5in';
   const pageHeight = dimensions?.height || '11in';
+  
   const handleContentUpdate = (newContent: string) => {
     console.log("Content updated in EditorPanel");
     onContentChange(newContent);
@@ -42,6 +45,7 @@ export const EditorPanel = ({
   if (!isEditor) {
     console.warn("EditorPanel component used outside of editor role context");
   }
+  
   return <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
         {!isMobile && <div className="flex justify-between items-center mb-4">
@@ -53,9 +57,14 @@ export const EditorPanel = ({
               </span>}
           </div>}
         <div className="bg-editor-bg rounded-md">
-          <div className="">
-            <RichTextEditor content={content} onUpdate={handleContentUpdate} isEditable={isEditable} hideToolbar={!isEditable} // Hide toolbar if not editable
-          templateStyles={customStyles} />
+          <div className={`min-h-[${pageHeight}] w-[${pageWidth}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+            <RichTextEditor 
+              content={content} 
+              onUpdate={handleContentUpdate}
+              isEditable={isEditable}
+              hideToolbar={!isEditable} // Hide toolbar if not editable
+              templateStyles={customStyles} 
+            />
           </div>
         </div>
       </div>

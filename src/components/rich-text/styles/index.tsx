@@ -3,6 +3,7 @@ import { BaseEditorStyles } from './BaseEditorStyles';
 import { FontSizeStyles } from './typography/FontSizeStyles';
 import { ColorPreservationStyles } from './formatting/ColorPreservationStyles';
 import { ListAndIndentStyles } from './layout/ListAndIndentStyles';
+import { TemplateStyleOverrides } from './theme/TemplateStyleOverrides';
 
 /**
  * EditorStyles Component
@@ -17,6 +18,7 @@ export const EditorStyles = () => {
       <FontSizeStyles />
       <ColorPreservationStyles />
       <ListAndIndentStyles />
+      <TemplateStyleOverrides />
     </>
   );
 };

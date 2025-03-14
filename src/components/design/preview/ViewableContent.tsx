@@ -66,11 +66,34 @@ export const ViewableContent = ({
     );
   } 
 
-  // EDITOR PATH - Safe to modify
-  // For editor role viewing mode, keep the white div with shadow
+  // EDITOR PATH - Enhanced to override editor styling and enforce template styles
   return (
     <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
-      {templateStyles && <style dangerouslySetInnerHTML={{ __html: templateStyles }} />}
+      {/* Apply template styles with high specificity to override editor choices */}
+      {templateStyles && (
+        <style dangerouslySetInnerHTML={{ 
+          __html: `
+            /* Template styles with higher specificity to override editor choices */
+            .template-styled * {
+              font-family: inherit !important;
+              color: inherit !important;
+              text-align: inherit !important;
+            }
+            
+            /* Add additional template style overrides */
+            ${templateStyles}
+            
+            /* Force template typography settings */
+            .template-styled [style*="font-family"],
+            .template-styled [style*="color"],
+            .template-styled [style*="text-align"] {
+              font-family: inherit !important;
+              color: inherit !important;
+              text-align: inherit !important;
+            }
+          `
+        }} />
+      )}
       <div 
         ref={previewRef} 
         onClick={onClick}

@@ -36,7 +36,8 @@ export const EditableContent = ({
   const { role } = useAuth();
   const isDesigner = role === "designer";
   
-  // For editor role, we don't apply template styling to the editable content
+  // Important: For editor role, we explicitly set this to false to prevent template styling
+  // from affecting the editable content, allowing editors to format text freely
   const shouldApplyTemplate = false;
   
   // Extract dimensions from template styles

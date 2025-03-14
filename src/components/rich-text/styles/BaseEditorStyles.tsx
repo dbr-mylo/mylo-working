@@ -51,6 +51,18 @@ export const BaseEditorStyles = () => {
       [data-radix-popper-content-wrapper] > div {
         background-color: white !important;
       }
+      
+      /* Ensure editor styling doesn't leak into preview */
+      .template-styled {
+        /* Reset all font styles to enable template control */
+        font-family: inherit;
+        color: inherit;
+      }
+      
+      /* Provide clear separation between editor and preview styling */
+      .ProseMirror:not(.template-styled) {
+        /* Editor-specific styles won't affect template view */
+      }
     `}</style>
   );
 };

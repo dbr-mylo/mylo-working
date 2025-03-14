@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -36,7 +35,7 @@ export default {
         editor: {
           bg: "#FFFFFF",
           sidebar: "#F5F5F5",
-          border: "#BABCBF",  // Updated to a lighter gray
+          border: "#D9DADC",  // Updated to an even lighter gray
           text: "#1F2937",
           heading: "#111827",
           panel: "rgb(249, 250, 251)",  // F9FAFB - Consistent panel color

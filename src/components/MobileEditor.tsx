@@ -25,7 +25,7 @@ export const MobileEditor = ({
   const [activeTab, setActiveTab] = useState<"editor" | "design">("editor");
 
   return (
-    <main className="animate-fade-in p-4">
+    <main className="animate-fade-in px-0">
       <div className="w-full">
         <div className="auth-tabs-list">
           <button 
@@ -45,7 +45,7 @@ export const MobileEditor = ({
         </div>
         
         {activeTab === "editor" && (
-          <div className="mt-2">
+          <div className="p-4">
             <EditorPanel 
               content={content}
               onContentChange={onContentChange}
@@ -57,7 +57,7 @@ export const MobileEditor = ({
         )}
         
         {activeTab === "design" && (
-          <div className="mt-2">
+          <div className="p-4">
             <DesignPanel 
               content={content}
               isEditable={isDesignEditable}

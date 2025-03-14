@@ -36,7 +36,7 @@ export default {
         editor: {
           bg: "#FFFFFF",
           sidebar: "#F5F5F5",
-          border: "#E5E7EB",
+          border: "#8A898C",  // Updated to a medium gray
           text: "#1F2937",
           heading: "#111827",
           panel: "rgb(249, 250, 251)",  // F9FAFB - Consistent panel color

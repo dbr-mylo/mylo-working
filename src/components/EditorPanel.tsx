@@ -49,7 +49,7 @@ export const EditorPanel = ({
   return (
     <div className={`${isMobile ? 'w-full' : 'w-1/2'} p-4 md:p-8 border-r border-editor-border bg-editor-bg ${!isMobile ? 'animate-slide-in' : ''} overflow-auto`}>
       <div className="mx-auto">
-        {!isMobile && <div className="flex justify-between items-center mb-4">
+        {!isMobile && <div className="flex justify-between items-center mb-8">
             <h2 className="text-sm font-medium text-editor-text">Editor Panel</h2>
             {isEditable ? <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                 Editable

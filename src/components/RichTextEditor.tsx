@@ -1,3 +1,4 @@
+
 /**
  * RichTextEditor Component
  * 
@@ -91,7 +92,7 @@ export const RichTextEditor = ({
       )}
       
       {!hideToolbar && isEditable && !externalToolbar && (
-        <div className="toolbar-container mb-4">
+        <div className="toolbar-container mb-8">
           <Toolbar editor={activeEditor} />
         </div>
       )}
@@ -105,6 +106,10 @@ export const RichTextEditor = ({
             box-sizing: border-box;
             background-color: white;
             margin: 0 auto;
+          }
+          
+          .toolbar-container {
+            margin-bottom: 2rem !important;
           }
         `}
       </style>

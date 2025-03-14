@@ -63,10 +63,10 @@ export const EditableContent = ({
   } 
 
   // EDITOR PATH - Safe to modify
-  // For editor role, render toolbar outside the document container
+  // For editor role, render toolbar outside the document container with added spacing
   return (
     <div className="editor-content-container">
-      {/* Main document container */}
+      {/* Main document container with increased spacing */}
       <div style={{ width: width, margin: '0 auto' }} className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
         <div className="font-editor">
           <RichTextEditor

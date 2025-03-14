@@ -22,25 +22,56 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
   const width = templateDimensions?.width || '8.5in';
   const height = templateDimensions?.height || '11in';
 
+  // Don't change behavior for designer role
+  if (isDesigner) {
+    return (
+      <div 
+        className={`prose prose-sm max-w-none font-editor designer-editor`}
+        ref={refProp}
+      >
+        <style>
+          {`
+          .designer-editor .ProseMirror {
+            min-height: ${height};
+            width: ${width};
+            padding: 1in;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          }
+          
+          .editor-toolbar {
+            background-color: white;
+            ${!isDesigner ? 'border-bottom: 1px solid #e2e8f0;' : ''}
+            padding: 0;
+            margin: 0;
+            z-index: 10;
+          }
+          
+          .fixed-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            width: 100%;
+          }
+          `}
+        </style>
+        {children}
+      </div>
+    );
+  }
+
+  // For editor role
   return (
     <div 
-      className={`prose prose-sm max-w-none font-editor ${isDesigner ? 'designer-editor' : ''}`}
+      className="prose prose-sm max-w-none font-editor"
       ref={refProp}
     >
       <style>
         {`
-        .designer-editor .ProseMirror {
-          min-height: ${height};
-          width: ${width};
-          padding: 1in;
-          margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-        
         .editor-toolbar {
           background-color: white;
-          ${!isDesigner ? 'border-bottom: 1px solid #e2e8f0;' : ''}
+          border-bottom: 1px solid #e2e8f0;
           padding: 0;
           margin: 0;
           z-index: 10;
@@ -56,10 +87,8 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
         .ProseMirror {
           min-height: ${height};
           width: ${width};
-          padding: 1in;
+          padding: 0;
           margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
           overflow-wrap: break-word;
         }
         `}

@@ -3,6 +3,7 @@ import { RichTextEditor } from "@/components/RichTextEditor";
 import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/components/design/useTemplateStyles";
+import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
 export const EditorPanel = ({ content, onContentChange, isEditable, templateId }: EditorPanelProps) => {
   const { width } = useWindowSize();
@@ -10,6 +11,11 @@ export const EditorPanel = ({ content, onContentChange, isEditable, templateId }
   
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);
+  
+  // Extract dimensions from template styles, or use default 8.5x11 inches
+  const dimensions = extractDimensionsFromCSS(customStyles);
+  const pageWidth = dimensions?.width || '8.5in';
+  const pageHeight = dimensions?.height || '11in';
   
   const handleContentUpdate = (newContent: string) => {
     console.log("Content updated in EditorPanel");
@@ -34,13 +40,15 @@ export const EditorPanel = ({ content, onContentChange, isEditable, templateId }
           </div>
         )}
         <div className="bg-editor-bg rounded-md">
-          <RichTextEditor 
-            content={content} 
-            onUpdate={handleContentUpdate}
-            isEditable={isEditable}
-            hideToolbar={!isEditable} // Hide toolbar if not editable
-            templateStyles={customStyles}
-          />
+          <div className={`min-h-[${pageHeight}] w-[${pageWidth}] p-[1in] mx-auto bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+            <RichTextEditor 
+              content={content} 
+              onUpdate={handleContentUpdate}
+              isEditable={isEditable}
+              hideToolbar={!isEditable} // Hide toolbar if not editable
+              templateStyles={customStyles}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -74,6 +74,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     
     // Clear the formatting
     clearFormatting(editor);
+    
+    // Show success toast
+    toast({
+      title: "Formatting cleared",
+      description: "All formatting has been removed from the selected text.",
+      variant: "success",
+      duration: 2000,
+    });
+    
+    // Force editor to refresh
+    setTimeout(() => {
+      if (editor.isEditable) {
+        editor.commands.focus();
+      }
+    }, 50);
   };
 
   return (

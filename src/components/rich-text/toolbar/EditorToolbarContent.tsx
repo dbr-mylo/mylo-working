@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { RemoveFormatting } from 'lucide-react';
 import { clearFormatting } from '../utils/textFormatting';
 import { useToast } from '@/hooks/use-toast';
+import { CLEAR_FONT_CACHE_EVENT } from '../font-size/constants';
 
 interface EditorToolbarContentProps {
   editor: Editor;
@@ -58,14 +59,12 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
     // Clear the formatting
     clearFormatting(editor);
     
-    // We need to update the state to reflect cleared formatting
-    if (editor.getAttributes('textStyle').fontFamily !== 'Inter') {
-      onFontChange('Inter');
-    }
+    // We need to update the UI state to reflect cleared formatting
+    onFontChange('Inter');
+    onColorChange('#000000');
     
-    if (editor.getAttributes('textStyle').color !== '#000000') {
-      onColorChange('#000000');
-    }
+    // Force a font cache clear to refresh all UI elements
+    document.dispatchEvent(new CustomEvent(CLEAR_FONT_CACHE_EVENT));
     
     // Show success toast
     toast({
@@ -73,6 +72,13 @@ export const EditorToolbarContent: React.FC<EditorToolbarContentProps> = ({
       description: "All formatting has been removed from the selected text.",
       duration: 2000,
     });
+    
+    // Force editor to refresh
+    setTimeout(() => {
+      if (editor.isEditable) {
+        editor.commands.focus();
+      }
+    }, 50);
   };
 
   return (

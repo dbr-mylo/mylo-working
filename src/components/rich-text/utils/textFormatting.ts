@@ -74,6 +74,9 @@ export const clearFormatting = (editor: Editor) => {
     // Trigger the font cache clear event to ensure font sizes are properly refreshed
     document.dispatchEvent(new CustomEvent(CLEAR_FONT_CACHE_EVENT));
     
+    // Log successful clearing
+    console.log("Formatting cleared successfully - first pass");
+    
     // Final check to ensure all formatting is cleared
     // Sometimes we need to reapply the default values after unsetAllMarks
     setTimeout(() => {
@@ -84,7 +87,10 @@ export const clearFormatting = (editor: Editor) => {
         .setFontSize('16px')
         .run();
       
-      console.log("Formatting cleared successfully");
+      // Trigger the event again to ensure UI is updated
+      document.dispatchEvent(new CustomEvent(CLEAR_FONT_CACHE_EVENT));
+      
+      console.log("Formatting cleared successfully - second pass");
     }, 10);
     
   } catch (error) {
@@ -141,7 +147,6 @@ export const resetSpecificFormatting = (
     }
     
     if (options.lists) {
-      // Fix: Check if in a list and use the appropriate method with parameters
       if (editor.isActive('bulletList') || editor.isActive('orderedList')) {
         chain.liftListItem('listItem');
       }

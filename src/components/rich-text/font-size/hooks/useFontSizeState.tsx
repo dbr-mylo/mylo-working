@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
+import { useFontSizeActions } from './useFontSizeActions';
 import { useFontSizeEvents } from './useFontSizeEvents';
 import { useDomFontSizeObserver } from './useDomFontSizeObserver';
-import { useFontSizeActions } from './useFontSizeActions';
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
 
 interface UseFontSizeStateProps {
   value: string;
@@ -15,10 +16,6 @@ export const useFontSizeState = ({
   onChange, 
   disabled = false 
 }: UseFontSizeStateProps) => {
-  // Constants for min/max font size values according to requirements
-  const MIN_FONT_SIZE = 1;
-  const MAX_FONT_SIZE = 99;
-
   // Extract the numeric value from the font size string (e.g., "16px" -> 16)
   const getNumericValue = (fontSizeValue: string): number => {
     if (!fontSizeValue) return 16; // Default size if no value provided
@@ -41,7 +38,7 @@ export const useFontSizeState = ({
       console.log("FontSizeInput: Value prop changed to:", value, "internal size updated to:", newSize);
       setSize(newSize);
     }
-  }, [value]);
+  }, [value, size]);
 
   // Use custom hooks for different functionalities
   useFontSizeEvents({

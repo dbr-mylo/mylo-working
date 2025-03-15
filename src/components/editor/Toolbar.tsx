@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useToast } from '@/hooks/use-toast';
 import { TextControls } from './toolbar/TextControls';
@@ -16,6 +16,17 @@ interface ToolbarProps {
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   const { toast } = useToast();
   
+  // Initialize toolbar event handlers
+  useEffect(() => {
+    // Clear font size cache on mount
+    const clearFontCacheEvent = new CustomEvent('tiptap-clear-font-cache');
+    document.dispatchEvent(clearFontCacheEvent);
+    
+    return () => {
+      // Clean up any event listeners if needed
+    };
+  }, []);
+  
   if (!editor) {
     return null;
   }
@@ -24,7 +35,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
 
   return (
     <div className="rounded-md bg-background p-1 flex flex-wrap gap-1 items-center">
-      {/* Text styling controls - font family and color */}
+      {/* Text styling controls - font family, font size and color */}
       <TextControls editor={editor} />
       
       {/* Text formatting buttons - bold and italic */}

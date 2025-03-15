@@ -28,6 +28,11 @@ type RoleFeatureFlags = {
   
   // View features
   defaultView: 'edit' | 'preview' | 'split';
+  
+  // Admin features
+  canManageUsers: boolean;
+  canManageAllTemplates: boolean;
+  canManageAllStyles: boolean;
 };
 
 const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
@@ -41,7 +46,10 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canApplyStyles: true,
     canCreateStyles: true,
     defaultDocumentWrapper: 'none',
-    defaultView: 'edit'
+    defaultView: 'edit',
+    canManageUsers: false,
+    canManageAllTemplates: false,
+    canManageAllStyles: false
   },
   editor: {
     canModifyTemplate: false,
@@ -53,7 +61,10 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canApplyStyles: true,
     canCreateStyles: false,
     defaultDocumentWrapper: 'white-page',
-    defaultView: 'split'
+    defaultView: 'split',
+    canManageUsers: false,
+    canManageAllTemplates: false,
+    canManageAllStyles: false
   },
   admin: {
     canModifyTemplate: true,
@@ -65,7 +76,10 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canApplyStyles: true, 
     canCreateStyles: true,
     defaultDocumentWrapper: 'none',
-    defaultView: 'edit'
+    defaultView: 'edit',
+    canManageUsers: true,
+    canManageAllTemplates: true,
+    canManageAllStyles: true
   }
 };
 
@@ -113,4 +127,11 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  */
 export const isEditorRole = (role: UserRole | null): boolean => {
   return role === 'editor';
+};
+
+/**
+ * Check if the current role is admin
+ */
+export const isAdminRole = (role: UserRole | null): boolean => {
+  return role === 'admin';
 };

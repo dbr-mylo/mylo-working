@@ -1,6 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, UserCog } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface ExternalActionsProps {
   onSignOut?: () => void;
@@ -8,8 +10,28 @@ interface ExternalActionsProps {
 }
 
 export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsProps) => {
+  const { role } = useAuth();
+  const navigate = useNavigate();
+  const isAdmin = role === "admin";
+
+  const handleAdminPanel = () => {
+    navigate("/admin");
+  };
+
   return (
-    <>
+    <div className="flex items-center gap-2">
+      {isAdmin && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2"
+          onClick={handleAdminPanel}
+        >
+          <UserCog className="w-4 h-4" />
+          Admin
+        </Button>
+      )}
+      
       {isAuthenticated && onSignOut && (
         <Button 
           variant="default" 
@@ -21,6 +43,6 @@ export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsP
           Sign Out
         </Button>
       )}
-    </>
+    </div>
   );
 };

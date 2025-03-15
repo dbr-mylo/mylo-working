@@ -11,6 +11,7 @@ interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
   continueAsGuestEditor: () => void;
   continueAsGuestDesigner: () => void;
+  continueAsGuestAdmin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,6 +135,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate("/");
   };
 
+  const continueAsGuestAdmin = () => {
+    setAuthState({
+      user: null,
+      role: "admin",
+      isLoading: false
+    });
+    toast.success("Continuing as Admin");
+    navigate("/");
+  };
+
   return (
     <AuthContext.Provider value={{ 
       ...authState, 
@@ -141,7 +152,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signUp, 
       signOut, 
       continueAsGuestEditor, 
-      continueAsGuestDesigner 
+      continueAsGuestDesigner,
+      continueAsGuestAdmin
     }}>
       {children}
     </AuthContext.Provider>

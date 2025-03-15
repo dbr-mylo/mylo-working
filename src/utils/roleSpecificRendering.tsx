@@ -3,7 +3,7 @@
  * Role-Specific Rendering Utilities
  * 
  * This utility provides components and functions to help separate
- * designer and editor role-specific code paths.
+ * designer, editor, and admin role-specific code paths.
  */
 
 import React from 'react';
@@ -48,18 +48,57 @@ export const EditorOnly: React.FC<{
 };
 
 /**
+ * Admin-specific component
+ */
+export const AdminOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback }) => {
+  return <RoleOnly role="admin" children={children} fallback={fallback} />;
+};
+
+/**
+ * Component that renders for multiple roles
+ */
+export const MultiRoleOnly: React.FC<{
+  roles: UserRole[];
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ roles, children, fallback = null }) => {
+  const { role: userRole } = useAuth();
+  
+  if (userRole && roles.includes(userRole)) {
+    return <>{children}</>;
+  }
+  
+  return <>{fallback}</>;
+};
+
+/**
+ * Designer or Admin only component
+ */
+export const DesignerOrAdminOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
  * Hook to get role-specific value
  */
-export function useRoleSpecificValue<T>(designerValue: T, editorValue: T, defaultValue?: T): T {
+export function useRoleSpecificValue<T>(designerValue: T, editorValue: T, adminValue: T = designerValue): T {
   const { role } = useAuth();
   
   if (role === 'designer') {
     return designerValue;
   } else if (role === 'editor') {
     return editorValue;
+  } else if (role === 'admin') {
+    return adminValue;
   }
   
-  return defaultValue || editorValue;
+  return editorValue;
 }
 
 /**
@@ -79,6 +118,14 @@ export function useIsEditor(): boolean {
 }
 
 /**
+ * Hook to check if current user has admin role
+ */
+export function useIsAdmin(): boolean {
+  const { role } = useAuth();
+  return role === 'admin';
+}
+
+/**
  * Role-specific conditional rendering function
  */
 export function renderForRole<T>(
@@ -86,6 +133,7 @@ export function renderForRole<T>(
   options: {
     designer: T;
     editor: T;
+    admin: T;
     default?: T;
   }
 ): T {
@@ -93,6 +141,8 @@ export function renderForRole<T>(
     return options.designer;
   } else if (role === 'editor') {
     return options.editor;
+  } else if (role === 'admin') {
+    return options.admin;
   }
   
   return options.default || options.editor;

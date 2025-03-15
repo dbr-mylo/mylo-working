@@ -7,7 +7,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
-  const { signIn, signUp, continueAsGuestEditor, continueAsGuestDesigner } = useAuth();
+  const { signIn, signUp, continueAsGuestEditor, continueAsGuestDesigner, continueAsGuestAdmin } = useAuth();
 
   const handleSubmit = async (action: "signin" | "signup") => {
     try {
@@ -131,6 +131,12 @@ export default function Auth() {
               className="auth-guest-button"
             >
               Designer
+            </button>
+            <button
+              onClick={continueAsGuestAdmin}
+              className="auth-guest-button"
+            >
+              Admin
             </button>
           </div>
         </div>

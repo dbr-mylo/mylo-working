@@ -2,17 +2,16 @@
 /**
  * ViewableContent Component
  * 
- * WARNING: This component contains role-specific rendering logic.
- * Changes to the designer role functionality (isDesigner === true) should be avoided.
- * Only modify the editor role section unless absolutely necessary.
- * 
- * The designer code path (first return after useEffect) should remain unchanged.
+ * This component displays the document content with appropriate styling based on user role.
+ * It handles template application for both designers and editors.
  */
 
 import { useRef, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { DocumentStyles } from "./DocumentStyles";
+import { templateService } from "@/services/TemplateService";
 
 interface ViewableContentProps {
   content: string;
@@ -20,6 +19,7 @@ interface ViewableContentProps {
   onClick: (e: React.MouseEvent) => void;
   templateStyles?: string;
   templateName?: string;
+  templateId?: string;
 }
 
 export const ViewableContent = ({ 
@@ -27,17 +27,50 @@ export const ViewableContent = ({
   previewRef, 
   onClick,
   templateStyles = '',
-  templateName = ''
+  templateName = '',
+  templateId = ''
 }: ViewableContentProps) => {
   const { role } = useAuth();
   const { toast } = useToast();
-  const isDesigner = role === "designer";
   const [prevTemplateName, setPrevTemplateName] = useState(templateName);
+  const [loadedStyles, setLoadedStyles] = useState(templateStyles);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  
+  const isDesigner = role === "designer";
+  const isAdmin = role === "admin";
   
   // Extract dimensions from template styles
-  const dimensions = extractDimensionsFromCSS(templateStyles);
+  const dimensions = extractDimensionsFromCSS(loadedStyles || templateStyles);
   const width = dimensions?.width || '8.5in';
   const height = dimensions?.height || '11in';
+
+  // Fetch template from Supabase if templateId is provided
+  useEffect(() => {
+    if (templateId && !templateStyles) {
+      const fetchTemplate = async () => {
+        setIsLoadingTemplate(true);
+        try {
+          const template = await templateService.getTemplateById(templateId);
+          if (template) {
+            setLoadedStyles(template.styles);
+            if (role === "editor") {
+              toast({
+                title: "Template Applied",
+                description: `The "${template.name}" template has been applied to your document.`,
+                duration: 3000,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error loading template:", error);
+        } finally {
+          setIsLoadingTemplate(false);
+        }
+      };
+      
+      fetchTemplate();
+    }
+  }, [templateId, role, toast]);
 
   // Notify user when template changes
   useEffect(() => {
@@ -51,80 +84,87 @@ export const ViewableContent = ({
     }
   }, [templateName, prevTemplateName, toast, role]);
 
-  // Apply Google Fonts for testing
-  const testingFontStyles = `
-    /* Test font styles for Designer preview */
-    .template-styled {
-      font-family: 'Playfair Display', serif !important;
-      color: #333 !important;
+  // Get the appropriate styles to use
+  const stylesContent = loadedStyles || templateStyles;
+
+  // Apply additional styling for design role preview
+  const designerPreviewStyles = `
+    /* Additional styles for designer preview */
+    .designer-preview h1 {
+      color: #1a365d;
     }
     
-    .template-styled h1 {
-      font-family: 'Playfair Display', serif !important;
-      font-weight: 700 !important;
-      color: #1a365d !important;
-      font-size: 2.25rem !important;
-    }
-    
-    .template-styled h2 {
-      font-family: 'Playfair Display', serif !important;
-      font-weight: 700 !important;
-      color: #2a4365 !important;
-      font-size: 1.875rem !important;
+    .designer-preview h2 {
+      color: #2a4365;
     }
   `;
 
-  // DESIGNER PATH - Apply test fonts for demonstration
-  if (isDesigner) {
-    const designerStyles = templateStyles || testingFontStyles;
-    
+  // DESIGNER/ADMIN PATH
+  if (isDesigner || isAdmin) {
     return (
       <>
-        {designerStyles && <style dangerouslySetInnerHTML={{ __html: designerStyles }} />}
-        <div 
-          ref={previewRef} 
-          onClick={onClick}
-          dangerouslySetInnerHTML={{ __html: content }} 
-          className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 template-styled bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}
-        />
+        {isLoadingTemplate ? (
+          <div className="flex items-center justify-center h-[11in] w-full">
+            <div className="animate-pulse text-gray-500">Loading template...</div>
+          </div>
+        ) : (
+          <>
+            <DocumentStyles customStyles={`
+              ${stylesContent}
+              ${isDesigner ? designerPreviewStyles : ''}
+            `} />
+            <div 
+              ref={previewRef} 
+              onClick={onClick}
+              dangerouslySetInnerHTML={{ __html: content }} 
+              className={`cursor-pointer min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 designer-preview template-styled bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}
+            />
+          </>
+        )}
       </>
     );
   } 
 
-  // EDITOR PATH - Enhanced to override editor styling and enforce template styles
+  // EDITOR PATH
   return (
-    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
-      {/* Apply template styles with high specificity to override editor choices */}
-      {templateStyles && (
-        <style dangerouslySetInnerHTML={{ 
-          __html: `
-            /* Template styles with higher specificity to override editor choices */
-            .template-styled * {
-              font-family: inherit !important;
-              color: inherit !important;
-              text-align: inherit !important;
-            }
-            
-            /* Add additional template style overrides */
-            ${templateStyles}
-            
-            /* Force template typography settings */
-            .template-styled [style*="font-family"],
-            .template-styled [style*="color"],
-            .template-styled [style*="text-align"] {
-              font-family: inherit !important;
-              color: inherit !important;
-              text-align: inherit !important;
-            }
-          `
-        }} />
+    <>
+      {isLoadingTemplate ? (
+        <div className="flex items-center justify-center h-[11in] w-full">
+          <div className="animate-pulse text-gray-500">Loading template...</div>
+        </div>
+      ) : (
+        <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+          {/* Apply template styles with high specificity to override editor choices */}
+          {stylesContent && (
+            <DocumentStyles customStyles={`
+              /* Template styles with higher specificity for editor view */
+              .template-styled * {
+                font-family: inherit !important;
+                color: inherit !important;
+                text-align: inherit !important;
+              }
+              
+              /* Add template styles */
+              ${stylesContent}
+              
+              /* Force template typography settings */
+              .template-styled [style*="font-family"],
+              .template-styled [style*="color"],
+              .template-styled [style*="text-align"] {
+                font-family: inherit !important;
+                color: inherit !important;
+                text-align: inherit !important;
+              }
+            `} />
+          )}
+          <div 
+            ref={previewRef} 
+            onClick={onClick}
+            dangerouslySetInnerHTML={{ __html: content }} 
+            className="cursor-pointer template-styled" 
+          />
+        </div>
       )}
-      <div 
-        ref={previewRef} 
-        onClick={onClick}
-        dangerouslySetInnerHTML={{ __html: content }} 
-        className="cursor-pointer template-styled" 
-      />
-    </div>
+    </>
   );
 };

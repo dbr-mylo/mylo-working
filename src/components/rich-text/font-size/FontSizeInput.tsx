@@ -29,6 +29,11 @@ export const FontSizeInput: React.FC<FontSizeInputProps> = ({
     disabled
   });
 
+  // Log font size changes
+  React.useEffect(() => {
+    console.log("FontSizeInput render with value:", value, "size:", size);
+  }, [value, size]);
+
   return (
     <div className={`flex items-center ${className || ''}`}>
       <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>

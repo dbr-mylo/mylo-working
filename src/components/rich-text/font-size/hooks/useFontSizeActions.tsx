@@ -25,14 +25,12 @@ export const useFontSizeActions = ({
     const newSize = Math.min(size + 1, MAX_FONT_SIZE);
     console.log("FontSizeInput: Incrementing from", size, "to", newSize);
     setSize(newSize);
-    onChange(`${newSize}px`);
     
-    // Dispatch event for other components
-    try {
-      dispatchFontSizeEvent(`${newSize}px`, EVENT_SOURCES.INPUT);
-    } catch (error) {
-      console.error("Error dispatching font size event:", error);
-    }
+    // Important: Call onChange with the properly formatted size
+    const formattedSize = formatFontSize(newSize);
+    onChange(formattedSize);
+    
+    // Dispatch event for other components (removed for simplicity)
   }, [size, setSize, onChange, disabled, MAX_FONT_SIZE]);
 
   const decrementSize = useCallback(() => {
@@ -40,14 +38,12 @@ export const useFontSizeActions = ({
     const newSize = Math.max(size - 1, MIN_FONT_SIZE);
     console.log("FontSizeInput: Decrementing from", size, "to", newSize);
     setSize(newSize);
-    onChange(`${newSize}px`);
     
-    // Dispatch event for other components
-    try {
-      dispatchFontSizeEvent(`${newSize}px`, EVENT_SOURCES.INPUT);
-    } catch (error) {
-      console.error("Error dispatching font size event:", error);
-    }
+    // Important: Call onChange with the properly formatted size
+    const formattedSize = formatFontSize(newSize);
+    onChange(formattedSize);
+    
+    // Dispatch event for other components (removed for simplicity)
   }, [size, setSize, onChange, disabled, MIN_FONT_SIZE]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,20 +63,13 @@ export const useFontSizeActions = ({
     // Round to one decimal place for better usability
     newSize = Math.round(newSize * 10) / 10;
     
-    setSize(newSize);
     console.log("FontSizeInput: Manual change to:", newSize);
+    setSize(newSize);
     
     // Only update if value is within acceptable range
     if (newSize >= MIN_FONT_SIZE) {
       const formattedSize = formatFontSize(newSize);
       onChange(formattedSize);
-      
-      // Dispatch event for other components
-      try {
-        dispatchFontSizeEvent(formattedSize, EVENT_SOURCES.INPUT);
-      } catch (error) {
-        console.error("Error dispatching font size event:", error);
-      }
     }
   }, [disabled, setSize, onChange, MIN_FONT_SIZE, MAX_FONT_SIZE]);
 
@@ -95,13 +84,6 @@ export const useFontSizeActions = ({
       
       const formattedSize = formatFontSize(newSize);
       onChange(formattedSize);
-      
-      // Dispatch event for other components
-      try {
-        dispatchFontSizeEvent(formattedSize, EVENT_SOURCES.INPUT);
-      } catch (error) {
-        console.error("Error dispatching font size event:", error);
-      }
     }
   }, [disabled, size, MIN_FONT_SIZE, setSize, onChange]);
 

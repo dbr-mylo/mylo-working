@@ -65,20 +65,26 @@ export const useFontSizeTracking = (editor: Editor | null) => {
     };
   }, [editor, isTextSelected, currentFontSize]);
 
-  // Simplified font size change handler
+  // Fix the handleFontSizeChange function to properly update the font size
   const handleFontSizeChange = useCallback((fontSize: string) => {
     if (!editor || !isTextSelected) return;
     
     try {
-      // Format the font size
+      // Ensure fontSize has px suffix
       const numericSize = parseFontSize(fontSize);
       const formattedSize = formatFontSize(numericSize);
       
-      // Update state directly without DOM queries
+      // Update UI first
       setCurrentFontSize(formattedSize);
       
-      // Update editor
-      editor.chain().focus().setFontSize(formattedSize).run();
+      // Force the editor command to execute synchronously
+      editor.chain()
+        .focus()
+        .setFontSize(formattedSize)
+        .run();
+      
+      // Log to debug
+      console.log("Applied font size:", formattedSize);
     } catch (error) {
       console.error("Error changing font size:", error);
     }

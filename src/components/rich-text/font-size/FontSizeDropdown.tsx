@@ -25,11 +25,16 @@ export const FontSizeDropdown: React.FC<FontSizeDropdownProps> = ({
   // Extract numeric value from fontsize with 'px'
   const fontSizeValue = value.replace('px', '');
   
+  const handleValueChange = (val: string) => {
+    console.log("FontSizeDropdown: Selected", val, "px");
+    onChange(`${val}px`);
+  };
+  
   return (
     <div className={className}>
       <Select
         value={fontSizeValue}
-        onValueChange={(val) => onChange(`${val}px`)}
+        onValueChange={handleValueChange}
         disabled={disabled}
       >
         <SelectTrigger 

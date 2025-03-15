@@ -28,6 +28,7 @@ export const useFontSizeState = ({
   useEffect(() => {
     const newSize = getNumericValue(value);
     if (Math.abs(newSize - size) > 0.1) {
+      console.log("useFontSizeState: Updating size from", size, "to", newSize, "based on value", value);
       setSize(newSize);
     }
   }, [value, size]);

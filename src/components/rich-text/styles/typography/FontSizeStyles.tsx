@@ -28,7 +28,7 @@ export const FontSizeStyles = () => {
       
       /* Base rule for all elements to ensure they inherit font size by default */
       .ProseMirror * {
-        font-size: inherit !important;
+        font-size: inherit;
       }
       
       /* Override the Tailwind prose-sm font size explicitly */
@@ -38,7 +38,7 @@ export const FontSizeStyles = () => {
       
       /* Ensure prose doesn't force font sizes on paragraphs */
       .prose.prose-sm .ProseMirror p {
-        font-size: inherit !important;
+        font-size: inherit;
         margin-bottom: 4px;
       }
       
@@ -72,26 +72,10 @@ export const FontSizeStyles = () => {
       }
       
       /* Force styles to be read from element */
-      span[style*="font-size"], 
-      p[style*="font-size"],
-      div[style*="font-size"] {
+      .ProseMirror span[style*="font-size"], 
+      .ProseMirror p[style*="font-size"],
+      .ProseMirror div[style*="font-size"] {
         font-size: unset !important;
-      }
-
-      /* Remove this default value that might be causing issues */
-      .ProseMirror .preserve-styling[style*="font-size:20px"] {
-        /* This was forcing 20px specifically */
-        /* font-size: 20px !important; */
-      }
-      
-      /* Initial default size that matches the toolbar's default */
-      .ProseMirror {
-        font-size: 16px !important;
-      }
-      
-      /* Only apply specific sizes when explicitly set */
-      .ProseMirror p:not([style*="font-size"]) {
-        font-size: 16px !important;
       }
     `}</style>
   );

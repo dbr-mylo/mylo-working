@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { FontSizeControls } from './FontSizeControls';
+import { CombinedFontSizeControl } from '../font-size/CombinedFontSizeControl';
 
 interface FontSizeSectionProps {
   editor: Editor;
@@ -19,10 +19,10 @@ export const FontSizeSection: React.FC<FontSizeSectionProps> = ({
   className
 }) => {
   return (
-    <FontSizeControls 
-      currentFontSize={currentFontSize}
-      isTextSelected={isTextSelected}
-      onFontSizeChange={onFontSizeChange}
+    <CombinedFontSizeControl 
+      value={currentFontSize}
+      onChange={onFontSizeChange}
+      disabled={!isTextSelected}
       className={className}
     />
   );

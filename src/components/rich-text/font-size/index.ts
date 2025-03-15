@@ -6,3 +6,5 @@ export * from './utils';
 export * from './constants';
 export * from './components/FontSizeStepper';
 export * from './FontSizeDropdown';
+export * from './CombinedFontSizeControl';
+

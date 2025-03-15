@@ -46,11 +46,13 @@ export const useEditorFontSizeState = (editor: Editor | null) => {
     if (!editor) return;
     
     const { from, to } = editor.state.selection;
-    const isSelected = from !== to;
-    setIsTextSelected(isSelected);
+    const hasSelection = from !== to;
+    
+    console.log("EditorToolbar: Text selection update, isSelected:", hasSelection);
+    setIsTextSelected(hasSelection);
     
     // When text is selected, check its font size
-    if (isSelected) {
+    if (hasSelection) {
       updateFontSize();
     }
   }, [editor, updateFontSize]);
@@ -59,20 +61,43 @@ export const useEditorFontSizeState = (editor: Editor | null) => {
   useEffect(() => {
     if (!editor) return;
     
-    // Add event listeners to editor
-    editor.on('selectionUpdate', updateFontSize);
-    editor.on('selectionUpdate', updateTextSelection);
-    editor.on('transaction', updateFontSize);
-    
-    // Initial update
-    updateFontSize();
+    // Initial update for selection state
     updateTextSelection();
+    
+    // Force an immediate check for text selection
+    const initialCheck = () => {
+      const { from, to } = editor.state.selection;
+      const hasSelection = from !== to;
+      console.log("EditorToolbar: Initial selection check:", hasSelection);
+      setIsTextSelected(hasSelection);
+      
+      if (hasSelection) {
+        updateFontSize();
+      }
+    };
+    
+    // Run initial check after a short delay to ensure editor is ready
+    const timeoutId = setTimeout(initialCheck, 50);
+    
+    // Add event listeners to editor
+    const handleSelectionUpdate = () => {
+      updateTextSelection();
+      updateFontSize();
+    };
+    
+    const handleTransaction = () => {
+      updateTextSelection();
+      updateFontSize();
+    };
+    
+    editor.on('selectionUpdate', handleSelectionUpdate);
+    editor.on('transaction', handleTransaction);
     
     return () => {
       // Clean up event listeners
-      editor.off('selectionUpdate', updateFontSize);
-      editor.off('selectionUpdate', updateTextSelection);
-      editor.off('transaction', updateFontSize);
+      editor.off('selectionUpdate', handleSelectionUpdate);
+      editor.off('transaction', handleTransaction);
+      clearTimeout(timeoutId);
     };
   }, [editor, updateFontSize, updateTextSelection]);
   

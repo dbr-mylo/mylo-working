@@ -14,6 +14,16 @@ export const useFontSizeTracking = (editor: Editor | null) => {
   // Get font size state from editor
   const editorFontSizeState = useEditorFontSizeState(editor);
   
+  // Initialize state from editor
+  useEffect(() => {
+    console.log("Font size tracking: Initial state from editor:", editorFontSizeState.currentFontSize, 
+      "isTextSelected:", editorFontSizeState.isTextSelected);
+    
+    if (editorFontSizeState.currentFontSize !== currentFontSize) {
+      setCurrentFontSize(editorFontSizeState.currentFontSize);
+    }
+  }, []);
+  
   // Update current font size when editor state changes
   useEffect(() => {
     if (editorFontSizeState.currentFontSize !== currentFontSize) {
@@ -27,16 +37,6 @@ export const useFontSizeTracking = (editor: Editor | null) => {
     onFontSizeChange: (fontSize: string) => {
       console.log("Font size event received:", fontSize);
       setCurrentFontSize(fontSize);
-      
-      // If size comes from DOM, immediately verify with editor and update if needed
-      if (editor && editor.isActive) {
-        const timeoutId = setTimeout(() => {
-          if (editor.isActive) {
-            editor.chain().focus().setFontSize(fontSize).run();
-          }
-        }, 10);
-        return () => clearTimeout(timeoutId);
-      }
     }
   });
 
@@ -53,18 +53,24 @@ export const useFontSizeTracking = (editor: Editor | null) => {
     };
     
     // Check on selection and transaction events
-    editor.on('selectionUpdate', checkDomFontSize);
-    editor.on('transaction', checkDomFontSize);
+    const handleUpdate = () => {
+      if (editorFontSizeState.isTextSelected) {
+        checkDomFontSize();
+      }
+    };
+    
+    editor.on('selectionUpdate', handleUpdate);
+    editor.on('transaction', handleUpdate);
     
     // Initial check
     const timeoutId = setTimeout(checkDomFontSize, 100);
     
     return () => {
-      editor.off('selectionUpdate', checkDomFontSize);
-      editor.off('transaction', checkDomFontSize);
+      editor.off('selectionUpdate', handleUpdate);
+      editor.off('transaction', handleUpdate);
       clearTimeout(timeoutId);
     };
-  }, [editor, currentFontSize]);
+  }, [editor, currentFontSize, editorFontSizeState.isTextSelected]);
 
   const handleFontSizeChange = useCallback((fontSize: string) => {
     if (!editor) return;

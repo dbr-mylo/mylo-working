@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { dispatchFontSizeEvent, formatFontSize, clampFontSize } from '../utils';
+import { formatFontSize, clampFontSize } from '../utils';
 import { EVENT_SOURCES } from '../constants';
 
 interface UseFontSizeActionsProps {
@@ -30,7 +30,13 @@ export const useFontSizeActions = ({
     const formattedSize = formatFontSize(newSize);
     onChange(formattedSize);
     
-    // Dispatch event for other components (removed for simplicity)
+    // Dispatch a custom event to force a style update
+    try {
+      const event = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(event);
+    } catch (error) {
+      console.error("Error dispatching font cache event:", error);
+    }
   }, [size, setSize, onChange, disabled, MAX_FONT_SIZE]);
 
   const decrementSize = useCallback(() => {
@@ -43,7 +49,13 @@ export const useFontSizeActions = ({
     const formattedSize = formatFontSize(newSize);
     onChange(formattedSize);
     
-    // Dispatch event for other components (removed for simplicity)
+    // Dispatch a custom event to force a style update
+    try {
+      const event = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(event);
+    } catch (error) {
+      console.error("Error dispatching font cache event:", error);
+    }
   }, [size, setSize, onChange, disabled, MIN_FONT_SIZE]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

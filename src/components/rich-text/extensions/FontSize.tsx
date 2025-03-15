@@ -53,9 +53,9 @@ export const FontSize = Extension.create<FontSizeOptions>({
                 ? attributes.fontSize 
                 : `${attributes.fontSize}px`;
               
-              // Return attributes for font size styling with !important to override Tailwind
+              // Use CSS variables to avoid the cascade issue
               return {
-                style: `font-size: ${formattedSize} !important;`,
+                style: `font-size: ${formattedSize}; --applied-font-size: ${formattedSize};`,
               };
             },
           },
@@ -77,7 +77,7 @@ export const FontSize = Extension.create<FontSizeOptions>({
         // Debug log to confirm command execution
         console.log("FontSize extension: Setting font size to", normalizedFontSize);
         
-        // Apply font size to the text with higher priority
+        // Apply font size to the text
         return commands.setMark('textStyle', { fontSize: normalizedFontSize });
       },
       

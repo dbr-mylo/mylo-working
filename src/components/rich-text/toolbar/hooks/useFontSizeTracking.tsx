@@ -83,6 +83,10 @@ export const useFontSizeTracking = (editor: Editor | null) => {
         .setFontSize(formattedSize)
         .run();
       
+      // Dispatch a custom event to force a style update
+      const event = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(event);
+      
       // Log to debug
       console.log("Applied font size:", formattedSize);
     } catch (error) {

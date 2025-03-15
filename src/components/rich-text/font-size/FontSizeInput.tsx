@@ -29,7 +29,7 @@ export const FontSizeInput: React.FC<FontSizeInputProps> = ({
     disabled
   });
 
-  // Log font size changes
+  // Log font size changes for debugging
   React.useEffect(() => {
     console.log("FontSizeInput render with value:", value, "size:", size);
   }, [value, size]);

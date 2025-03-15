@@ -27,7 +27,18 @@ export const FontSizeDropdown: React.FC<FontSizeDropdownProps> = ({
   
   const handleValueChange = (val: string) => {
     console.log("FontSizeDropdown: Selected", val, "px");
-    onChange(`${val}px`);
+    
+    // Ensure we format the value consistently and trigger style refresh
+    const newSize = `${val}px`;
+    onChange(newSize);
+    
+    // Dispatch a custom event to force a style update
+    try {
+      const event = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(event);
+    } catch (error) {
+      console.error("Error dispatching font cache event:", error);
+    }
   };
   
   return (

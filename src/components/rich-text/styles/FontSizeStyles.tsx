@@ -22,34 +22,28 @@ export const FontSizeStyles = () => {
     <style>{`
       /* Critical fix for the root elements to prevent Tailwind prose classes from overriding font sizes */
       .ProseMirror {
-        font-size: initial !important;
+        font-size: 16px !important;
         --tw-prose-body: none !important;
       }
       
       /* Base rule for all elements to ensure they inherit font size by default */
       .ProseMirror * {
-        font-size: inherit !important;
+        font-size: inherit;
       }
       
       /* Override the Tailwind prose-sm font size explicitly */
       .prose.prose-sm .ProseMirror {
-        font-size: initial !important;
+        font-size: 16px !important;
       }
       
       /* Ensure prose doesn't force font sizes on paragraphs */
       .prose.prose-sm .ProseMirror p {
-        font-size: inherit !important;
         margin-bottom: 4px;
       }
       
-      /* Make elements with explicit font-size styles use their inline styles */
+      /* THIS IS THE CRITICAL FIX: Allow styles to be applied directly */
       .ProseMirror [style*="font-size"] {
-        font-size: unset !important;
-      }
-      
-      /* Custom class for our font-size extension with maximum specificity */
-      .ProseMirror .custom-font-size {
-        font-size: unset !important;
+        font-size: var(--applied-font-size, unset) !important;
       }
       
       /* Additional specific selectors for common elements with max specificity */
@@ -62,20 +56,14 @@ export const FontSizeStyles = () => {
       .ProseMirror h4[style*="font-size"],
       .ProseMirror h5[style*="font-size"],
       .ProseMirror h6[style*="font-size"] {
-        font-size: unset !important;
-      }
-      
-      /* Specifically target the preserve-styling spans with inline styles */
-      .ProseMirror .preserve-styling,
-      .ProseMirror .preserve-styling[style*="font-size"] {
-        font-size: unset !important;
+        font-size: var(--applied-font-size, unset) !important;
       }
       
       /* Force styles to be read from element */
       span[style*="font-size"], 
       p[style*="font-size"],
       div[style*="font-size"] {
-        font-size: unset !important;
+        font-size: var(--applied-font-size, unset) !important;
       }
 
       /* Remove this default value that might be causing issues */
@@ -92,6 +80,11 @@ export const FontSizeStyles = () => {
       /* Only apply specific sizes when explicitly set */
       .ProseMirror p:not([style*="font-size"]) {
         font-size: 16px !important;
+      }
+      
+      /* Add a specific class for refreshing fonts */
+      .ProseMirror.refresh-fonts {
+        transform: translateZ(0);
       }
     `}</style>
   );

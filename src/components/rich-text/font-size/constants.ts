@@ -32,3 +32,6 @@ export const EVENT_SOURCES = {
   DIRECT_DOM_CHECK: 'direct-dom-check',
   UNKNOWN: 'unknown'
 };
+
+/** Preset font sizes available in the dropdown */
+export const TEXT_PRESETS = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];

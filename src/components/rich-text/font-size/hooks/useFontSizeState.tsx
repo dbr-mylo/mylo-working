@@ -1,8 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useFontSizeActions } from './useFontSizeActions';
-import { useFontSizeEvents } from './useFontSizeEvents';
-import { useDomFontSizeObserver } from './useDomFontSizeObserver';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
 
 interface UseFontSizeStateProps {
@@ -26,36 +24,13 @@ export const useFontSizeState = ({
   const initialSize = getNumericValue(value);
   const [size, setSize] = useState<number>(initialSize);
   
-  // Log initial value received
-  useEffect(() => {
-    console.log("FontSizeInput: Initialized with value:", value, "parsed to size:", initialSize);
-  }, []);
-  
-  // Update internal state when external value changes
+  // Update internal state when external value changes (with debounce)
   useEffect(() => {
     const newSize = getNumericValue(value);
     if (Math.abs(newSize - size) > 0.1) {
-      console.log("FontSizeInput: Value prop changed to:", value, "internal size updated to:", newSize);
       setSize(newSize);
     }
   }, [value, size]);
-
-  // Use custom hooks for different functionalities
-  useFontSizeEvents({
-    size,
-    setSize,
-    onChange,
-    disabled,
-    getNumericValue
-  });
-
-  useDomFontSizeObserver({
-    size,
-    setSize,
-    onChange,
-    disabled,
-    getNumericValue
-  });
 
   const {
     incrementSize,

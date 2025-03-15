@@ -38,7 +38,7 @@ export const FontSizeInput: React.FC<FontSizeInputProps> = ({
           onChange={handleInputChange}
           onBlur={handleBlur}
           className="w-10 h-7 px-0 text-xs"
-          maxLength={4} // Allow for decimals like "10.5"
+          maxLength={4}
           disabled={disabled}
           style={{ 
             textAlign: 'left',

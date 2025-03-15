@@ -7,7 +7,7 @@ export const useFontSizeTracking = (editor: Editor | null) => {
   const [currentFontSize, setCurrentFontSize] = useState("16px");
   const [isTextSelected, setIsTextSelected] = useState(false);
   
-  // Track text selection state
+  // Track text selection state with debounce to prevent excessive updates
   useEffect(() => {
     if (!editor) return;
     
@@ -27,7 +27,7 @@ export const useFontSizeTracking = (editor: Editor | null) => {
     };
   }, [editor]);
   
-  // Track font size from editor
+  // Track font size from editor with reduced update frequency
   useEffect(() => {
     if (!editor || !isTextSelected) return;
     
@@ -38,23 +38,34 @@ export const useFontSizeTracking = (editor: Editor | null) => {
       }
     };
     
+    // Initial update
     updateFontSize();
     
-    // Listen for changes that might affect font size
+    // Use a throttled handler for transaction updates
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     const handleTransaction = () => {
-      if (isTextSelected) {
+      if (!isTextSelected) return;
+      
+      // Clear any pending update
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      // Schedule update with 50ms delay to reduce processing frequency
+      timeoutId = setTimeout(() => {
         updateFontSize();
-      }
+        timeoutId = null;
+      }, 50);
     };
     
     editor.on('transaction', handleTransaction);
     
     return () => {
       editor.off('transaction', handleTransaction);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [editor, isTextSelected, currentFontSize]);
 
-  // Handle font size change from user input
+  // Simplified font size change handler
   const handleFontSizeChange = useCallback((fontSize: string) => {
     if (!editor || !isTextSelected) return;
     
@@ -63,7 +74,7 @@ export const useFontSizeTracking = (editor: Editor | null) => {
       const numericSize = parseFontSize(fontSize);
       const formattedSize = formatFontSize(numericSize);
       
-      // Update state
+      // Update state directly without DOM queries
       setCurrentFontSize(formattedSize);
       
       // Update editor

@@ -125,7 +125,7 @@ export type Database = {
     }
     Enums: {
       document_status: "draft" | "published"
-      user_role: "editor" | "designer"
+      user_role: "editor" | "designer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never

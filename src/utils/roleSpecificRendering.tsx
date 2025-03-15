@@ -85,6 +85,33 @@ export const DesignerOrAdminOnly: React.FC<{
 };
 
 /**
+ * Editor or Admin only component
+ */
+export const EditorOrAdminOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['editor', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
+ * Component that renders for all except specified roles
+ */
+export const ExcludeRoles: React.FC<{
+  excludeRoles: UserRole[];
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ excludeRoles, children, fallback = null }) => {
+  const { role: userRole } = useAuth();
+  
+  if (userRole && !excludeRoles.includes(userRole)) {
+    return <>{children}</>;
+  }
+  
+  return <>{fallback}</>;
+};
+
+/**
  * Hook to get role-specific value
  */
 export function useRoleSpecificValue<T>(designerValue: T, editorValue: T, adminValue: T = designerValue): T {
@@ -123,6 +150,28 @@ export function useIsEditor(): boolean {
 export function useIsAdmin(): boolean {
   const { role } = useAuth();
   return role === 'admin';
+}
+
+/**
+ * Hook to check if user has one of multiple roles
+ */
+export function useHasAnyRole(roles: UserRole[]): boolean {
+  const { role } = useAuth();
+  return role ? roles.includes(role) : false;
+}
+
+/**
+ * Hook to check if user has designer or admin role
+ */
+export function useIsDesignerOrAdmin(): boolean {
+  return useHasAnyRole(['designer', 'admin']);
+}
+
+/**
+ * Hook to check if user has editor or admin role
+ */
+export function useIsEditorOrAdmin(): boolean {
+  return useHasAnyRole(['editor', 'admin']);
 }
 
 /**

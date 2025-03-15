@@ -1,50 +1,37 @@
+
 import { Editor } from '@tiptap/react';
 
 /**
  * Gets the font size from the DOM based on current text selection
+ * Simplified to avoid performance issues
  */
 export const getDomFontSize = (editor: Editor | null): string | null => {
   if (!editor || !editor.view) return null;
   
   try {
+    // Get directly from editor attributes first (fastest)
+    const editorFontSize = editor.getAttributes('textStyle').fontSize;
+    if (editorFontSize) return editorFontSize;
+    
+    // Only do DOM operations if we couldn't get from editor
     const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      
-      // If no real selection, try to get from cursor position
-      if (range.collapsed) {
-        // Get the node at cursor position
-        const node = range.startContainer;
-        if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
-          const style = window.getComputedStyle(node.parentElement);
-          return style.fontSize;
-        }
-      } else {
-        // For text selection, create a temporary span to compute style
-        const span = document.createElement('span');
-        const clonedRange = range.cloneRange();
-        const fragment = clonedRange.cloneContents();
-        
-        if (fragment.firstChild) {
-          // Check direct style on first child if it's an element
-          if (fragment.firstChild.nodeType === Node.ELEMENT_NODE) {
-            const style = window.getComputedStyle(fragment.firstChild as Element);
-            return style.fontSize;
-          }
-          
-          // Otherwise check computed style
-          span.appendChild(fragment);
-          document.body.appendChild(span);
-          const style = window.getComputedStyle(span);
-          const fontSize = style.fontSize;
-          document.body.removeChild(span);
-          return fontSize;
-        }
-      }
-    }
+    if (!selection || selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return null;
+    
+    // Get parent element of selection
+    const parentElement = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+      ? range.commonAncestorContainer.parentElement
+      : range.commonAncestorContainer as Element;
+    
+    if (!parentElement || !(parentElement instanceof Element)) return null;
+    
+    // Get computed style
+    const style = window.getComputedStyle(parentElement);
+    return style.fontSize;
   } catch (error) {
     console.error("Error getting DOM font size:", error);
+    return null;
   }
-  
-  return null;
 };

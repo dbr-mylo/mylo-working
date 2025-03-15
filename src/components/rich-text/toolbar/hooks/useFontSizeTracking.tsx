@@ -1,102 +1,81 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
-import { useEditorFontSizeState } from './useEditorFontSizeState';
-import { useFontSizeEventHandling } from './useFontSizeEventHandling';
-import { getDomFontSize } from './utils/domFontSizeUtils';
-import { useToast } from '@/hooks/use-toast';
 import { parseFontSize, formatFontSize } from '@/components/rich-text/font-size/utils';
 
 export const useFontSizeTracking = (editor: Editor | null) => {
   const [currentFontSize, setCurrentFontSize] = useState("16px");
-  const { toast } = useToast();
+  const [isTextSelected, setIsTextSelected] = useState(false);
   
-  // Get font size state from editor
-  const editorFontSizeState = useEditorFontSizeState(editor);
-  
-  // Initialize state from editor
-  useEffect(() => {
-    console.log("Font size tracking: Initial state from editor:", editorFontSizeState.currentFontSize, 
-      "isTextSelected:", editorFontSizeState.isTextSelected);
-    
-    if (editorFontSizeState.currentFontSize !== currentFontSize) {
-      setCurrentFontSize(editorFontSizeState.currentFontSize);
-    }
-  }, []);
-  
-  // Update current font size when editor state changes
-  useEffect(() => {
-    if (editorFontSizeState.currentFontSize !== currentFontSize) {
-      console.log("Updating font size from editor state:", editorFontSizeState.currentFontSize);
-      setCurrentFontSize(editorFontSizeState.currentFontSize);
-    }
-  }, [editorFontSizeState.currentFontSize, currentFontSize]);
-  
-  // Handle events that change font size
-  useFontSizeEventHandling({
-    onFontSizeChange: (fontSize: string) => {
-      console.log("Font size event received:", fontSize);
-      setCurrentFontSize(fontSize);
-    }
-  });
-
-  // Check DOM directly for a more accurate font size
+  // Track text selection state
   useEffect(() => {
     if (!editor) return;
     
-    const checkDomFontSize = () => {
-      const domSize = getDomFontSize(editor);
-      if (domSize && domSize !== currentFontSize) {
-        console.log("Direct DOM font size check detected:", domSize);
-        setCurrentFontSize(domSize);
-      }
+    const checkSelection = () => {
+      const { from, to } = editor.state.selection;
+      setIsTextSelected(from !== to);
     };
-    
-    // Check on selection and transaction events
-    const handleUpdate = () => {
-      if (editorFontSizeState.isTextSelected) {
-        checkDomFontSize();
-      }
-    };
-    
-    editor.on('selectionUpdate', handleUpdate);
-    editor.on('transaction', handleUpdate);
     
     // Initial check
-    const timeoutId = setTimeout(checkDomFontSize, 100);
+    checkSelection();
+    
+    // Listen for selection changes
+    editor.on('selectionUpdate', checkSelection);
     
     return () => {
-      editor.off('selectionUpdate', handleUpdate);
-      editor.off('transaction', handleUpdate);
-      clearTimeout(timeoutId);
+      editor.off('selectionUpdate', checkSelection);
     };
-  }, [editor, currentFontSize, editorFontSizeState.isTextSelected]);
-
-  const handleFontSizeChange = useCallback((fontSize: string) => {
-    if (!editor) return;
-    
-    console.log("EditorToolbar: Setting font size to:", fontSize);
-    
-    // Make sure fontSize is in the correct format
-    const numericSize = parseFontSize(fontSize);
-    const formattedSize = formatFontSize(numericSize);
-    
-    // Update state and editor
-    setCurrentFontSize(formattedSize);
-    editor.chain().focus().setFontSize(formattedSize).run();
-    
-    // Force a refresh of font cache
-    const timeoutId = setTimeout(() => {
-      const refreshEvent = new CustomEvent('tiptap-clear-font-cache');
-      document.dispatchEvent(refreshEvent);
-    }, 10);
-    
-    return () => clearTimeout(timeoutId);
   }, [editor]);
+  
+  // Track font size from editor
+  useEffect(() => {
+    if (!editor || !isTextSelected) return;
+    
+    const updateFontSize = () => {
+      const fontSize = editor.getAttributes('textStyle').fontSize;
+      if (fontSize && fontSize !== currentFontSize) {
+        setCurrentFontSize(fontSize);
+      }
+    };
+    
+    updateFontSize();
+    
+    // Listen for changes that might affect font size
+    const handleTransaction = () => {
+      if (isTextSelected) {
+        updateFontSize();
+      }
+    };
+    
+    editor.on('transaction', handleTransaction);
+    
+    return () => {
+      editor.off('transaction', handleTransaction);
+    };
+  }, [editor, isTextSelected, currentFontSize]);
+
+  // Handle font size change from user input
+  const handleFontSizeChange = useCallback((fontSize: string) => {
+    if (!editor || !isTextSelected) return;
+    
+    try {
+      // Format the font size
+      const numericSize = parseFontSize(fontSize);
+      const formattedSize = formatFontSize(numericSize);
+      
+      // Update state
+      setCurrentFontSize(formattedSize);
+      
+      // Update editor
+      editor.chain().focus().setFontSize(formattedSize).run();
+    } catch (error) {
+      console.error("Error changing font size:", error);
+    }
+  }, [editor, isTextSelected]);
 
   return {
     currentFontSize,
-    isTextSelected: editorFontSizeState.isTextSelected,
+    isTextSelected,
     handleFontSizeChange
   };
 };

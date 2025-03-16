@@ -8,7 +8,7 @@ import {
   useIsAdmin, 
   useIsDesigner, 
   useIsDesignerOrAdmin 
-} from "@/utils/roleSpecificRendering";
+} from "@/utils/roles/RoleHooks";
 
 interface TemplateManagerProps {
   onLoadTemplate?: (doc: Document) => void;

@@ -1,16 +1,15 @@
+
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { DocumentTitle } from "./DocumentTitle";
-import { DocumentControls } from "./DocumentControls";
-import { ExternalActions } from "./ExternalActions";
-import { CloseDocumentDialog } from "./CloseDocumentDialog";
-import { fetchUserDocuments, hasUnsavedChanges } from "./EditorNavUtils";
-import type { Document } from "@/lib/types";
+import { fetchUserDocuments } from "./EditorNavUtils";
+import { DocumentTitle } from "./components/DocumentTitle";
+import { DocumentControls } from "./components/DocumentControls";
+import { ExternalActions } from "./components/ExternalActions";
+import { CloseDocumentDialog } from "./components/CloseDocumentDialog";
+import { useDocumentTitle, useCloseDocument, useDocumentSave } from "./hooks";
 
 export const EditorNav = ({ 
   currentRole, 
@@ -22,23 +21,37 @@ export const EditorNav = ({
   initialContent = "" 
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
-  const { toast } = useToast();
-  const [title, setTitle] = useState(documentTitle);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [titlePlaceholder, setTitlePlaceholder] = useState(
     currentRole === "designer" ? "Create Template Title" : "Create Document Title"
   );
-  const [showCloseDialog, setShowCloseDialog] = useState(false);
-  const navigate = useNavigate();
-  const isDesigner = currentRole === "designer";
   
   // Use a slightly smaller nav height for designers, but not as compressed as h-8
-  const navHeight = isDesigner ? "h-10" : "h-14";
+  const navHeight = currentRole === "designer" ? "h-10" : "h-14";
+  const documentType = currentRole === "designer" ? "template" : "document";
 
-  useEffect(() => {
-    setTitle(documentTitle);
-  }, [documentTitle]);
+  // Use our custom hooks
+  const { title, handleTitleChange, handleTitleBlur } = useDocumentTitle({
+    initialTitle: documentTitle,
+    onTitleChange
+  });
+  
+  const { showCloseDialog, setShowCloseDialog, handleCloseDocument, 
+          handleCloseWithoutSaving, handleSaveAndClose } = useCloseDocument({
+    content,
+    initialContent,
+    title,
+    documentTitle,
+    onSave
+  });
+  
+  const { isSaving, handleSave } = useDocumentSave({
+    onSave,
+    loadDocuments,
+    content,
+    documentType
+  });
 
   useEffect(() => {
     loadDocuments();
@@ -49,81 +62,18 @@ export const EditorNav = ({
     setTitlePlaceholder(currentRole === "designer" ? "Create Template Title" : "Create Document Title");
   }, [currentRole]);
 
-  const loadDocuments = async (): Promise<void> => {
+  async function loadDocuments(): Promise<void> {
     setIsLoadingDocs(true);
     try {
       const docs = await fetchUserDocuments(user?.id, currentRole);
       setDocuments(docs);
     } catch (error) {
       console.error("Error loading documents:", error);
-      toast({
-        title: `Error loading ${currentRole === "designer" ? "templates" : "documents"}`,
-        description: `There was a problem loading your ${currentRole === "designer" ? "templates" : "documents"}.`,
-        variant: "destructive",
-      });
     } finally {
       setIsLoadingDocs(false);
     }
     return Promise.resolve();
-  };
-
-  const handleCloseDocument = (): Promise<void> => {
-    console.log("Close document triggered. Content length:", content?.length);
-    console.log("Initial content length:", initialContent?.length);
-    
-    if (hasUnsavedChanges(content, initialContent, title, documentTitle)) {
-      console.log("Unsaved changes detected, showing dialog");
-      setShowCloseDialog(true);
-    } else {
-      console.log("No unsaved changes, navigating to document list");
-      navigateToDocumentList();
-    }
-    return Promise.resolve();
-  };
-
-  const navigateToDocumentList = (): Promise<void> => {
-    navigate('/');
-    return Promise.resolve();
-  };
-
-  const handleCloseWithoutSaving = async (): Promise<void> => {
-    console.log("Closing without saving");
-    setShowCloseDialog(false);
-    await navigateToDocumentList();
-    return Promise.resolve();
-  };
-
-  const handleSaveAndClose = async (): Promise<void> => {
-    console.log("Saving and closing");
-    setShowCloseDialog(false);
-    
-    if (onSave) {
-      console.log("Calling onSave");
-      await onSave();
-      console.log("Save completed");
-    }
-    
-    console.log("Navigating away");
-    await navigateToDocumentList();
-    return Promise.resolve();
-  };
-  
-  const handleSave = async (): Promise<void> => {
-    console.log("Save triggered from nav");
-    if (onSave) {
-      await onSave();
-      await loadDocuments();
-    }
-    return Promise.resolve();
-  };
-
-  const handleTitleChange = async (newTitle: string): Promise<void> => {
-    setTitle(newTitle);
-    if (onTitleChange) {
-      await onTitleChange(newTitle);
-    }
-    return Promise.resolve();
-  };
+  }
 
   return (
     <nav className={`${navHeight} border-b border-editor-border bg-white px-4 flex items-center justify-between`}>
@@ -132,6 +82,7 @@ export const EditorNav = ({
         <DocumentTitle 
           title={title}
           onTitleChange={handleTitleChange}
+          onTitleBlur={handleTitleBlur}
           isEditable={currentRole === "editor" || currentRole === "designer"}
           placeholder={titlePlaceholder}
         />
@@ -144,11 +95,13 @@ export const EditorNav = ({
       
       <div className="flex items-center space-x-2">
         <DocumentControls
-          onSave={onSave}
+          onSave={handleSave}
+          isSaving={isSaving}
           onLoadDocument={onLoadDocument}
           documents={documents}
           isLoadingDocs={isLoadingDocs}
-          content={content}
+          documentType={documentType}
+          currentRole={currentRole}
         />
         
         <ExternalActions 
@@ -160,7 +113,7 @@ export const EditorNav = ({
           variant="ghost" 
           size="icon" 
           onClick={handleCloseDocument}
-          title={`Close ${currentRole === "designer" ? "template" : "document"}`}
+          title={`Close ${documentType}`}
           className="text-gray-500 hover:text-gray-700"
         >
           <X className="w-5 h-5" />
@@ -178,7 +131,7 @@ export const EditorNav = ({
   );
 };
 
-export * from './DocumentControls';
-export * from './DocumentTitle';
-export * from './ExternalActions';
-export * from './CloseDocumentDialog';
+export * from './components/DocumentControls';
+export * from './components/DocumentTitle';
+export * from './components/ExternalActions';
+export * from './components/CloseDocumentDialog';

@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {

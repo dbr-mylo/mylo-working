@@ -1,3 +1,10 @@
+/* Import modular CSS files */
+@import "./styles/variables.css";
+@import "./styles/typography.css";
+@import "./styles/editor.css";
+@import "./styles/animations.css";
+@import "./styles/auth.css";
+
 
 /* =============================================
    Base Tailwind Imports
@@ -5,11 +12,4 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import modular CSS files */
-@import "./styles/variables.css";
-@import "./styles/typography.css";
-@import "./styles/editor.css";
-@import "./styles/animations.css";
-@import "./styles/auth.css";
 

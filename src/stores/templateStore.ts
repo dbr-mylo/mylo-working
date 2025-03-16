@@ -1,12 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
-
-export interface Template {
-  id: string;
-  name: string;
-  styles: string;
-  owner_id?: string;
-}
+import { Template } from '@/lib/types';
 
 // Get templates from localStorage
 export const getTemplates = async (): Promise<Template[]> => {
@@ -40,6 +34,9 @@ export const saveTemplate = async (template: Omit<Template, 'id'> & { id?: strin
       name: template.name,
       styles: template.styles,
       owner_id: template.owner_id,
+      status: template.status,
+      category: template.category,
+      version: template.version,
     };
     
     // Update existing or add new

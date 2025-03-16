@@ -19,6 +19,7 @@ interface ViewableContentProps {
   onClick: (e: React.MouseEvent) => void;
   templateStyles?: string;
   templateName?: string;
+  templateVersion?: number;
   templateId?: string;
 }
 
@@ -28,6 +29,7 @@ export const ViewableContent = ({
   onClick,
   templateStyles = '',
   templateName = '',
+  templateVersion = 1,
   templateId = ''
 }: ViewableContentProps) => {
   const { role } = useAuth();

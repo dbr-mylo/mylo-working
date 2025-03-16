@@ -205,6 +205,7 @@ export const DocumentPreview = ({
             templateStyles={templateStyles}
             templateName={templateName}
             templateVersion={templateVersion}
+            templateId={templateId}
           />
         ) : (
           <EmptyContent dimensions={dimensions} />

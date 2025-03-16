@@ -8,6 +8,8 @@ interface DocumentListProps {
   onDeleteDocument: (e: React.MouseEvent, documentId: string) => void;
   onSelectDocument: (documentId: string) => void;
   isDesigner?: boolean;
+  showStatus?: boolean;
+  onToggleStatus?: (documentId: string, currentStatus: string) => void;
 }
 
 export const DocumentList = ({ 
@@ -15,7 +17,9 @@ export const DocumentList = ({
   isLoading, 
   onDeleteDocument, 
   onSelectDocument,
-  isDesigner = false
+  isDesigner = false,
+  showStatus = false,
+  onToggleStatus
 }: DocumentListProps) => {
   const itemType = isDesigner ? "template" : "document";
   const itemTypePlural = isDesigner ? "templates" : "documents";
@@ -37,6 +41,9 @@ export const DocumentList = ({
           onDelete={onDeleteDocument}
           onSelect={onSelectDocument}
           isDesigner={isDesigner}
+          showStatus={showStatus}
+          status={doc.meta?.status}
+          onToggleStatus={onToggleStatus}
         />
       ))}
     </div>

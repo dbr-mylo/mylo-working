@@ -11,6 +11,7 @@ import { Editor } from "@tiptap/react";
 import { templateStore } from "@/stores/templateStore";
 import { useToast } from "@/hooks/use-toast";
 import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocumentPreviewProps {
   content: string;
@@ -35,14 +36,16 @@ export const DocumentPreview = ({
   editorInstance = null,
   templateId = ''
 }: DocumentPreviewProps) => {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { toast } = useToast();
   const isDesigner = role === "designer";
   const isEditor = role === "editor";
   
   const [templateStyles, setTemplateStyles] = useState(customStyles);
   const [templateName, setTemplateName] = useState('');
+  const [templateVersion, setTemplateVersion] = useState(1);
   const [isTemplateLoading, setIsTemplateLoading] = useState(false);
+  const [documentId, setDocumentId] = useState<string | null>(null);
   
   // Add default dimensions if the template doesn't specify them
   useEffect(() => {
@@ -70,7 +73,16 @@ export const DocumentPreview = ({
       if (templateId && isEditor) {
         setIsTemplateLoading(true);
         try {
-          const template = await templateStore.getTemplateById(templateId);
+          // Get template from Supabase directly to ensure we get the latest version
+          const { data: template, error } = await supabase
+            .from('design_templates')
+            .select('*')
+            .eq('id', templateId)
+            .eq('status', 'published')
+            .single();
+          
+          if (error) throw error;
+          
           if (template) {
             let styles = template.styles;
             
@@ -82,6 +94,53 @@ export const DocumentPreview = ({
             
             setTemplateStyles(styles);
             setTemplateName(template.name);
+            setTemplateVersion(template.version || 1);
+            
+            // Update the local templateStore
+            await templateStore.saveTemplate({
+              id: template.id,
+              name: template.name,
+              styles: template.styles,
+              status: template.status,
+              category: template.category,
+              version: template.version
+            });
+            
+            // Record template usage
+            if (user?.id && documentId) {
+              try {
+                // Check if relationship already exists
+                const { data: existingRelation } = await supabase
+                  .from('document_templates')
+                  .select('id')
+                  .eq('document_id', documentId)
+                  .eq('template_id', templateId)
+                  .single();
+                
+                // Only create if doesn't exist
+                if (!existingRelation) {
+                  await supabase
+                    .from('document_templates')
+                    .insert({
+                      document_id: documentId,
+                      template_id: templateId,
+                      template_version: template.version || 1
+                    });
+                } else {
+                  // Update version if exists
+                  await supabase
+                    .from('document_templates')
+                    .update({
+                      template_version: template.version || 1,
+                      applied_at: new Date().toISOString()
+                    })
+                    .eq('document_id', documentId)
+                    .eq('template_id', templateId);
+                }
+              } catch (e) {
+                console.error("Error recording template usage:", e);
+              }
+            }
           }
         } catch (error) {
           console.error("Error loading template:", error);
@@ -95,7 +154,16 @@ export const DocumentPreview = ({
     };
     
     loadTemplate();
-  }, [templateId, customStyles, isEditor, isDesigner]);
+  }, [templateId, customStyles, isEditor, isDesigner, user, documentId]);
+  
+  // Extract document ID from URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    const match = path.match(/\/editor\/([^\/]+)/);
+    if (match && match[1]) {
+      setDocumentId(match[1]);
+    }
+  }, []);
   
   const handleContentChange = (newContent: string) => {
     if (onContentChange) {
@@ -136,6 +204,7 @@ export const DocumentPreview = ({
             onClick={handlePreviewClick}
             templateStyles={templateStyles}
             templateName={templateName}
+            templateVersion={templateVersion}
           />
         ) : (
           <EmptyContent dimensions={dimensions} />

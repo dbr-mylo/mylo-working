@@ -11,30 +11,84 @@ export type Database = {
     Tables: {
       design_templates: {
         Row: {
+          category: string | null
           created_at: string
           id: string
           name: string
           owner_id: string | null
+          status: string
           styles: string
           updated_at: string
+          version: number
         }
         Insert: {
+          category?: string | null
           created_at?: string
           id?: string
           name: string
           owner_id?: string | null
+          status?: string
           styles: string
           updated_at?: string
+          version?: number
         }
         Update: {
+          category?: string | null
           created_at?: string
           id?: string
           name?: string
           owner_id?: string | null
+          status?: string
           styles?: string
           updated_at?: string
+          version?: number
         }
         Relationships: []
+      }
+      document_templates: {
+        Row: {
+          applied_at: string
+          created_at: string
+          document_id: string
+          id: string
+          template_id: string | null
+          template_version: number
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          created_at?: string
+          document_id: string
+          id?: string
+          template_id?: string | null
+          template_version: number
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          template_id?: string | null
+          template_version?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "design_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {

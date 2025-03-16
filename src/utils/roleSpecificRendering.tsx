@@ -112,6 +112,26 @@ export const ExcludeRoles: React.FC<{
 };
 
 /**
+ * Component that renders only for users who can create content
+ */
+export const ContentCreatorOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['editor', 'designer', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
+ * Component that renders only for users who can manage templates
+ */
+export const TemplateManagerOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
  * Hook to get role-specific value
  */
 export function useRoleSpecificValue<T>(designerValue: T, editorValue: T, adminValue: T = designerValue): T {
@@ -172,6 +192,27 @@ export function useIsDesignerOrAdmin(): boolean {
  */
 export function useIsEditorOrAdmin(): boolean {
   return useHasAnyRole(['editor', 'admin']);
+}
+
+/**
+ * Hook to check if user can manage templates
+ */
+export function useCanManageTemplates(): boolean {
+  return useHasAnyRole(['designer', 'admin']);
+}
+
+/**
+ * Hook to check if user can publish templates
+ */
+export function useCanPublishTemplates(): boolean {
+  return useHasAnyRole(['designer', 'admin']);
+}
+
+/**
+ * Hook to check if user can use templates
+ */
+export function useCanUseTemplates(): boolean {
+  return useHasAnyRole(['editor', 'designer', 'admin']);
 }
 
 /**

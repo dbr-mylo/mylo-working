@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save } from "lucide-react";
+import { Save, EyeOff, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Select,
@@ -11,8 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Switch,
+  Label
+} from "@/components/ui";
 import { templateStore, Template } from "@/stores/templateStore";
 import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
+import { useIsDesignerOrAdmin } from "@/utils/roleSpecificRendering";
 
 interface TemplateControlsProps {
   onStylesChange: (styles: string) => void;
@@ -26,6 +31,9 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
   const [customStyles, setCustomStyles] = useState<string>("");
   const [width, setWidth] = useState<string>("8.5in");
   const [height, setHeight] = useState<string>("11in");
+  const [status, setStatus] = useState<string>("draft");
+  const [category, setCategory] = useState<string>("general");
+  const canPublish = useIsDesignerOrAdmin();
   
   // Load templates when component mounts
   useEffect(() => {
@@ -36,7 +44,10 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
       // Set default template if any exist
       if (loadedTemplates.length > 0 && !selectedTemplate) {
         setSelectedTemplate(loadedTemplates[0].id);
+        setTemplateName(loadedTemplates[0].name);
         setCustomStyles(loadedTemplates[0].styles);
+        setStatus(loadedTemplates[0].status || "draft");
+        setCategory(loadedTemplates[0].category || "general");
         onStylesChange(loadedTemplates[0].styles);
         
         // Extract dimensions if available
@@ -55,7 +66,10 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
     setSelectedTemplate(templateId);
     const template = templates.find(t => t.id === templateId);
     if (template) {
+      setTemplateName(template.name);
       setCustomStyles(template.styles);
+      setStatus(template.status || "draft");
+      setCategory(template.category || "general");
       onStylesChange(template.styles);
       
       // Extract dimensions if available
@@ -91,6 +105,10 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
     onStylesChange(updatedStyles);
   };
   
+  const handleToggleStatus = () => {
+    setStatus(prev => prev === "published" ? "draft" : "published");
+  };
+  
   const saveTemplate = async () => {
     if (!templateName.trim()) {
       toast({
@@ -112,7 +130,9 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
       const savedTemplate = await templateStore.saveTemplate({
         id: selectedTemplate || undefined,
         name: templateName,
-        styles: stylesToSave
+        styles: stylesToSave,
+        status,
+        category
       });
       
       if (!selectedTemplate) {
@@ -124,7 +144,7 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
       
       toast({
         title: "Template saved",
-        description: "Your design template has been saved successfully.",
+        description: `Your design template has been saved as ${status === "published" ? "published" : "draft"}.`,
       });
     } catch (error) {
       console.error("Error saving template:", error);
@@ -142,6 +162,8 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
     setCustomStyles(generateDimensionsCSS());
     setWidth("8.5in");
     setHeight("11in");
+    setStatus("draft");
+    setCategory("general");
     onStylesChange(generateDimensionsCSS());
   };
   
@@ -173,7 +195,7 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
             <SelectContent>
               {templates.map(template => (
                 <SelectItem key={template.id} value={template.id}>
-                  {template.name}
+                  {template.name} {template.status === "published" ? "(Published)" : "(Draft)"}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -181,6 +203,49 @@ export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
           <Button variant="outline" size="sm" onClick={handleNewTemplate}>
             New
           </Button>
+        </div>
+        
+        {canPublish && (
+          <div className="flex items-center justify-between py-2">
+            <Label htmlFor="template-status" className="text-sm">
+              Template Status:
+            </Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                {status === "published" ? "Published" : "Draft"}
+              </span>
+              <Switch
+                id="template-status"
+                checked={status === "published"}
+                onCheckedChange={handleToggleStatus}
+              />
+              <span className="text-sm text-gray-400">
+                {status === "published" ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </span>
+            </div>
+          </div>
+        )}
+        
+        <div className="py-2">
+          <Label htmlFor="template-category" className="text-sm block mb-1">
+            Category
+          </Label>
+          <Select
+            value={category}
+            onValueChange={setCategory}
+          >
+            <SelectTrigger id="template-category">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="general">General</SelectItem>
+              <SelectItem value="letter">Letter</SelectItem>
+              <SelectItem value="report">Report</SelectItem>
+              <SelectItem value="invoice">Invoice</SelectItem>
+              <SelectItem value="resume">Resume</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="flex gap-2 items-center">

@@ -4,7 +4,7 @@
  * 
  * This component is specifically for the editor role.
  * It should NOT include designer-specific functionality.
- * Use the useIsEditor() hook from roleSpecificRendering.tsx to enforce this separation.
+ * Use the useIsEditor() hook from roles module to enforce this separation.
  */
 
 import { RichTextEditor } from "@/components/RichTextEditor";
@@ -12,7 +12,7 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/components/design/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsEditor } from "@/utils/roleSpecificRendering";
+import { useIsEditor } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 
 export const EditorPanel = ({

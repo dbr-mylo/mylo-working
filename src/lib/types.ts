@@ -130,3 +130,9 @@ export interface TypographyStyles {
   letterSpacing: string;
   textAlign: string;
 }
+
+export interface AuthState {
+  user: any | null;
+  role: UserRole | null;
+  isLoading: boolean;
+}

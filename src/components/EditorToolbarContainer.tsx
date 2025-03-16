@@ -2,7 +2,7 @@
 import React from 'react';
 import { Toolbar } from './editor/Toolbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useIsEditor } from '@/utils/roleSpecificRendering';
+import { useIsEditor } from '@/utils/roles';
 import { Editor } from '@tiptap/react';
 
 interface EditorToolbarContainerProps {

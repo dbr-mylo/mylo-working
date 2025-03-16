@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsAdmin } from "@/utils/roleSpecificRendering";
+import { useIsAdmin } from "@/utils/roles";
 import Index from "./pages/Index";
 import DocumentSelection from "./pages/DocumentSelection";
 import Auth from "./pages/Auth";

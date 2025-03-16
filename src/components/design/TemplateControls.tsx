@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
-import { useIsDesignerOrAdmin } from "@/utils/roles/RoleHooks";
+import { useIsDesignerOrAdmin } from "@/utils/roles";
 import { TemplateSelector } from "./template/TemplateSelector";
 import { TemplateStatus } from "./template/TemplateStatus";
 import { TemplateCategory } from "./template/TemplateCategory";

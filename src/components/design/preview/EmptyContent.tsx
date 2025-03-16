@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsDesigner } from "@/utils/roles";
 
 interface EmptyContentProps {
   dimensions?: {
@@ -10,8 +11,7 @@ interface EmptyContentProps {
 }
 
 export const EmptyContent = ({ dimensions }: EmptyContentProps) => {
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
+  const isDesigner = useIsDesigner();
   
   const width = dimensions?.width || '8.5in';
   const height = dimensions?.height || '11in';

@@ -10,7 +10,7 @@
  */
 
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { useAuth } from "@/contexts/AuthContext";
+import { useIsDesigner } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
@@ -33,8 +33,7 @@ export const EditableContent = ({
   editorInstance = null,
   templateStyles = ''
 }: EditableContentProps) => {
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
+  const isDesigner = useIsDesigner();
   
   // Important: For editor role, we explicitly set this to false to prevent template styling
   // from affecting the editable content, allowing editors to format text freely

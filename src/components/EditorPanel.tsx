@@ -12,7 +12,7 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/components/design/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsEditor } from "@/utils/roles/RoleHooks";
+import { useIsEditor } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 
 export const EditorPanel = ({

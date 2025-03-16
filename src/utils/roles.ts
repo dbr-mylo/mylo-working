@@ -6,8 +6,6 @@
  * hooks and components from the roles directory.
  */
 
-// Re-export everything from the roles directory
-export * from './roles/RoleHooks';
-export * from './roles/RoleComponents';
-export * from './roles/RoleFunctions';
-export * from './roles/types';
+// Re-export everything from the dedicated roles module
+export * from './roles';
+

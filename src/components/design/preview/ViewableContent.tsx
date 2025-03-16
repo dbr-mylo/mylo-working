@@ -7,7 +7,7 @@
  */
 
 import { useRef, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useIsDesigner, useIsAdmin } from "@/utils/roles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { DesignerViewContent } from "./DesignerViewContent";
 import { EditorViewContent } from "./EditorViewContent";
@@ -33,12 +33,10 @@ export const ViewableContent = ({
   templateVersion = 1,
   templateId = ''
 }: ViewableContentProps) => {
-  const { role } = useAuth();
+  const isDesigner = useIsDesigner();
+  const isAdmin = useIsAdmin();
   const [loadedStyles, setLoadedStyles] = useState(templateStyles);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
-  
-  const isDesigner = role === "designer";
-  const isAdmin = role === "admin";
   
   // Use the notification hook
   useTemplateNotification(templateName, isLoadingTemplate);

@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useIsDesigner } from '@/utils/roles';
 
 interface EditorContainerProps {
   children: React.ReactNode;
@@ -25,8 +25,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
   refProp,
   templateDimensions
 }) => {
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
+  const isDesigner = useIsDesigner();
   
   // Default dimensions (8.5 x 11 inches)
   const width = templateDimensions?.width || '8.5in';

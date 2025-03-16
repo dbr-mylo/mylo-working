@@ -59,7 +59,7 @@ export const DocumentCard = ({
               
               {showStatus && (
                 <Badge 
-                  variant={isPublished ? "success" : "outline"}
+                  variant={isPublished ? "default" : "outline"}
                   className={isPublished ? "bg-green-500 hover:bg-green-600" : "text-gray-500"}
                 >
                   {isPublished ? "Published" : "Draft"}

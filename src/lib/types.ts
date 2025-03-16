@@ -1,4 +1,3 @@
-
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {
@@ -55,12 +54,6 @@ export interface EditorNavProps {
 }
 
 export type UserRole = 'editor' | 'designer' | 'admin';
-
-export interface AuthState {
-  user: any | null;
-  role: UserRole | null;
-  isLoading: boolean;
-}
 
 export interface Template {
   id: string;

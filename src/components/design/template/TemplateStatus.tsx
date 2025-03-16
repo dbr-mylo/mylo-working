@@ -4,7 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { EyeOff, Eye } from "lucide-react";
 
 interface TemplateStatusProps {
-  status: string;
+  status: 'draft' | 'published';
   onToggleStatus: () => void;
   canPublish: boolean;
 }

@@ -101,7 +101,7 @@ export const DocumentPreview = ({
               id: template.id,
               name: template.name,
               styles: template.styles,
-              status: template.status,
+              status: template.status as 'draft' | 'published',
               category: template.category,
               version: template.version
             });

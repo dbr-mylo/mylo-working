@@ -13,7 +13,7 @@ export const useTemplateControls = (onStylesChange: (styles: string) => void) =>
   const [customStyles, setCustomStyles] = useState<string>("");
   const [width, setWidth] = useState<string>("8.5in");
   const [height, setHeight] = useState<string>("11in");
-  const [status, setStatus] = useState<string>("draft");
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [category, setCategory] = useState<string>("general");
 
   // Load templates when component mounts
@@ -27,7 +27,7 @@ export const useTemplateControls = (onStylesChange: (styles: string) => void) =>
         setSelectedTemplate(loadedTemplates[0].id);
         setTemplateName(loadedTemplates[0].name);
         setCustomStyles(loadedTemplates[0].styles);
-        setStatus(loadedTemplates[0].status || "draft");
+        setStatus(loadedTemplates[0].status || 'draft');
         setCategory(loadedTemplates[0].category || "general");
         onStylesChange(loadedTemplates[0].styles);
         
@@ -49,7 +49,7 @@ export const useTemplateControls = (onStylesChange: (styles: string) => void) =>
     if (template) {
       setTemplateName(template.name);
       setCustomStyles(template.styles);
-      setStatus(template.status || "draft");
+      setStatus(template.status || 'draft');
       setCategory(template.category || "general");
       onStylesChange(template.styles);
       
@@ -112,7 +112,7 @@ export const useTemplateControls = (onStylesChange: (styles: string) => void) =>
         id: selectedTemplate || undefined,
         name: templateName,
         styles: stylesToSave,
-        status,
+        status: status,
         category
       });
       

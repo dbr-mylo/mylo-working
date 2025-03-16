@@ -1,0 +1,2 @@
+
+export { templateService } from './TemplateService';

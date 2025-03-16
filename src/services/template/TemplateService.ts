@@ -2,38 +2,38 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/lib/types";
 import { toast } from "sonner";
+import { TemplateCache } from "./TemplateCache";
+import { LocalTemplateStorage } from "./LocalTemplateStorage";
 
+/**
+ * Service for managing design templates
+ * Provides methods for creating, reading, updating, and deleting templates
+ */
 class TemplateService {
-  // Cache for templates to reduce database queries
-  private cache: Map<string, Template> = new Map();
-  private allTemplatesCache: Template[] | null = null;
-  private lastFetchTimestamp: number = 0;
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
+  private cache: TemplateCache;
+  private localStorage: LocalTemplateStorage;
 
   constructor() {
+    this.cache = new TemplateCache();
+    this.localStorage = new LocalTemplateStorage();
+    
     // Subscribe to auth state changes to clear cache when user signs out
     supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        this.clearCache();
+        this.cache.clearCache();
       }
     });
   }
 
-  private clearCache() {
-    this.cache.clear();
-    this.allTemplatesCache = null;
-    this.lastFetchTimestamp = 0;
-  }
-
-  private isCacheValid(): boolean {
-    return Date.now() - this.lastFetchTimestamp < this.CACHE_TTL;
-  }
-
+  /**
+   * Gets all templates, with optional forced refresh
+   */
   async getTemplates(forceRefresh = false): Promise<Template[]> {
     // Return cached templates if available and not expired
-    if (this.allTemplatesCache && this.isCacheValid() && !forceRefresh) {
+    const cachedTemplates = this.cache.getCachedTemplates();
+    if (cachedTemplates && !forceRefresh) {
       console.log("Using cached templates");
-      return this.allTemplatesCache;
+      return cachedTemplates;
     }
 
     try {
@@ -47,31 +47,30 @@ class TemplateService {
       }
 
       // Update cache
-      this.allTemplatesCache = data as Template[];
-      this.lastFetchTimestamp = Date.now();
+      const templates = data as Template[];
+      this.cache.cacheAllTemplates(templates);
       
-      // Update individual template cache
-      data.forEach(template => {
-        this.cache.set(template.id, template as Template);
-      });
-
-      return data as Template[];
+      return templates;
     } catch (error) {
       console.error("Error fetching templates:", error);
       
       // Try to get from localStorage as fallback for guest users
       if (!supabase.auth.getSession()) {
-        return this.getLocalTemplates();
+        return this.localStorage.getLocalTemplates();
       }
       
       throw error;
     }
   }
 
+  /**
+   * Gets a template by ID
+   */
   async getTemplateById(id: string): Promise<Template | null> {
     // Return from cache if available
-    if (this.cache.has(id) && this.isCacheValid()) {
-      return this.cache.get(id) || null;
+    const cachedTemplate = this.cache.getCachedTemplate(id);
+    if (cachedTemplate) {
+      return cachedTemplate;
     }
 
     try {
@@ -91,20 +90,23 @@ class TemplateService {
 
       // Update cache
       const template = data as Template;
-      this.cache.set(id, template);
+      this.cache.cacheTemplate(template);
       return template;
     } catch (error) {
       console.error(`Error fetching template with ID ${id}:`, error);
       
       // Try to get from localStorage as fallback for guest users
       if (!supabase.auth.getSession()) {
-        return this.getLocalTemplateById(id);
+        return this.localStorage.getLocalTemplateById(id);
       }
       
       return null;
     }
   }
 
+  /**
+   * Creates a new template
+   */
   async createTemplate(template: Omit<Template, 'id'>): Promise<Template> {
     try {
       const { data, error } = await supabase
@@ -124,7 +126,7 @@ class TemplateService {
       }
 
       // Clear cache to ensure fresh data
-      this.clearCache();
+      this.cache.clearCache();
       
       const newTemplate = data as Template;
       toast.success(`Template "${newTemplate.name}" created`);
@@ -134,7 +136,7 @@ class TemplateService {
       
       // For guest users, save to localStorage
       if (!supabase.auth.getSession()) {
-        return this.createLocalTemplate(template);
+        return this.localStorage.createLocalTemplate(template);
       }
       
       toast.error("Failed to create template");
@@ -142,6 +144,9 @@ class TemplateService {
     }
   }
 
+  /**
+   * Updates an existing template
+   */
   async updateTemplate(id: string, updates: Partial<Template>): Promise<Template> {
     try {
       const { data, error } = await supabase
@@ -157,8 +162,8 @@ class TemplateService {
 
       // Update cache
       const updatedTemplate = data as Template;
-      this.cache.set(id, updatedTemplate);
-      this.allTemplatesCache = null; // Invalidate the all templates cache
+      this.cache.cacheTemplate(updatedTemplate);
+      this.cache.invalidateAllTemplates(); // Invalidate the all templates cache
       
       toast.success(`Template "${updatedTemplate.name}" updated`);
       return updatedTemplate;
@@ -167,7 +172,7 @@ class TemplateService {
       
       // For guest users, update in localStorage
       if (!supabase.auth.getSession()) {
-        return this.updateLocalTemplate(id, updates);
+        return this.localStorage.updateLocalTemplate(id, updates);
       }
       
       toast.error("Failed to update template");
@@ -175,6 +180,9 @@ class TemplateService {
     }
   }
 
+  /**
+   * Deletes a template
+   */
   async deleteTemplate(id: string): Promise<void> {
     try {
       const { error } = await supabase
@@ -187,8 +195,8 @@ class TemplateService {
       }
 
       // Update cache
-      this.cache.delete(id);
-      this.allTemplatesCache = null; // Invalidate the all templates cache
+      this.cache.invalidateTemplate(id);
+      this.cache.invalidateAllTemplates(); // Invalidate the all templates cache
       
       toast.success("Template deleted");
     } catch (error) {
@@ -196,7 +204,7 @@ class TemplateService {
       
       // For guest users, delete from localStorage
       if (!supabase.auth.getSession()) {
-        this.deleteLocalTemplate(id);
+        this.localStorage.deleteLocalTemplate(id);
         return;
       }
       
@@ -205,67 +213,11 @@ class TemplateService {
     }
   }
 
+  /**
+   * Publishes a template (changes status to 'published')
+   */
   async publishTemplate(id: string): Promise<Template> {
     return this.updateTemplate(id, { status: 'published' });
-  }
-
-  // Guest user localStorage methods
-  private getLocalTemplates(): Template[] {
-    try {
-      const templates = localStorage.getItem('designerTemplates');
-      return templates ? JSON.parse(templates) : [];
-    } catch (error) {
-      console.error("Error reading templates from localStorage:", error);
-      return [];
-    }
-  }
-
-  private getLocalTemplateById(id: string): Template | null {
-    const templates = this.getLocalTemplates();
-    return templates.find(t => t.id === id) || null;
-  }
-
-  private createLocalTemplate(template: Omit<Template, 'id'>): Template {
-    const templates = this.getLocalTemplates();
-    const newTemplate: Template = {
-      ...template,
-      id: `local-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    templates.push(newTemplate);
-    localStorage.setItem('designerTemplates', JSON.stringify(templates));
-    toast.success(`Template "${newTemplate.name}" created locally`);
-    return newTemplate;
-  }
-
-  private updateLocalTemplate(id: string, updates: Partial<Template>): Template {
-    const templates = this.getLocalTemplates();
-    const index = templates.findIndex(t => t.id === id);
-    
-    if (index === -1) {
-      throw new Error(`Template with ID ${id} not found`);
-    }
-    
-    const updatedTemplate: Template = {
-      ...templates[index],
-      ...updates,
-      updated_at: new Date().toISOString()
-    };
-    
-    templates[index] = updatedTemplate;
-    localStorage.setItem('designerTemplates', JSON.stringify(templates));
-    toast.success(`Template "${updatedTemplate.name}" updated locally`);
-    return updatedTemplate;
-  }
-
-  private deleteLocalTemplate(id: string): void {
-    const templates = this.getLocalTemplates();
-    const filteredTemplates = templates.filter(t => t.id !== id);
-    
-    localStorage.setItem('designerTemplates', JSON.stringify(filteredTemplates));
-    toast.success("Template deleted locally");
   }
 }
 

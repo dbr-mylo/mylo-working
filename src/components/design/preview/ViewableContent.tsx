@@ -1,4 +1,3 @@
-
 /**
  * ViewableContent Component
  * 
@@ -11,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { DocumentStyles } from "./DocumentStyles";
-import { templateService } from "@/services/TemplateService";
+import { templateService } from "@/services/template";
 
 interface ViewableContentProps {
   content: string;

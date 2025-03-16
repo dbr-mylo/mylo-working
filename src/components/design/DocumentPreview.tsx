@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DocumentStyles } from "./preview/DocumentStyles";
@@ -12,6 +11,7 @@ import { templateStore } from "@/stores/templateStore";
 import { useToast } from "@/hooks/use-toast";
 import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { templateService } from "@/services/template";
 
 interface DocumentPreviewProps {
   content: string;
@@ -47,12 +47,10 @@ export const DocumentPreview = ({
   const [isTemplateLoading, setIsTemplateLoading] = useState(false);
   const [documentId, setDocumentId] = useState<string | null>(null);
   
-  // Add default dimensions if the template doesn't specify them
   useEffect(() => {
     if (templateStyles) {
       const dimensions = extractDimensionsFromCSS(templateStyles);
       
-      // If dimensions aren't specified in the template, add default dimensions
       if (!dimensions) {
         const defaultDimensionsCSS = generateDimensionsCSS();
         setTemplateStyles(prev => prev + defaultDimensionsCSS);
@@ -67,13 +65,11 @@ export const DocumentPreview = ({
     handleApplyStyle
   } = useDocumentPreview(onElementSelect);
   
-  // Load template when templateId changes
   useEffect(() => {
     const loadTemplate = async () => {
       if (templateId && isEditor) {
         setIsTemplateLoading(true);
         try {
-          // Get template from Supabase directly to ensure we get the latest version
           const { data: template, error } = await supabase
             .from('design_templates')
             .select('*')
@@ -86,7 +82,6 @@ export const DocumentPreview = ({
           if (template) {
             let styles = template.styles;
             
-            // Ensure template has dimensions
             const dimensions = extractDimensionsFromCSS(styles);
             if (!dimensions) {
               styles += generateDimensionsCSS();
@@ -96,7 +91,6 @@ export const DocumentPreview = ({
             setTemplateName(template.name);
             setTemplateVersion(template.version || 1);
             
-            // Update the local templateStore
             await templateStore.saveTemplate({
               id: template.id,
               name: template.name,
@@ -106,10 +100,8 @@ export const DocumentPreview = ({
               version: template.version
             });
             
-            // Record template usage
             if (user?.id && documentId) {
               try {
-                // Check if relationship already exists
                 const { data: existingRelation } = await supabase
                   .from('document_templates')
                   .select('id')
@@ -117,7 +109,6 @@ export const DocumentPreview = ({
                   .eq('template_id', templateId)
                   .single();
                 
-                // Only create if doesn't exist
                 if (!existingRelation) {
                   await supabase
                     .from('document_templates')
@@ -127,7 +118,6 @@ export const DocumentPreview = ({
                       template_version: template.version || 1
                     });
                 } else {
-                  // Update version if exists
                   await supabase
                     .from('document_templates')
                     .update({
@@ -148,7 +138,6 @@ export const DocumentPreview = ({
           setIsTemplateLoading(false);
         }
       } else if (isDesigner) {
-        // For designers, use the custom styles directly
         setTemplateStyles(customStyles);
       }
     };
@@ -156,7 +145,6 @@ export const DocumentPreview = ({
     loadTemplate();
   }, [templateId, customStyles, isEditor, isDesigner, user, documentId]);
   
-  // Extract document ID from URL
   useEffect(() => {
     const path = window.location.pathname;
     const match = path.match(/\/editor\/([^\/]+)/);
@@ -171,12 +159,10 @@ export const DocumentPreview = ({
     }
   };
   
-  // Extract dimensions for EmptyContent
   const dimensions = extractDimensionsFromCSS(templateStyles);
   
   return (
     <div className="bg-editor-panel rounded-md">
-      {/* Show selection bar only when not editable and has selected element */}
       {!isEditable && selectedElement && (
         <SelectedElementBar 
           selectedElement={selectedElement}

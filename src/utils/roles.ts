@@ -1,12 +1,13 @@
 
-import { UserRole } from "@/lib/types";
+/**
+ * Re-exports from the role-specific modules
+ * 
+ * This is a convenience file that re-exports the commonly used
+ * hooks and components from the roles directory.
+ */
 
-export const useIsAdmin = () => {
-  // This is a simple implementation for now
-  // It can be expanded based on your authentication logic
-  const isAdmin = (role: UserRole | null): boolean => {
-    return role === "admin";
-  };
-  
-  return isAdmin;
-};
+// Re-export everything from the roles directory
+export * from './roles/RoleHooks';
+export * from './roles/RoleComponents';
+export * from './roles/RoleFunctions';
+export * from './roles/types';

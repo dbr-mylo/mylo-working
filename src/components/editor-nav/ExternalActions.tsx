@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, UserCog } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useIsAdmin } from "@/utils/roles";
+import { useIsAdmin } from "@/utils/roles/RoleHooks";
 
 interface ExternalActionsProps {
   onSignOut?: () => void;
@@ -12,7 +12,7 @@ interface ExternalActionsProps {
 
 export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsProps) => {
   const { role } = useAuth();
-  const isAdmin = useIsAdmin();
+  const isAdmin = useIsAdmin()(role);
   const navigate = useNavigate();
 
   const handleAdminPanel = () => {

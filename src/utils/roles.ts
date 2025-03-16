@@ -8,3 +8,6 @@
 
 // Re-export everything from the roles module
 export * from './roles/index';
+
+// Export the cache clearing hook
+export { useCacheClearing } from './roles/hooks/useCacheClearing';

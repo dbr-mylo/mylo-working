@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { CacheControls } from "@/components/auth/CacheControls";
 import "../styles/auth.css";
 
 export default function Auth() {
@@ -139,6 +140,8 @@ export default function Auth() {
               Admin
             </button>
           </div>
+          
+          <CacheControls />
         </div>
       </div>
     </div>

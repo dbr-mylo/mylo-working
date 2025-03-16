@@ -1,14 +1,15 @@
-
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { fetchUserDocuments } from "./EditorNavUtils";
-import { DocumentTitle } from "./components/DocumentTitle";
-import { DocumentControls } from "./components/DocumentControls";
-import { ExternalActions } from "./components/ExternalActions";
-import { CloseDocumentDialog } from "./components/CloseDocumentDialog";
+import { 
+  DocumentTitle, 
+  DocumentControls, 
+  ExternalActions,
+  CloseDocumentDialog 
+} from "./components";
 import { useDocumentTitle, useCloseDocument, useDocumentSave } from "./hooks";
 
 export const EditorNav = ({ 
@@ -27,11 +28,9 @@ export const EditorNav = ({
     currentRole === "designer" ? "Create Template Title" : "Create Document Title"
   );
   
-  // Use a slightly smaller nav height for designers, but not as compressed as h-8
   const navHeight = currentRole === "designer" ? "h-10" : "h-14";
   const documentType = currentRole === "designer" ? "template" : "document";
 
-  // Use our custom hooks
   const { title, handleTitleChange, handleTitleBlur } = useDocumentTitle({
     initialTitle: documentTitle,
     onTitleChange
@@ -58,7 +57,6 @@ export const EditorNav = ({
   }, [user]);
 
   useEffect(() => {
-    // Update placeholder based on role
     setTitlePlaceholder(currentRole === "designer" ? "Create Template Title" : "Create Document Title");
   }, [currentRole]);
 
@@ -131,7 +129,5 @@ export const EditorNav = ({
   );
 };
 
-export * from './components/DocumentControls';
-export * from './components/DocumentTitle';
-export * from './components/ExternalActions';
-export * from './components/CloseDocumentDialog';
+export * from './components';
+export * from './hooks';

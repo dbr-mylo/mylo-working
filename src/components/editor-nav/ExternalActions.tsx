@@ -12,7 +12,7 @@ interface ExternalActionsProps {
 
 export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsProps) => {
   const { role } = useAuth();
-  const isAdmin = useIsAdmin()(role);
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
 
   const handleAdminPanel = () => {

@@ -9,7 +9,4 @@
  */
 
 // Re-export everything from the new structure for backward compatibility
-export * from './roles/RoleComponents';
-export * from './roles/RoleHooks';
-export * from './roles/RoleFunctions';
-export * from './roles/types';
+export * from './roles';

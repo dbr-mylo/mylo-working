@@ -7,7 +7,4 @@
  */
 
 // Re-export everything from the roles module
-export * from './roles/RoleHooks';
-export * from './roles/RoleComponents';
-export * from './roles/RoleFunctions';
-export * from './roles/types';
+export * from './roles/index';

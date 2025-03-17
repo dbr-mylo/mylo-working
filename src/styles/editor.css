@@ -40,7 +40,7 @@
   /* Ensure the Radix select dropdown shows above content */
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important; /* Highest z-index */
-    position: relative !important;
+    position: fixed !important;
     pointer-events: auto !important;
   }
   
@@ -56,19 +56,28 @@
   /* Explicitly target Radix popover content */
   [data-radix-popper-content] {
     z-index: 9999 !important;
+    position: absolute !important;
   }
   
   /* Explicitly set positioning for font size dropdown */
   .font-size-dropdown-content {
     z-index: 9999 !important;
     position: absolute !important;
-    transform: none !important;
     top: auto !important;
     left: auto !important;
     background-color: white !important;
     border-radius: 0.375rem !important;
     overflow: hidden !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Force Radix popover to position correctly */
+  [data-radix-popper-content-wrapper] {
+    position: absolute !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: none !important;
   }
   
   /* Ensure toast notifications appear above everything */
@@ -139,6 +148,21 @@
     position: absolute !important;
     transform-origin: top center !important;
     animation: dropdown-appear 0.1s ease-out !important;
+  }
+  
+  /* Fix for Radix UI select dropdown positioning issues */
+  [data-radix-select-content][data-side="bottom"] {
+    top: 100% !important;
+    bottom: auto !important;
+    margin-top: 8px !important;
+  }
+  
+  /* Fix for font size dropdown specific issues */
+  .font-size-dropdown-content[data-state="open"] {
+    position: absolute !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
   }
   
   @keyframes dropdown-appear {

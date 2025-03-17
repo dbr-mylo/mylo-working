@@ -180,4 +180,10 @@
       transform: translateY(0);
     }
   }
+  
+  /* Update the panel background color to match the hex value */
+  .bg-editor-panel {
+    --tw-bg-opacity: 1;
+    background-color: rgb(243 244 246 / var(--tw-bg-opacity)) !important;
+  }
 }

@@ -41,9 +41,9 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
   }
   
   return (
-    <div className="flex h-[calc(100vh-56px)]">
+    <div className="flex h-[calc(100vh-56px-48px)]">
       {/* Editor panel - left side */}
-      <div className="w-1/2 bg-editor-bg overflow-auto h-full">
+      <div className="w-1/2 bg-white overflow-auto h-full">
         <EditorPanel
           content={content}
           onContentChange={onContentChange}
@@ -54,17 +54,15 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
       </div>
       
       {/* Preview panel - right side */}
-      <div className="w-1/2 bg-design-panel overflow-auto h-full">
-        <div className="p-4 md:p-8 h-full">
-          <div className="mx-auto h-full">
-            <DocumentPreview 
-              content={content}
-              customStyles={customStyles}
-              isEditable={false}
-              onContentChange={onContentChange}
-              templateId={templateId}
-            />
-          </div>
+      <div className="w-1/2 bg-gray-100 overflow-auto h-full">
+        <div className="p-4 md:p-8">
+          <DocumentPreview 
+            content={content}
+            customStyles={customStyles}
+            isEditable={false}
+            onContentChange={onContentChange}
+            templateId={templateId}
+          />
         </div>
       </div>
     </div>

@@ -6,7 +6,6 @@
 @import "./styles/animations.css";
 @import "./styles/auth.css";
 
-
 /* =============================================
    Base Tailwind Imports
 ============================================= */
@@ -18,12 +17,22 @@
    Custom Global CSS for Popups & Dropdowns
 ============================================= */
 @layer utilities {
+  /* Global dropdown container styles */
+  [data-radix-popper-content-wrapper] {
+    position: absolute !important;
+    z-index: 9999 !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+  }
+  
   /* Ensure all dropdown content is visible */
   [data-radix-select-content] {
     background-color: white !important;
     border-radius: 0.375rem !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     z-index: 9999 !important;
+    position: absolute !important;
   }
   
   /* Fix for Select component dropdown visibility */
@@ -31,21 +40,31 @@
     background-color: white !important;
     z-index: 9999 !important;
     position: absolute !important;
+    top: auto !important;
+    left: auto !important;
   }
   
   /* Fix positioning of portal-based components */
   [data-radix-portal] {
     position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
     pointer-events: none !important;
     z-index: 9999 !important;
+    width: auto !important;
+    height: auto !important;
   }
   
   /* Allow clicks on portal content */
   [data-radix-portal] > * {
     pointer-events: auto !important;
+  }
+  
+  /* Specific selector for font size dropdown in editor */
+  .editor-toolbar-container [data-radix-select-content],
+  .editor-toolbar [data-radix-select-content] {
+    position: absolute !important;
+    z-index: 9999 !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
   }
 }

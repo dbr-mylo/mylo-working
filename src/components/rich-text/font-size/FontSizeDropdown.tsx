@@ -55,8 +55,12 @@ export const FontSizeDropdown: React.FC<FontSizeDropdownProps> = ({
           <SelectValue placeholder="Size" />
         </SelectTrigger>
         <SelectContent
-          position="item-aligned"
+          position="popper"
+          align="start"
+          sideOffset={5}
           className="font-size-dropdown-content"
+          avoidCollisions={true}
+          collisionPadding={20}
           style={{ 
             backgroundColor: 'white',
             zIndex: 9999,

@@ -1,3 +1,4 @@
+
 /* =============================================
    Designer Mode Specific Styles
 ============================================= */
@@ -68,9 +69,24 @@
     z-index: 50 !important;
   }
   
-  /* Ensure the Radix select dropdown shows above content */
+  /* Specific dropdown z-index fixes */
+  .font-size-dropdown-content {
+    position: absolute !important;
+    z-index: 9999 !important; 
+    background-color: white !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    margin-top: 4px !important;
+  }
+
+  /* Fix for Radix popper content positioning */
   [data-radix-popper-content-wrapper] {
-    z-index: 9999 !important; /* Highest z-index */
+    position: absolute !important;
+    z-index: 9999 !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 4px !important;
   }
   
   /* Fix for menus and dropdowns to appear correctly */
@@ -79,7 +95,8 @@
   [role="tooltip"],
   [role="menu"],
   [data-state="open"] ~ [data-radix-popper-content] {
-    z-index: 9999 !important; /* Highest z-index */
+    z-index: 9999 !important;
+    position: absolute !important;
   }
   
   /* For poppers in inline editor toolbar */
@@ -88,6 +105,7 @@
   [data-side="left"],
   [data-side="right"] {
     z-index: 9999 !important;
+    position: absolute !important;
   }
   
   /* Fix for Select content appearance */
@@ -95,6 +113,7 @@
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
+    position: absolute !important;
   }
   
   /* Specifically target font size dropdown for editor role */
@@ -102,6 +121,13 @@
     background-color: white !important;
     z-index: 9999 !important;
     display: block !important;
+    position: absolute !important;
+  }
+  
+  /* Fix for Radix Select positioning */
+  [data-radix-select-viewport] {
+    position: relative !important;
+    z-index: 9999 !important;
   }
   
   /* Ensure toast notifications appear above everything */
@@ -114,7 +140,7 @@
   .sonner-toast,
   div[data-sonner-toast],
   div[data-toast-container] {
-    z-index: 99999 !important; /* Super high z-index */
+    z-index: 99999 !important;
     position: relative !important;
   }
   
@@ -152,6 +178,8 @@
     position: absolute !important;
     transform-origin: top center !important;
     animation: dropdown-appear 0.1s ease-out !important;
+    top: auto !important;
+    left: auto !important;
   }
   
   @keyframes dropdown-appear {

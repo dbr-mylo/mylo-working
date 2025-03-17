@@ -3,9 +3,15 @@
  * EditorView Component
  *
  * This component is specifically for the editor role.
+ * It shows a live preview of the document with a fixed toolbar.
  */
 
 import React from 'react';
+import { RichTextEditor } from "@/components/RichTextEditor";
+import { useTemplateStyles } from "@/hooks/useTemplateStyles";
+import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { useIsEditor } from "@/utils/roles";
+import { Editor } from "@tiptap/react";
 
 interface EditorViewProps {
   content: string;
@@ -26,11 +32,40 @@ export const EditorView = ({
   templateId,
   isMobile
 }: EditorViewProps) => {
-  // For now, we're creating a stub to maintain the directory structure
-  // This will need to be properly implemented
+  const isEditor = useIsEditor();
+  
+  // Extract dimensions from template styles, or use default 8.5x11 inches
+  const dimensions = extractDimensionsFromCSS(customStyles);
+  const pageWidth = dimensions?.width || '8.5in';
+  const pageHeight = dimensions?.height || '11in';
+  
+  const handleContentUpdate = (newContent: string) => {
+    console.log("Content updated in EditorView");
+    onContentChange(newContent);
+  };
+
+  if (!isEditor) {
+    console.warn("EditorView component used outside of editor role context");
+  }
+  
   return (
-    <div className="w-full bg-white">
-      <p>Editor View (Placeholder)</p>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-editor-panel ${!isMobile ? 'animate-slide-in' : ''} overflow-auto h-full flex flex-col`}>
+      <div className="p-4 pt-6 md:p-8 md:pt-6 flex-grow">
+        <div className="mx-auto mt-0">
+          <div className="bg-editor-panel rounded-md">
+            <div className="mx-auto" style={{ width: pageWidth }}>
+              <RichTextEditor 
+                content={content} 
+                onUpdate={handleContentUpdate}
+                isEditable={isEditable}
+                hideToolbar={true} // Hide the toolbar since we're using external toolbar
+                externalToolbar={true}
+                templateStyles={customStyles}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

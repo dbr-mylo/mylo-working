@@ -4,6 +4,7 @@ import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -19,14 +20,33 @@ export const StyleEditorModal = ({
   onStyleSaved,
 }: StyleEditorModalProps) => {
   const { toast } = useToast();
+  const [localStyle, setLocalStyle] = useState<TextStyle | null>(null);
+  
+  // Update local style when prop changes
+  useEffect(() => {
+    if (style) {
+      setLocalStyle(style);
+    } else if (isOpen) {
+      // Set default values for a new style
+      setLocalStyle({
+        id: '',
+        name: 'New Style',
+        fontFamily: 'Inter',
+        fontSize: '16px',
+        fontWeight: '400',
+        color: '#000000',
+        lineHeight: '1.5',
+        letterSpacing: '0',
+        selector: 'p',
+        description: ''
+      });
+    }
+  }, [style, isOpen]);
   
   const handleSave = async (formData: StyleFormData) => {
     try {
-      // Ensure we have values for required fields
       const styleData = {
         ...formData,
-        name: formData.name || "New Style",
-        selector: formData.selector || "p",
         id: style?.id, // If editing, keep the existing ID
       };
       
@@ -49,35 +69,22 @@ export const StyleEditorModal = ({
     }
   };
 
-  // Default values for a new style if none is provided
-  const defaultStyle: TextStyle = {
-    id: '',
-    name: 'New Style',
-    fontFamily: 'Inter',
-    fontSize: '16px',
-    fontWeight: '400',
-    color: '#000000',
-    lineHeight: '1.5',
-    letterSpacing: '0',
-    selector: 'p',
-    description: ''
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xs p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-2 pb-2">
-          <DialogTitle className="text-xs font-semibold">
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
             {style ? `Edit Style: ${style.name}` : "Create New Style"}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="px-2 pb-2">
-          <StyleForm 
-            initialValues={style || defaultStyle}
-            onSubmit={handleSave}
-            compact={true}
-          />
+        <div className="py-4">
+          {localStyle && (
+            <StyleForm 
+              initialValues={localStyle}
+              onSubmit={handleSave}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>

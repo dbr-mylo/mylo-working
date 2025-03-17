@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
@@ -88,13 +87,11 @@ const SelectContent = React.forwardRef<
         zIndex: 9999, // Explicitly set highest z-index
         backgroundColor: 'white',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        position: 'absolute',
         ...style 
       }}
       position={position}
-      align={props.align || "start"}
-      sideOffset={props.sideOffset || 5}
-      avoidCollisions={true}
+      sideOffset={props.sideOffset || 4}
+      collisionPadding={8}
       {...props}
     >
       <SelectScrollUpButton />

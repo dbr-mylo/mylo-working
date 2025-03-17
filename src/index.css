@@ -17,7 +17,7 @@
    Custom Global CSS for Popups & Dropdowns
 ============================================= */
 @layer utilities {
-  /* All dropdowns and popups should be visible and positioned correctly */
+  /* Fix for all dropdown and portal elements */
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
   }
@@ -46,5 +46,10 @@
   .editor-toolbar-container [data-radix-select-viewport],
   .editor-toolbar [data-radix-select-viewport] {
     background-color: white !important;
+  }
+  
+  /* Critical position fix for Select content in editor */
+  [data-role="editor"] [data-radix-select-content][data-side="bottom"] {
+    transform: translateY(5px) !important;
   }
 }

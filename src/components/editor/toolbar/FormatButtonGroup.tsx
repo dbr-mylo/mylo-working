@@ -12,7 +12,7 @@ interface FormatButtonGroupProps {
 
 export const FormatButtonGroup: React.FC<FormatButtonGroupProps> = ({ editor, currentColor }) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-1">
       <Button
         variant="ghost"
         size="xs"

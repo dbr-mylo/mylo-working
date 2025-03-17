@@ -12,7 +12,7 @@ interface ListButtonGroupProps {
 
 export const ListButtonGroup: React.FC<ListButtonGroupProps> = ({ editor, currentColor }) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-1">
       <Button
         variant="ghost"
         size="xs"

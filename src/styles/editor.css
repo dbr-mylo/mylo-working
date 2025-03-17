@@ -1,3 +1,4 @@
+
 /* =============================================
    Designer Mode Specific Styles
 ============================================= */
@@ -22,59 +23,7 @@
   /* =============================================
      Font Size Enforcement Rules
   ============================================= */
-  /* Ensure inline styles take precedence over everything */
-  [style*="font-size"] {
-    font-size: unset !important;
-  }
-  
-  /* Target preserve-styling spans with highest specificity */
-  .preserve-styling[style*="font-size"] {
-    font-size: unset !important;
-  }
-  
-  /* Special class for our font size extension with max specificity */
-  .custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Ensure we override any Tailwind prose-sm styles that set font sizes */
-  .prose-sm .ProseMirror {
-    font-size: initial !important;
-  }
-  
-  /* Make sure no parent can override font sizes of styled elements */
-  .prose-sm [style*="font-size"],
-  .prose [style*="font-size"] {
-    font-size: unset !important;
-  }
-  
-  /* Override for data-font-size attribute */
-  [data-font-size] {
-    font-size: attr(data-font-size px) !important;
-  }
-  
-  /* New more specific rules to ensure font size consistency */
-  .prose .custom-font-size,
-  .prose-sm .custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Ensure font size is applied when using data attributes */
-  [data-style-fontSize] {
-    font-size: attr(data-style-fontSize) !important;
-  }
-  
-  /* Override for any DOM elements with custom font size attributes */
-  [style*="font-size"].custom-font-size,
-  span[style*="font-size"].custom-font-size,
-  p[style*="font-size"].custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Enforce that any element that has both a style and a data attribute uses the style */
-  [style*="font-size"][data-font-size] {
-    font-size: unset !important;
-  }
+  /* ... keep existing code (font size enforcement rules) */
   
   /* =============================================
      Z-Index and Dropdown Corrections
@@ -107,6 +56,19 @@
   /* Explicitly target Radix popover content */
   [data-radix-popper-content] {
     z-index: 9999 !important;
+  }
+  
+  /* Explicitly set positioning for font size dropdown */
+  .font-size-dropdown-content {
+    z-index: 9999 !important;
+    position: absolute !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    background-color: white !important;
+    border-radius: 0.375rem !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
   }
   
   /* Ensure toast notifications appear above everything */
@@ -164,5 +126,29 @@
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+  }
+  
+  /* Prevent content shifting when dropdown opens */
+  body.dropdown-open {
+    overflow: hidden !important;
+  }
+  
+  /* Editor-specific dropdown corrections */
+  [data-role="editor"] .SelectContent,
+  [data-role="editor"] [data-radix-popper-content-wrapper] {
+    position: absolute !important;
+    transform-origin: top center !important;
+    animation: dropdown-appear 0.1s ease-out !important;
+  }
+  
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

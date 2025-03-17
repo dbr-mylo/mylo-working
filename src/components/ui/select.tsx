@@ -86,9 +86,13 @@ const SelectContent = React.forwardRef<
       style={{ 
         borderRadius: '0.375rem',
         zIndex: 9999, // Explicitly set highest z-index
+        backgroundColor: 'white',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         ...style 
       }}
       position={position}
+      sideOffset={props.sideOffset || 5}
+      avoidCollisions={true}
       {...props}
     >
       <SelectScrollUpButton />

@@ -50,7 +50,7 @@ export const EditorView = ({
   }
   
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-gray-100 h-full overflow-auto`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-[#f3f4f6] h-full overflow-auto`}>
       <div className="p-4 md:p-8">
         <div className="mx-auto">
           <div className="bg-white rounded-md">

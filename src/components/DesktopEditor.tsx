@@ -54,7 +54,7 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
       </div>
       
       {/* Preview panel - right side */}
-      <div className="w-1/2 bg-gray-100 overflow-auto h-full">
+      <div className="w-1/2 bg-[#f3f4f6] overflow-auto h-full">
         <div className="p-4 md:p-8">
           <DocumentPreview 
             content={content}

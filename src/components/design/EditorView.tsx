@@ -23,7 +23,7 @@ export const EditorView = ({
   isMobile
 }: EditorViewProps) => {
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-gray-100 h-full overflow-auto`}>
+    <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-[#f3f4f6] h-full overflow-auto`}>
       {isEditable && (
         <div className="w-full">
           <ToolSettingsMenuBar />

@@ -43,7 +43,7 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
   return (
     <div className="flex h-[calc(100vh-56px-48px)]">
       {/* Editor panel - left side */}
-      <div className="w-1/2 bg-white overflow-auto h-full">
+      <div className="w-1/2 overflow-auto h-full bg-white">
         <EditorPanel
           content={content}
           onContentChange={onContentChange}

@@ -17,40 +17,24 @@
    Custom Global CSS for Popups & Dropdowns
 ============================================= */
 @layer utilities {
-  /* Global dropdown container styles */
+  /* All dropdowns and popups should be visible and positioned correctly */
   [data-radix-popper-content-wrapper] {
-    position: absolute !important;
     z-index: 9999 !important;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
   }
   
-  /* Ensure all dropdown content is visible */
-  [data-radix-select-content] {
+  /* Font size dropdown stacking context fix */
+  .font-size-dropdown-content,
+  [data-radix-select-content],
+  [role="dialog"],
+  [role="tooltip"],
+  [role="menu"] {
+    z-index: 9999 !important;
     background-color: white !important;
-    border-radius: 0.375rem !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-    z-index: 9999 !important;
-    position: absolute !important;
   }
   
-  /* Fix for Select component dropdown visibility */
-  .font-size-dropdown-content {
-    background-color: white !important;
-    z-index: 9999 !important;
-    position: absolute !important;
-    top: auto !important;
-    left: auto !important;
-  }
-  
-  /* Fix positioning of portal-based components */
+  /* Portal-level z-index fixes */
   [data-radix-portal] {
-    position: fixed !important;
-    pointer-events: none !important;
     z-index: 9999 !important;
-    width: auto !important;
-    height: auto !important;
   }
   
   /* Allow clicks on portal content */
@@ -58,13 +42,9 @@
     pointer-events: auto !important;
   }
   
-  /* Specific selector for font size dropdown in editor */
-  .editor-toolbar-container [data-radix-select-content],
-  .editor-toolbar [data-radix-select-content] {
-    position: absolute !important;
-    z-index: 9999 !important;
-    transform: none !important;
-    top: auto !important;
-    left: auto !important;
+  /* Specific selector for editor dropdown visibility */
+  .editor-toolbar-container [data-radix-select-viewport],
+  .editor-toolbar [data-radix-select-viewport] {
+    background-color: white !important;
   }
 }

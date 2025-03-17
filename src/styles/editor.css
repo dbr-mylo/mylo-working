@@ -116,16 +116,24 @@
     pointer-events: auto !important;
   }
   
-  /* Ensure consistent editor component border styling with higher specificity */
-  .editor-toolbar .SelectTrigger,
-  .editor-toolbar button[data-state],
-  .editor-toolbar-container select,
-  .editor-toolbar-container button,
-  .editor-toolbar-container .radix-select-trigger,
-  .SelectTrigger,
-  [data-radix-select-trigger] {
-    border-color: #D9DADC !important;
-    border-radius: 0.375rem !important;
+  /* Editor-specific toolbar button styles */
+  .editor-toolbar-buttons .Button[role="button"],
+  .editor-toolbar-buttons button {
+    border-color: #D9DADC;
+    border-radius: 0.375rem;
+  }
+  
+  /* Editor role-specific button styles */
+  [data-role="editor"] .editor-toolbar-buttons button,
+  [data-role="editor"] .editor-toolbar-buttons .Button {
+    border-color: #D9DADC;
+    border-radius: 0.375rem;
+  }
+  
+  /* Make sure buttons in editor toolbar have higher specificity than global overrides */
+  .editor-toolbar-buttons button[variant="ghost"],
+  .editor-toolbar-buttons .Button[variant="ghost"] {
+    background-color: transparent;
   }
   
   /* Target the actual combobox element with maximum specificity */

@@ -1,13 +1,12 @@
-
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast"; 
 import { useEditorSetup } from "@/components/rich-text/useEditor";
-import { useTemplateStyles } from "@/components/design/useTemplateStyles";
-import { DesignerStandaloneView } from "@/components/design/DesignerStandaloneView";
-import { EditorView } from "@/components/design/EditorView";
+import { useTemplateStyles } from "@/hooks/useTemplateStyles";
+import { DesignerStandaloneView } from "@/components/designer/core/DesignerStandaloneView";
+import { EditorView } from "@/components/editor/EditorView";
 
 interface DesignPanelProps {
   content: string;

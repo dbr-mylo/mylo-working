@@ -1,12 +1,33 @@
 
-import { useCallback } from 'react';
-import { Editor } from '@tiptap/react';
-import { textStyleStore } from '@/stores/textStyles';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback } from "react";
+import { Editor } from "@tiptap/react";
+import { textStyleStore } from "@/stores/textStyles";
+import { TextStyle } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+
+interface UseStyleApplicationProps {
+  editor: Editor | null;
+}
 
 export const useStyleApplication = (editor: Editor | null) => {
+  const [styles, setStyles] = useState<TextStyle[]>([]);
   const { toast } = useToast();
-
+  
+  // Load text styles
+  useEffect(() => {
+    const loadStyles = async () => {
+      try {
+        const textStyles = await textStyleStore.getTextStyles();
+        setStyles(textStyles);
+      } catch (error) {
+        console.error("Error loading text styles:", error);
+      }
+    };
+    
+    loadStyles();
+  }, []);
+  
+  // Apply style to editor
   const applyStyle = useCallback(async (styleId: string) => {
     if (!editor) {
       console.warn("No editor instance available to apply style");
@@ -82,5 +103,5 @@ export const useStyleApplication = (editor: Editor | null) => {
     }
   }, [editor, toast]);
   
-  return { applyStyle };
+  return { styles, applyStyle };
 };

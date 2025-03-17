@@ -68,9 +68,9 @@ export const StyleForm = ({
     
     e.preventDefault();
     onSubmit({
-      name,
-      selector: "", // Providing empty string as default
-      description: "", // Providing empty string as default
+      name: name || "New Style",
+      selector: styles.selector || "p", // Providing default values
+      description: styles.description || "", 
       parentId,
       ...styles,
     });
@@ -98,7 +98,7 @@ export const StyleForm = ({
         <TabsContent value="basic" className={spacing}>
           {showFormFields && (
             <StyleFormMetadata
-              name={name}
+              name={name || "New Style"}
               parentId={parentId}
               currentStyleId={initialValues?.id}
               onNameChange={setName}
@@ -125,13 +125,13 @@ export const StyleForm = ({
             variant="outline" 
             type="button" 
             size={buttonSize}
-            onClick={onSubmit ? () => onSubmit({
-              name,
-              selector: "",
-              description: "",
+            onClick={() => onSubmit({
+              name: name || "New Style",
+              selector: styles.selector || "p",
+              description: styles.description || "",
               parentId,
               ...styles,
-            }) : undefined}
+            })}
           >
             Cancel
           </Button>

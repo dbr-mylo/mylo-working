@@ -20,11 +20,14 @@ export const FontWeightControl = ({ value, onChange, compact = false }: FontWeig
     { value: "800", label: "Extra Bold" },
   ];
 
+  // Ensure value is always a non-empty string
+  const safeValue = value || "400";
+
   return (
     <div className="mb-1">
       <Label htmlFor="font-weight" className="text-xs mb-0.5 inline-block">Font Weight</Label>
       <Select
-        value={value}
+        value={safeValue}
         onValueChange={onChange}
       >
         <SelectTrigger id="font-weight" className={compact ? "h-7 text-xs" : ""}>

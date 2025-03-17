@@ -6,7 +6,6 @@ import { StyleFormControls } from "./StyleFormControls";
 import { Button } from "@/components/ui/button";
 import { useStyleForm } from "./hooks/useStyleForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
 import { StyleInheritance } from "./StyleInheritance";
@@ -18,13 +17,15 @@ interface StyleFormProps {
   // Support for direct style manipulation
   styles?: TypographyStyles;
   handleStyleChange?: (property: keyof TypographyStyles, value: string) => void;
+  compact?: boolean;
 }
 
 export const StyleForm = ({ 
   initialValues, 
   onSubmit,
   styles: externalStyles,
-  handleStyleChange: externalStyleChange
+  handleStyleChange: externalStyleChange,
+  compact = false
 }: StyleFormProps) => {
   const [parentStyle, setParentStyle] = useState<TextStyle | null>(null);
   
@@ -82,31 +83,19 @@ export const StyleForm = ({
 
   // Show form fields for creating/editing styles only when onSubmit is provided
   const showFormFields = !!onSubmit;
+  
+  const buttonSize = compact ? "sm" : "default";
+  const spacing = compact ? "space-y-2" : "space-y-3";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      {/* Smaller preview at the top */}
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-2 mb-2">
-        <TextPreview styles={styles} />
-        {parentStyle && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <div className="flex items-center">
-              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
-                Inherits from
-              </Badge>
-              <span className="text-xs ml-2">{parentStyle.name}</span>
-            </div>
-          </div>
-        )}
-      </div>
-      
+    <form onSubmit={handleSubmit} className={spacing}>
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-3">
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="typography">Typography</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 mb-2">
+          <TabsTrigger value="basic" className="text-xs py-1">Basic Info</TabsTrigger>
+          <TabsTrigger value="typography" className="text-xs py-1">Typography</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="basic" className="space-y-3">
+        <TabsContent value="basic" className={spacing}>
           {showFormFields && (
             <StyleFormMetadata
               name={name}
@@ -115,32 +104,39 @@ export const StyleForm = ({
               onNameChange={setName}
               onParentChange={handleParentChange}
               parentStyle={parentStyle}
+              compact={compact}
             />
           )}
         </TabsContent>
         
-        <TabsContent value="typography" className="space-y-3">
+        <TabsContent value="typography" className={spacing}>
           <StyleFormControls 
             styles={styles}
             onStyleChange={handleStyleChange}
             parentStyle={parentStyle}
+            compact={compact}
           />
         </TabsContent>
       </Tabs>
 
       {showFormFields && (
-        <div className="flex justify-end space-x-2 pt-3 border-t mt-3">
-          <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
-            name,
-            selector: "",
-            description: "",
-            parentId,
-            ...styles,
-          }) : undefined}>
+        <div className="flex justify-end space-x-2 pt-2 border-t mt-2">
+          <Button 
+            variant="outline" 
+            type="button" 
+            size={buttonSize}
+            onClick={onSubmit ? () => onSubmit({
+              name,
+              selector: "",
+              description: "",
+              parentId,
+              ...styles,
+            }) : undefined}
+          >
             Cancel
           </Button>
-          <Button type="submit">
-            {initialValues ? "Update Style" : "Create Style"}
+          <Button type="submit" size={buttonSize}>
+            {initialValues ? "Update" : "Create"}
           </Button>
         </div>
       )}

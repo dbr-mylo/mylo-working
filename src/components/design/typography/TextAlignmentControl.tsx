@@ -1,46 +1,51 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
 
 interface TextAlignmentControlProps {
   value: string;
   onChange: (value: string) => void;
+  compact?: boolean;
 }
 
-export const TextAlignmentControl = ({ value, onChange }: TextAlignmentControlProps) => {
-  // Text align options
-  const textAlignOptions = [
-    { value: "left", label: "Left", icon: <AlignLeft className="h-4 w-4" /> },
-    { value: "center", label: "Center", icon: <AlignCenter className="h-4 w-4" /> },
-    { value: "right", label: "Right", icon: <AlignRight className="h-4 w-4" /> },
-    { value: "justify", label: "Justify", icon: <AlignJustify className="h-4 w-4" /> }
-  ];
-
-  const handleButtonClick = (alignValue: string, e: React.MouseEvent) => {
-    // Prevent form submission
-    e.preventDefault();
-    onChange(alignValue);
-  };
-
+export const TextAlignmentControl = ({ value, onChange, compact = false }: TextAlignmentControlProps) => {
+  const iconSize = compact ? 14 : 16;
+  
   return (
-    <div>
-      <Label className="text-xs mb-1 block">Text Align</Label>
-      <div className="flex gap-2">
-        {textAlignOptions.map(option => (
-          <Button
-            key={option.value}
-            variant={value === option.value ? "default" : "outline"}
-            size="xs"
-            onClick={(e) => handleButtonClick(option.value, e)}
-            title={option.label}
-            type="button" // Explicitly set type to button to prevent form submission
-          >
-            {option.icon}
-          </Button>
-        ))}
-      </div>
+    <div className="mb-1">
+      <Label className="text-xs mb-0.5 inline-block">Text Alignment</Label>
+      <ToggleGroup type="single" value={value} onValueChange={onChange} className="justify-start">
+        <ToggleGroupItem 
+          value="left" 
+          aria-label="Align left"
+          className={compact ? "h-7 w-7" : ""}
+        >
+          <AlignLeft className={`h-${iconSize} w-${iconSize}`} />
+        </ToggleGroupItem>
+        <ToggleGroupItem 
+          value="center" 
+          aria-label="Align center"
+          className={compact ? "h-7 w-7" : ""}
+        >
+          <AlignCenter className={`h-${iconSize} w-${iconSize}`} />
+        </ToggleGroupItem>
+        <ToggleGroupItem 
+          value="right" 
+          aria-label="Align right"
+          className={compact ? "h-7 w-7" : ""}
+        >
+          <AlignRight className={`h-${iconSize} w-${iconSize}`} />
+        </ToggleGroupItem>
+        <ToggleGroupItem 
+          value="justify" 
+          aria-label="Justify"
+          className={compact ? "h-7 w-7" : ""}
+        >
+          <AlignJustify className={`h-${iconSize} w-${iconSize}`} />
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   );
 };

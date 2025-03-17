@@ -11,24 +11,27 @@ interface TextPreviewProps {
     letterSpacing: string;
     textAlign: string;
   };
+  compact?: boolean;
 }
 
-export const TextPreview = ({ styles }: TextPreviewProps) => {
+export const TextPreview = ({ styles, compact = false }: TextPreviewProps) => {
   return (
-    <div className="flex flex-col space-y-0.5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium">Preview</h3>
-        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-          <span>{styles.fontFamily}</span>
-          <span>•</span>
-          <span>{styles.fontSize}</span>
-          <span>•</span>
-          <span>Weight: {styles.fontWeight}</span>
+    <div className={`flex flex-col ${compact ? 'space-y-0' : 'space-y-0.5'}`}>
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-medium">Preview</h3>
+          <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+            <span>{styles.fontFamily}</span>
+            <span>•</span>
+            <span>{styles.fontSize}</span>
+            <span>•</span>
+            <span>Weight: {styles.fontWeight}</span>
+          </div>
         </div>
-      </div>
+      )}
       
       <div 
-        className="py-1"
+        className={`${compact ? 'py-0.5' : 'py-1'}`}
         style={{ 
           fontFamily: styles.fontFamily,
           fontSize: styles.fontSize,

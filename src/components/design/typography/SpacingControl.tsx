@@ -10,6 +10,7 @@ interface SpacingControlProps {
   min?: number;
   max?: number;
   step?: number;
+  compact?: boolean;
 }
 
 export const SpacingControl = ({ 
@@ -18,7 +19,8 @@ export const SpacingControl = ({
   onChange, 
   min = type === "lineHeight" ? 0.5 : -2, 
   max = type === "lineHeight" ? 3 : 10, 
-  step = type === "lineHeight" ? 0.1 : 0.5 
+  step = type === "lineHeight" ? 0.1 : 0.5,
+  compact = false
 }: SpacingControlProps) => {
   const label = type === "lineHeight" ? "Line Height" : "Letter Spacing";
   const id = type === "lineHeight" ? "line-height" : "letter-spacing";
@@ -52,7 +54,7 @@ export const SpacingControl = ({
   };
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       <div className="flex justify-between items-center mb-0.5">
         <Label htmlFor={id} className="text-xs">{label}</Label>
         <span className="text-xs text-gray-500">{formatDisplayValue()}</span>
@@ -64,6 +66,7 @@ export const SpacingControl = ({
         max={max} 
         step={step}
         onValueChange={(val) => onChange(formatOutputValue(val[0]))}
+        className={compact ? "h-3" : ""}
       />
     </div>
   );

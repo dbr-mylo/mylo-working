@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface FontWeightControlProps {
   value: string;
   onChange: (value: string) => void;
+  compact?: boolean;
 }
 
-export const FontWeightControl = ({ value, onChange }: FontWeightControlProps) => {
+export const FontWeightControl = ({ value, onChange, compact = false }: FontWeightControlProps) => {
   // Font weight options
   const fontWeights = [
     { value: "300", label: "Light" },
@@ -20,13 +21,13 @@ export const FontWeightControl = ({ value, onChange }: FontWeightControlProps) =
   ];
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       <Label htmlFor="font-weight" className="text-xs mb-0.5 inline-block">Font Weight</Label>
       <Select
         value={value}
         onValueChange={onChange}
       >
-        <SelectTrigger id="font-weight">
+        <SelectTrigger id="font-weight" className={compact ? "h-7 text-xs" : ""}>
           <SelectValue placeholder="Select weight" />
         </SelectTrigger>
         <SelectContent>

@@ -69,7 +69,7 @@ export const StyleInheritance = ({
   }, [currentStyleId]);
 
   const handleParentChange = (value: string) => {
-    onParentChange(value === "" ? undefined : value);
+    onParentChange(value === "none" ? undefined : value);
   };
   
   if (loading) {
@@ -78,14 +78,14 @@ export const StyleInheritance = ({
 
   return (
     <Select
-      value={parentId || ""}
+      value={parentId || "none"}
       onValueChange={handleParentChange}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="No parent style (base style)" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">No parent style (base style)</SelectItem>
+        <SelectItem value="none">No parent style (base style)</SelectItem>
         {availableParents.map(style => (
           <SelectItem key={style.id} value={style.id}>
             {style.name}

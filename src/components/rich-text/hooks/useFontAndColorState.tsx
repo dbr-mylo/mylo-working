@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 
 export const useFontAndColorState = (editor: Editor | null) => {
-  const [currentFont, setCurrentFont] = useState('Merriweather');
+  const [currentFont, setCurrentFont] = useState('Inter');
   const [currentColor, setCurrentColor] = useState('#000000');
   
   const handleFontChange = (font: string) => {
@@ -39,8 +40,23 @@ export const useFontAndColorState = (editor: Editor | null) => {
       }
     };
     
-    editor.on('selectionUpdate', updateColorState);
-    editor.on('transaction', updateColorState);
+    // Also update font family state when selection changes
+    const updateFontState = () => {
+      const { fontFamily } = editor.getAttributes('textStyle');
+      if (fontFamily) {
+        setCurrentFont(fontFamily);
+      }
+    };
+    
+    editor.on('selectionUpdate', () => {
+      updateColorState();
+      updateFontState();
+    });
+    
+    editor.on('transaction', () => {
+      updateColorState();
+      updateFontState();
+    });
     
     return () => {
       editor.off('selectionUpdate', updateColorState);

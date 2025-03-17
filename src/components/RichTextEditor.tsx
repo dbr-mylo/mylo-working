@@ -62,7 +62,7 @@ export const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class: 'font-sans' // Add Inter font explicitly
+        class: 'font-sans' 
       }
     }
   });

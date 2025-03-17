@@ -22,6 +22,18 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   
+  /* Designer-specific toolbar styles */
+  .designer-toolbar button {
+    height: auto;
+    padding: 0.25rem;
+  }
+  
+  .designer-toolbar button[size="xxs"] {
+    height: 1.5rem;
+    padding: 0 0.25rem;
+    font-size: 0.65rem;
+  }
+
   /* =============================================
      Font Size Enforcement Rules
   ============================================= */
@@ -70,6 +82,12 @@
     position: relative;
     z-index: 50;
   }
+
+  /* Designer toolbar specific z-index */
+  .designer-toolbar {
+    position: relative;
+    z-index: 50;
+  }
   
   /* Font size dropdown specific styles */
   .font-size-dropdown-content {
@@ -87,6 +105,12 @@
   /* Editor-specific portal positioning fixes */
   [data-role="editor"] [data-radix-select-portal] > [data-radix-select-content],
   [data-role="editor"] [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+  
+  /* Designer-specific portal positioning fixes */
+  [data-role="designer"] [data-radix-select-portal] > [data-radix-select-content],
+  [data-role="designer"] [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
   }
   

@@ -8,10 +8,10 @@
  */
 
 import { DocumentPreview } from "@/components/designer/preview/DocumentPreview";
-import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 import { Editor } from "@tiptap/react";
 import { DesignerSidebar } from "@/components/designer/core/DesignerSidebar";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { DesignerToolbar } from "@/components/designer/toolbar/DesignerToolbar";
 
 interface DesignerStandaloneViewProps {
   content: string;
@@ -51,7 +51,7 @@ export const DesignerStandaloneView = ({
             <div className="flex items-center justify-between px-4">
               {editorSetup?.editor && (
                 <div className="flex-1 py-2">
-                  <EditorToolbar 
+                  <DesignerToolbar 
                     editor={editorSetup.editor}
                     currentFont={editorSetup.currentFont}
                     currentColor={editorSetup.currentColor}

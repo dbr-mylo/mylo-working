@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { EditorPanel } from '@/components/EditorPanel';
-import { EditableContent } from '@/components/design/preview/EditableContent';
+import { DocumentPreview } from '@/components/design/DocumentPreview';
 import { useIsEditor } from '@/utils/roles';
 import { Editor } from '@tiptap/react';
+import { useTemplateStyles } from '@/hooks/useTemplateStyles';
 
 interface DesktopEditorProps {
   content: string;
@@ -30,6 +31,9 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
   editorInstance
 }) => {
   const isEditor = useIsEditor();
+  
+  // Get template styles
+  const { customStyles } = useTemplateStyles(templateId);
   
   if (!isEditor) {
     console.warn("DesktopEditor used outside of editor role");
@@ -51,12 +55,12 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
       <div className="w-1/2 bg-design-panel overflow-auto">
         <div className="p-4 md:p-8 flex-grow flex flex-col h-full">
           <div className="mx-auto mt-0 flex-grow">
-            <EditableContent
+            <DocumentPreview 
               content={content}
+              customStyles={customStyles}
+              isEditable={false}
               onContentChange={onContentChange}
-              hideToolbar={true}
-              externalToolbar={true}
-              editorInstance={editorInstance}
+              templateId={templateId}
             />
           </div>
         </div>

@@ -12,6 +12,7 @@ import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { useIsEditor } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
+import { DocumentPreview } from "@/components/design/DocumentPreview";
 
 interface EditorViewProps {
   content: string;

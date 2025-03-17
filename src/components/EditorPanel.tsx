@@ -10,7 +10,7 @@
 import { RichTextEditor } from "@/components/RichTextEditor";
 import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useTemplateStyles } from "@/components/design/useTemplateStyles";
+import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { useIsEditor } from "@/utils/roles";
 import { Editor } from "@tiptap/react";

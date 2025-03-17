@@ -8,6 +8,7 @@ import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Text } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { StyleListItem } from "@/components/design/typography/StyleListItem";
 
 interface StyleDropdownProps {
   editor: Editor;
@@ -46,24 +47,12 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
             <div className="space-y-1">
               {styles.length > 0 ? (
                 styles.map((style) => (
-                  <Button
+                  <StyleListItem
                     key={style.id}
-                    variant="ghost"
-                    size="xs"
-                    className="w-full justify-start font-normal"
-                    onClick={() => handleStyleSelect(style.id)}
-                  >
-                    <div 
-                      className="w-full overflow-hidden text-ellipsis"
-                      style={{ 
-                        fontFamily: style.fontFamily,
-                        fontWeight: style.fontWeight,
-                        color: style.color
-                      }}
-                    >
-                      {style.name}
-                    </div>
-                  </Button>
+                    style={style}
+                    onSelect={() => handleStyleSelect(style.id)}
+                    compact={true}
+                  />
                 ))
               ) : (
                 <p className="text-xs text-muted-foreground py-2">

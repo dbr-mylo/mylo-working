@@ -28,14 +28,20 @@ export const useDocumentSave = ({
       return Promise.resolve();
     }
     
+    console.log(`Starting save process for ${documentType}. Content length: ${content.length}`);
     setIsSaving(true);
+    
     try {
       if (onSave) {
+        console.log(`Calling onSave function for ${documentType}`);
         await onSave();
+        console.log(`onSave function completed for ${documentType}`);
       }
       
       if (loadDocuments) {
+        console.log(`Reloading documents list for ${documentType}`);
         await loadDocuments();
+        console.log(`Documents list reloaded for ${documentType}`);
       }
     } catch (error) {
       console.error(`Error saving ${documentType}:`, error);
@@ -46,6 +52,7 @@ export const useDocumentSave = ({
       });
     } finally {
       setIsSaving(false);
+      console.log(`Save process completed for ${documentType}`);
     }
     return Promise.resolve();
   };

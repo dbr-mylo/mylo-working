@@ -82,15 +82,21 @@ export function saveDocumentToLocalStorage(
     const documentTitle = title.trim() || 'Untitled Document';
     const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
     
+    console.log(`Starting localStorage save process for ${role} role`);
+    console.log(`Storage key: ${storageKey}, Document ID: ${documentId || 'new'}`);
+    
     let documents: Document[] = [];
     const localDocs = localStorage.getItem(storageKey);
     
     if (localDocs) {
+      console.log(`Found existing documents in localStorage for ${role} role`);
       documents = JSON.parse(localDocs);
       if (!Array.isArray(documents)) {
         console.warn(`${storageKey} is not an array, resetting to empty array`);
         documents = [];
       }
+    } else {
+      console.log(`No existing documents found in localStorage for ${role} role`);
     }
     
     let savedDocument: Document;
@@ -102,6 +108,7 @@ export function saveDocumentToLocalStorage(
       const documentIndex = documents.findIndex(doc => doc.id === documentId);
       
       if (documentIndex !== -1) {
+        console.log(`Found document at index ${documentIndex}`);
         savedDocument = {
           ...documents[documentIndex],
           title: documentTitle,
@@ -110,6 +117,7 @@ export function saveDocumentToLocalStorage(
         };
         
         documents[documentIndex] = savedDocument;
+        console.log(`Updated existing document in array`);
       } else {
         console.warn(`Document with ID ${documentId} not found in ${storageKey}, creating new`);
         
@@ -121,24 +129,30 @@ export function saveDocumentToLocalStorage(
         };
         
         documents.push(savedDocument);
+        console.log(`Added document with existing ID to array`);
       }
     } 
     // Otherwise, create a new document
     else {
       console.log(`Creating new ${role} document in localStorage`);
       
+      const newId = uuidv4();
+      console.log(`Generated new UUID: ${newId}`);
+      
       savedDocument = {
-        id: uuidv4(),
+        id: newId,
         title: documentTitle,
         content: content,
         updated_at: now
       };
       
       documents.push(savedDocument);
+      console.log(`Added new document to array`);
     }
     
+    console.log(`Saving ${documents.length} documents to localStorage`);
     localStorage.setItem(storageKey, JSON.stringify(documents));
-    console.log(`Document saved to ${storageKey}:`, savedDocument);
+    console.log(`Document saved to ${storageKey}:`, savedDocument.id);
     
     return savedDocument;
   } catch (error) {

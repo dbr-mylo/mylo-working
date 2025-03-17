@@ -53,3 +53,32 @@ export const getStyleWithInheritance = async (styleId: string): Promise<TextStyl
     return null;
   }
 };
+
+/**
+ * Gets the full inheritance chain for a style
+ */
+export const getInheritanceChain = async (styleId: string): Promise<TextStyle[]> => {
+  try {
+    const chain: TextStyle[] = [];
+    const styles = getLocalTextStyles();
+    let currentId = styleId;
+    
+    // Prevent infinite loops from circular references
+    const visited = new Set<string>();
+    
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId);
+      
+      const style = styles.find(s => s.id === currentId);
+      if (!style) break;
+      
+      chain.push(style);
+      currentId = style.parentId || '';
+    }
+    
+    return chain;
+  } catch (error) {
+    console.error('Error in getInheritanceChain:', error);
+    return [];
+  }
+};

@@ -16,12 +16,12 @@ interface StyleDropdownProps {
 export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles, isLoading } = useTextStyles();
-  const { applyStyleToSelection } = useStyleApplication(editor);
+  const { applyStyle } = useStyleApplication(editor);
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
   const handleStyleSelect = (styleId: string) => {
-    applyStyleToSelection(styleId);
+    applyStyle(styleId);
     setIsOpen(false);
   };
 

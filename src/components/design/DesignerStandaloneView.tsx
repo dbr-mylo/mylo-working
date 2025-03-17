@@ -13,6 +13,7 @@ import { RichTextEditor } from "@/components/RichTextEditor";
 import { Editor } from "@tiptap/react";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { DesignerToolbar } from "@/components/designer/toolbar/DesignerToolbar";
 
 interface DesignerStandaloneViewProps {
   content: string;
@@ -51,10 +52,13 @@ export const DesignerStandaloneView = ({
           <div className="bg-white border-b border-slate-200 z-10">
             <div className="flex items-center justify-between px-4">
               <div className="flex-1 py-2">
-                <div className="designer-toolbar">
-                  {/* Designer-specific toolbar */}
-                  {/* This section uses the editor from editorSetup */}
-                </div>
+                <DesignerToolbar 
+                  editor={editorSetup.editor}
+                  currentFont={editorSetup.currentFont}
+                  currentColor={editorSetup.currentColor}
+                  onFontChange={editorSetup.handleFontChange}
+                  onColorChange={editorSetup.handleColorChange}
+                />
               </div>
             </div>
           </div>

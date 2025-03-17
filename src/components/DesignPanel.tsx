@@ -69,6 +69,7 @@ export const DesignPanel = ({ content, isEditable, templateId }: DesignPanelProp
     }
   };
   
+  // Initialize editor setup for designer mode
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 

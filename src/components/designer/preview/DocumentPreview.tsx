@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { Editor } from '@tiptap/react';
+import { DocumentStyles } from '@/components/design/preview/DocumentStyles';
 
 interface DocumentPreviewProps {
   content: string;
@@ -29,7 +30,22 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   externalToolbar = false,
   editorInstance = null
 }) => {
-  // For now, we're creating a stub to maintain the directory structure
-  // This will need to be properly implemented based on the existing implementation
-  return <div>Document Preview Component</div>;
+  return (
+    <div className="document-preview">
+      {/* Apply custom styles */}
+      <DocumentStyles customStyles={customStyles} />
+      
+      {/* Document content */}
+      <div 
+        className="document-content"
+        dangerouslySetInnerHTML={{ __html: content }}
+        onClick={(e) => {
+          // Select the clicked element
+          if (e.target instanceof HTMLElement) {
+            onElementSelect(e.target);
+          }
+        }}
+      />
+    </div>
+  );
 };

@@ -1,84 +1,55 @@
 
-import { TextStyle } from "@/lib/types";
-import { getLocalTextStyles } from "./storage";
+import { TextStyle } from '@/lib/types';
+import { getTextStyles } from './storage';
 
 /**
- * Gets a style with all properties inherited from parent styles
+ * Gets a text style with all properties from its inheritance chain applied
+ * @param styleId The ID of the style to get
+ * @returns The style with inherited properties
  */
 export const getStyleWithInheritance = async (styleId: string): Promise<TextStyle | null> => {
-  try {
-    const styles = getLocalTextStyles();
-    const style = styles.find(s => s.id === styleId);
-    
-    if (!style) {
-      console.error('Style not found:', styleId);
-      return null;
-    }
-    
-    // If this style doesn't inherit from a parent, return it as is
-    if (!style.parentId) {
-      console.log('Style has no parent, returning as is:', style.name);
-      return style;
-    }
-    
-    // Get the parent style with its inherited properties
-    const parentStyle = await getStyleWithInheritance(style.parentId);
-    
-    if (!parentStyle) {
-      console.warn('Parent style not found, returning child as is');
-      return style;
-    }
-    
-    console.log(`Merging style ${style.name} with parent ${parentStyle.name}`);
-    
-    // Create a new style object that combines the parent's properties with this style's overrides
-    const combinedStyle: TextStyle = {
-      ...parentStyle,
-      ...style,
-      // Keep the original ID, name, selector, and description
-      id: style.id,
-      name: style.name,
-      selector: style.selector,
-      description: style.description,
-      isDefault: style.isDefault,
-      isSystem: style.isSystem,
-      isUsed: style.isUsed,
-      created_at: style.created_at,
-      updated_at: style.updated_at
-    };
-    
-    return combinedStyle;
-  } catch (error) {
-    console.error('Error in getStyleWithInheritance:', error);
-    return null;
-  }
+  const textStyles = await getTextStyles();
+  const style = textStyles.find(s => s.id === styleId);
+  
+  if (!style) return null;
+  
+  // If the style has no parent, return it as is
+  if (!style.parentId) return style;
+  
+  // Get the parent style
+  const parent = await getStyleWithInheritance(style.parentId);
+  if (!parent) return style;
+  
+  // Merge the parent style with the current style, with current style taking precedence
+  return {
+    ...parent,
+    ...style,
+    id: style.id, // Ensure we keep the correct ID
+    name: style.name, // Ensure we keep the correct name
+    parentId: style.parentId, // Ensure we keep the parent reference
+  };
 };
 
 /**
- * Gets the full inheritance chain for a style
+ * Gets the entire inheritance chain for a style
+ * @param styleId The ID of the style to get the inheritance chain for
+ * @returns An array of styles in the inheritance chain, from the current style to the root
  */
 export const getInheritanceChain = async (styleId: string): Promise<TextStyle[]> => {
-  try {
-    const chain: TextStyle[] = [];
-    const styles = getLocalTextStyles();
-    let currentId = styleId;
-    
-    // Prevent infinite loops from circular references
-    const visited = new Set<string>();
-    
-    while (currentId && !visited.has(currentId)) {
-      visited.add(currentId);
-      
-      const style = styles.find(s => s.id === currentId);
-      if (!style) break;
-      
-      chain.push(style);
-      currentId = style.parentId || '';
-    }
-    
-    return chain;
-  } catch (error) {
-    console.error('Error in getInheritanceChain:', error);
-    return [];
-  }
+  const textStyles = await getTextStyles();
+  const style = textStyles.find(s => s.id === styleId);
+  
+  if (!style) return [];
+  
+  // Start with the current style
+  const chain: TextStyle[] = [style];
+  
+  // If the style has no parent, return just the current style
+  if (!style.parentId) return chain;
+  
+  // Recursively get the parent styles
+  const parentChain = await getInheritanceChain(style.parentId);
+  
+  // Return the chain with the current style first, followed by parent chain
+  return [...chain, ...parentChain];
 };

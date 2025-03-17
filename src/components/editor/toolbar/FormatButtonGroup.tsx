@@ -18,7 +18,7 @@ export const FormatButtonGroup: React.FC<FormatButtonGroupProps> = ({ editor, cu
         size="xs"
         onClick={() => handleBoldWithColorPreservation(editor, currentColor)}
         disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-accent' : ''}
+        className={`border-0 p-1 ${editor.isActive('bold') ? 'bg-accent' : 'hover:bg-accent/50'}`}
       >
         <Bold className="h-3.5 w-3.5" />
       </Button>
@@ -31,7 +31,7 @@ export const FormatButtonGroup: React.FC<FormatButtonGroupProps> = ({ editor, cu
           }, currentColor);
         }}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-accent' : ''}
+        className={`border-0 p-1 ${editor.isActive('italic') ? 'bg-accent' : 'hover:bg-accent/50'}`}
       >
         <Italic className="h-3.5 w-3.5" />
       </Button>

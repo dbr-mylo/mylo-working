@@ -34,7 +34,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
 
   return (
-    <div className="rounded-md bg-background p-1 flex flex-wrap gap-2 items-center">
+    <div className="rounded-md bg-background p-1 flex flex-wrap gap-3 items-center">
       {/* Text styling controls - font family, font size and color */}
       <TextControls editor={editor} />
       

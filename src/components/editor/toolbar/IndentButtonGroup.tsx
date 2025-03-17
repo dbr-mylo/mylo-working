@@ -52,6 +52,7 @@ export const IndentButtonGroup: React.FC<IndentButtonGroupProps> = ({ editor }) 
         size="xs"
         onClick={handleIndent}
         title="Indent paragraph"
+        className="border-0 p-1 hover:bg-accent/50"
       >
         <Indent className="h-3.5 w-3.5" />
       </Button>
@@ -60,6 +61,7 @@ export const IndentButtonGroup: React.FC<IndentButtonGroupProps> = ({ editor }) 
         size="xs"
         onClick={handleOutdent}
         title="Outdent paragraph"
+        className="border-0 p-1 hover:bg-accent/50"
       >
         <Outdent className="h-3.5 w-3.5" />
       </Button>

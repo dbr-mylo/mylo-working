@@ -8,6 +8,8 @@ import { DesignerFormatButtonGroup } from './DesignerFormatButtonGroup';
 import { DesignerListButtonGroup } from './DesignerListButtonGroup';
 import { DesignerStyleControls } from './DesignerStyleControls';
 import { DesignerClearFormattingButton } from './DesignerClearFormattingButton';
+import { DesignerAlignmentButtonGroup } from './DesignerAlignmentButtonGroup';
+import { DesignerIndentButtonGroup } from './DesignerIndentButtonGroup';
 import { Separator } from '@/components/ui/separator';
 
 interface DesignerToolbarProps {
@@ -61,6 +63,14 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
 
       {/* List buttons - bullet and ordered lists */}
       <DesignerListButtonGroup editor={editor} currentColor={currentColor} />
+      
+      <Separator orientation="vertical" className="mx-0.5 h-5" />
+      
+      {/* Alignment buttons */}
+      <DesignerAlignmentButtonGroup editor={editor} />
+      
+      {/* Indentation controls */}
+      <DesignerIndentButtonGroup editor={editor} />
       
       <Separator orientation="vertical" className="mx-0.5 h-5" />
       

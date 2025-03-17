@@ -28,6 +28,8 @@ export const StyleForm = ({
   compact = false
 }: StyleFormProps) => {
   const [parentStyle, setParentStyle] = useState<TextStyle | null>(null);
+  const [selector, setSelector] = useState(initialValues?.selector || "p");
+  const [description, setDescription] = useState(initialValues?.description || "");
   
   const {
     name,
@@ -63,14 +65,22 @@ export const StyleForm = ({
     fetchParentStyle();
   }, [parentId]);
 
+  // Update selector and description when initialValues changes
+  useEffect(() => {
+    if (initialValues) {
+      setSelector(initialValues.selector || "p");
+      setDescription(initialValues.description || "");
+    }
+  }, [initialValues]);
+
   const handleSubmit = (e: React.FormEvent) => {
     if (!onSubmit) return;
     
     e.preventDefault();
     onSubmit({
       name: name || "New Style",
-      selector: styles.selector || "p", // Providing default values
-      description: styles.description || "", 
+      selector: selector || "p", // Using local state instead of styles
+      description: description || "", 
       parentId,
       ...styles,
     });
@@ -127,8 +137,8 @@ export const StyleForm = ({
             size={buttonSize}
             onClick={() => onSubmit({
               name: name || "New Style",
-              selector: styles.selector || "p",
-              description: styles.description || "",
+              selector: selector || "p",
+              description: description || "",
               parentId,
               ...styles,
             })}

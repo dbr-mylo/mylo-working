@@ -35,8 +35,7 @@ export const StyleInheritance = ({
           if (style.id === currentStyleId) return false;
           
           // Check if selecting this style as parent would create circular inheritance
-          const chain = textStyleStore.getInheritanceChain(style.id);
-          return !chain.some(s => s.id === currentStyleId);
+          return !wouldCreateCircularDependency(style.id, currentStyleId, styles);
         });
         
         setAvailableParents(filtered);
@@ -47,6 +46,32 @@ export const StyleInheritance = ({
     
     loadStyles();
   }, [currentStyleId]);
+
+  // Helper function to check for circular dependencies
+  const wouldCreateCircularDependency = (
+    potentialParentId: string,
+    childStyleId: string,
+    allStyles: TextStyle[],
+    visited: Set<string> = new Set()
+  ): boolean => {
+    if (visited.has(potentialParentId)) {
+      return true;
+    }
+    
+    visited.add(potentialParentId);
+    
+    const style = allStyles.find(s => s.id === potentialParentId);
+    
+    if (!style || !style.parentId) {
+      return false;
+    }
+    
+    if (style.parentId === childStyleId) {
+      return true;
+    }
+    
+    return wouldCreateCircularDependency(style.parentId, childStyleId, allStyles, visited);
+  };
   
   // Load parent style details when parentId changes
   useEffect(() => {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ export const StyleApplicatorTest = () => {
     textAlign: "left"
   });
 
-  // Load all available styles
   useEffect(() => {
     const loadStyles = async () => {
       try {
@@ -74,11 +72,9 @@ export const StyleApplicatorTest = () => {
       const savedStyle = await textStyleStore.saveTextStyle(styleToSave);
       console.log("Saved style:", savedStyle);
       
-      // Reset for next style
       setNewStyleId(uuidv4());
       setSelectedStyleId(savedStyle.id);
       
-      // Refresh styles list
       const updatedStyles = await textStyleStore.getTextStyles();
       setStyles(updatedStyles);
     } catch (error) {
@@ -114,7 +110,7 @@ export const StyleApplicatorTest = () => {
               <StyleInheritance 
                 currentStyleId={newStyleId}
                 parentId={newStyleParentId}
-                onChange={handleParentChange}
+                onParentChange={handleParentChange}
               />
             </div>
             
@@ -170,7 +166,6 @@ export const StyleApplicatorTest = () => {
   );
 };
 
-// Component to display style details with inheritance
 const StyleDetails = ({ styleId }: { styleId: string }) => {
   const [style, setStyle] = useState<TextStyle | null>(null);
   const [inheritanceChain, setInheritanceChain] = useState<TextStyle[]>([]);
@@ -178,11 +173,9 @@ const StyleDetails = ({ styleId }: { styleId: string }) => {
   useEffect(() => {
     const loadStyleDetails = async () => {
       try {
-        // Get the style with inheritance
         const styleWithInheritance = await textStyleStore.getStyleWithInheritance(styleId);
         setStyle(styleWithInheritance);
         
-        // Load the inheritance chain
         if (styleWithInheritance?.parentId) {
           const styles = await textStyleStore.getTextStyles();
           const chain: TextStyle[] = [];
@@ -216,7 +209,6 @@ const StyleDetails = ({ styleId }: { styleId: string }) => {
     <div className="mt-4 p-3 border rounded-md bg-muted/30">
       <h3 className="font-medium">{style.name}</h3>
       
-      {/* Inheritance chain */}
       {inheritanceChain.length > 0 && (
         <div className="mt-2">
           <div className="text-xs text-muted-foreground mb-1">Inherits from:</div>
@@ -235,7 +227,6 @@ const StyleDetails = ({ styleId }: { styleId: string }) => {
         </div>
       )}
       
-      {/* Style properties */}
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
         <div>
           <span className="text-muted-foreground">Font:</span>{" "}
@@ -266,7 +257,6 @@ const StyleDetails = ({ styleId }: { styleId: string }) => {
         )}
       </div>
       
-      {/* Preview */}
       <div className="mt-3 p-3 bg-white rounded border">
         <p style={{
           fontFamily: style.fontFamily,

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { TextStyle, TypographyStyles } from "@/lib/types";
 import { FontFamilyControl } from "./FontFamilyControl";
@@ -63,13 +64,13 @@ export const StyleFormControls = ({
       
       <div className="grid grid-cols-2 gap-2">
         <SpacingControl 
-          label="Line Height" 
+          type="lineHeight"
           value={safeStyles.lineHeight} 
           onChange={(value) => onStyleChange('lineHeight', value)} 
           compact={compact}
         />
         <SpacingControl 
-          label="Letter Spacing" 
+          type="letterSpacing"
           value={safeStyles.letterSpacing} 
           onChange={(value) => onStyleChange('letterSpacing', value)} 
           compact={compact}

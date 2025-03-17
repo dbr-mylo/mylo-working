@@ -3,5 +3,5 @@
 export * from './RoleHooks';
 export * from './RoleComponents';
 export * from './RoleFunctions';
-export * from './EditorOnly';
+export { StandaloneEditorOnly } from './EditorOnly';
 export * from './types';

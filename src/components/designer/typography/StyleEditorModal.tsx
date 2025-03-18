@@ -1,6 +1,6 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StyleForm } from "@/components/design/typography/StyleForm"; // Updated import path
+import { StyleForm } from "@/components/design/typography/StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
@@ -33,24 +33,7 @@ export const StyleEditorModal = ({
       return;
     }
     
-    // Check for duplicate names
     try {
-      const existingStyles = await textStyleStore.getTextStyles();
-      const isDuplicate = existingStyles.some(
-        existingStyle => 
-          existingStyle.name.toLowerCase() === formData.name.toLowerCase() && 
-          existingStyle.id !== style?.id
-      );
-      
-      if (isDuplicate) {
-        toast({
-          title: "Duplicate style name",
-          description: "A style with this name already exists. Please use a different name.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       setIsSaving(true);
       
       const styleData = {
@@ -83,11 +66,16 @@ export const StyleEditorModal = ({
   };
 
   const handleCancel = () => {
+    // Simply close the modal without saving
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open && !isSaving) {
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-3 pb-2">
           <DialogTitle className="text-sm font-semibold">

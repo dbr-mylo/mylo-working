@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { StyleInheritance } from "./StyleInheritance";
 import { TextStyle } from "@/lib/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, AlertCircle } from "lucide-react";
+import { useStyleNameValidator } from "./hooks/useStyleNameValidator";
 
 interface StyleFormMetadataProps {
   name: string;
@@ -24,6 +25,11 @@ export const StyleFormMetadata = ({
   onParentChange,
   parentStyle
 }: StyleFormMetadataProps) => {
+  const { isDuplicate, isChecking, isValid } = useStyleNameValidator({
+    name,
+    currentStyleId
+  });
+  
   return (
     <>
       {/* Style Name */}
@@ -38,10 +44,18 @@ export const StyleFormMetadata = ({
           placeholder="Heading 1"
           required
           aria-required="true"
+          className={!isValid || isDuplicate ? "border-destructive" : ""}
         />
-        {name.trim() === "" && (
-          <p className="text-xs text-destructive mt-1">
+        {!isValid && (
+          <p className="text-xs text-destructive mt-1 flex items-center">
+            <AlertCircle className="h-3 w-3 mr-1" />
             Name is required
+          </p>
+        )}
+        {isDuplicate && (
+          <p className="text-xs text-destructive mt-1 flex items-center">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            This name is already in use
           </p>
         )}
       </div>

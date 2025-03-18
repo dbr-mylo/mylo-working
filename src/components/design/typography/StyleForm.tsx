@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
-import { StyleInheritance } from "./StyleInheritance";
 import { Loader2 } from "lucide-react";
+import { useStyleNameValidator } from "./hooks/useStyleNameValidator";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -45,6 +45,12 @@ export const StyleForm = ({
     externalStyles,
     externalStyleChange
   });
+  
+  // Use the name validator hook
+  const { isDuplicate, isValid } = useStyleNameValidator({
+    name,
+    currentStyleId: initialValues?.id
+  });
 
   // Fetch parent style details when parentId changes
   useEffect(() => {
@@ -71,6 +77,17 @@ export const StyleForm = ({
     if (!onSubmit) return;
     
     e.preventDefault();
+    
+    // Form validation
+    if (!name.trim()) {
+      return; // Don't submit if name is empty
+    }
+    
+    // Check for duplicate names
+    if (isDuplicate) {
+      return; // Don't submit if name is a duplicate
+    }
+    
     onSubmit({
       name,
       selector: "p", // Providing default rather than empty string
@@ -87,6 +104,9 @@ export const StyleForm = ({
 
   // Show form fields for creating/editing styles only when onSubmit is provided
   const showFormFields = !!onSubmit;
+  
+  // Disable save button if validation fails
+  const isSaveDisabled = isSaving || !isValid || isDuplicate;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -145,7 +165,7 @@ export const StyleForm = ({
           </Button>
           <Button 
             type="submit"
-            disabled={isSaving}
+            disabled={isSaveDisabled}
           >
             {isSaving ? (
               <>

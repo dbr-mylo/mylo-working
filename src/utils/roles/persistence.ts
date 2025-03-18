@@ -1,7 +1,7 @@
 
 import { UserRole } from "@/lib/types";
 import { GuestRoleState } from "@/lib/types/authTypes";
-import { RoleError, StorageError } from "@/lib/errors/authErrors";
+import { RoleError, StorageError } from "@/lib/errors/auth";
 
 // Constants for storage keys
 export const ROLE_STORAGE_KEY = 'app_user_role';

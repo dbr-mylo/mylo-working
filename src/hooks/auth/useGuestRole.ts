@@ -5,7 +5,7 @@ import { GuestRoleState } from "@/lib/types/authTypes";
 import { 
   RoleError, 
   StorageError 
-} from "@/lib/errors/authErrors";
+} from "@/lib/errors/auth";
 import { toast } from "sonner";
 import { 
   persistRole, 

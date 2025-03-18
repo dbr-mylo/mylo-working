@@ -1,9 +1,8 @@
 
-import { Error } from "@/lib/errors/authErrors";
 import { AuthError } from "@/lib/errors/authErrors";
 
 interface AuthErrorProps {
-  error: Error | null;
+  error: Error | AuthError | null;
   onClear: () => void;
 }
 

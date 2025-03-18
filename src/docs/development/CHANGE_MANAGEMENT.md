@@ -1,7 +1,7 @@
 
 # Change Management Guidelines
 
-**Last Updated:** 2023-11-20
+**Last Updated:** 2023-11-25
 
 ## Overview
 
@@ -15,6 +15,8 @@ This document outlines best practices for making changes to the application code
 4. **Documentation First** - Document current behavior before making changes
 
 ## Safe Component Modification Process
+
+For a detailed template to follow when making changes, refer to the [Change Management Template](./CHANGE_MANAGEMENT_TEMPLATE.md).
 
 ### Pre-Change Assessment
 
@@ -97,7 +99,9 @@ After each change:
 2. Update any affected workflow documentation
 3. Add or update examples showing the new functionality
 
-## Change Review Checklist
+## Change Verification Checklist
+
+For a comprehensive checklist to use during development, refer to the [Development Checklist](./CHECKLIST.md).
 
 Before submitting changes for review:
 
@@ -107,3 +111,21 @@ Before submitting changes for review:
 - [ ] UI matches design specifications
 - [ ] Code follows project style guidelines
 - [ ] Documentation updated to reflect changes
+
+## Hook Implementation Guidelines
+
+For detailed guidance on creating and modifying hooks, refer to the [Hook Implementation Guide](./HOOK_IMPLEMENTATION_GUIDE.md).
+
+When modifying hooks:
+
+1. **Document Current Behavior** - Understand how the hook currently works
+2. **Create Test Hook** - Create a duplicate for testing changes
+3. **Incremental Implementation** - Add functionality one piece at a time
+4. **Thorough Testing** - Test all aspects of the hook's behavior
+5. **Replace Original** - Only after thorough testing
+
+## Related Resources
+
+- [Development Checklist](./CHECKLIST.md) - Comprehensive checklist for development
+- [Change Management Template](./CHANGE_MANAGEMENT_TEMPLATE.md) - Detailed template for changes
+- [Hook Implementation Guide](./HOOK_IMPLEMENTATION_GUIDE.md) - Best practices for hook development

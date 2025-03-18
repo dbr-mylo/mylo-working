@@ -149,4 +149,6 @@ Use this checklist after implementation:
 [ ] Edge cases
   [ ] Works for new and existing styles
   [ ] Handles errors gracefully
+  [ ] Shows validation state in real-time
+  [ ] Provides visual feedback on validation
 ```

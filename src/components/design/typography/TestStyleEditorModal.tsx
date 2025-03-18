@@ -1,9 +1,10 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStyleNameValidator } from "./hooks/useStyleNameValidator";
 
 interface StyleEditorModalProps {
@@ -23,18 +24,19 @@ export const TestStyleEditorModal = ({
   const [isSaving, setIsSaving] = useState(false);
   const [styleName, setStyleName] = useState(style?.name || "");
   
-  const { isDuplicate, isValid } = useStyleNameValidator({
+  const { isDuplicate, isChecking, isValid } = useStyleNameValidator({
     name: styleName,
     currentStyleId: style?.id
   });
   
-  useState(() => {
+  // Update the name state when style prop changes
+  useEffect(() => {
     if (style) {
       setStyleName(style.name || "");
     } else {
       setStyleName("");
     }
-  });
+  }, [style]);
   
   const handleSave = async (formData: StyleFormData) => {
     if (!formData.name?.trim()) {
@@ -119,6 +121,11 @@ export const TestStyleEditorModal = ({
             onCancel={handleCancel}
             isSaving={isSaving}
             onNameChange={handleNameChange}
+            nameValidation={{
+              isValid,
+              isDuplicate,
+              isChecking
+            }}
           />
         </div>
       </DialogContent>

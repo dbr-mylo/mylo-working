@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { TextStyle, TypographyStyles, StyleFormData } from "@/lib/types";
 import { StyleFormMetadata } from "./StyleFormMetadata";
@@ -9,7 +10,12 @@ import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { useStyleNameValidator } from "./hooks/useStyleNameValidator";
+
+interface NameValidationStatus {
+  isValid: boolean;
+  isDuplicate: boolean;
+  isChecking: boolean;
+}
 
 interface StyleFormProps {
   initialValues?: TextStyle;
@@ -17,6 +23,7 @@ interface StyleFormProps {
   onCancel?: () => void;
   isSaving?: boolean;
   onNameChange?: (name: string) => void;
+  nameValidation?: NameValidationStatus;
 
   // Support for direct style manipulation
   styles?: TypographyStyles;
@@ -29,6 +36,7 @@ export const StyleForm = ({
   onCancel,
   isSaving = false,
   onNameChange,
+  nameValidation,
   styles: externalStyles,
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
@@ -47,12 +55,6 @@ export const StyleForm = ({
     externalStyleChange
   });
   
-  // Use the name validator hook
-  const { isDuplicate, isValid } = useStyleNameValidator({
-    name,
-    currentStyleId: initialValues?.id
-  });
-
   // Call onNameChange when name changes
   useEffect(() => {
     if (onNameChange) {
@@ -91,8 +93,8 @@ export const StyleForm = ({
       return; // Don't submit if name is empty
     }
     
-    // Check for duplicate names
-    if (isDuplicate) {
+    // Check for duplicate names (either using passed validation or local state)
+    if (nameValidation?.isDuplicate) {
       return; // Don't submit if name is a duplicate
     }
     
@@ -114,7 +116,10 @@ export const StyleForm = ({
   const showFormFields = !!onSubmit;
   
   // Disable save button if validation fails
-  const isSaveDisabled = isSaving || !isValid || isDuplicate;
+  const isSaveDisabled = isSaving || 
+    !name.trim() || 
+    (nameValidation?.isDuplicate || false) || 
+    (nameValidation?.isChecking || false);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -148,6 +153,7 @@ export const StyleForm = ({
               onNameChange={setName}
               onParentChange={handleParentChange}
               parentStyle={parentStyle}
+              validationStatus={nameValidation}
             />
           )}
         </TabsContent>
@@ -174,6 +180,11 @@ export const StyleForm = ({
           <Button 
             type="submit"
             disabled={isSaveDisabled}
+            className={
+              isSaveDisabled ? "opacity-70" : 
+              nameValidation?.isChecking ? "bg-amber-500 hover:bg-amber-600" :
+              "bg-primary hover:bg-primary/90"
+            }
           >
             {isSaving ? (
               <>

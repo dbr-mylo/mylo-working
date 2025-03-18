@@ -10,10 +10,13 @@ import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
 import { StyleInheritance } from "./StyleInheritance";
+import { Loader2 } from "lucide-react";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
   onSubmit?: (data: StyleFormData) => void;
+  onCancel?: () => void;
+  isSaving?: boolean;
   
   // Support for direct style manipulation
   styles?: TypographyStyles;
@@ -23,6 +26,8 @@ interface StyleFormProps {
 export const StyleForm = ({ 
   initialValues, 
   onSubmit,
+  onCancel,
+  isSaving = false,
   styles: externalStyles,
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
@@ -68,7 +73,7 @@ export const StyleForm = ({
     e.preventDefault();
     onSubmit({
       name,
-      selector: "", // Providing empty string as default
+      selector: "p", // Providing default rather than empty string
       description: "", // Providing empty string as default
       parentId,
       ...styles,
@@ -130,17 +135,26 @@ export const StyleForm = ({
 
       {showFormFields && (
         <div className="flex justify-end space-x-2 pt-3 border-t mt-3">
-          <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
-            name,
-            selector: "",
-            description: "",
-            parentId,
-            ...styles,
-          }) : undefined}>
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={onCancel}
+            disabled={isSaving}
+          >
             Cancel
           </Button>
-          <Button type="submit">
-            {initialValues ? "Update Style" : "Create Style"}
+          <Button 
+            type="submit"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              initialValues ? "Update Style" : "Create Style"
+            )}
           </Button>
         </div>
       )}

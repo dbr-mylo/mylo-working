@@ -28,14 +28,22 @@ export const StyleFormMetadata = ({
     <>
       {/* Style Name */}
       <div className="mb-2">
-        <Label htmlFor="name" className="text-xs mb-0.5 inline-block">Style Name</Label>
+        <Label htmlFor="name" className="text-xs mb-0.5 inline-block">
+          Style Name <span className="text-destructive">*</span>
+        </Label>
         <Input 
           id="name" 
           value={name} 
           onChange={(e) => onNameChange(e.target.value)} 
           placeholder="Heading 1"
           required
+          aria-required="true"
         />
+        {name.trim() === "" && (
+          <p className="text-xs text-destructive mt-1">
+            Name is required
+          </p>
+        )}
       </div>
       
       {/* Style Inheritance */}

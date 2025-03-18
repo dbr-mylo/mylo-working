@@ -4,6 +4,7 @@ import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -19,12 +20,45 @@ export const StyleEditorModal = ({
   onStyleSaved,
 }: StyleEditorModalProps) => {
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
   
   const handleSave = async (formData: StyleFormData) => {
+    // Validate required fields
+    if (!formData.name?.trim()) {
+      toast({
+        title: "Required field missing",
+        description: "Style name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check for duplicate names
     try {
+      const existingStyles = await textStyleStore.getTextStyles();
+      const isDuplicate = existingStyles.some(
+        existingStyle => 
+          existingStyle.name.toLowerCase() === formData.name.toLowerCase() && 
+          existingStyle.id !== style?.id
+      );
+      
+      if (isDuplicate) {
+        toast({
+          title: "Duplicate style name",
+          description: "A style with this name already exists. Please use a different name.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setIsSaving(true);
+      
       const styleData = {
         ...formData,
         id: style?.id, // If editing, keep the existing ID
+        // Ensure no empty strings for optional fields
+        selector: formData.selector || "p",
+        description: formData.description || "",
       };
       
       await textStyleStore.saveTextStyle(styleData);
@@ -43,7 +77,13 @@ export const StyleEditorModal = ({
         description: "Failed to save text style",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    onClose();
   };
 
   return (
@@ -59,6 +99,8 @@ export const StyleEditorModal = ({
           <StyleForm 
             initialValues={style || undefined}
             onSubmit={handleSave}
+            onCancel={handleCancel}
+            isSaving={isSaving}
           />
         </div>
       </DialogContent>

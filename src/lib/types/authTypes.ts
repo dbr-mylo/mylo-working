@@ -12,6 +12,14 @@ export interface UserProfile {
   id: string;
   email?: string;
   role?: UserRole;
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  lastSignInAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  metadata?: Record<string, any>;
   [key: string]: any;
 }
 
@@ -25,6 +33,8 @@ export interface AuthContextType extends AuthState {
   clearError: () => void;
   clearGuestRole: () => boolean;
   isAuthenticated: boolean;
+  refreshUserData: () => Promise<void>;
+  updateUserProfile?: (data: Partial<UserProfile>) => Promise<void>;
 }
 
 export interface AuthFormState {
@@ -38,6 +48,7 @@ export interface GuestRoleState {
   role: UserRole;
   timestamp: number;
   expiresAt: number;
+  metadata?: Record<string, any>;
 }
 
 export interface AuthSession {
@@ -48,18 +59,40 @@ export interface AuthSession {
     [key: string]: any;
   } | null;
   error: Error | null;
+  expires_at?: number;
 }
 
 export enum AuthErrorCode {
+  // Sign in errors
   InvalidCredentials = "auth/invalid-credentials",
   UserNotFound = "auth/user-not-found",
+  
+  // Sign up errors
   EmailAlreadyInUse = "auth/email-already-in-use",
   WeakPassword = "auth/weak-password",
+  InvalidEmail = "auth/invalid-email",
+  
+  // General errors
   NetworkError = "auth/network-error",
   UnknownError = "auth/unknown-error",
+  
+  // Role errors
   InvalidRole = "auth/invalid-role",
+  
+  // Session errors
   SessionExpired = "auth/session-expired",
-  StorageError = "auth/storage-error"
+  
+  // Storage errors
+  StorageError = "auth/storage-error",
+  
+  // Permissions
+  PermissionDenied = "auth/permission-denied",
+  
+  // Account status
+  AccountDisabled = "auth/account-disabled",
+  
+  // Rate limiting
+  TooManyRequests = "auth/too-many-requests"
 }
 
 export type AuthErrorType = 
@@ -68,10 +101,33 @@ export type AuthErrorType =
   | "signOut" 
   | "session" 
   | "role" 
-  | "storage";
+  | "storage"
+  | "permission";
 
 export interface AuthErrorOptions {
   code?: AuthErrorCode;
   context?: string;
   originalError?: unknown;
+  metadata?: Record<string, any>;
+}
+
+export interface AuthErrorHandlerOptions {
+  showToast?: boolean;
+  logToConsole?: boolean;
+  retryCount?: number;
+  retryDelay?: number;
+}
+
+export interface RoleValidationResult {
+  isAuthorized: boolean;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  role: UserRole | null;
+  handleUnauthorized: (message?: string) => void;
+}
+
+export interface AuthValidationResult {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  handleUnauthenticated: (message?: string) => void;
 }

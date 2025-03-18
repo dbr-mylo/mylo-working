@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { 
   AuthError, 
   SignInError, 
@@ -7,39 +7,38 @@ import {
   SignOutError,
   formatAuthError,
   getUserFriendlyErrorMessage,
-  mapToAuthError
+  mapToAuthError,
+  isRetryableError
 } from '@/lib/errors/authErrors';
 import { toast } from 'sonner';
-import { AuthErrorType } from '@/lib/types/authTypes';
+import { AuthErrorType, AuthErrorHandlerOptions } from '@/lib/types/authTypes';
 
-interface ErrorHandlerOptions {
-  showToast?: boolean;
-  logToConsole?: boolean;
-  retryCount?: number;
-}
-
-const defaultOptions: ErrorHandlerOptions = {
+const defaultOptions: AuthErrorHandlerOptions = {
   showToast: true,
   logToConsole: true,
-  retryCount: 0
+  retryCount: 0,
+  retryDelay: 1000
 };
 
 /**
- * Hook for handling authentication-related errors
+ * Hook for handling authentication-related errors with type safety
+ * Provides error state management, retry capability, and user feedback
  */
-export const useAuthErrorHandler = (options: ErrorHandlerOptions = defaultOptions) => {
+export const useAuthErrorHandler = (options: AuthErrorHandlerOptions = defaultOptions) => {
   const [error, setError] = useState<AuthError | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = options.retryCount ?? defaultOptions.retryCount;
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
-   * Handle an authentication error
+   * Handle an authentication error with proper type mapping and user feedback
    * @param error The error that occurred
    * @param context The context in which the error occurred
    * @returns The processed AuthError instance
    */
-  const handleError = useCallback((error: unknown, context: AuthErrorType) => {
-    // Map the error to an AuthError
+  const handleError = useCallback((error: unknown, context: AuthErrorType): AuthError => {
+    // Map the error to an AuthError with proper typing
     const processedError = mapToAuthError(error, context);
     
     // Set the error state
@@ -62,37 +61,79 @@ export const useAuthErrorHandler = (options: ErrorHandlerOptions = defaultOption
   }, [options.showToast, options.logToConsole]);
 
   /**
-   * Retry an operation that failed
+   * Retry an operation that failed with exponential backoff
    * @param operation The operation to retry
    * @param maxRetries Maximum number of retry attempts
    * @returns Promise that resolves with the operation result or rejects with an error
    */
   const retryOperation = useCallback(async <T>(
     operation: () => Promise<T>,
-    maxRetries: number = options.retryCount || 1
+    customMaxRetries?: number
   ): Promise<T> => {
-    if (maxRetries <= 0 || retryCount >= maxRetries) {
-      throw new Error('Maximum retry attempts reached');
+    const effectiveMaxRetries = customMaxRetries !== undefined ? customMaxRetries : maxRetries;
+    
+    if (effectiveMaxRetries <= 0) {
+      return operation();
     }
+    
+    // Create new abort controller for this retry operation
+    abortControllerRef.current = new AbortController();
+    const { signal } = abortControllerRef.current;
+    
+    let currentRetry = 0;
+    let lastError: unknown;
 
+    setRetryCount(0);
+    setIsRetrying(true);
+    
     try {
-      setIsRetrying(true);
-      setRetryCount(prev => prev + 1);
-      return await operation();
-    } catch (error) {
-      if (retryCount < maxRetries - 1) {
-        // Exponential backoff wait
-        const waitTime = Math.min(1000 * (2 ** retryCount), 10000);
+      while (currentRetry <= effectiveMaxRetries) {
+        if (signal.aborted) {
+          throw new Error('Retry operation aborted');
+        }
         
-        // Wait and retry
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        return retryOperation(operation, maxRetries);
+        try {
+          if (currentRetry > 0) {
+            // Wait with exponential backoff before retrying
+            const delayTime = Math.min((options.retryDelay || 1000) * Math.pow(2, currentRetry - 1), 30000);
+            await new Promise(resolve => setTimeout(resolve, delayTime));
+          }
+          
+          // Attempt the operation
+          const result = await operation();
+          return result;
+        } catch (error) {
+          lastError = error;
+          
+          // Only retry if the error is retryable and we haven't reached max retries
+          if (currentRetry < effectiveMaxRetries && isRetryableError(error)) {
+            currentRetry++;
+            setRetryCount(currentRetry);
+            continue;
+          }
+          
+          // Not retryable or reached max retries
+          throw error;
+        }
       }
-      throw error;
+      
+      // This should never be reached due to the while loop condition
+      throw lastError || new Error('Maximum retry attempts reached');
     } finally {
       setIsRetrying(false);
+      abortControllerRef.current = null;
     }
-  }, [retryCount, options.retryCount]);
+  }, [maxRetries, options.retryDelay]);
+
+  /**
+   * Cancel any in-progress retry operation
+   */
+  const cancelRetry = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsRetrying(false);
+    }
+  }, []);
 
   /**
    * Clear any stored errors
@@ -116,6 +157,7 @@ export const useAuthErrorHandler = (options: ErrorHandlerOptions = defaultOption
     handleError,
     clearError,
     retryOperation,
-    resetRetryCount
+    resetRetryCount,
+    cancelRetry
   };
 };

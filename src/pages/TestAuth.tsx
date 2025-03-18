@@ -41,11 +41,13 @@ export default function TestAuth() {
   const { 
     retryOperation, 
     isRetrying, 
-    clearError: clearHandlerError 
+    clearError: clearHandlerError,
+    cancelRetry
   } = useAuthErrorHandler({
     showToast: true,
     logToConsole: true,
-    retryCount: 1
+    retryCount: 2,
+    retryDelay: 1500
   });
 
   // Use the auth error display hook for managing error display
@@ -64,8 +66,9 @@ export default function TestAuth() {
       clearError();
       clearHandlerError();
       resetDismissedErrors();
+      cancelRetry();
     };
-  }, [clearError, clearHandlerError, resetDismissedErrors, formState.activeTab]);
+  }, [clearError, clearHandlerError, resetDismissedErrors, cancelRetry, formState.activeTab]);
 
   // Enhanced form submission with retry capability
   const handleFormSubmit = async (action: "signin" | "signup") => {
@@ -80,6 +83,12 @@ export default function TestAuth() {
     } catch (err) {
       console.error(`${action} failed with error:`, err);
     }
+  };
+
+  // Handle retry of the last operation
+  const handleRetry = () => {
+    const action = formState.activeTab;
+    handleFormSubmit(action);
   };
 
   // Determine loading and error states
@@ -124,7 +133,11 @@ export default function TestAuth() {
             />
           )}
           
-          <AuthErrorDisplay error={error} onClear={dismissError} />
+          <AuthErrorDisplay 
+            error={error} 
+            onClear={dismissError} 
+            onRetry={handleRetry}
+          />
         </div>
         
         <AuthDivider />

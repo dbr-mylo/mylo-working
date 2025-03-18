@@ -13,6 +13,11 @@ export const ROLE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 // Valid user roles
 export const VALID_ROLES: UserRole[] = ['editor', 'designer', 'admin'];
 
+// Type guard for UserRole
+export function isValidRole(role: any): role is UserRole {
+  return typeof role === 'string' && VALID_ROLES.includes(role as UserRole);
+}
+
 /**
  * Store user role in localStorage with timestamp
  * @param role The user role to persist
@@ -22,7 +27,7 @@ export const VALID_ROLES: UserRole[] = ['editor', 'designer', 'admin'];
 export const persistRole = (role: UserRole | null): void => {
   try {
     // Validate role before storing
-    if (role !== null && !VALID_ROLES.includes(role)) {
+    if (role !== null && !isValidRole(role)) {
       throw new RoleError(`Invalid role: ${role}`);
     }
     
@@ -63,26 +68,15 @@ export const retrievePersistedRole = (): UserRole | null => {
       return null;
     }
     
-    const guestRoleState: GuestRoleState = JSON.parse(storedRoleData);
+    const guestRoleState = parseGuestRoleState(storedRoleData);
     
-    // Validate the parsed data
-    if (!guestRoleState || !guestRoleState.role || !guestRoleState.timestamp) {
-      // Invalid data format, clear it
-      localStorage.removeItem(ROLE_STORAGE_KEY);
-      return null;
-    }
-    
-    // Check if the role is valid
-    if (!VALID_ROLES.includes(guestRoleState.role)) {
-      localStorage.removeItem(ROLE_STORAGE_KEY);
+    // Return null if parsing failed
+    if (!guestRoleState) {
       return null;
     }
     
     // Check if the role has expired
-    const isExpired = Date.now() > guestRoleState.expiresAt || 
-                      Date.now() - guestRoleState.timestamp > ROLE_EXPIRATION_TIME;
-    
-    if (isExpired) {
+    if (isRoleExpired(guestRoleState)) {
       // Clear expired role
       localStorage.removeItem(ROLE_STORAGE_KEY);
       return null;
@@ -104,13 +98,49 @@ export const retrievePersistedRole = (): UserRole | null => {
 };
 
 /**
+ * Safely parse guest role state with type validation
+ * @param jsonString The JSON string to parse
+ * @returns Parsed and validated GuestRoleState or null if invalid
+ */
+export const parseGuestRoleState = (jsonString: string): GuestRoleState | null => {
+  try {
+    const parsed = JSON.parse(jsonString);
+    
+    // Type validation
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+    
+    // Required fields validation
+    if (!isValidRole(parsed.role) || 
+        typeof parsed.timestamp !== 'number' || 
+        typeof parsed.expiresAt !== 'number') {
+      return null;
+    }
+    
+    return parsed as GuestRoleState;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Check if a GuestRoleState has expired
+ * @param roleState The guest role state to check
+ * @returns Whether the role has expired
+ */
+export const isRoleExpired = (roleState: GuestRoleState): boolean => {
+  return Date.now() > roleState.expiresAt;
+};
+
+/**
  * Validate a role string to ensure it's a valid UserRole
  * @param role The role to validate
  * @returns The validated role or null if invalid
  */
 export const validateRole = (role: any): UserRole | null => {
-  if (role && typeof role === 'string' && VALID_ROLES.includes(role as UserRole)) {
-    return role as UserRole;
+  if (isValidRole(role)) {
+    return role;
   }
   
   return null;
@@ -133,4 +163,31 @@ export const hasRoleExpired = (timestamp: number): boolean => {
 export const getRoleRemainingTime = (expiresAt: number): number => {
   const remaining = expiresAt - Date.now();
   return remaining > 0 ? remaining : 0;
+};
+
+/**
+ * Format role expiration time in a human-readable format
+ * @param expiresAt Expiration timestamp
+ * @returns Human-readable string (e.g., "23 hours 59 minutes")
+ */
+export const formatRoleExpirationTime = (expiresAt: number): string => {
+  const remainingMs = getRoleRemainingTime(expiresAt);
+  
+  if (remainingMs <= 0) {
+    return 'Expired';
+  }
+  
+  const seconds = Math.floor(remainingMs / 1000) % 60;
+  const minutes = Math.floor(remainingMs / (1000 * 60)) % 60;
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  
+  if (hours > 0) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  }
+  
+  if (minutes > 0) {
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
+  }
+  
+  return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
 };

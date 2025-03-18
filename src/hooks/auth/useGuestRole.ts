@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { 
   persistRole, 
   retrievePersistedRole, 
-  VALID_ROLES 
+  VALID_ROLES,
+  ROLE_STORAGE_KEY 
 } from "@/utils/roles/persistence";
 import { roleAuditLogger } from "@/utils/roles/auditLogger";
 
@@ -122,6 +123,33 @@ export const useGuestRole = () => {
     }
   };
 
+  // Clear guest role from local storage
+  const clearGuestRole = () => {
+    try {
+      const currentRole = retrievePersistedRole();
+      
+      // Remove role from local storage
+      localStorage.removeItem(ROLE_STORAGE_KEY);
+      
+      // Log role removal
+      roleAuditLogger.logRoleChange({
+        userId: null,
+        previousRole: currentRole,
+        newRole: null,
+        timestamp: Date.now(),
+        source: 'guest',
+        success: true
+      });
+      
+      toast.success("Signed out successfully");
+      return true;
+    } catch (error) {
+      console.error("Error clearing guest role:", error);
+      toast.error("Failed to sign out. Please try again.");
+      return false;
+    }
+  };
+
   // Helper functions for specific roles
   const continueAsGuestEditor = () => setGuestRole("editor");
   const continueAsGuestDesigner = () => setGuestRole("designer");
@@ -131,6 +159,7 @@ export const useGuestRole = () => {
     loadGuestRole,
     saveGuestRole,
     setGuestRole,
+    clearGuestRole,
     continueAsGuestEditor,
     continueAsGuestDesigner,
     continueAsGuestAdmin

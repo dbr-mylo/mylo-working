@@ -11,6 +11,7 @@ interface ExternalActionsProps {
 }
 
 export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsProps) => {
+  const { role, isAuthenticated: contextIsAuthenticated } = useAuth();
   const isAdmin = useIsAdmin();
   const navigate = useNavigate();
 
@@ -32,7 +33,7 @@ export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsP
         </Button>
       )}
       
-      {isAuthenticated && onSignOut && (
+      {(isAuthenticated || contextIsAuthenticated) && onSignOut && (
         <Button 
           variant="default" 
           size="sm" 
@@ -40,7 +41,7 @@ export const ExternalActions = ({ onSignOut, isAuthenticated }: ExternalActionsP
           onClick={onSignOut}
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {role ? "Sign Out" : "Sign Out"}
         </Button>
       )}
     </div>

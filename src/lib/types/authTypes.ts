@@ -1,3 +1,4 @@
+
 import { UserRole } from "../types";
 
 export interface AuthState {
@@ -22,6 +23,8 @@ export interface AuthContextType extends AuthState {
   continueAsGuestDesigner: () => void;
   continueAsGuestAdmin: () => void;
   clearError: () => void;
+  clearGuestRole: () => boolean;
+  isAuthenticated: boolean;
 }
 
 export interface AuthFormState {

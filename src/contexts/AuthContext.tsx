@@ -27,7 +27,9 @@ const defaultAuthContext: AuthContextType = {
   continueAsGuestEditor: () => {},
   continueAsGuestDesigner: () => {},
   continueAsGuestAdmin: () => {},
-  clearError: () => {}
+  clearError: () => {},
+  clearGuestRole: () => {},
+  isAuthenticated: false
 };
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
@@ -61,7 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadGuestRole,
     continueAsGuestEditor,
     continueAsGuestDesigner,
-    continueAsGuestAdmin
+    continueAsGuestAdmin,
+    clearGuestRole
   } = useGuestRole();
   
   // Initialize auth actions
@@ -69,9 +72,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading,
     clearError,
     setError,
-    fetchUserData
+    fetchUserData,
+    clearGuestRole
   });
   
+  // Check if the user is authenticated (has user or guest role)
+  const isAuthenticated = !isLoading && (user !== null || role !== null);
+
   // Initialize auth state and listeners
   useAuthInitialization({
     fetchUserData,
@@ -94,7 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       continueAsGuestEditor, 
       continueAsGuestDesigner,
       continueAsGuestAdmin,
-      clearError
+      clearError,
+      clearGuestRole,
+      isAuthenticated
     }}>
       {children}
     </AuthContext.Provider>

@@ -17,6 +17,7 @@ interface UseAuthActionsProps {
   clearError: () => void;
   setError: (error: any) => void;
   fetchUserData: (userId: string) => Promise<void>;
+  clearGuestRole: () => boolean;
 }
 
 /**
@@ -26,7 +27,8 @@ export const useAuthActions = ({
   setLoading,
   clearError,
   setError,
-  fetchUserData
+  fetchUserData,
+  clearGuestRole
 }: UseAuthActionsProps) => {
   const navigate = useNavigate();
   
@@ -110,6 +112,18 @@ export const useAuthActions = ({
       // Set loading state
       setLoading(true);
       
+      // Check if we need to clear a guest role first
+      const isGuestRole = await supabase.auth.getSession().then(({ data }) => !data.session);
+      
+      if (isGuestRole) {
+        // Clear guest role and redirect
+        clearGuestRole();
+        navigate("/auth");
+        setLoading(false);
+        return;
+      }
+      
+      // Handle Supabase auth signout
       const { error } = await supabase.auth.signOut();
       
       if (error) throw new SignOutError(error.message, {
@@ -130,7 +144,7 @@ export const useAuthActions = ({
     } finally {
       setLoading(false);
     }
-  }, [clearError, setLoading, setError, navigate]);
+  }, [clearError, setLoading, setError, navigate, clearGuestRole]);
 
   return {
     signIn,

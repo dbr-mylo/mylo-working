@@ -1,5 +1,5 @@
 
-import { AuthError } from "@/lib/errors/authErrors";
+import { AuthError } from "@/lib/errors/auth";
 
 interface AuthErrorProps {
   error: Error | AuthError | null;

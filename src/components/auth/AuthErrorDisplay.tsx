@@ -3,7 +3,7 @@ import React from "react";
 import { X, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AuthError } from "@/lib/errors/authErrors";
+import { AuthError } from "@/lib/errors/auth";
 
 interface AuthErrorDisplayProps {
   error: Error | null;

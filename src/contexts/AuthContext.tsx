@@ -6,7 +6,7 @@ import {
   AuthState
 } from "@/lib/types/authTypes";
 import { UserRole } from "@/lib/types";
-import { RoleError } from "@/lib/errors/authErrors";
+import { RoleError } from "@/lib/errors/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   useAuthState, 

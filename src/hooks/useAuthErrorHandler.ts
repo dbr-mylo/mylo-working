@@ -9,7 +9,7 @@ import {
   getUserFriendlyErrorMessage,
   mapToAuthError,
   isRetryableError
-} from '@/lib/errors/authErrors';
+} from '@/lib/errors/auth';
 import { toast } from 'sonner';
 import { AuthErrorType, AuthErrorHandlerOptions } from '@/lib/types/authTypes';
 

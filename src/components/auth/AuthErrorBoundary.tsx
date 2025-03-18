@@ -1,6 +1,6 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AuthError } from '@/lib/errors/authErrors';
+import { AuthError } from '@/lib/errors/auth';
 import { toast } from "sonner";
 
 interface AuthErrorBoundaryProps {

@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ import {
   SignOutError,
   SessionError,
   mapToAuthError
-} from "@/lib/errors/authErrors";
+} from "@/lib/errors/auth";
 
 interface UseAuthActionsProps {
   setLoading: (isLoading: boolean) => void;

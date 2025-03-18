@@ -5,13 +5,14 @@ import { CacheControls } from "@/components/auth/CacheControls";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 import { useAuthForm } from "@/hooks/auth";
 import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
-import { AuthError } from "@/lib/errors/authErrors";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { GuestRoleButtons } from "@/components/auth/GuestRoleButtons";
 import { AuthTabs } from "@/components/auth/AuthTabs";
 import { AuthErrorDisplay } from "@/components/auth/AuthError";
 import { AuthDivider } from "@/components/auth/AuthDivider";
+import { AuthContainer } from "@/components/auth/AuthContainer";
+import { AuthLoadingState } from "@/components/auth/AuthLoadingState";
 import "../styles/auth.css";
 
 export default function Auth() {
@@ -69,50 +70,52 @@ export default function Auth() {
 
   return (
     <AuthErrorBoundary>
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-1">Welcome</h1>
-            <p className="text-gray-500 mb-6">Sign in to access your documents</p>
-            
-            <div>
-              <AuthTabs 
-                activeTab={formState.activeTab}
-                onTabChange={handleTabChange}
-                isDisabled={isFormProcessing}
-              />
-              
-              {formState.activeTab === "signin" && (
-                <SignInForm
-                  email={formState.email}
-                  password={formState.password}
-                  isProcessing={isFormProcessing}
-                  onInputChange={handleInputChange}
-                  onSubmit={handleFormSubmit}
-                />
-              )}
-              
-              {formState.activeTab === "signup" && (
-                <SignUpForm
-                  email={formState.email}
-                  password={formState.password}
-                  isProcessing={isFormProcessing}
-                  onInputChange={handleInputChange}
-                  onSubmit={handleFormSubmit}
-                />
-              )}
-              
-              <AuthErrorDisplay error={error} onClear={clearError} />
-            </div>
-            
-            <AuthDivider />
-            
-            <GuestRoleButtons isDisabled={isFormProcessing} />
-            
-            <CacheControls />
-          </div>
+      <AuthContainer>
+        <h1 className="text-2xl font-bold mb-1">Welcome</h1>
+        <p className="text-gray-500 mb-6">Sign in to access your documents</p>
+        
+        <div>
+          <AuthTabs 
+            activeTab={formState.activeTab}
+            onTabChange={handleTabChange}
+            isDisabled={isFormProcessing}
+          />
+          
+          {isFormProcessing && (
+            <AuthLoadingState 
+              message={formState.activeTab === "signin" ? "Signing in..." : "Creating account..."}
+            />
+          )}
+          
+          {!isFormProcessing && formState.activeTab === "signin" && (
+            <SignInForm
+              email={formState.email}
+              password={formState.password}
+              isProcessing={isFormProcessing}
+              onInputChange={handleInputChange}
+              onSubmit={handleFormSubmit}
+            />
+          )}
+          
+          {!isFormProcessing && formState.activeTab === "signup" && (
+            <SignUpForm
+              email={formState.email}
+              password={formState.password}
+              isProcessing={isFormProcessing}
+              onInputChange={handleInputChange}
+              onSubmit={handleFormSubmit}
+            />
+          )}
+          
+          <AuthErrorDisplay error={error} onClear={clearError} />
         </div>
-      </div>
+        
+        <AuthDivider />
+        
+        <GuestRoleButtons isDisabled={isFormProcessing} />
+        
+        <CacheControls />
+      </AuthContainer>
     </AuthErrorBoundary>
   );
 }

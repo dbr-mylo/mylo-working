@@ -7,3 +7,4 @@ export * from './middleware';
 export * from './auditLogger';
 export * from './types';
 export * from './persistence';
+export * from './EditorOnly';

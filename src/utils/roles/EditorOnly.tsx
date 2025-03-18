@@ -15,4 +15,3 @@ export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({
   
   return isEditor ? <>{children}</> : <>{fallback}</>;
 };
-

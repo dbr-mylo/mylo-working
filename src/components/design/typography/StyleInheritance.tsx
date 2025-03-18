@@ -1,97 +1,73 @@
 
-import { useState, useEffect } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TextStyle } from "@/lib/types";
-import { textStyleStore } from "@/stores/textStyles";
+import React from "react";
+import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
+import { useStyleInheritance } from "./hooks/useStyleInheritance";
+import { StyleInheritanceSelect } from "./StyleInheritanceSelect";
+import { InheritanceChain } from "./InheritanceChain";
+import { useToast } from "@/hooks/use-toast";
 
 interface StyleInheritanceProps {
-  currentStyleId: string;
+  currentStyleId?: string;
   parentId?: string;
-  onParentChange: (parentId: string | undefined) => void;
+  onChange: (parentId: string | undefined) => void;
+  disabled?: boolean;
 }
 
 export const StyleInheritance = ({ 
   currentStyleId, 
   parentId, 
-  onParentChange 
+  onChange, 
+  disabled = false 
 }: StyleInheritanceProps) => {
-  const [availableParents, setAvailableParents] = useState<TextStyle[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  // Fetch all styles that could be valid parents
-  useEffect(() => {
-    const fetchAvailableParents = async () => {
-      try {
-        setLoading(true);
-        const allStyles = await textStyleStore.getTextStyles();
-        
-        // Filter out:
-        // 1. The current style itself
-        // 2. Any styles that have this style as an ancestor (would create circular ref)
-        const validParents = allStyles.filter(style => {
-          // Don't include the current style
-          if (style.id === currentStyleId) return false;
-          
-          // Don't include styles that would create circular references
-          if (currentStyleId) {
-            // Check if adding this style as a parent would create a circular reference
-            const wouldCreateCircular = checkCircularReference(style.id, currentStyleId);
-            if (wouldCreateCircular) return false;
-          }
-          
-          return true;
-        });
-        
-        setAvailableParents(validParents);
-      } catch (error) {
-        console.error("Error fetching available parents:", error);
-        setAvailableParents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Function to check if adding a parent would create a circular reference
-    const checkCircularReference = async (parentId: string, childId: string): Promise<boolean> => {
-      try {
-        // Get the inheritance chain of the potential parent
-        const chain = await textStyleStore.getInheritanceChain(parentId);
-        
-        // If the child is in the parent's chain, it would create a circular reference
-        return chain.some(style => style.id === childId);
-      } catch (error) {
-        console.error("Error checking circular reference:", error);
-        return true; // Safer to assume it would create a circular reference
-      }
-    };
-    
-    fetchAvailableParents();
-  }, [currentStyleId]);
+  const { toast } = useToast();
+  const { styles, loading, error, inheritanceChain } = useStyleInheritance({
+    currentStyleId,
+    parentId
+  });
 
-  const handleParentChange = (value: string) => {
-    onParentChange(value === "none" ? undefined : value);
+  const handleParentChange = (value: string | undefined) => {
+    try {
+      if (value !== undefined && styles.findIndex(s => s.id === value) === -1) {
+        throw new Error("Selected style is not valid as a parent");
+      }
+      
+      onChange(value);
+    } catch (err) {
+      console.error("Error changing parent style:", err);
+      toast({
+        title: "Error changing parent style",
+        description: err instanceof Error ? err.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
   };
-  
-  if (loading) {
-    return <div className="text-xs text-muted-foreground">Loading available parents...</div>;
-  }
 
   return (
-    <Select
-      value={parentId || "none"}
-      onValueChange={handleParentChange}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="No parent style (base style)" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">No parent style (base style)</SelectItem>
-        {availableParents.map(style => (
-          <SelectItem key={style.id} value={style.id}>
-            {style.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="space-y-2">
+      <Label htmlFor="parent-style">Inherit From</Label>
+      
+      <StyleInheritanceSelect
+        styles={styles}
+        parentId={parentId}
+        onChange={handleParentChange}
+        disabled={disabled}
+        loading={loading}
+        error={error}
+      />
+      
+      <InheritanceChain inheritanceChain={inheritanceChain} />
+      
+      {error ? (
+        <div className="flex items-center text-xs text-destructive mt-1">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          <p>{error}</p>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground mt-1">
+          Inheriting from another style will use its properties as a base for this style.
+        </p>
+      )}
+    </div>
   );
 };

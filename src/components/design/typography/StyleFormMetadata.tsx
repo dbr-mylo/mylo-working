@@ -1,59 +1,60 @@
 
-import React from 'react';
-import { TextStyle } from "@/lib/types";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { StyleInheritance } from "./StyleInheritance";
+import { TextStyle } from "@/lib/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface StyleFormMetadataProps {
   name: string;
   parentId?: string;
   currentStyleId?: string;
-  onNameChange: (name: string) => void;
-  onParentChange: (id: string | undefined) => void;
+  onNameChange: (value: string) => void;
+  onParentChange: (parentId: string | undefined) => void;
   parentStyle?: TextStyle | null;
-  compact?: boolean;
 }
 
-export const StyleFormMetadata: React.FC<StyleFormMetadataProps> = ({
+export const StyleFormMetadata = ({
   name,
   parentId,
   currentStyleId,
   onNameChange,
   onParentChange,
-  parentStyle,
-  compact = false
-}) => {
-  const spacing = compact ? "space-y-2" : "space-y-3";
-  
+  parentStyle
+}: StyleFormMetadataProps) => {
   return (
-    <div className={spacing}>
-      <div className="space-y-1">
-        <Label className="text-xs font-medium">Style Name</Label>
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => onNameChange(e.target.value)}
-          placeholder="Enter style name"
-          className="h-7 text-xs"
+    <>
+      {/* Style Name */}
+      <div className="mb-2">
+        <Label htmlFor="name" className="text-xs mb-0.5 inline-block">Style Name</Label>
+        <Input 
+          id="name" 
+          value={name} 
+          onChange={(e) => onNameChange(e.target.value)} 
+          placeholder="Heading 1"
+          required
         />
       </div>
       
-      <div className="space-y-1">
-        <Label className="text-xs font-medium">Parent Style (Optional)</Label>
-        <Select
-          value={parentId || ""}
-          onValueChange={(value) => onParentChange(value ? value : undefined)}
-        >
-          <SelectTrigger className="h-7 text-xs">
-            <SelectValue placeholder="None (No Parent)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">None (No Parent)</SelectItem>
-            {/* Parent styles would be populated here */}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+      {/* Style Inheritance */}
+      <StyleInheritance
+        currentStyleId={currentStyleId}
+        parentId={parentId}
+        onChange={onParentChange}
+      />
+      
+      {/* Info about inheritance */}
+      {parentStyle && (
+        <Alert variant="default" className="bg-primary/5 border-primary/20 mt-3">
+          <InfoIcon className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-xs">
+            This style inherits properties from <strong>{parentStyle.name}</strong>. 
+            Any property you don't override will use the parent's value.
+          </AlertDescription>
+        </Alert>
+      )}
+    </>
   );
 };

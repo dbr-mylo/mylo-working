@@ -7,10 +7,9 @@ import { Slider } from "@/components/ui/slider";
 interface FontSizeControlProps {
   value: string;
   onChange: (value: string) => void;
-  compact?: boolean;
 }
 
-export const FontSizeControl = ({ value, onChange, compact = false }: FontSizeControlProps) => {
+export const FontSizeControl = ({ value, onChange }: FontSizeControlProps) => {
   // Constants for min/max font size values according to requirements
   const MIN_FONT_SIZE = 1;
   const MAX_FONT_SIZE = 99;
@@ -21,7 +20,7 @@ export const FontSizeControl = ({ value, onChange, compact = false }: FontSizeCo
   };
 
   return (
-    <div className="mb-1">
+    <div className="mb-2">
       <div className="flex justify-between items-center mb-0.5">
         <Label htmlFor="font-size" className="text-xs">Font Size</Label>
         <span className="text-xs text-gray-500">{value}</span>
@@ -34,7 +33,7 @@ export const FontSizeControl = ({ value, onChange, compact = false }: FontSizeCo
           max={MAX_FONT_SIZE} 
           step={1}
           onValueChange={(val) => onChange(`${val[0]}px`)}
-          className={`flex-1 ${compact ? "h-3" : ""}`}
+          className="flex-1"
         />
         <Input
           type="number"
@@ -45,7 +44,7 @@ export const FontSizeControl = ({ value, onChange, compact = false }: FontSizeCo
               onChange(`${numValue}px`);
             }
           }}
-          className={`w-12 ${compact ? "h-6 text-xs px-1" : ""}`}
+          className="w-14"
           min={MIN_FONT_SIZE}
           max={MAX_FONT_SIZE}
         />

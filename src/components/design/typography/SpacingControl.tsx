@@ -4,28 +4,23 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
 interface SpacingControlProps {
-  type?: "lineHeight" | "letterSpacing";
-  label?: string;
+  type: "lineHeight" | "letterSpacing";
   value: string;
   onChange: (value: string) => void;
   min?: number;
   max?: number;
   step?: number;
-  compact?: boolean;
 }
 
 export const SpacingControl = ({ 
-  label,
-  type = "lineHeight",
+  type, 
   value, 
   onChange, 
   min = type === "lineHeight" ? 0.5 : -2, 
   max = type === "lineHeight" ? 3 : 10, 
-  step = type === "lineHeight" ? 0.1 : 0.5,
-  compact = false
+  step = type === "lineHeight" ? 0.1 : 0.5 
 }: SpacingControlProps) => {
-  // Use the label prop if provided, otherwise derive from type
-  const displayLabel = label || (type === "lineHeight" ? "Line Height" : "Letter Spacing");
+  const label = type === "lineHeight" ? "Line Height" : "Letter Spacing";
   const id = type === "lineHeight" ? "line-height" : "letter-spacing";
   
   // Handle parsing the value
@@ -57,9 +52,9 @@ export const SpacingControl = ({
   };
 
   return (
-    <div className="mb-1">
+    <div className="mb-2">
       <div className="flex justify-between items-center mb-0.5">
-        <Label htmlFor={id} className="text-xs">{displayLabel}</Label>
+        <Label htmlFor={id} className="text-xs">{label}</Label>
         <span className="text-xs text-gray-500">{formatDisplayValue()}</span>
       </div>
       <Slider 
@@ -69,7 +64,6 @@ export const SpacingControl = ({
         max={max} 
         step={step}
         onValueChange={(val) => onChange(formatOutputValue(val[0]))}
-        className={compact ? "h-3" : ""}
       />
     </div>
   );

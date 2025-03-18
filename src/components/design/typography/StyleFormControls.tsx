@@ -1,87 +1,147 @@
 
 import React from "react";
-import { TextStyle, TypographyStyles } from "@/lib/types";
+import { TypographyStyles, TextStyle } from "@/lib/types";
 import { FontFamilyControl } from "./FontFamilyControl";
 import { FontSizeControl } from "./FontSizeControl";
 import { FontWeightControl } from "./FontWeightControl";
 import { ColorControl } from "./ColorControl";
 import { SpacingControl } from "./SpacingControl";
 import { TextAlignmentControl } from "./TextAlignmentControl";
-import { TextPreview } from "./TextPreview";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Link2 } from "lucide-react";
 
 interface StyleFormControlsProps {
   styles: TypographyStyles;
   onStyleChange: (property: keyof TypographyStyles, value: string) => void;
   parentStyle?: TextStyle | null;
-  compact?: boolean;
 }
 
-export const StyleFormControls = ({ 
-  styles, 
-  onStyleChange,
-  parentStyle,
-  compact = false
-}: StyleFormControlsProps) => {
-  // Ensure default values for form controls
-  const safeStyles = {
-    fontFamily: styles.fontFamily || "Inter",
-    fontSize: styles.fontSize || "16px",
-    fontWeight: styles.fontWeight || "400",
-    color: styles.color || "#000000",
-    lineHeight: styles.lineHeight || "1.5",
-    letterSpacing: styles.letterSpacing || "0",
-    textAlign: styles.textAlign || "left",
-    // Other style properties
-    ...styles
+export const StyleFormControls = ({ styles, onStyleChange, parentStyle }: StyleFormControlsProps) => {
+  // Function to determine if a property is inherited from parent
+  const isInherited = (property: keyof TypographyStyles): boolean => {
+    if (!parentStyle) return false;
+    
+    // Check if this property matches the parent's property
+    return parentStyle[property] === styles[property];
   };
-
+  
   return (
-    <div className="space-y-2">
-      <FontFamilyControl 
-        value={safeStyles.fontFamily} 
-        onChange={(value) => onStyleChange('fontFamily', value)} 
-        compact={compact}
-      />
+    <div className="space-y-6">
+      {parentStyle && (
+        <div className="bg-muted/30 p-2 rounded border border-muted flex items-center space-x-2">
+          <Link2 className="h-4 w-4 text-muted-foreground" />
+          <div className="text-xs">
+            <span className="text-muted-foreground">Inherits from: </span>
+            <span className="font-medium">{parentStyle.name}</span>
+          </div>
+        </div>
+      )}
       
-      <div className="grid grid-cols-2 gap-2">
-        <FontSizeControl 
-          value={safeStyles.fontSize} 
-          onChange={(value) => onStyleChange('fontSize', value)} 
-          compact={compact}
-        />
-        <FontWeightControl 
-          value={safeStyles.fontWeight} 
-          onChange={(value) => onStyleChange('fontWeight', value)} 
-          compact={compact}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left column - Font Controls */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Font Settings</h3>
+          
+          {/* Font Family */}
+          <div className="space-y-1">
+            <FontFamilyControl 
+              value={styles.fontFamily} 
+              onChange={(value) => onStyleChange("fontFamily", value)} 
+            />
+            {isInherited("fontFamily") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+
+          {/* Font Size */}
+          <div className="space-y-1">
+            <FontSizeControl 
+              value={styles.fontSize} 
+              onChange={(value) => onStyleChange("fontSize", value)} 
+            />
+            {isInherited("fontSize") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+
+          {/* Font Weight */}
+          <div className="space-y-1">
+            <FontWeightControl 
+              value={styles.fontWeight} 
+              onChange={(value) => onStyleChange("fontWeight", value)} 
+            />
+            {isInherited("fontWeight") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+        </div>
+        
+        {/* Right column - Text Controls */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Text Settings</h3>
+          
+          {/* Text Color */}
+          <div className="space-y-1">
+            <ColorControl 
+              value={styles.color} 
+              onChange={(value) => onStyleChange("color", value)} 
+            />
+            {isInherited("color") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+
+          {/* Line Height */}
+          <div className="space-y-1">
+            <SpacingControl 
+              type="lineHeight"
+              value={styles.lineHeight} 
+              onChange={(value) => onStyleChange("lineHeight", value)} 
+            />
+            {isInherited("lineHeight") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+
+          {/* Letter Spacing */}
+          <div className="space-y-1">
+            <SpacingControl 
+              type="letterSpacing"
+              value={styles.letterSpacing} 
+              onChange={(value) => onStyleChange("letterSpacing", value)} 
+            />
+            {isInherited("letterSpacing") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+
+          {/* Text Alignment */}
+          <div className="space-y-1">
+            <TextAlignmentControl 
+              value={styles.textAlign} 
+              onChange={(value) => onStyleChange("textAlign", value)} 
+            />
+            {isInherited("textAlign") && (
+              <Badge variant="outline" className="text-[10px] h-4 bg-primary/10 text-primary border-primary/20">
+                Inherited
+              </Badge>
+            )}
+          </div>
+        </div>
       </div>
-      
-      <ColorControl 
-        value={safeStyles.color} 
-        onChange={(value) => onStyleChange('color', value)} 
-        compact={compact}
-      />
-      
-      <div className="grid grid-cols-2 gap-2">
-        <SpacingControl 
-          type="lineHeight"
-          value={safeStyles.lineHeight} 
-          onChange={(value) => onStyleChange('lineHeight', value)} 
-          compact={compact}
-        />
-        <SpacingControl 
-          type="letterSpacing"
-          value={safeStyles.letterSpacing} 
-          onChange={(value) => onStyleChange('letterSpacing', value)} 
-          compact={compact}
-        />
-      </div>
-      
-      <TextAlignmentControl 
-        value={safeStyles.textAlign} 
-        onChange={(value) => onStyleChange('textAlign', value)} 
-        compact={compact}
-      />
     </div>
   );
 };

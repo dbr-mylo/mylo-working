@@ -4,7 +4,6 @@ import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -20,28 +19,6 @@ export const StyleEditorModal = ({
   onStyleSaved,
 }: StyleEditorModalProps) => {
   const { toast } = useToast();
-  const [localStyle, setLocalStyle] = useState<TextStyle | null>(null);
-  
-  // Update local style when prop changes
-  useEffect(() => {
-    if (style) {
-      setLocalStyle(style);
-    } else if (isOpen) {
-      // Set default values for a new style
-      setLocalStyle({
-        id: '',
-        name: 'New Style',
-        fontFamily: 'Inter',
-        fontSize: '16px',
-        fontWeight: '400',
-        color: '#000000',
-        lineHeight: '1.5',
-        letterSpacing: '0',
-        selector: 'p',
-        description: ''
-      });
-    }
-  }, [style, isOpen]);
   
   const handleSave = async (formData: StyleFormData) => {
     try {
@@ -71,20 +48,18 @@ export const StyleEditorModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-3 pb-2">
+          <DialogTitle className="text-sm font-semibold">
             {style ? `Edit Style: ${style.name}` : "Create New Style"}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
-          {localStyle && (
-            <StyleForm 
-              initialValues={localStyle}
-              onSubmit={handleSave}
-            />
-          )}
+        <div className="px-3 pb-3">
+          <StyleForm 
+            initialValues={style || undefined}
+            onSubmit={handleSave}
+          />
         </div>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,3 @@
-
 import { createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -28,7 +27,7 @@ const defaultAuthContext: AuthContextType = {
   continueAsGuestDesigner: () => {},
   continueAsGuestAdmin: () => {},
   clearError: () => {},
-  clearGuestRole: () => {},
+  clearGuestRole: () => false,
   isAuthenticated: false
 };
 

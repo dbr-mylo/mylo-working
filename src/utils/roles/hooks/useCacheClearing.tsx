@@ -6,19 +6,22 @@
  * This prevents duplication of cache-clearing logic across components.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { textStyleStore } from '@/stores/textStyles';
 import { toast } from '@/components/ui/use-toast';
 
 export const useCacheClearing = () => {
   const { role } = useAuth();
+  const [isClearing, setIsClearing] = useState(false);
 
   /**
    * Clear all caches related to the current role
    */
   const clearAllCaches = useCallback(() => {
     try {
+      setIsClearing(true);
+      
       if (role === 'designer') {
         // Designers need deeper cache cleaning
         textStyleStore.deepCleanStorage();
@@ -44,10 +47,13 @@ export const useCacheClearing = () => {
         description: "There was a problem clearing the caches. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsClearing(false);
     }
   }, [role]);
 
   return {
+    isClearing,
     clearAllCaches
   };
 };

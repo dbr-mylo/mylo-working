@@ -12,7 +12,8 @@ export * from './RoleFunctions';
 
 // Role-specific components
 export * from './RoleComponents';
-export * from './EditorOnly';
+// Explicitly re-export EditorOnly from its dedicated file to avoid ambiguity with RoleComponents export
+export { EditorOnly } from './EditorOnly';
 
 // Role utilities
 export * from './types';

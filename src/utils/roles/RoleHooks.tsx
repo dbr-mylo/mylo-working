@@ -34,6 +34,14 @@ export const useIsEditor = (): boolean => {
 };
 
 /**
+ * Check if current user is a designer or admin
+ */
+export const useIsDesignerOrAdmin = (): boolean => {
+  const { role } = useAuth();
+  return role === 'designer' || role === 'admin';
+};
+
+/**
  * Get role-specific features
  */
 export const useRoleFeatures = () => {

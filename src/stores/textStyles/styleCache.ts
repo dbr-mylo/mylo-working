@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for managing text style cache and versioning
  */
@@ -147,6 +146,79 @@ export const resetTextStylesToDefaults = (): void => {
 export const clearAllStyleCaches = (): void => {
   // In a real application, this would clear both local storage and any in-memory caches
   console.log('Clearing all style caches');
+};
+
+/**
+ * Performs a deep clean of all style-related storage
+ * Removes all cached styles, version tracking, and resets to defaults
+ */
+export const deepCleanStorage = (): void => {
+  try {
+    // Clear all style-related localStorage items
+    const keysToRemove: string[] = [];
+    
+    // Find all style-related keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.startsWith('textStyle_') || 
+        key.startsWith('styleCache_') || 
+        key.startsWith('styleVersion_') ||
+        key.includes('_style_') ||
+        key.includes('_styles_') ||
+        key === 'defaultTextStyle' ||
+        key === 'cachedFontSize'
+      )) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    // Remove all identified keys
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
+    console.log(`Deep cleaned storage: removed ${keysToRemove.length} items`);
+    
+    // Reset to defaults after cleaning
+    resetTextStylesToDefaults();
+  } catch (error) {
+    console.error('Error during deep storage cleaning:', error);
+    throw new Error('Failed to perform deep clean of style storage');
+  }
+};
+
+/**
+ * Clears the default reset style from cache
+ * This is used to force regeneration of the default style
+ */
+export const clearDefaultResetStyle = (): void => {
+  try {
+    localStorage.removeItem('defaultTextStyle');
+    console.log('Cleared default reset style from cache');
+  } catch (error) {
+    console.error('Error clearing default reset style:', error);
+  }
+};
+
+/**
+ * Clears editor-specific caches to ensure clean rendering
+ * This includes font sizes, colors, and other editor-specific settings
+ */
+export const clearEditorCache = (): void => {
+  try {
+    // Clear specific editor caches
+    localStorage.removeItem('cachedFontSize');
+    localStorage.removeItem('editorFontCache');
+    localStorage.removeItem('editorColorCache');
+    
+    // Clear pattern-based caches
+    clearCachedStylesByPattern(['fontSize', 'fontFamily', 'color']);
+    
+    console.log('Cleared editor caches');
+  } catch (error) {
+    console.error('Error clearing editor cache:', error);
+  }
 };
 
 /**

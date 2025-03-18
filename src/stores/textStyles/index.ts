@@ -23,7 +23,10 @@ import {
   resetTextStylesToDefaults,
   clearAllStyleCaches,
   detectCircularReference,
-  resolveStyleConflicts
+  resolveStyleConflicts,
+  deepCleanStorage,
+  clearDefaultResetStyle,
+  clearEditorCache
 } from './styleCache';
 
 // Re-export the SaveTextStyleInput interface
@@ -60,5 +63,10 @@ export const textStyleStore = {
   resetTextStylesToDefaults,
   clearAllStyleCaches,
   detectCircularReference,
-  resolveStyleConflicts
+  resolveStyleConflicts,
+  
+  // New cache management functions
+  deepCleanStorage,
+  clearDefaultResetStyle,
+  clearEditorCache
 };

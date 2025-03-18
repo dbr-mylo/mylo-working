@@ -5,6 +5,7 @@ import { CacheControls } from "@/components/auth/CacheControls";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
+import { AuthError } from "@/lib/errors/authErrors";
 import "../styles/auth.css";
 
 export default function Auth() {
@@ -191,7 +192,7 @@ export default function Auth() {
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
                   <p className="font-medium">Authentication Error</p>
-                  <p>{error.getUserMessage ? error.getUserMessage() : error.message}</p>
+                  <p>{error instanceof AuthError ? error.getUserMessage() : error.message}</p>
                   <button 
                     onClick={clearError}
                     className="mt-2 text-xs text-red-600 hover:text-red-800 underline"

@@ -1,39 +1,69 @@
 
 # Designer Components
 
-This directory contains components specific to the designer role in the application.
+**Last Updated:** 2023-11-15
 
-## Core Components
+## Overview
 
-- `DesignerStandaloneView.tsx` - Main container for designer functionality
-- `DesignerSidebar.tsx` - Sidebar with design tools
-- `DesignerToolbar.tsx` - Designer-specific formatting toolbar
-- `DocumentPreview.tsx` - Preview of document with design capabilities
+The Designer components provide the interface for creating and managing templates. These components are only available to users with the "designer" role and enable advanced design capabilities.
 
-## Typography Components
+## Key Components
 
-- `StyleEditor.tsx` - Edit text styles
-- `StylesList.tsx` - List of available text styles
-- `StyleListItem.tsx` - Individual style in the list
-- `StyleInheritance.tsx` - Manage style inheritance
-- `InheritanceChain.tsx` - Visualize style inheritance
+- **DesignerStandaloneView**: The main container for the designer experience
+- **DesignerSidebar**: Side panel with design tools
+- **DesignerToolbar**: Toolbar with formatting and design controls
+- **TemplateManager**: Interface for managing templates
 
-## Toolbar Components
+## Architecture
 
-- `DesignerFormatButtonGroup.tsx` - Text formatting buttons
-- `DesignerAlignmentButtonGroup.tsx` - Text alignment buttons
-- `DesignerListButtonGroup.tsx` - List formatting buttons
-- `DesignerIndentButtonGroup.tsx` - Indentation controls
-- `DesignerStyleControls.tsx` - Style application controls
-- `DesignerTextControls.tsx` - Text formatting controls
+See the [Designer Components Overview](./DesignerComponentsOverview.md) for a detailed explanation of the component hierarchy and interactions.
 
-## Integration
+## Designer Sidebar
 
-Designer components maintain strict separation from editor components to prevent functionality conflicts. They include specialized behavior for template management and style inheritance.
+The DesignerSidebar provides access to design tools through tabs:
+
+- **Typography Panel**: Style creation and management
+- **Template Panel**: Template dimensions and settings
+- **Element Panel**: Selection properties and formatting
+
+## Template Management
+
+The template management components support:
+
+- Creating new templates
+- Setting template dimensions
+- Defining template styles
+- Managing template categories
+- Publishing templates for editors
+
+## Style Management
+
+The style management components enable:
+
+- Creating text styles
+- Establishing inheritance relationships
+- Previewing styles in the document
+- Applying styles to content
 
 ## Usage
 
-All designer components should:
-1. Check for the designer role before rendering
-2. Only be used in designer-specific contexts
-3. Include appropriate error handling for incorrect usage
+```tsx
+// Render the designer view
+<DesignerStandaloneView
+  content={content}
+  designContent={designContent}
+  customStyles={templateStyles}
+  isEditable={true}
+  editorSetup={editorSetup}
+  onContentChange={handleContentChange}
+  onElementSelect={handleElementSelect}
+/>
+```
+
+## Best Practices
+
+1. **Template Structure**: Create templates with clear structure
+2. **Style Inheritance**: Use inheritance for consistency
+3. **Dimensions**: Set appropriate dimensions for output
+4. **Placeholder Content**: Use meaningful placeholders
+5. **Performance**: Minimize the number of styles

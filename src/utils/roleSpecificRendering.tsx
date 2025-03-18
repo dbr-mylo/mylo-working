@@ -2,11 +2,10 @@
 /**
  * Role-Specific Rendering Utilities
  * 
- * @deprecated This file is maintained for backward compatibility.
- * Please use direct imports from '@/utils/roles' instead.
+ * This utility provides components and functions to help separate
+ * designer, editor, and admin role-specific code paths.
  * 
- * Example:
- * import { useIsDesigner, DesignerOnly } from '@/utils/roles';
+ * @deprecated Use imports from '@/utils/roles' instead
  */
 
 // Re-export everything from the new structure for backward compatibility

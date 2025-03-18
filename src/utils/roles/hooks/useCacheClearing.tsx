@@ -1,59 +1,73 @@
 
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 /**
- * useCacheClearing Hook
+ * Hook for clearing application caches
  * 
- * A specialized hook for clearing cache in a role-appropriate way.
- * This prevents duplication of cache-clearing logic across components.
+ * This hook provides functionality to clear various caches in the application.
+ * The component using this hook is responsible for checking admin permissions.
  */
-
-import { useCallback, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { textStyleStore } from '@/stores/textStyles';
-import { toast } from '@/components/ui/use-toast';
-
 export const useCacheClearing = () => {
-  const { role } = useAuth();
   const [isClearing, setIsClearing] = useState(false);
 
-  /**
-   * Clear all caches related to the current role
-   */
-  const clearAllCaches = useCallback(() => {
+  const clearLocalStorageCache = () => {
+    try {
+      // Clear editor-related caches
+      localStorage.removeItem('editor_font_size');
+      localStorage.removeItem('editor_recent_colors');
+      
+      // Clear any template caches
+      const templateKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('template_') || key.includes('cache')
+      );
+      
+      templateKeys.forEach(key => localStorage.removeItem(key));
+      
+      toast.success("Local storage cache cleared successfully");
+    } catch (error) {
+      console.error("Error clearing local storage:", error);
+      toast.error("Failed to clear local storage cache");
+    }
+  };
+
+  const clearMemoryCache = () => {
     try {
       setIsClearing(true);
       
-      if (role === 'designer') {
-        // Designers need deeper cache cleaning
-        textStyleStore.deepCleanStorage();
-        toast({
-          title: "Design caches cleared",
-          description: "All style caches have been reset to defaults."
-        });
-      } else {
-        // Editors just need font/color cache clearing
-        textStyleStore.clearEditorCache();
-        textStyleStore.clearDefaultResetStyle();
-        toast({
-          title: "Editor caches cleared",
-          description: "Editor-specific caches have been refreshed."
-        });
-      }
+      // Dispatch cache clear events
+      document.dispatchEvent(new CustomEvent('tiptap-clear-font-cache'));
+      document.dispatchEvent(new CustomEvent('clear-application-cache'));
       
-      console.log(`Caches cleared for ${role} role`);
-    } catch (error) {
-      console.error('Error clearing caches:', error);
-      toast({
-        title: "Error clearing caches",
-        description: "There was a problem clearing the caches. Please try again.",
-        variant: "destructive"
+      // Force reload styles
+      const styleElements = document.querySelectorAll('style');
+      styleElements.forEach(el => {
+        const parent = el.parentNode;
+        if (parent) {
+          parent.removeChild(el);
+          parent.appendChild(el);
+        }
       });
+      
+      toast.success("Memory cache cleared successfully");
+    } catch (error) {
+      console.error("Error clearing memory cache:", error);
+      toast.error("Failed to clear memory cache");
     } finally {
       setIsClearing(false);
     }
-  }, [role]);
+  };
+
+  const clearAllCaches = () => {
+    clearLocalStorageCache();
+    clearMemoryCache();
+    toast.success("All caches cleared successfully");
+  };
 
   return {
     isClearing,
+    clearLocalStorageCache,
+    clearMemoryCache,
     clearAllCaches
   };
 };

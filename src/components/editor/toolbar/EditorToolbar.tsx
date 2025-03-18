@@ -8,7 +8,8 @@ import { EditorListButtonGroup } from './EditorListButtonGroup';
 import { EditorAlignmentButtonGroup } from './EditorAlignmentButtonGroup';
 import { EditorIndentButtonGroup } from './EditorIndentButtonGroup';
 import { EditorClearFormattingButton } from './EditorClearFormattingButton';
-import { useIsEditor, EditorOnly } from '@/utils/roles';
+import { useIsEditor } from '@/utils/roles';
+import { StandaloneEditorOnly } from '@/utils/roles';
 
 interface EditorToolbarProps {
   editor: Editor;
@@ -36,7 +37,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
 
   return (
-    <EditorOnly>
+    <StandaloneEditorOnly>
       <div className="rounded-md bg-background p-1 flex flex-wrap gap-3 items-center editor-toolbar-buttons">
         {/* Text styling controls - font family, font size and color */}
         <TextControls editor={editor} />
@@ -56,6 +57,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         {/* Clear formatting button */}
         <EditorClearFormattingButton editor={editor} />
       </div>
-    </EditorOnly>
+    </StandaloneEditorOnly>
   );
 };

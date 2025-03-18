@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CacheControls } from "@/components/auth/CacheControls";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
-import { useAuthForm } from "@/hooks/useAuthForm";
+import { useAuthForm } from "@/hooks/auth";
 import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
 import { AuthError } from "@/lib/errors/authErrors";
 import { SignInForm } from "@/components/auth/SignInForm";

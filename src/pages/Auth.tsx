@@ -29,15 +29,25 @@ export default function Auth() {
     clearError
   } = useAuth();
   
-  // Use the auth error handler
-  const { handleError } = useAuthErrorHandler();
+  // Use the enhanced auth error handler
+  const { 
+    handleError, 
+    retryOperation, 
+    isRetrying, 
+    clearError: clearHandlerError 
+  } = useAuthErrorHandler({
+    showToast: true,
+    logToConsole: true,
+    retryCount: 1
+  });
 
   // Clear auth errors when component unmounts or tab changes
   useEffect(() => {
     return () => {
       clearError();
+      clearHandlerError();
     };
-  }, [clearError, formState.activeTab]);
+  }, [clearError, clearHandlerError, formState.activeTab]);
 
   // Handle input changes with type safety
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,9 +69,10 @@ export default function Auth() {
       isSubmitting: false
     }));
     clearError();
+    clearHandlerError();
   };
 
-  // Handle form submission
+  // Handle form submission with improved error handling and retry capability
   const handleSubmit = async (action: "signin" | "signup") => {
     try {
       // Validate form
@@ -91,9 +102,12 @@ export default function Auth() {
       // Set submitting state
       setFormState(prev => ({ ...prev, isSubmitting: true }));
       
+      // Use the auth operation with retry capability if enabled
       if (action === "signin") {
-        await signIn(formState.email, formState.password);
+        // Attempt sign in with retry support
+        await retryOperation(() => signIn(formState.email, formState.password));
       } else {
+        // Sign up typically doesn't need retries
         await signUp(formState.email, formState.password);
       }
     } catch (error) {
@@ -105,7 +119,7 @@ export default function Auth() {
   };
 
   // Determine loading and error states
-  const isAuthLoading = isLoading || formState.isSubmitting;
+  const isAuthLoading = isLoading || formState.isSubmitting || isRetrying;
 
   return (
     <AuthErrorBoundary>
@@ -123,6 +137,7 @@ export default function Auth() {
                   data-state={formState.activeTab === "signin" ? "active" : "inactive"}
                   onClick={() => handleTabChange("signin")}
                   disabled={isAuthLoading}
+                  aria-disabled={isAuthLoading}
                 >
                   Sign In
                 </button>
@@ -132,6 +147,7 @@ export default function Auth() {
                   data-state={formState.activeTab === "signup" ? "active" : "inactive"}
                   onClick={() => handleTabChange("signup")}
                   disabled={isAuthLoading}
+                  aria-disabled={isAuthLoading}
                 >
                   Sign Up
                 </button>
@@ -178,7 +194,7 @@ export default function Auth() {
                     disabled={isAuthLoading}
                     aria-busy={isAuthLoading}
                   >
-                    {isAuthLoading ? "Signing In..." : "Sign In"}
+                    {isRetrying ? "Retrying..." : (isAuthLoading ? "Signing In..." : "Sign In")}
                   </button>
                 </form>
               )}
@@ -227,6 +243,20 @@ export default function Auth() {
                     {isAuthLoading ? "Signing Up..." : "Sign Up"}
                   </button>
                 </form>
+              )}
+              
+              {/* Add error display section */}
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                  <p className="font-medium">Authentication Error</p>
+                  <p>{error.message}</p>
+                  <button 
+                    onClick={clearError}
+                    className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               )}
             </div>
             

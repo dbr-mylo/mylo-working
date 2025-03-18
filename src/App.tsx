@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from 'sonner';
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoutes } from "@/components/auth/ProtectedRoutes";
+import { AuthenticatedRoute } from "@/components/auth/ProtectedRoutes";
 import DocumentSelection from "@/pages/DocumentSelection";
 import { AuthImplementationRouter } from "@/components/auth/AuthImplementationRouter";
 import { AuthFeatureFlagsProvider, AuthToggle } from "@/components/auth/AuthFeatureFlag";
@@ -17,9 +17,9 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={
-              <ProtectedRoutes>
+              <AuthenticatedRoute>
                 <DocumentSelection />
-              </ProtectedRoutes>
+              </AuthenticatedRoute>
             } />
             <Route path="/auth" element={<AuthImplementationRouter />} />
             <Route path="*" element={<NotFound />} />

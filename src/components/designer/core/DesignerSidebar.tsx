@@ -5,7 +5,7 @@ import { TextStyle } from "@/lib/types";
 import { PlusIcon, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StylesList } from "@/components/designer/typography/StylesList";
-import { StyleEditorModal } from "@/components/designer/typography/StyleEditorModal";
+import { TestStyleEditorModal } from "@/components/design/typography/TestStyleEditorModal";
 import { Editor } from "@tiptap/react";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
@@ -146,7 +146,8 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
         />
       </DesignerSidebarContainer>
       
-      <StyleEditorModal
+      {/* Using TestStyleEditorModal instead of StyleEditorModal */}
+      <TestStyleEditorModal
         style={selectedStyle}
         isOpen={isStyleEditorOpen}
         onClose={() => setIsStyleEditorOpen(false)}

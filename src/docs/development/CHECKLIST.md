@@ -121,3 +121,32 @@ Use this checklist after implementation:
 [ ] Verify fix works
 [ ] Add regression test
 ```
+
+### Style Editor Modal Test Plan
+
+```
+[ ] Modal display and interaction
+  [ ] Opens when isOpen is true
+  [ ] Closes with Close button
+  [ ] Closes with X icon
+  [ ] Closes when clicking outside
+  [ ] Cannot close during save operation
+[ ] Form input validation
+  [ ] Name required validation
+  [ ] Name uniqueness validation
+  [ ] Disable save on validation failure
+[ ] Style property controls
+  [ ] All inputs function correctly
+[ ] Parent style inheritance
+  [ ] Selection works correctly
+  [ ] Inheritance chain displays properly
+  [ ] Prevents circular dependencies
+[ ] Save and cancel operations
+  [ ] Save properly stores data
+  [ ] Cancel closes without saving
+  [ ] Shows appropriate loading states
+  [ ] Displays success/error toasts
+[ ] Edge cases
+  [ ] Works for new and existing styles
+  [ ] Handles errors gracefully
+```

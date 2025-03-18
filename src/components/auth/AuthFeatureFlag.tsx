@@ -1,27 +1,17 @@
+import { createContext, useContext } from "react";
 
-import { createContext, useContext, useState } from "react";
-
-// Create a context for feature flags
+// Simplified context now that we no longer toggle between implementations
 interface AuthFeatureFlagsContextType {
-  useTestAuth: boolean;
-  toggleTestAuth: () => void;
+  useTestAuth: false;
 }
 
 const AuthFeatureFlagsContext = createContext<AuthFeatureFlagsContextType>({
-  useTestAuth: true, // Changed default to true
-  toggleTestAuth: () => {}
+  useTestAuth: false
 });
 
 export const AuthFeatureFlagsProvider = ({ children }: { children: React.ReactNode }) => {
-  // Initialize with TestAuth as the default
-  const [useTestAuth, setUseTestAuth] = useState(true);
-  
-  const toggleTestAuth = () => {
-    setUseTestAuth(prev => !prev);
-  };
-  
   return (
-    <AuthFeatureFlagsContext.Provider value={{ useTestAuth, toggleTestAuth }}>
+    <AuthFeatureFlagsContext.Provider value={{ useTestAuth: false }}>
       {children}
     </AuthFeatureFlagsContext.Provider>
   );
@@ -33,20 +23,4 @@ export const useAuthFeatureFlags = () => {
     throw new Error("useAuthFeatureFlags must be used within an AuthFeatureFlagsProvider");
   }
   return context;
-};
-
-// Component to toggle between original and test implementation
-export const AuthToggle = () => {
-  const { useTestAuth, toggleTestAuth } = useAuthFeatureFlags();
-  
-  return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <button 
-        onClick={toggleTestAuth}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow"
-      >
-        {useTestAuth ? "Use Original Auth" : "Use Test Auth"}
-      </button>
-    </div>
-  );
 };

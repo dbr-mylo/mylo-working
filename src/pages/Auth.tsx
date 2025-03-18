@@ -1,37 +1,33 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CacheControls } from "@/components/auth/CacheControls";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
+import { useAuthForm } from "@/hooks/useAuthForm";
 import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
-import { toast } from "sonner";
-import { AuthFormState } from "@/lib/types/authTypes";
 import "../styles/auth.css";
 
 export default function Auth() {
-  // Form state with proper typing
-  const [formState, setFormState] = useState<AuthFormState>({
-    email: "",
-    password: "",
-    isSubmitting: false,
-    activeTab: "signin"
-  });
+  // Use the custom auth form hook for form state and handlers
+  const {
+    formState,
+    isAuthLoading,
+    handleInputChange,
+    handleTabChange,
+    handleSubmit
+  } = useAuthForm();
   
-  // Auth context with improved error handling
+  // Get guest role functions from auth context
   const { 
-    signIn, 
-    signUp, 
     continueAsGuestEditor, 
     continueAsGuestDesigner, 
     continueAsGuestAdmin,
-    isLoading,
     error,
     clearError
   } = useAuth();
   
   // Use the enhanced auth error handler
   const { 
-    handleError, 
     retryOperation, 
     isRetrying, 
     clearError: clearHandlerError 
@@ -49,77 +45,23 @@ export default function Auth() {
     };
   }, [clearError, clearHandlerError, formState.activeTab]);
 
-  // Handle input changes with type safety
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    const field = id.split('-')[1]; // Extract field name from id (e.g., "signin-email" -> "email")
-    
-    setFormState(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Handle tab changes
-  const handleTabChange = (tab: "signin" | "signup") => {
-    setFormState(prev => ({
-      ...prev,
-      activeTab: tab,
-      // Reset form errors on tab change
-      isSubmitting: false
-    }));
-    clearError();
-    clearHandlerError();
-  };
-
-  // Handle form submission with improved error handling and retry capability
-  const handleSubmit = async (action: "signin" | "signup") => {
+  // Enhanced form submission with retry capability
+  const handleFormSubmit = async (action: "signin" | "signup") => {
     try {
-      // Validate form
-      if (!formState.email) {
-        toast.error("Email is required");
-        return;
-      }
-      
-      if (!formState.password) {
-        toast.error("Password is required");
-        return;
-      }
-      
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formState.email)) {
-        toast.error("Please enter a valid email address");
-        return;
-      }
-      
-      // Basic password validation
-      if (formState.password.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return;
-      }
-      
-      // Set submitting state
-      setFormState(prev => ({ ...prev, isSubmitting: true }));
-      
-      // Use the auth operation with retry capability if enabled
       if (action === "signin") {
         // Attempt sign in with retry support
-        await retryOperation(() => signIn(formState.email, formState.password));
+        await retryOperation(() => handleSubmit(action));
       } else {
         // Sign up typically doesn't need retries
-        await signUp(formState.email, formState.password);
+        await handleSubmit(action);
       }
-    } catch (error) {
-      // Use the error handler - convert the action to the proper AuthErrorType
-      handleError(error, action === "signin" ? "signIn" : "signUp");
-    } finally {
-      setFormState(prev => ({ ...prev, isSubmitting: false }));
+    } catch (err) {
+      console.error(`${action} failed with error:`, err);
     }
   };
 
   // Determine loading and error states
-  const isAuthLoading = isLoading || formState.isSubmitting || isRetrying;
+  const isFormProcessing = isAuthLoading || isRetrying;
 
   return (
     <AuthErrorBoundary>
@@ -136,8 +78,8 @@ export default function Auth() {
                   style={{ borderRadius: "0.375rem" }}
                   data-state={formState.activeTab === "signin" ? "active" : "inactive"}
                   onClick={() => handleTabChange("signin")}
-                  disabled={isAuthLoading}
-                  aria-disabled={isAuthLoading}
+                  disabled={isFormProcessing}
+                  aria-disabled={isFormProcessing}
                 >
                   Sign In
                 </button>
@@ -146,8 +88,8 @@ export default function Auth() {
                   style={{ borderRadius: "0.375rem" }}
                   data-state={formState.activeTab === "signup" ? "active" : "inactive"}
                   onClick={() => handleTabChange("signup")}
-                  disabled={isAuthLoading}
-                  aria-disabled={isAuthLoading}
+                  disabled={isFormProcessing}
+                  aria-disabled={isFormProcessing}
                 >
                   Sign Up
                 </button>
@@ -157,7 +99,7 @@ export default function Auth() {
                 <form 
                   onSubmit={(e) => { 
                     e.preventDefault(); 
-                    handleSubmit("signin"); 
+                    handleFormSubmit("signin"); 
                   }} 
                   className="auth-form"
                   aria-label="Sign in form"
@@ -171,7 +113,7 @@ export default function Auth() {
                       onChange={handleInputChange}
                       required
                       className="auth-input"
-                      disabled={isAuthLoading}
+                      disabled={isFormProcessing}
                       aria-describedby="signin-email-error"
                     />
                   </div>
@@ -184,17 +126,17 @@ export default function Auth() {
                       onChange={handleInputChange}
                       required
                       className="auth-input"
-                      disabled={isAuthLoading}
+                      disabled={isFormProcessing}
                       aria-describedby="signin-password-error"
                     />
                   </div>
                   <button 
                     type="submit" 
                     className="auth-submit-button"
-                    disabled={isAuthLoading}
-                    aria-busy={isAuthLoading}
+                    disabled={isFormProcessing}
+                    aria-busy={isFormProcessing}
                   >
-                    {isRetrying ? "Retrying..." : (isAuthLoading ? "Signing In..." : "Sign In")}
+                    {isRetrying ? "Retrying..." : (isFormProcessing ? "Signing In..." : "Sign In")}
                   </button>
                 </form>
               )}
@@ -203,7 +145,7 @@ export default function Auth() {
                 <form 
                   onSubmit={(e) => { 
                     e.preventDefault(); 
-                    handleSubmit("signup"); 
+                    handleFormSubmit("signup"); 
                   }} 
                   className="auth-form"
                   aria-label="Sign up form"
@@ -217,7 +159,7 @@ export default function Auth() {
                       onChange={handleInputChange}
                       required
                       className="auth-input"
-                      disabled={isAuthLoading}
+                      disabled={isFormProcessing}
                       aria-describedby="signup-email-error"
                     />
                   </div>
@@ -230,17 +172,17 @@ export default function Auth() {
                       onChange={handleInputChange}
                       required
                       className="auth-input"
-                      disabled={isAuthLoading}
+                      disabled={isFormProcessing}
                       aria-describedby="signup-password-error"
                     />
                   </div>
                   <button 
                     type="submit" 
                     className="auth-submit-button"
-                    disabled={isAuthLoading}
-                    aria-busy={isAuthLoading}
+                    disabled={isFormProcessing}
+                    aria-busy={isFormProcessing}
                   >
-                    {isAuthLoading ? "Signing Up..." : "Sign Up"}
+                    {isFormProcessing ? "Signing Up..." : "Sign Up"}
                   </button>
                 </form>
               )}
@@ -249,7 +191,7 @@ export default function Auth() {
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
                   <p className="font-medium">Authentication Error</p>
-                  <p>{error.message}</p>
+                  <p>{error.getUserMessage ? error.getUserMessage() : error.message}</p>
                   <button 
                     onClick={clearError}
                     className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
@@ -268,21 +210,21 @@ export default function Auth() {
               <button
                 onClick={continueAsGuestEditor}
                 className="auth-guest-button"
-                disabled={isAuthLoading}
+                disabled={isFormProcessing}
               >
                 Editor
               </button>
               <button
                 onClick={continueAsGuestDesigner}
                 className="auth-guest-button"
-                disabled={isAuthLoading}
+                disabled={isFormProcessing}
               >
                 Designer
               </button>
               <button
                 onClick={continueAsGuestAdmin}
                 className="auth-guest-button"
-                disabled={isAuthLoading}
+                disabled={isFormProcessing}
               >
                 Admin
               </button>

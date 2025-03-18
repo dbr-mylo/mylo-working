@@ -1,25 +1,25 @@
 
 /**
- * EditorOnly Component
+ * Editor-Only Component
  * 
- * This component is specifically for rendering content only to users with the editor role.
- * It's a specialized version of the RoleOnly component.
+ * This component only renders its children when the current user has the editor role.
+ * It's extracted into its own file to prevent circular dependencies.
  */
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useIsEditor } from './RoleHooks';
 import { RoleComponentProps } from './types';
 
 /**
- * Component that only renders its children for the editor role
+ * Renders content only if the current user has the editor role
  */
 export const EditorOnly: React.FC<RoleComponentProps> = ({ 
   children, 
   fallback = null 
 }) => {
-  const { role } = useAuth();
+  const isEditor = useIsEditor();
   
-  if (role === 'editor') {
+  if (isEditor) {
     return <>{children}</>;
   }
   

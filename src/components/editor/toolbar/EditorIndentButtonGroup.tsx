@@ -18,42 +18,6 @@ export const EditorIndentButtonGroup: React.FC<EditorIndentButtonGroupProps> = (
     return null;
   }
   
-  const handleIndent = () => {
-    if (editor) {
-      if (editor.isActive('bulletList')) {
-        editor.chain().focus().updateAttributes('bulletList', { 
-          indent: Math.min((editor.getAttributes('bulletList').indent || 0) + 1, 10)
-        }).run();
-      } else if (editor.isActive('orderedList')) {
-        editor.chain().focus().updateAttributes('orderedList', { 
-          indent: Math.min((editor.getAttributes('orderedList').indent || 0) + 1, 10)
-        }).run();
-      } else {
-        editor.chain().focus().updateAttributes('paragraph', { 
-          indent: Math.min((editor.getAttributes('paragraph').indent || 0) + 1, 10)
-        }).run();
-      }
-    }
-  };
-
-  const handleOutdent = () => {
-    if (editor) {
-      if (editor.isActive('bulletList')) {
-        editor.chain().focus().updateAttributes('bulletList', { 
-          indent: Math.max((editor.getAttributes('bulletList').indent || 0) - 1, 0)
-        }).run();
-      } else if (editor.isActive('orderedList')) {
-        editor.chain().focus().updateAttributes('orderedList', { 
-          indent: Math.max((editor.getAttributes('orderedList').indent || 0) - 1, 0)
-        }).run();
-      } else {
-        editor.chain().focus().updateAttributes('paragraph', { 
-          indent: Math.max((editor.getAttributes('paragraph').indent || 0) - 1, 0)
-        }).run();
-      }
-    }
-  };
-
   return (
     <div className="flex items-center gap-1">
       <Button
@@ -78,4 +42,40 @@ export const EditorIndentButtonGroup: React.FC<EditorIndentButtonGroupProps> = (
       </Button>
     </div>
   );
+
+  function handleIndent() {
+    if (editor) {
+      if (editor.isActive('bulletList')) {
+        editor.chain().focus().updateAttributes('bulletList', { 
+          indent: Math.min((editor.getAttributes('bulletList').indent || 0) + 1, 10)
+        }).run();
+      } else if (editor.isActive('orderedList')) {
+        editor.chain().focus().updateAttributes('orderedList', { 
+          indent: Math.min((editor.getAttributes('orderedList').indent || 0) + 1, 10)
+        }).run();
+      } else {
+        editor.chain().focus().updateAttributes('paragraph', { 
+          indent: Math.min((editor.getAttributes('paragraph').indent || 0) + 1, 10)
+        }).run();
+      }
+    }
+  }
+
+  function handleOutdent() {
+    if (editor) {
+      if (editor.isActive('bulletList')) {
+        editor.chain().focus().updateAttributes('bulletList', { 
+          indent: Math.max((editor.getAttributes('bulletList').indent || 0) - 1, 0)
+        }).run();
+      } else if (editor.isActive('orderedList')) {
+        editor.chain().focus().updateAttributes('orderedList', { 
+          indent: Math.max((editor.getAttributes('orderedList').indent || 0) - 1, 0)
+        }).run();
+      } else {
+        editor.chain().focus().updateAttributes('paragraph', { 
+          indent: Math.max((editor.getAttributes('paragraph').indent || 0) - 1, 0)
+        }).run();
+      }
+    }
+  }
 };

@@ -11,12 +11,6 @@
 export * from './roles/index';
 
 // Specific hook exports for better discoverability
-export { 
-  useIsAdmin, 
-  useIsDesigner, 
-  useIsEditor, 
-  useIsDesignerOrAdmin,
-  useRoleFeatures 
-} from './roles/RoleHooks';
+export { useIsAdmin, useIsDesigner, useIsEditor, useRoleFeatures } from './roles/RoleHooks';
 export { EditorOnly } from './roles/EditorOnly';
 export { useCacheClearing } from './roles/hooks/useCacheClearing';

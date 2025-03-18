@@ -16,11 +16,16 @@ import {
   SignUpError, 
   SignOutError, 
   SessionError,
-  RoleError
+  RoleError,
+  StorageError,
+  mapToAuthError,
+  getUserFriendlyErrorMessage
 } from "@/lib/errors/authErrors";
 
 // Guest role storage key
 const GUEST_ROLE_STORAGE_KEY = 'app_guest_role';
+// Default expiration time for guest roles (24 hours)
+const GUEST_ROLE_EXPIRY = 24 * 60 * 60 * 1000;
 
 // Default auth context value
 const defaultAuthContext: AuthContextType = {
@@ -53,33 +58,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthState(prevState => ({ ...prevState, error: null }));
   };
 
-  // Load guest role from local storage
+  // Load guest role from local storage with improved validation
   const loadGuestRole = (): UserRole | null => {
     try {
       const storedRole = localStorage.getItem(GUEST_ROLE_STORAGE_KEY);
-      if (storedRole) {
-        const guestRoleState: GuestRoleState = JSON.parse(storedRole);
-        
-        // Check if the stored role is valid and not expired (24 hours)
-        const isValid = Date.now() - guestRoleState.timestamp < 24 * 60 * 60 * 1000;
-        
-        if (isValid) {
-          return guestRoleState.role;
-        } else {
-          // Clear expired guest role
-          localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
-        }
+      if (!storedRole) return null;
+      
+      // Parse with error handling
+      let guestRoleState: GuestRoleState;
+      try {
+        guestRoleState = JSON.parse(storedRole);
+      } catch (error) {
+        console.warn('Invalid guest role data in localStorage, clearing it');
+        localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
+        return null;
       }
+      
+      // Validate structure and content
+      if (!guestRoleState || 
+          typeof guestRoleState !== 'object' || 
+          !('role' in guestRoleState) || 
+          !('timestamp' in guestRoleState) ||
+          !('expiresAt' in guestRoleState)) {
+        console.warn('Malformed guest role data, clearing it');
+        localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
+        return null;
+      }
+      
+      // Validate role value
+      if (!['editor', 'designer', 'admin'].includes(guestRoleState.role)) {
+        console.warn('Invalid role in guest role data, clearing it');
+        localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
+        return null;
+      }
+      
+      // Check for expiration
+      const now = Date.now();
+      if (now >= guestRoleState.expiresAt) {
+        console.log('Guest role expired, clearing it');
+        localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
+        return null;
+      }
+      
+      return guestRoleState.role;
     } catch (error) {
-      console.warn('Error loading guest role from localStorage:', error);
+      const storageError = new StorageError('Error loading guest role from localStorage', {
+        originalError: error
+      });
+      console.warn(storageError.message, error);
+      return null;
     }
-    return null;
   };
 
-  // Save guest role to local storage
+  // Save guest role to local storage with better error handling
   const saveGuestRole = (role: UserRole): void => {
     try {
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+      // Validate role before saving
+      if (!['editor', 'designer', 'admin'].includes(role)) {
+        throw new RoleError(`Invalid role: ${role}`);
+      }
+      
+      const expiresAt = Date.now() + GUEST_ROLE_EXPIRY;
       const guestRoleState: GuestRoleState = {
         role,
         timestamp: Date.now(),
@@ -87,7 +126,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       localStorage.setItem(GUEST_ROLE_STORAGE_KEY, JSON.stringify(guestRoleState));
     } catch (error) {
-      console.warn('Error saving guest role to localStorage:', error);
+      const storageError = error instanceof AuthError
+        ? error
+        : new StorageError('Failed to save guest role', { originalError: error });
+      console.warn(storageError.message, error);
+      
+      // Still attempt to set the role in the auth state even if storage fails
+      setAuthState(prevState => ({
+        ...prevState,
+        role,
+        error: storageError
+      }));
+      
+      toast.error('Failed to save your guest session. Your role will be lost when you close the browser.');
     }
   };
 
@@ -95,7 +146,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         // Check for existing session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          throw new SessionError(sessionError.message, {
+            code: sessionError.code as AuthErrorCode,
+            originalError: sessionError
+          });
+        }
         
         if (session) {
           await fetchUserData(session.user.id);
@@ -111,8 +169,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        const authError = new SessionError('Error initializing authentication');
-        console.error('Auth initialization error:', error);
+        const authError = error instanceof AuthError
+          ? error
+          : new SessionError('Error initializing authentication', {
+              originalError: error
+            });
+        
+        console.error('Auth initialization error:', authError);
         
         setAuthState({
           user: null,
@@ -121,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           error: authError
         });
         
-        toast.error('Authentication error: Failed to initialize session');
+        toast.error(authError.getUserMessage());
       }
     };
 
@@ -130,6 +193,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
+        console.log(`Auth state changed: ${event}`);
+        
         if (session) {
           await fetchUserData(session.user.id);
         } else {
@@ -144,8 +209,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        const authError = new SessionError('Error handling auth state change');
-        console.error('Auth state change error:', error);
+        const authError = error instanceof AuthError
+          ? error 
+          : new SessionError('Error handling auth state change', {
+              originalError: error
+            });
+        
+        console.error('Auth state change error:', authError);
         
         setAuthState(prevState => ({
           ...prevState,
@@ -171,7 +241,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("id", userId)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw new SessionError('Failed to fetch user profile', {
+          originalError: profileError
+        });
+      }
 
       // Fetch user role
       const { data: roleData, error: roleError } = await supabase
@@ -180,7 +254,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("user_id", userId)
         .single();
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        throw new RoleError('Failed to fetch user role', {
+          originalError: roleError
+        });
+      }
 
       // Update auth state with user data and role
       setAuthState({
@@ -192,7 +270,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error fetching user data:", error);
       
-      const fetchError = new SessionError("Failed to fetch user data");
+      const fetchError = error instanceof AuthError
+        ? error
+        : new SessionError("Failed to fetch user data", {
+            originalError: error
+          });
       
       setAuthState(prevState => ({
         ...prevState,
@@ -200,7 +282,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: fetchError
       }));
       
-      toast.error("Error fetching user data. Please try signing in again.");
+      toast.error(fetchError.getUserMessage());
     }
   };
 
@@ -226,7 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       const signInError = error instanceof SignInError 
         ? error
-        : new SignInError(error.message || 'Sign in failed');
+        : mapToAuthError(error, "signIn");
       
       // Update error state
       setAuthState(prevState => ({
@@ -235,7 +317,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: signInError
       }));
       
-      toast.error(signInError.message);
+      toast.error(signInError.getUserMessage());
     }
   };
 
@@ -263,7 +345,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       const signUpError = error instanceof SignUpError
         ? error
-        : new SignUpError(error.message || 'Sign up failed');
+        : mapToAuthError(error, "signUp");
       
       // Update error state
       setAuthState(prevState => ({
@@ -272,7 +354,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: signUpError
       }));
       
-      toast.error(signUpError.message);
+      toast.error(signUpError.getUserMessage());
     }
   };
 
@@ -286,7 +368,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const { error } = await supabase.auth.signOut();
       
-      if (error) throw new SignOutError(error.message);
+      if (error) throw new SignOutError(error.message, {
+        originalError: error
+      });
       
       // Also clear any stored guest role
       localStorage.removeItem(GUEST_ROLE_STORAGE_KEY);
@@ -295,7 +379,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       const signOutError = error instanceof SignOutError
         ? error
-        : new SignOutError(error.message || 'Sign out failed');
+        : mapToAuthError(error, "signOut");
       
       // Update error state
       setAuthState(prevState => ({
@@ -304,7 +388,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: signOutError
       }));
       
-      toast.error(signOutError.message);
+      toast.error(signOutError.getUserMessage());
     }
   };
 
@@ -331,14 +415,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       const roleError = error instanceof RoleError
         ? error
-        : new RoleError('Failed to set guest role');
+        : new RoleError('Failed to set guest role', {
+            originalError: error
+          });
       
       setAuthState(prevState => ({
         ...prevState,
         error: roleError
       }));
       
-      toast.error(roleError.message);
+      toast.error(roleError.getUserMessage());
     }
   };
 

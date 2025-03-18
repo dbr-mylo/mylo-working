@@ -12,6 +12,7 @@ import {
   retrievePersistedRole, 
   VALID_ROLES 
 } from "@/utils/roles/persistence";
+import { roleAuditLogger } from "@/utils/roles/auditLogger";
 
 /**
  * Hook for managing guest role functionality
@@ -20,12 +21,38 @@ export const useGuestRole = () => {
   // Load guest role on initialization
   const loadGuestRole = (): UserRole | null => {
     try {
-      return retrievePersistedRole();
+      const role = retrievePersistedRole();
+      
+      if (role) {
+        // Log successful role load
+        roleAuditLogger.logRoleChange({
+          userId: null,
+          previousRole: null,
+          newRole: role,
+          timestamp: Date.now(),
+          source: 'guest',
+          success: true
+        });
+      }
+      
+      return role;
     } catch (error) {
       const storageError = new StorageError('Error loading guest role from localStorage', {
         originalError: error
       });
       console.warn(storageError.message, error);
+      
+      // Log failed role load
+      roleAuditLogger.logRoleChange({
+        userId: null,
+        previousRole: null,
+        newRole: null,
+        timestamp: Date.now(),
+        source: 'guest',
+        success: false,
+        error: storageError.message
+      });
+      
       return null;
     }
   };
@@ -45,6 +72,17 @@ export const useGuestRole = () => {
         : new StorageError('Failed to save guest role', { originalError: error });
       console.warn(storageError.message, error);
       
+      // Log failed role save
+      roleAuditLogger.logRoleChange({
+        userId: null,
+        previousRole: null,
+        newRole: role,
+        timestamp: Date.now(),
+        source: 'guest',
+        success: false,
+        error: storageError.message
+      });
+      
       toast.error('Failed to save your guest session. Your role will be lost when you close the browser.');
     }
   };
@@ -59,6 +97,16 @@ export const useGuestRole = () => {
       
       // Save role to local storage for persistence
       saveGuestRole(role);
+      
+      // Log successful role change
+      roleAuditLogger.logRoleChange({
+        userId: null,
+        previousRole: null,
+        newRole: role,
+        timestamp: Date.now(),
+        source: 'guest',
+        success: true
+      });
       
       toast.success(`Continuing as ${role.charAt(0).toUpperCase() + role.slice(1)}`);
       return role;

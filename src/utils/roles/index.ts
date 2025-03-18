@@ -1,7 +1,9 @@
 
-// Re-export all role hooks and components
+// Export all role-based hooks and components
 export * from './RoleHooks';
-export * from './RoleComponents'; 
+export * from './RoleComponents';
 export * from './RoleFunctions';
-export { StandaloneEditorOnly } from './EditorOnly';
+export * from './middleware';
+export * from './auditLogger';
 export * from './types';
+export * from './persistence';

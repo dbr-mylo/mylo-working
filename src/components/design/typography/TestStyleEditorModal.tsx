@@ -1,10 +1,10 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useStyleNameValidator } from "./hooks/useStyleNameValidator";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -21,9 +21,22 @@ export const TestStyleEditorModal = ({
 }: StyleEditorModalProps) => {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [styleName, setStyleName] = useState(style?.name || "");
+  
+  const { isDuplicate, isValid } = useStyleNameValidator({
+    name: styleName,
+    currentStyleId: style?.id
+  });
+  
+  useState(() => {
+    if (style) {
+      setStyleName(style.name || "");
+    } else {
+      setStyleName("");
+    }
+  });
   
   const handleSave = async (formData: StyleFormData) => {
-    // Validate required fields
     if (!formData.name?.trim()) {
       toast({
         title: "Required field missing",
@@ -33,30 +46,21 @@ export const TestStyleEditorModal = ({
       return;
     }
     
+    if (isDuplicate) {
+      toast({
+        title: "Duplicate style name",
+        description: "A style with this name already exists. Please use a different name.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
-      // Check for duplicate names
-      const existingStyles = await textStyleStore.getTextStyles();
-      const isDuplicate = existingStyles.some(
-        existingStyle => 
-          existingStyle.name.toLowerCase() === formData.name.toLowerCase() && 
-          existingStyle.id !== style?.id
-      );
-      
-      if (isDuplicate) {
-        toast({
-          title: "Duplicate style name",
-          description: "A style with this name already exists. Please use a different name.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       setIsSaving(true);
       
       const styleData = {
         ...formData,
-        id: style?.id, // If editing, keep the existing ID
-        // Ensure no empty strings for optional fields
+        id: style?.id,
         selector: formData.selector || "p",
         description: formData.description || "",
       };
@@ -83,17 +87,19 @@ export const TestStyleEditorModal = ({
   };
 
   const handleCancel = () => {
-    // Only allow cancel if not in the middle of saving
     if (!isSaving) {
       onClose();
     }
+  };
+
+  const handleNameChange = (name: string) => {
+    setStyleName(name);
   };
 
   return (
     <Dialog 
       open={isOpen} 
       onOpenChange={(open) => {
-        // Only allow closing via onOpenChange if not saving
         if (!open && !isSaving) {
           onClose();
         }
@@ -112,6 +118,7 @@ export const TestStyleEditorModal = ({
             onSubmit={handleSave}
             onCancel={handleCancel}
             isSaving={isSaving}
+            onNameChange={handleNameChange}
           />
         </div>
       </DialogContent>

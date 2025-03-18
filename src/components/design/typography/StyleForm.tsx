@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { TextStyle, TypographyStyles, StyleFormData } from "@/lib/types";
 import { StyleFormMetadata } from "./StyleFormMetadata";
@@ -17,7 +16,8 @@ interface StyleFormProps {
   onSubmit?: (data: StyleFormData) => void;
   onCancel?: () => void;
   isSaving?: boolean;
-  
+  onNameChange?: (name: string) => void;
+
   // Support for direct style manipulation
   styles?: TypographyStyles;
   handleStyleChange?: (property: keyof TypographyStyles, value: string) => void;
@@ -28,6 +28,7 @@ export const StyleForm = ({
   onSubmit,
   onCancel,
   isSaving = false,
+  onNameChange,
   styles: externalStyles,
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
@@ -51,6 +52,13 @@ export const StyleForm = ({
     name,
     currentStyleId: initialValues?.id
   });
+
+  // Call onNameChange when name changes
+  useEffect(() => {
+    if (onNameChange) {
+      onNameChange(name);
+    }
+  }, [name, onNameChange]);
 
   // Fetch parent style details when parentId changes
   useEffect(() => {

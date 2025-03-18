@@ -10,7 +10,7 @@ export class AuthError extends Error {
   public readonly code?: AuthErrorCode;
   public readonly originalError?: unknown;
 
-  constructor(message: string, type: AuthErrorType = "unknown", options?: AuthErrorOptions) {
+  constructor(message: string, type: AuthErrorType = "signIn", options?: AuthErrorOptions) {
     super(message);
     this.name = 'AuthError';
     this.type = type;

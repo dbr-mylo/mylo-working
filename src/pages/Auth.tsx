@@ -97,8 +97,8 @@ export default function Auth() {
         await signUp(formState.email, formState.password);
       }
     } catch (error) {
-      // Use the error handler
-      handleError(error, action);
+      // Use the error handler - convert the action to the proper AuthErrorType
+      handleError(error, action === "signin" ? "signIn" : "signUp");
     } finally {
       setFormState(prev => ({ ...prev, isSubmitting: false }));
     }

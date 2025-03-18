@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { 
   AuthContextType, 
   AuthState, 
-  GuestRoleState 
+  GuestRoleState,
+  AuthErrorCode
 } from "@/lib/types/authTypes";
 import { UserRole } from "@/lib/types";
 import { 
@@ -78,9 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Save guest role to local storage
   const saveGuestRole = (role: UserRole): void => {
     try {
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
       const guestRoleState: GuestRoleState = {
         role,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        expiresAt
       };
       localStorage.setItem(GUEST_ROLE_STORAGE_KEY, JSON.stringify(guestRoleState));
     } catch (error) {
@@ -214,7 +217,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       
-      if (error) throw new SignInError(error.message, error.code);
+      if (error) throw new SignInError(error.message, { 
+        code: error.code as AuthErrorCode,
+        originalError: error 
+      });
       
       navigate("/");
     } catch (error: any) {
@@ -246,7 +252,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       
-      if (error) throw new SignUpError(error.message, error.code);
+      if (error) throw new SignUpError(error.message, {
+        code: error.code as AuthErrorCode,
+        originalError: error
+      });
       
       // Success
       setAuthState(prevState => ({ ...prevState, isLoading: false }));

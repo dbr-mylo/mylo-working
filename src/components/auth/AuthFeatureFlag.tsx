@@ -8,12 +8,13 @@ interface AuthFeatureFlagsContextType {
 }
 
 const AuthFeatureFlagsContext = createContext<AuthFeatureFlagsContextType>({
-  useTestAuth: false,
+  useTestAuth: true, // Changed default to true
   toggleTestAuth: () => {}
 });
 
 export const AuthFeatureFlagsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [useTestAuth, setUseTestAuth] = useState(false);
+  // Initialize with TestAuth as the default
+  const [useTestAuth, setUseTestAuth] = useState(true);
   
   const toggleTestAuth = () => {
     setUseTestAuth(prev => !prev);

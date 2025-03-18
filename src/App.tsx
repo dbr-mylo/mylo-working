@@ -6,7 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthenticatedRoute } from "@/components/auth/ProtectedRoutes";
 import DocumentSelection from "@/pages/DocumentSelection";
 import { AuthImplementationRouter } from "@/components/auth/AuthImplementationRouter";
-import { AuthFeatureFlagsProvider, AuthToggle } from "@/components/auth/AuthFeatureFlag";
+import { AuthFeatureFlagsProvider } from "@/components/auth/AuthFeatureFlag";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -26,7 +26,6 @@ function App() {
           </Routes>
           <Toaster />
           <SonnerToaster position="top-right" />
-          <AuthToggle />
         </AuthProvider>
       </AuthFeatureFlagsProvider>
     </Router>

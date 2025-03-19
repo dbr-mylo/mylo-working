@@ -3,11 +3,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { PluginOption } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Create an array of plugins, conditionally including componentTagger only in development
-  const plugins = [react()];
+  const plugins: PluginOption[] = [react()];
   
   if (mode === 'development') {
     plugins.push(componentTagger());

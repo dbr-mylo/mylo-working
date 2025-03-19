@@ -31,6 +31,10 @@ export default defineConfig(({ mode }) => {
         input: {
           main: path.resolve(__dirname, 'index.html'),
         },
+        external: [
+          // Mark external scripts that shouldn't be processed by Vite
+          'https://cdn.gpteng.co/gptengineer.js'
+        ]
       },
     },
   };

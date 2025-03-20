@@ -9,6 +9,64 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      design_templates: {
+        Row: {
+          id: string
+          name: string
+          styles: string
+          owner_id: string | null
+          status: string | null
+          category: string | null
+          version: number | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          styles: string
+          owner_id?: string | null
+          status?: string | null
+          category?: string | null
+          version?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          styles?: string
+          owner_id?: string | null
+          status?: string | null
+          category?: string | null
+          version?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      document_templates: {
+        Row: {
+          id: string
+          document_id: string | null
+          template_id: string | null
+          template_version: number | null
+          applied_at: string | null
+        }
+        Insert: {
+          id?: string
+          document_id?: string | null
+          template_id?: string | null
+          template_version?: number | null
+          applied_at?: string | null
+        }
+        Update: {
+          id?: string
+          document_id?: string | null
+          template_id?: string | null
+          template_version?: number | null
+          applied_at?: string | null
+        }
+      }
       documents: {
         Row: {
           id: string
@@ -38,16 +96,70 @@ export type Database = {
           is_template?: boolean | null
         }
       }
-      // Add other tables similarly
-      design_templates: { /* ... */ }
-      document_templates: { /* ... */ }
-      profiles: { /* ... */ }
-      user_roles: { /* ... */ }
+      profiles: {
+        Row: {
+          id: string
+          username: string | null
+          full_name: string | null
+          avatar_url: string | null
+          website: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          website?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          website?: string | null
+          updated_at?: string | null
+        }
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string | null
+          role: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          role: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          role?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
-    // Rest of the interface
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
-
 
 type PublicSchema = Database[Extract<keyof Database, "public">]
 
@@ -145,4 +257,3 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
-

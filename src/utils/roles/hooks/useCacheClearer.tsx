@@ -1,122 +1,55 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { textStyleStore } from '@/stores/textStyles';
-import { TemplateCache } from '@/services/template/TemplateCache';
+import { clearCaches } from '@/utils/clearCache';
 
 /**
- * Hook for clearing all application caches
- * 
- * This hook provides functions to clear various cache types:
- * - Local storage caches (editor settings, styles, etc.)
- * - Memory caches (styles, templates, etc.)
- * - Template caches
+ * Hook for clearing application caches
+ * @returns Object containing cache clearing state and function
  */
 export const useCacheClearer = () => {
   const [isClearing, setIsClearing] = useState(false);
 
-  /**
-   * Clear all local storage caches 
-   */
-  const clearLocalStorageCaches = () => {
-    try {
-      console.log("Clearing local storage caches");
-      
-      // Clear editor-related caches
-      localStorage.removeItem('editor_font_size');
-      localStorage.removeItem('editor_recent_colors');
-      localStorage.removeItem('cachedFontSize');
-      localStorage.removeItem('editorFontCache');
-      localStorage.removeItem('editorColorCache');
-      
-      // Clear cache keys that match patterns
-      const cacheKeys = Object.keys(localStorage).filter(key => 
-        key.includes('cache') || 
-        key.includes('style') || 
-        key.includes('template') ||
-        key.includes('font')
-      );
-      
-      console.log(`Found ${cacheKeys.length} cache keys to clear`);
-      cacheKeys.forEach(key => localStorage.removeItem(key));
-      
-      toast.success(`Cleared ${cacheKeys.length} local storage caches`);
-    } catch (error) {
-      console.error("Error clearing local storage caches:", error);
-      toast.error("Failed to clear local storage caches");
-    }
-  };
-
-  /**
-   * Clear all in-memory caches 
-   */
-  const clearMemoryCaches = () => {
+  const clearAllCaches = async () => {
     try {
       setIsClearing(true);
+      toast.info('Clearing application caches...');
       
-      // Trigger styles cache clearing
-      textStyleStore.clearAllStyleCaches();
-      textStyleStore.clearDefaultResetStyle();
-      textStyleStore.clearEditorCache();
+      // Clear localStorage caches
+      localStorage.removeItem('templateCache');
+      localStorage.removeItem('styleCache');
+      localStorage.removeItem('documentCache');
       
-      // Dispatch cache clear events for other components
-      document.dispatchEvent(new CustomEvent('tiptap-clear-font-cache'));
-      document.dispatchEvent(new CustomEvent('clear-application-cache'));
-      document.dispatchEvent(new CustomEvent('clear-template-cache'));
+      // Clear all template and style data from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('template_') || key.startsWith('style_') || key.startsWith('document_')) {
+          localStorage.removeItem(key);
+        }
+      });
       
-      console.log("Cleared in-memory caches");
-      toast.success("Cleared in-memory caches");
+      // Use the Node.js utility script if available
+      if (typeof clearCaches === 'function') {
+        await clearCaches(() => {
+          console.log('Cache clearing completed via Node.js utility');
+        });
+      }
+      
+      // Dispatch custom event to notify components about cache clearing
+      const cacheClearEvent = new CustomEvent('app-cache-cleared');
+      document.dispatchEvent(cacheClearEvent);
+      
+      // Reload fonts and styles in the editor
+      const fontCacheEvent = new CustomEvent('tiptap-clear-font-cache');
+      document.dispatchEvent(fontCacheEvent);
+      
+      toast.success('All caches cleared successfully');
     } catch (error) {
-      console.error("Error clearing memory caches:", error);
-      toast.error("Failed to clear memory caches");
+      console.error('Error clearing caches:', error);
+      toast.error('Failed to clear some caches');
     } finally {
       setIsClearing(false);
     }
   };
 
-  /**
-   * Clear template caches
-   */
-  const clearTemplateCaches = () => {
-    try {
-      // Clear template caches
-      const templateCache = new TemplateCache();
-      templateCache.clearCache();
-      
-      console.log("Cleared template caches");
-      toast.success("Cleared template caches");
-    } catch (error) {
-      console.error("Error clearing template caches:", error);
-      toast.error("Failed to clear template caches");
-    }
-  };
-
-  /**
-   * Clear all caches
-   */
-  const clearAllCaches = () => {
-    setIsClearing(true);
-    
-    try {
-      clearLocalStorageCaches();
-      clearMemoryCaches();
-      clearTemplateCaches();
-      
-      console.log("All caches cleared successfully");
-      toast.success("All application caches cleared successfully");
-    } catch (error) {
-      console.error("Error clearing all caches:", error);
-      toast.error("Failed to clear all caches");
-    } finally {
-      setIsClearing(false);
-    }
-  };
-
-  return {
-    isClearing,
-    clearLocalStorageCaches,
-    clearMemoryCaches,
-    clearTemplateCaches,
-    clearAllCaches
-  };
+  return { isClearing, clearAllCaches };
 };

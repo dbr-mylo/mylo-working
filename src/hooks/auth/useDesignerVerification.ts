@@ -8,7 +8,7 @@ import { UserRole } from '@/lib/types';
  * Hook to verify if a user should have the designer role
  */
 export const useDesignerVerification = () => {
-  const { user, role, setRole } = useAuth();
+  const { user, role, refreshUserData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,11 +19,11 @@ export const useDesignerVerification = () => {
       try {
         setIsLoading(true);
         
-        // Check if user has the designer role in the profiles table
+        // Check if user has the designer role in the user_roles table
         const { data, error } = await supabase
-          .from('profiles')
+          .from('user_roles')
           .select('role')
-          .eq('id', user.id)
+          .eq('user_id', user.id)
           .single();
         
         if (error) {
@@ -33,12 +33,12 @@ export const useDesignerVerification = () => {
         // If user has a designer role in the database but not in state, update state
         if (data?.role === 'designer' && role !== 'designer') {
           console.log('Setting user role to designer based on database verification');
-          setRole('designer' as UserRole);
+          await refreshUserData();
         } 
         // If user doesn't have designer role in the database but has it in state, update state
         else if (data?.role !== 'designer' && role === 'designer') {
           console.log('User does not have designer privileges, updating role');
-          setRole('editor' as UserRole);
+          await refreshUserData();
         }
       } catch (err) {
         console.error('Error verifying designer role:', err);
@@ -49,7 +49,7 @@ export const useDesignerVerification = () => {
     };
     
     verifyDesignerRole();
-  }, [user, role, setRole]);
+  }, [user, role, refreshUserData]);
   
   return { isLoading, error };
 };

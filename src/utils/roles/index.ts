@@ -8,5 +8,5 @@ export * from './auditLogger';
 export * from './types';
 export * from './persistence';
 
-// Re-export EditorOnly explicitly to resolve the ambiguity
-export { EditorOnly } from './EditorOnly';
+// Re-export EditorOnly and StandaloneEditorOnly explicitly to resolve the ambiguity
+export { EditorOnly, StandaloneEditorOnly } from './EditorOnly';

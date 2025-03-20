@@ -27,7 +27,6 @@ const defaultAuthContext: AuthContextType = {
   signOut: async () => {},
   continueAsGuestEditor: () => {},
   continueAsGuestDesigner: () => {},
-  continueAsGuestAdmin: () => {},
   clearError: () => {},
   clearGuestRole: () => false,
   isAuthenticated: false,
@@ -65,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadGuestRole,
     continueAsGuestEditor,
     continueAsGuestDesigner,
-    continueAsGuestAdmin,
     clearGuestRole
   } = useGuestRole();
   
@@ -126,7 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut, 
       continueAsGuestEditor, 
       continueAsGuestDesigner,
-      continueAsGuestAdmin,
       clearError,
       clearGuestRole,
       isAuthenticated,

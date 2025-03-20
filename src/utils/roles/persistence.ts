@@ -1,4 +1,3 @@
-
 import { UserRole } from "@/lib/types";
 import { GuestRoleState } from "@/lib/types/authTypes";
 import { RoleError, StorageError } from "@/lib/errors/auth";
@@ -11,7 +10,7 @@ export const ROLE_TIMESTAMP_KEY = 'app_role_timestamp';
 export const ROLE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 
 // Valid user roles
-export const VALID_ROLES: UserRole[] = ['editor', 'designer', 'admin'];
+export const VALID_ROLES: UserRole[] = ['editor', 'designer'];
 
 // Type guard for UserRole
 export function isValidRole(role: any): role is UserRole {

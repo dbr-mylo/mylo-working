@@ -11,139 +11,159 @@ export type Database = {
     Tables: {
       design_templates: {
         Row: {
+          category: string | null
+          created_at: string | null
           id: string
           name: string
-          styles: string
           owner_id: string | null
           status: string | null
-          category: string | null
-          version: number | null
-          created_at: string | null
+          styles: string
           updated_at: string | null
+          version: number | null
         }
         Insert: {
+          category?: string | null
+          created_at?: string | null
           id?: string
           name: string
-          styles: string
           owner_id?: string | null
           status?: string | null
-          category?: string | null
-          version?: number | null
-          created_at?: string | null
+          styles: string
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
+          category?: string | null
+          created_at?: string | null
           id?: string
           name?: string
-          styles?: string
           owner_id?: string | null
           status?: string | null
-          category?: string | null
-          version?: number | null
-          created_at?: string | null
+          styles?: string
           updated_at?: string | null
+          version?: number | null
         }
+        Relationships: []
       }
       document_templates: {
         Row: {
-          id: string
+          applied_at: string | null
           document_id: string | null
+          id: string
           template_id: string | null
           template_version: number | null
-          applied_at: string | null
         }
         Insert: {
-          id?: string
+          applied_at?: string | null
           document_id?: string | null
+          id?: string
           template_id?: string | null
           template_version?: number | null
-          applied_at?: string | null
         }
         Update: {
-          id?: string
+          applied_at?: string | null
           document_id?: string | null
+          id?: string
           template_id?: string | null
           template_version?: number | null
-          applied_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "design_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
-          id: string
-          title: string
           content: string | null
-          owner_id: string | null
           created_at: string | null
-          updated_at: string | null
+          id: string
           is_template: boolean | null
+          owner_id: string | null
+          title: string
+          updated_at: string | null
         }
         Insert: {
-          id?: string
-          title: string
           content?: string | null
-          owner_id?: string | null
           created_at?: string | null
-          updated_at?: string | null
+          id?: string
           is_template?: boolean | null
+          owner_id?: string | null
+          title: string
+          updated_at?: string | null
         }
         Update: {
-          id?: string
-          title?: string
           content?: string | null
-          owner_id?: string | null
           created_at?: string | null
-          updated_at?: string | null
+          id?: string
           is_template?: boolean | null
+          owner_id?: string | null
+          title?: string
+          updated_at?: string | null
         }
+        Relationships: []
       }
       profiles: {
         Row: {
-          id: string
-          username: string | null
-          full_name: string | null
           avatar_url: string | null
-          website: string | null
+          full_name: string | null
+          id: string
           updated_at: string | null
+          username: string | null
+          website: string | null
         }
         Insert: {
-          id: string
-          username?: string | null
-          full_name?: string | null
           avatar_url?: string | null
-          website?: string | null
+          full_name?: string | null
+          id: string
           updated_at?: string | null
+          username?: string | null
+          website?: string | null
         }
         Update: {
-          id?: string
-          username?: string | null
-          full_name?: string | null
           avatar_url?: string | null
-          website?: string | null
+          full_name?: string | null
+          id?: string
           updated_at?: string | null
+          username?: string | null
+          website?: string | null
         }
+        Relationships: []
       }
       user_roles: {
         Row: {
-          id: string
-          user_id: string | null
-          role: string
           created_at: string | null
+          id: string
+          role: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          user_id?: string | null
-          role: string
           created_at?: string | null
+          id?: string
+          role: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          id?: string
-          user_id?: string | null
-          role?: string
           created_at?: string | null
+          id?: string
+          role?: string
           updated_at?: string | null
+          user_id?: string | null
         }
+        Relationships: []
       }
     }
     Views: {

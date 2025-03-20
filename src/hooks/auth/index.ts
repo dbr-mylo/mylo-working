@@ -8,4 +8,4 @@ export * from './useAuthForm';
 export * from './useAuthFormState';
 export * from './useAuthFormValidation';
 export * from './useAuthFormSubmit';
-export * from './useAdminVerification';
+export * from './useDesignerVerification';

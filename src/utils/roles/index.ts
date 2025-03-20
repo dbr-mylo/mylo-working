@@ -10,3 +10,6 @@ export * from './persistence';
 
 // Re-export EditorOnly and StandaloneEditorOnly explicitly to resolve the ambiguity
 export { EditorOnly, StandaloneEditorOnly } from './EditorOnly';
+
+// Export DesignerOnly components
+export { DesignerOnly, StandaloneDesignerOnly, AdminOnly, StandaloneAdminOnly } from './DesignerOnly';

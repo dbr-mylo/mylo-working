@@ -46,6 +46,15 @@ export const useRoleValidation = (
 };
 
 /**
+ * Hook to validate if user has designer role
+ * @param redirectTo Path to redirect to if validation fails
+ * @returns Object containing validation state and error handling function
+ */
+export const useDesignerValidation = (redirectTo: string = "/") => {
+  return useRoleValidation('designer', redirectTo);
+};
+
+/**
  * Hook to validate if user is authenticated
  * @param redirectTo Path to redirect to if validation fails
  * @returns Object containing validation state and error handling function
@@ -69,3 +78,9 @@ export const useAuthValidation = (redirectTo: string = "/auth") => {
     handleUnauthenticated
   };
 };
+
+/**
+ * Legacy hook for backward compatibility
+ * @deprecated Use useDesignerValidation instead
+ */
+export const useAdminValidation = useDesignerValidation;

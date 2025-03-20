@@ -9,22 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      documents: {
+        Row: {
+          id: string
+          title: string
+          content: string | null
+          owner_id: string | null
+          created_at: string | null
+          updated_at: string | null
+          is_template: boolean | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          content?: string | null
+          owner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          is_template?: boolean | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string | null
+          owner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          is_template?: boolean | null
+        }
+      }
+      // Add other tables similarly
+      design_templates: { /* ... */ }
+      document_templates: { /* ... */ }
+      profiles: { /* ... */ }
+      user_roles: { /* ... */ }
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    // Rest of the interface
   }
 }
+
 
 type PublicSchema = Database[Extract<keyof Database, "public">]
 
@@ -123,44 +146,3 @@ export type CompositeTypes<
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
-export type Database = {
-  public: {
-    Tables: {
-      documents: {
-        Row: {
-          id: string
-          title: string
-          content: string | null
-          owner_id: string | null
-          created_at: string | null
-          updated_at: string | null
-          is_template: boolean | null
-        }
-        Insert: {
-          id?: string
-          title: string
-          content?: string | null
-          owner_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          is_template?: boolean | null
-        }
-        Update: {
-          id?: string
-          title?: string
-          content?: string | null
-          owner_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          is_template?: boolean | null
-        }
-      }
-      // Add other tables similarly
-      design_templates: { /* ... */ }
-      document_templates: { /* ... */ }
-      profiles: { /* ... */ }
-      user_roles: { /* ... */ }
-    }
-    // Rest of the interface
-  }
-}

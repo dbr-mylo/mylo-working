@@ -4,7 +4,11 @@ import { DocumentList } from "@/components/document/DocumentList";
 import { TemplateHeader } from "@/components/design/template/TemplateHeader";
 import { useTemplateManager } from "@/components/design/template/hooks/useTemplateManager";
 import { Document } from "@/lib/types";
-import { useIsDesigner } from "@/utils/roles";
+import { 
+  useIsAdmin, 
+  useIsDesigner, 
+  useIsDesignerOrAdmin 
+} from "@/utils/roles";
 
 interface TemplateManagerProps {
   onLoadTemplate?: (doc: Document) => void;
@@ -13,7 +17,9 @@ interface TemplateManagerProps {
 
 export const TemplateManager = ({ onLoadTemplate, onClose }: TemplateManagerProps) => {
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
   const isDesigner = useIsDesigner();
+  const canManageTemplates = useIsDesignerOrAdmin();
 
   const {
     templates,
@@ -28,7 +34,8 @@ export const TemplateManager = ({ onLoadTemplate, onClose }: TemplateManagerProp
   };
 
   const getTemplateTitle = () => {
-    if (isDesigner) return "All Templates";
+    if (isAdmin) return "All Templates";
+    if (isDesigner) return "Your Templates";
     return "Available Templates";
   };
 
@@ -36,7 +43,7 @@ export const TemplateManager = ({ onLoadTemplate, onClose }: TemplateManagerProp
     <div className="p-4 space-y-4">
       <TemplateHeader 
         title={getTemplateTitle()}
-        canManageTemplates={isDesigner}
+        canManageTemplates={canManageTemplates}
         onCreateNewTemplate={handleCreateNewTemplate}
       />
       
@@ -45,9 +52,9 @@ export const TemplateManager = ({ onLoadTemplate, onClose }: TemplateManagerProp
         isLoading={isLoading}
         onDeleteDocument={handleDeleteTemplate}
         onSelectDocument={handleSelectTemplate}
-        isDesigner={isDesigner}
+        isDesigner={canManageTemplates}
         showStatus={true}
-        onToggleStatus={isDesigner ? handleToggleTemplateStatus : undefined}
+        onToggleStatus={canManageTemplates ? handleToggleTemplateStatus : undefined}
       />
     </div>
   );

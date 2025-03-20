@@ -8,7 +8,6 @@ import { useStyleApplication } from "@/hooks/useStyleApplication";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Text } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { StyleListItem } from "@/components/design/typography/StyleListItem";
 
 interface StyleDropdownProps {
   editor: Editor;
@@ -17,12 +16,12 @@ interface StyleDropdownProps {
 export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles, isLoading } = useTextStyles();
-  const { applyStyle } = useStyleApplication(editor);
+  const { applyStyleToSelection } = useStyleApplication(editor);
   const { role } = useAuth();
   const isDesigner = role === "designer";
 
   const handleStyleSelect = (styleId: string) => {
-    applyStyle(styleId);
+    applyStyleToSelection(styleId);
     setIsOpen(false);
   };
 
@@ -47,12 +46,24 @@ export const StyleDropdown = ({ editor }: StyleDropdownProps) => {
             <div className="space-y-1">
               {styles.length > 0 ? (
                 styles.map((style) => (
-                  <StyleListItem
+                  <Button
                     key={style.id}
-                    style={style}
-                    onSelect={() => handleStyleSelect(style.id)}
-                    compact={true}
-                  />
+                    variant="ghost"
+                    size="xs"
+                    className="w-full justify-start font-normal"
+                    onClick={() => handleStyleSelect(style.id)}
+                  >
+                    <div 
+                      className="w-full overflow-hidden text-ellipsis"
+                      style={{ 
+                        fontFamily: style.fontFamily,
+                        fontWeight: style.fontWeight,
+                        color: style.color
+                      }}
+                    >
+                      {style.name}
+                    </div>
+                  </Button>
                 ))
               ) : (
                 <p className="text-xs text-muted-foreground py-2">

@@ -1,133 +1,159 @@
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  AuthContextType, 
-  AuthState
-} from "@/lib/types/authTypes";
-import { UserRole } from "@/lib/types";
-import { RoleError } from "@/lib/errors/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  useAuthState, 
-  useAuthActions, 
-  useGuestRole, 
-  useUserData,
-  useAuthInitialization
-} from "@/hooks/auth";
+import type { AuthState, UserRole } from "@/lib/types";
+import { toast } from "sonner";
 
-// Default auth context value
-const defaultAuthContext: AuthContextType = {
-  user: null,
-  role: null,
-  isLoading: true,
-  error: null,
-  signIn: async () => {},
-  signUp: async () => {},
-  signOut: async () => {},
-  continueAsGuestEditor: () => {},
-  continueAsGuestDesigner: () => {},
-  clearError: () => {},
-  clearGuestRole: () => false,
-  isAuthenticated: false,
-  refreshUserData: async () => {}
-};
+interface AuthContextType extends AuthState {
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  continueAsGuestEditor: () => void;
+  continueAsGuestDesigner: () => void;
+  continueAsGuestAdmin: () => void;
+}
 
-const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    role: null,
+    isLoading: true,
+  });
   const navigate = useNavigate();
-  
-  // Initialize auth state
-  const {
-    user,
-    role,
-    isLoading,
-    error,
-    updateAuthState,
-    setUser,
-    setRole,
-    setLoading,
-    setError,
-    clearError
-  } = useAuthState();
-  
-  // Initialize user data handling
-  const { fetchUserData } = useUserData({
-    setUser,
-    setRole,
-    setError
-  });
-  
-  // Initialize guest role handling
-  const {
-    loadGuestRole,
-    continueAsGuestEditor,
-    continueAsGuestDesigner,
-    clearGuestRole
-  } = useGuestRole();
-  
-  // Initialize auth actions
-  const { signIn, signUp, signOut } = useAuthActions({
-    setLoading,
-    clearError,
-    setError,
-    fetchUserData,
-    clearGuestRole
-  });
-  
-  // Check if the user is authenticated (has user or guest role)
-  const isAuthenticated = !isLoading && (user !== null || role !== null);
 
-  // Add the refreshUserData function to fetch the latest user data
-  const refreshUserData = async () => {
-    try {
-      // Get current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw sessionError;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchUserData(session.user.id);
+      } else {
+        setAuthState(state => ({ ...state, isLoading: false }));
       }
-      
-      if (session && session.user) {
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
         await fetchUserData(session.user.id);
-        return;
+      } else {
+        setAuthState({ user: null, role: null, isLoading: false });
       }
-      
-      // If no session, check for guest role
-      const guestRole = loadGuestRole();
-      setRole(guestRole);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
+
+      if (roleError) throw roleError;
+
+      setAuthState({
+        user: profile,
+        role: roleData.role as UserRole,
+        isLoading: false,
+      });
     } catch (error) {
-      console.error('Error refreshing user data:', error);
-      setError(error);
+      console.error("Error fetching user data:", error);
+      toast.error("Error fetching user data");
+      setAuthState(state => ({ ...state, isLoading: false }));
     }
   };
 
-  // Initialize auth state and listeners
-  useAuthInitialization({
-    fetchUserData,
-    loadGuestRole,
-    setLoading,
-    setRole,
-    setUser,
-    setError
-  });
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+      toast.success("Check your email to confirm your account");
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
+  const continueAsGuestEditor = () => {
+    setAuthState({
+      user: null,
+      role: "editor",
+      isLoading: false
+    });
+    toast.success("Continuing as Editor");
+    navigate("/");
+  };
+
+  const continueAsGuestDesigner = () => {
+    setAuthState({
+      user: null,
+      role: "designer",
+      isLoading: false
+    });
+    toast.success("Continuing as Designer");
+    navigate("/");
+  };
+
+  const continueAsGuestAdmin = () => {
+    setAuthState({
+      user: null,
+      role: "admin",
+      isLoading: false
+    });
+    toast.success("Continuing as Admin");
+    navigate("/");
+  };
 
   return (
     <AuthContext.Provider value={{ 
-      user, 
-      role, 
-      isLoading, 
-      error, 
+      ...authState, 
       signIn, 
       signUp, 
       signOut, 
       continueAsGuestEditor, 
       continueAsGuestDesigner,
-      clearError,
-      clearGuestRole,
-      isAuthenticated,
-      refreshUserData
+      continueAsGuestAdmin
     }}>
       {children}
     </AuthContext.Provider>
@@ -137,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new RoleError("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

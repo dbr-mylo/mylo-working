@@ -1,11 +1,9 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { Template } from "@/lib/types";
 import { toast } from "sonner";
 import { TemplateCache } from "./TemplateCache";
 import { LocalTemplateStorage } from "./LocalTemplateStorage";
-import { templateAdapter } from "./TemplateAdapter";
-import { templateErrorHandler } from "./TemplateErrorHandler";
-import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Service for managing design templates
@@ -30,7 +28,7 @@ class TemplateService {
   /**
    * Gets all templates, with optional forced refresh
    */
-  async getTemplates(forceRefresh = false, timeoutMs = 5000): Promise<Template[]> {
+  async getTemplates(forceRefresh = false): Promise<Template[]> {
     // Return cached templates if available and not expired
     const cachedTemplates = this.cache.getCachedTemplates();
     if (cachedTemplates && !forceRefresh) {
@@ -39,29 +37,36 @@ class TemplateService {
     }
 
     try {
-      const templates = await templateAdapter.fetchAllTemplates(timeoutMs);
-      
+      const { data, error } = await supabase
+        .from('design_templates')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
       // Update cache
+      const templates = data as Template[];
       this.cache.cacheAllTemplates(templates);
       
       return templates;
     } catch (error) {
-      templateErrorHandler.handleError('fetching templates', error);
+      console.error("Error fetching templates:", error);
       
       // Try to get from localStorage as fallback for guest users
-      if (!templateAdapter.isAuthenticated()) {
+      if (!supabase.auth.getSession()) {
         return this.localStorage.getLocalTemplates();
       }
       
-      // If we're here, return empty array instead of throwing to prevent app crashes
-      return [];
+      throw error;
     }
   }
 
   /**
    * Gets a template by ID
    */
-  async getTemplateById(id: string, timeoutMs = 5000): Promise<Template | null> {
+  async getTemplateById(id: string): Promise<Template | null> {
     // Return from cache if available
     const cachedTemplate = this.cache.getCachedTemplate(id);
     if (cachedTemplate) {
@@ -69,19 +74,29 @@ class TemplateService {
     }
 
     try {
-      const template = await templateAdapter.fetchTemplateById(id, timeoutMs);
-      
-      if (template) {
-        // Update cache
-        this.cache.cacheTemplate(template);
+      const { data, error } = await supabase
+        .from('design_templates')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // Template not found
+          return null;
+        }
+        throw error;
       }
-      
+
+      // Update cache
+      const template = data as Template;
+      this.cache.cacheTemplate(template);
       return template;
     } catch (error) {
-      templateErrorHandler.handleError(`fetching template with ID ${id}`, error);
+      console.error(`Error fetching template with ID ${id}:`, error);
       
       // Try to get from localStorage as fallback for guest users
-      if (!templateAdapter.isAuthenticated()) {
+      if (!supabase.auth.getSession()) {
         return this.localStorage.getLocalTemplateById(id);
       }
       
@@ -94,21 +109,37 @@ class TemplateService {
    */
   async createTemplate(template: Omit<Template, 'id'>): Promise<Template> {
     try {
-      const newTemplate = await templateAdapter.createTemplate(template);
-      
+      const { data, error } = await supabase
+        .from('design_templates')
+        .insert({
+          name: template.name,
+          styles: template.styles,
+          status: template.status || 'draft',
+          category: template.category,
+          version: template.version || 1
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       // Clear cache to ensure fresh data
       this.cache.clearCache();
       
-      templateErrorHandler.handleSuccess('created', newTemplate.name);
+      const newTemplate = data as Template;
+      toast.success(`Template "${newTemplate.name}" created`);
       return newTemplate;
     } catch (error) {
-      templateErrorHandler.handleError('creating template', error);
+      console.error("Error creating template:", error);
       
       // For guest users, save to localStorage
-      if (!templateAdapter.isAuthenticated()) {
+      if (!supabase.auth.getSession()) {
         return this.localStorage.createLocalTemplate(template);
       }
       
+      toast.error("Failed to create template");
       throw error;
     }
   }
@@ -118,22 +149,33 @@ class TemplateService {
    */
   async updateTemplate(id: string, updates: Partial<Template>): Promise<Template> {
     try {
-      const updatedTemplate = await templateAdapter.updateTemplate(id, updates);
-      
+      const { data, error } = await supabase
+        .from('design_templates')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       // Update cache
+      const updatedTemplate = data as Template;
       this.cache.cacheTemplate(updatedTemplate);
       this.cache.invalidateAllTemplates(); // Invalidate the all templates cache
       
-      templateErrorHandler.handleSuccess('updated', updatedTemplate.name);
+      toast.success(`Template "${updatedTemplate.name}" updated`);
       return updatedTemplate;
     } catch (error) {
-      templateErrorHandler.handleError(`updating template with ID ${id}`, error);
+      console.error(`Error updating template with ID ${id}:`, error);
       
       // For guest users, update in localStorage
-      if (!templateAdapter.isAuthenticated()) {
+      if (!supabase.auth.getSession()) {
         return this.localStorage.updateLocalTemplate(id, updates);
       }
       
+      toast.error("Failed to update template");
       throw error;
     }
   }
@@ -143,22 +185,30 @@ class TemplateService {
    */
   async deleteTemplate(id: string): Promise<void> {
     try {
-      await templateAdapter.deleteTemplate(id);
-      
+      const { error } = await supabase
+        .from('design_templates')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
       // Update cache
       this.cache.invalidateTemplate(id);
       this.cache.invalidateAllTemplates(); // Invalidate the all templates cache
       
-      templateErrorHandler.handleSuccess('deleted');
+      toast.success("Template deleted");
     } catch (error) {
-      templateErrorHandler.handleError(`deleting template with ID ${id}`, error);
+      console.error(`Error deleting template with ID ${id}:`, error);
       
       // For guest users, delete from localStorage
-      if (!templateAdapter.isAuthenticated()) {
+      if (!supabase.auth.getSession()) {
         this.localStorage.deleteLocalTemplate(id);
         return;
       }
       
+      toast.error("Failed to delete template");
       throw error;
     }
   }

@@ -3,4 +3,4 @@
 export type { SaveTextStyleInput } from './styleManagement';
 export { saveTextStyle, deleteTextStyle, duplicateTextStyle, setDefaultStyle } from './styleManagement';
 export { getDefaultStyle, getStylesWithParent } from './utils';
-export { getStyleWithInheritance, getInheritanceChain } from './styleInheritance';
+export { getStyleWithInheritance } from './styleInheritance';

@@ -9,22 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextPreview } from "./TextPreview";
 import { textStyleStore } from "@/stores/textStyles";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
-
-interface NameValidationStatus {
-  isValid: boolean;
-  isDuplicate: boolean;
-  isChecking: boolean;
-}
+import { StyleInheritance } from "./StyleInheritance";
 
 interface StyleFormProps {
   initialValues?: TextStyle;
   onSubmit?: (data: StyleFormData) => void;
-  onCancel?: () => void;
-  isSaving?: boolean;
-  onNameChange?: (name: string) => void;
-  nameValidation?: NameValidationStatus;
-
+  
   // Support for direct style manipulation
   styles?: TypographyStyles;
   handleStyleChange?: (property: keyof TypographyStyles, value: string) => void;
@@ -33,10 +23,6 @@ interface StyleFormProps {
 export const StyleForm = ({ 
   initialValues, 
   onSubmit,
-  onCancel,
-  isSaving = false,
-  onNameChange,
-  nameValidation,
   styles: externalStyles,
   handleStyleChange: externalStyleChange
 }: StyleFormProps) => {
@@ -54,13 +40,6 @@ export const StyleForm = ({
     externalStyles,
     externalStyleChange
   });
-  
-  // Call onNameChange when name changes
-  useEffect(() => {
-    if (onNameChange) {
-      onNameChange(name);
-    }
-  }, [name, onNameChange]);
 
   // Fetch parent style details when parentId changes
   useEffect(() => {
@@ -87,20 +66,9 @@ export const StyleForm = ({
     if (!onSubmit) return;
     
     e.preventDefault();
-    
-    // Form validation
-    if (!name.trim()) {
-      return; // Don't submit if name is empty
-    }
-    
-    // Check for duplicate names (either using passed validation or local state)
-    if (nameValidation?.isDuplicate) {
-      return; // Don't submit if name is a duplicate
-    }
-    
     onSubmit({
       name,
-      selector: "p", // Providing default rather than empty string
+      selector: "", // Providing empty string as default
       description: "", // Providing empty string as default
       parentId,
       ...styles,
@@ -114,12 +82,6 @@ export const StyleForm = ({
 
   // Show form fields for creating/editing styles only when onSubmit is provided
   const showFormFields = !!onSubmit;
-  
-  // Disable save button if validation fails
-  const isSaveDisabled = isSaving || 
-    !name.trim() || 
-    (nameValidation?.isDuplicate || false) || 
-    (nameValidation?.isChecking || false);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -153,7 +115,6 @@ export const StyleForm = ({
               onNameChange={setName}
               onParentChange={handleParentChange}
               parentStyle={parentStyle}
-              validationStatus={nameValidation}
             />
           )}
         </TabsContent>
@@ -169,31 +130,17 @@ export const StyleForm = ({
 
       {showFormFields && (
         <div className="flex justify-end space-x-2 pt-3 border-t mt-3">
-          <Button 
-            variant="outline" 
-            type="button" 
-            onClick={onCancel}
-            disabled={isSaving}
-          >
+          <Button variant="outline" type="button" onClick={onSubmit ? () => onSubmit({
+            name,
+            selector: "",
+            description: "",
+            parentId,
+            ...styles,
+          }) : undefined}>
             Cancel
           </Button>
-          <Button 
-            type="submit"
-            disabled={isSaveDisabled}
-            className={
-              isSaveDisabled ? "opacity-70" : 
-              nameValidation?.isChecking ? "bg-amber-500 hover:bg-amber-600" :
-              "bg-primary hover:bg-primary/90"
-            }
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              initialValues ? "Update Style" : "Create Style"
-            )}
+          <Button type="submit">
+            {initialValues ? "Update Style" : "Create Style"}
           </Button>
         </div>
       )}

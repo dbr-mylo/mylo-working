@@ -14,10 +14,10 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      <div className="fixed inset-0 pointer-events-none flex flex-col items-end gap-2 p-4 z-[9999]">
+      <div style={{ position: 'relative', zIndex: 9999 }}>
         {toasts.map(function ({ id, title, description, action, ...props }) {
           return (
-            <Toast key={id} {...props} className="pointer-events-auto">
+            <Toast key={id} {...props}>
               <div className="grid gap-1">
                 {title && <ToastTitle>{title}</ToastTitle>}
                 {description && (

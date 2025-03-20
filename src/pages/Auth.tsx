@@ -1,121 +1,149 @@
 
-import { useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CacheControls } from "@/components/auth/CacheControls";
-import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
-import { useAuthForm } from "@/hooks/auth";
-import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
-import { SignInForm } from "@/components/auth/SignInForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
-import { GuestRoleButtons } from "@/components/auth/GuestRoleButtons";
-import { AuthTabs } from "@/components/auth/AuthTabs";
-import { AuthErrorDisplay } from "@/components/auth/AuthError";
-import { AuthDivider } from "@/components/auth/AuthDivider";
-import { AuthContainer } from "@/components/auth/AuthContainer";
-import { AuthLoadingState } from "@/components/auth/AuthLoadingState";
 import "../styles/auth.css";
 
 export default function Auth() {
-  // Use the custom auth form hook for form state and handlers
-  const {
-    formState,
-    isAuthLoading,
-    handleInputChange,
-    handleTabChange,
-    handleSubmit
-  } = useAuthForm();
-  
-  // Get auth context
-  const { 
-    error,
-    clearError
-  } = useAuth();
-  
-  // Use the enhanced auth error handler
-  const { 
-    retryOperation, 
-    isRetrying, 
-    clearError: clearHandlerError 
-  } = useAuthErrorHandler({
-    showToast: true,
-    logToConsole: true,
-    retryCount: 1
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
+  const { signIn, signUp, continueAsGuestEditor, continueAsGuestDesigner, continueAsGuestAdmin } = useAuth();
 
-  // Clear auth errors when component unmounts or tab changes
-  useEffect(() => {
-    return () => {
-      clearError();
-      clearHandlerError();
-    };
-  }, [clearError, clearHandlerError, formState.activeTab]);
-
-  // Enhanced form submission with retry capability
-  const handleFormSubmit = async (action: "signin" | "signup") => {
+  const handleSubmit = async (action: "signin" | "signup") => {
     try {
       if (action === "signin") {
-        // Attempt sign in with retry support
-        await retryOperation(() => handleSubmit(action));
+        await signIn(email, password);
       } else {
-        // Sign up typically doesn't need retries
-        await handleSubmit(action);
+        await signUp(email, password);
       }
-    } catch (err) {
-      console.error(`${action} failed with error:`, err);
+    } catch (error) {
+      // Error is handled in the auth context
     }
   };
 
-  // Determine loading and error states
-  const isFormProcessing = isAuthLoading || isRetrying;
-
   return (
-    <AuthErrorBoundary>
-      <AuthContainer>
-        <h1 className="text-2xl font-bold mb-1">Welcome</h1>
-        <p className="text-gray-500 mb-6">Sign in to access your documents</p>
-        
-        <div>
-          <AuthTabs 
-            activeTab={formState.activeTab}
-            onTabChange={handleTabChange}
-            isDisabled={isFormProcessing}
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-1">Welcome</h1>
+          <p className="text-gray-500 mb-6">Sign in to access your documents</p>
           
-          {isFormProcessing && (
-            <AuthLoadingState 
-              message={formState.activeTab === "signin" ? "Signing in..." : "Creating account..."}
-            />
-          )}
+          <div>
+            <div className="auth-tabs-list" style={{ borderRadius: "0.5rem", border: "1px solid #e5e7eb" }}>
+              <button 
+                className="auth-tab-trigger" 
+                style={{ borderRadius: "0.375rem" }}
+                data-state={activeTab === "signin" ? "active" : "inactive"}
+                onClick={() => setActiveTab("signin")}
+              >
+                Sign In
+              </button>
+              <button 
+                className="auth-tab-trigger" 
+                style={{ borderRadius: "0.375rem" }}
+                data-state={activeTab === "signup" ? "active" : "inactive"}
+                onClick={() => setActiveTab("signup")}
+              >
+                Sign Up
+              </button>
+            </div>
+            
+            {activeTab === "signin" && (
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signin"); }} className="auth-form">
+                <div className="auth-input-group">
+                  <label htmlFor="signin-email" className="auth-input-label">Email</label>
+                  <input
+                    id="signin-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <div className="auth-input-group">
+                  <label htmlFor="signin-password" className="auth-input-label">Password</label>
+                  <input
+                    id="signin-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="auth-submit-button"
+                >
+                  Sign In
+                </button>
+              </form>
+            )}
+            
+            {activeTab === "signup" && (
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit("signup"); }} className="auth-form">
+                <div className="auth-input-group">
+                  <label htmlFor="signup-email" className="auth-input-label">Email</label>
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <div className="auth-input-group">
+                  <label htmlFor="signup-password" className="auth-input-label">Password</label>
+                  <input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="auth-input"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="auth-submit-button"
+                >
+                  Sign Up
+                </button>
+              </form>
+            )}
+          </div>
           
-          {!isFormProcessing && formState.activeTab === "signin" && (
-            <SignInForm
-              email={formState.email}
-              password={formState.password}
-              isProcessing={isFormProcessing}
-              onInputChange={handleInputChange}
-              onSubmit={handleFormSubmit}
-            />
-          )}
+          <div className="auth-divider">
+            <span className="auth-divider-text">Or continue as guest</span>
+          </div>
           
-          {!isFormProcessing && formState.activeTab === "signup" && (
-            <SignUpForm
-              email={formState.email}
-              password={formState.password}
-              isProcessing={isFormProcessing}
-              onInputChange={handleInputChange}
-              onSubmit={handleFormSubmit}
-            />
-          )}
+          <div className="auth-guest-buttons">
+            <button
+              onClick={continueAsGuestEditor}
+              className="auth-guest-button"
+            >
+              Editor
+            </button>
+            <button
+              onClick={continueAsGuestDesigner}
+              className="auth-guest-button"
+            >
+              Designer
+            </button>
+            <button
+              onClick={continueAsGuestAdmin}
+              className="auth-guest-button"
+            >
+              Admin
+            </button>
+          </div>
           
-          <AuthErrorDisplay error={error} onClear={clearError} />
+          <CacheControls />
         </div>
-        
-        <AuthDivider />
-        
-        <GuestRoleButtons isDisabled={isFormProcessing} />
-        
-        <CacheControls />
-      </AuthContainer>
-    </AuthErrorBoundary>
+      </div>
+    </div>
   );
 }

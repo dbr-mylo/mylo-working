@@ -22,18 +22,6 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   
-  /* Designer-specific toolbar styles */
-  .designer-toolbar button {
-    height: auto;
-    padding: 0.25rem;
-  }
-  
-  .designer-toolbar button[size="xxs"] {
-    height: 1.5rem;
-    padding: 0 0.25rem;
-    font-size: 0.65rem;
-  }
-
   /* =============================================
      Font Size Enforcement Rules
   ============================================= */
@@ -82,12 +70,6 @@
     position: relative;
     z-index: 50;
   }
-
-  /* Designer toolbar specific z-index */
-  .designer-toolbar {
-    position: relative;
-    z-index: 50;
-  }
   
   /* Font size dropdown specific styles */
   .font-size-dropdown-content {
@@ -105,12 +87,6 @@
   /* Editor-specific portal positioning fixes */
   [data-role="editor"] [data-radix-select-portal] > [data-radix-select-content],
   [data-role="editor"] [data-radix-popper-content-wrapper] {
-    z-index: 9999 !important;
-  }
-  
-  /* Designer-specific portal positioning fixes */
-  [data-role="designer"] [data-radix-select-portal] > [data-radix-select-content],
-  [data-role="designer"] [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
   }
   
@@ -140,24 +116,16 @@
     pointer-events: auto !important;
   }
   
-  /* Editor-specific toolbar button styles */
-  .editor-toolbar-buttons .Button[role="button"],
-  .editor-toolbar-buttons button {
-    border-color: #D9DADC;
-    border-radius: 0.375rem;
-  }
-  
-  /* Editor role-specific button styles */
-  [data-role="editor"] .editor-toolbar-buttons button,
-  [data-role="editor"] .editor-toolbar-buttons .Button {
-    border-color: #D9DADC;
-    border-radius: 0.375rem;
-  }
-  
-  /* Make sure buttons in editor toolbar have higher specificity than global overrides */
-  .editor-toolbar-buttons button[variant="ghost"],
-  .editor-toolbar-buttons .Button[variant="ghost"] {
-    background-color: transparent;
+  /* Ensure consistent editor component border styling with higher specificity */
+  .editor-toolbar .SelectTrigger,
+  .editor-toolbar button[data-state],
+  .editor-toolbar-container select,
+  .editor-toolbar-container button,
+  .editor-toolbar-container .radix-select-trigger,
+  .SelectTrigger,
+  [data-radix-select-trigger] {
+    border-color: #D9DADC !important;
+    border-radius: 0.375rem !important;
   }
   
   /* Target the actual combobox element with maximum specificity */
@@ -179,11 +147,5 @@
       opacity: 1;
       transform: translateY(0);
     }
-  }
-  
-  /* Update the panel background color to match the hex value */
-  .bg-editor-panel {
-    --tw-bg-opacity: 1;
-    background-color: rgb(243 244 246 / var(--tw-bg-opacity)) !important;
   }
 }

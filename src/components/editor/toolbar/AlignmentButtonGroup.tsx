@@ -10,12 +10,12 @@ interface AlignmentButtonGroupProps {
 
 export const AlignmentButtonGroup: React.FC<AlignmentButtonGroupProps> = ({ editor }) => {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center">
       <Button
         variant="ghost"
         size="xs"
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
-        className={`border-0 p-1 ${editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : 'hover:bg-accent/50'}`}
+        className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
       >
         <AlignLeft className="h-3.5 w-3.5" />
       </Button>
@@ -23,7 +23,7 @@ export const AlignmentButtonGroup: React.FC<AlignmentButtonGroupProps> = ({ edit
         variant="ghost"
         size="xs"
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
-        className={`border-0 p-1 ${editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : 'hover:bg-accent/50'}`}
+        className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
       >
         <AlignCenter className="h-3.5 w-3.5" />
       </Button>
@@ -31,7 +31,7 @@ export const AlignmentButtonGroup: React.FC<AlignmentButtonGroupProps> = ({ edit
         variant="ghost"
         size="xs"
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
-        className={`border-0 p-1 ${editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : 'hover:bg-accent/50'}`}
+        className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
       >
         <AlignRight className="h-3.5 w-3.5" />
       </Button>

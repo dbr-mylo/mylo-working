@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
-import { useIsDesigner } from "@/utils/roles";
+import { useIsDesignerOrAdmin } from "@/utils/roles";
 import { TemplateSelector } from "./template/TemplateSelector";
 import { TemplateStatus } from "./template/TemplateStatus";
 import { TemplateCategory } from "./template/TemplateCategory";
@@ -14,7 +14,7 @@ interface TemplateControlsProps {
 }
 
 export const TemplateControls = ({ onStylesChange }: TemplateControlsProps) => {
-  const canPublish = useIsDesigner();
+  const canPublish = useIsDesignerOrAdmin();
   const {
     templateName,
     setTemplateName,

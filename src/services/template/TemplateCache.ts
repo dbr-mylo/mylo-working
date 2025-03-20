@@ -2,83 +2,82 @@
 import { Template } from "@/lib/types";
 
 /**
- * Class for caching templates in memory to reduce API calls
+ * Cache management for template service
+ * Handles caching of templates to reduce database queries
  */
 export class TemplateCache {
-  private allTemplatesCache: { templates: Template[], timestamp: number } | null = null;
-  private templateCache: Map<string, { template: Template, timestamp: number }> = new Map();
-  private cacheExpirationMs = 5 * 60 * 1000; // 5 minutes
+  private cache: Map<string, Template> = new Map();
+  private allTemplatesCache: Template[] | null = null;
+  private lastFetchTimestamp: number = 0;
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
 
   /**
-   * Get all cached templates if they exist and aren't expired
+   * Clears all cached template data
    */
-  getCachedTemplates(): Template[] | null {
-    if (!this.allTemplatesCache) return null;
-    
-    const now = Date.now();
-    if (now - this.allTemplatesCache.timestamp > this.cacheExpirationMs) {
-      this.allTemplatesCache = null;
-      return null;
-    }
-    
-    return this.allTemplatesCache.templates;
-  }
-
-  /**
-   * Cache all templates
-   */
-  cacheAllTemplates(templates: Template[]): void {
-    this.allTemplatesCache = {
-      templates,
-      timestamp: Date.now()
-    };
-  }
-
-  /**
-   * Invalidate all templates cache
-   */
-  invalidateAllTemplates(): void {
+  clearCache(): void {
+    this.cache.clear();
     this.allTemplatesCache = null;
+    this.lastFetchTimestamp = 0;
   }
 
   /**
-   * Get a cached template by ID if it exists and isn't expired
+   * Checks if the cache is still valid based on TTL
+   */
+  isCacheValid(): boolean {
+    return Date.now() - this.lastFetchTimestamp < this.CACHE_TTL;
+  }
+
+  /**
+   * Gets a template from cache if available
    */
   getCachedTemplate(id: string): Template | null {
-    const cachedTemplate = this.templateCache.get(id);
-    if (!cachedTemplate) return null;
-    
-    const now = Date.now();
-    if (now - cachedTemplate.timestamp > this.cacheExpirationMs) {
-      this.templateCache.delete(id);
-      return null;
+    if (this.cache.has(id) && this.isCacheValid()) {
+      return this.cache.get(id) || null;
     }
-    
-    return cachedTemplate.template;
+    return null;
   }
 
   /**
-   * Cache a template
+   * Gets all templates from cache if available
+   */
+  getCachedTemplates(): Template[] | null {
+    if (this.allTemplatesCache && this.isCacheValid()) {
+      return this.allTemplatesCache;
+    }
+    return null;
+  }
+
+  /**
+   * Sets a template in the cache
    */
   cacheTemplate(template: Template): void {
-    this.templateCache.set(template.id, {
-      template,
-      timestamp: Date.now()
+    this.cache.set(template.id, template);
+  }
+
+  /**
+   * Sets the all templates cache
+   */
+  cacheAllTemplates(templates: Template[]): void {
+    this.allTemplatesCache = templates;
+    this.lastFetchTimestamp = Date.now();
+    
+    // Also cache individual templates
+    templates.forEach(template => {
+      this.cache.set(template.id, template);
     });
   }
 
   /**
-   * Invalidate a cached template
+   * Invalidates a specific template in the cache
    */
   invalidateTemplate(id: string): void {
-    this.templateCache.delete(id);
+    this.cache.delete(id);
   }
 
   /**
-   * Clear the entire cache
+   * Invalidates the all templates cache
    */
-  clearCache(): void {
+  invalidateAllTemplates(): void {
     this.allTemplatesCache = null;
-    this.templateCache.clear();
   }
 }

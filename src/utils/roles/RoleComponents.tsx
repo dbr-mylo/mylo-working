@@ -1,91 +1,111 @@
+
+/**
+ * Role-Specific Component Rendering
+ * 
+ * These components render content conditionally based on the user's role.
+ */
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/types';
-import { MultiRoleComponentProps, ExcludeRolesProps, RoleComponentProps } from './types';
+import { RoleComponentProps, MultiRoleComponentProps, ExcludeRolesProps } from './types';
 
 /**
- * Component that only renders its children when the current user has a specific role
+ * Component that only renders its children for a specific role
  */
-export const RoleComponent: React.FC<MultiRoleComponentProps> = ({ 
-  roles, 
-  children, 
-  fallback = null 
-}) => {
-  const { role } = useAuth();
+export const RoleOnly: React.FC<{
+  role: UserRole;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ role, children, fallback = null }) => {
+  const { role: userRole } = useAuth();
   
-  // If user has any of the specified roles, render children
-  if (role && roles.includes(role)) {
+  if (userRole === role) {
     return <>{children}</>;
   }
   
-  // Otherwise render fallback
   return <>{fallback}</>;
 };
 
 /**
- * Component that renders its children for any role EXCEPT the specified roles
+ * Designer-specific component
+ */
+export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <RoleOnly role="designer" children={children} fallback={fallback} />;
+};
+
+/**
+ * Editor-specific component
+ */
+export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <RoleOnly role="editor" children={children} fallback={fallback} />;
+};
+
+/**
+ * Admin-specific component
+ */
+export const AdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <RoleOnly role="admin" children={children} fallback={fallback} />;
+};
+
+/**
+ * Component that renders for multiple roles
+ */
+export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({ 
+  roles, 
+  children, 
+  fallback = null 
+}) => {
+  const { role: userRole } = useAuth();
+  
+  if (userRole && roles.includes(userRole)) {
+    return <>{children}</>;
+  }
+  
+  return <>{fallback}</>;
+};
+
+/**
+ * Designer or Admin only component
+ */
+export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
+ * Editor or Admin only component
+ */
+export const EditorOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['editor', 'admin']} children={children} fallback={fallback} />;
+};
+
+/**
+ * Component that renders for all except specified roles
  */
 export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({ 
   excludeRoles, 
   children, 
   fallback = null 
 }) => {
-  const { role } = useAuth();
+  const { role: userRole } = useAuth();
   
-  // If user role is in excluded roles list, render fallback
-  if (role && excludeRoles.includes(role)) {
-    return <>{fallback}</>;
-  }
-  
-  // Otherwise render children
-  return <>{children}</>;
-};
-
-/**
- * Component that only renders its children for guests (no authenticated user)
- */
-export const GuestOnly: React.FC<RoleComponentProps> = ({ 
-  children, 
-  fallback = null 
-}) => {
-  const { user, role } = useAuth();
-  
-  // If no user and no role (complete guest), render children
-  if (!user && !role) {
+  if (userRole && !excludeRoles.includes(userRole)) {
     return <>{children}</>;
   }
   
-  // Otherwise render fallback
   return <>{fallback}</>;
 };
 
 /**
- * Component that only renders its children for authenticated users (including guest roles)
+ * Component that renders only for users who can create content
  */
-export const AuthenticatedOnly: React.FC<RoleComponentProps> = ({ 
-  children, 
-  fallback = null 
-}) => {
-  const { user, role } = useAuth();
-  
-  // If has user or guest role, render children
-  if (user || role) {
-    return <>{children}</>;
-  }
-  
-  // Otherwise render fallback
-  return <>{fallback}</>;
+export const ContentCreatorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['editor', 'designer', 'admin']} children={children} fallback={fallback} />;
 };
 
 /**
- * Component that only renders its children when a user (not guest role) is authenticated
+ * Component that renders only for users who can manage templates
  */
-export const UserOnly: React.FC<RoleComponentProps> = ({ 
-  children, 
-  fallback = null 
-}) => {
-  const { user } = useAuth();
-  
-  // Only render if there's an actual user (not just a role)
-  return user ? <>{children}</> : <>{fallback}</>;
+export const TemplateManagerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
 };

@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {
@@ -53,7 +54,7 @@ export interface EditorNavProps {
   onTemplateChange?: (templateId: string) => void;
 }
 
-export type UserRole = 'editor' | 'designer';
+export type UserRole = 'editor' | 'designer' | 'admin';
 
 export interface Template {
   id: string;

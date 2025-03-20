@@ -29,7 +29,7 @@ type RoleFeatureFlags = {
   // View features
   defaultView: 'edit' | 'preview' | 'split';
   
-  // Management features
+  // Admin features
   canManageUsers: boolean;
   canManageAllTemplates: boolean;
   canManageAllStyles: boolean;
@@ -47,9 +47,9 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canCreateStyles: true,
     defaultDocumentWrapper: 'none',
     defaultView: 'edit',
-    canManageUsers: true,        // Designers now have user management capabilities
-    canManageAllTemplates: true, // Designers can manage all templates
-    canManageAllStyles: true     // Designers can manage all styles
+    canManageUsers: false,
+    canManageAllTemplates: false,
+    canManageAllStyles: false
   },
   editor: {
     canModifyTemplate: false,
@@ -65,6 +65,21 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canManageUsers: false,
     canManageAllTemplates: false,
     canManageAllStyles: false
+  },
+  admin: {
+    canModifyTemplate: true,
+    canEditLayout: true,
+    canCreateTemplate: true,
+    canPublishTemplate: true,
+    showToolbar: true,
+    showPreview: true,
+    canApplyStyles: true, 
+    canCreateStyles: true,
+    defaultDocumentWrapper: 'none',
+    defaultView: 'edit',
+    canManageUsers: true,
+    canManageAllTemplates: true,
+    canManageAllStyles: true
   }
 };
 
@@ -112,4 +127,11 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  */
 export const isEditorRole = (role: UserRole | null): boolean => {
   return role === 'editor';
+};
+
+/**
+ * Check if the current role is admin
+ */
+export const isAdminRole = (role: UserRole | null): boolean => {
+  return role === 'admin';
 };

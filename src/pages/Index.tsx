@@ -13,15 +13,12 @@ import { textStyleStore } from "@/stores/textStyles";
 import { Editor } from "@tiptap/react";
 import { EditorToolbarContainer } from "@/components/EditorToolbarContainer";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
-import { CacheClearingControls } from "@/components/auth/CacheClearingControls";
-import { useIsDesigner } from "@/utils/roles";
 
 const Index = () => {
   const { documentId } = useParams();
   const { role } = useAuth();
   const { width } = useWindowSize();
   const isMobile = width < 1281;
-  const isDesigner = useIsDesigner();
   
   // State for template ID and shared editor instance
   const [templateId, setTemplateId] = useState<string | undefined>(undefined);
@@ -131,9 +128,6 @@ const Index = () => {
         <main className="animate-fade-in">
           <StyleApplicatorTest />
         </main>
-        {isDesigner && <div className="fixed bottom-4 right-4">
-          <CacheClearingControls />
-        </div>}
       </div>
     );
   }
@@ -196,11 +190,6 @@ const Index = () => {
       <main className="animate-fade-in">
         {renderContent()}
       </main>
-      
-      {/* Add the cache clearing controls for designers */}
-      {isDesigner && <div className="fixed bottom-4 right-4 z-50">
-        <CacheClearingControls />
-      </div>}
     </div>
   );
 };

@@ -2,18 +2,18 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
-import { useCacheClearer } from "@/utils/roles/hooks/useCacheClearer";
-import { useIsDesigner } from "@/utils/roles";
+import { useCacheClearing } from "@/utils/roles";
+import { useIsAdmin } from "@/utils/roles";
 
 export const CacheControls = () => {
-  const { isClearing, clearAllCaches } = useCacheClearer();
-  const isDesigner = useIsDesigner();
+  const { isClearing, clearAllCaches } = useCacheClearing();
+  const isAdmin = useIsAdmin();
 
-  if (!isDesigner) return null;
+  if (!isAdmin) return null;
 
   return (
     <div className="mt-6 border-t pt-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Management Controls</h3>
+      <h3 className="text-sm font-medium text-gray-700 mb-2">Admin Controls</h3>
       <Button
         variant="outline"
         size="sm"

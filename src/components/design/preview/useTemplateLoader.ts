@@ -39,46 +39,18 @@ export const useTemplateLoader = ({
     }
   }, [templateStyles]);
   
-  // Load template from database with timeout protection
+  // Load template from database
   useEffect(() => {
     const loadTemplate = async () => {
       if (templateId && isEditor) {
         setIsTemplateLoading(true);
-        
-        // Set timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-          console.warn("Template loading timed out");
-          setIsTemplateLoading(false);
-          toast({
-            title: "Template loading timed out",
-            description: "Using default styles instead.",
-            variant: "destructive",
-          });
-        }, 8000); // 8 second timeout
-        
         try {
-          // Create a timeout promise
-          const timeoutPromise = new Promise<{ data: null, error: Error }>((_, reject) => {
-            setTimeout(() => {
-              const timeoutError = new Error('Template fetch timeout');
-              reject({ data: null, error: timeoutError });
-            }, 5000); // 5 second timeout
-          });
-          
-          // Create fetch promise
-          const fetchPromise = supabase
+          const { data: template, error } = await supabase
             .from('design_templates')
             .select('*')
             .eq('id', templateId)
             .eq('status', 'published')
-            .maybeSingle();
-          
-          // Race the promises
-          const { data: template, error } = await Promise.race([fetchPromise, timeoutPromise])
-            .catch(err => {
-              console.error("Template fetch error or timeout:", err);
-              return { data: null, error: err };
-            });
+            .single();
           
           if (error) throw error;
           
@@ -94,7 +66,6 @@ export const useTemplateLoader = ({
             setTemplateName(template.name);
             setTemplateVersion(template.version || 1);
             
-            // Also save to local cache
             await templateStore.saveTemplate({
               id: template.id,
               name: template.name,
@@ -104,7 +75,6 @@ export const useTemplateLoader = ({
               version: template.version
             });
             
-            // Record template usage relationship if user is authenticated
             if (user?.id && documentId) {
               try {
                 const { data: existingRelation } = await supabase
@@ -112,7 +82,7 @@ export const useTemplateLoader = ({
                   .select('id')
                   .eq('document_id', documentId)
                   .eq('template_id', templateId)
-                  .maybeSingle();
+                  .single();
                 
                 if (!existingRelation) {
                   await supabase
@@ -136,24 +106,10 @@ export const useTemplateLoader = ({
                 console.error("Error recording template usage:", e);
               }
             }
-          } else {
-            // Try to load from local storage as fallback
-            const localTemplate = await templateStore.getTemplateById(templateId);
-            if (localTemplate) {
-              setTemplateStyles(localTemplate.styles);
-              setTemplateName(localTemplate.name);
-              setTemplateVersion(localTemplate.version || 1);
-            }
           }
         } catch (error) {
           console.error("Error loading template:", error);
-          toast({
-            title: "Error loading template",
-            description: "Using fallback styles instead.",
-            variant: "destructive",
-          });
         } finally {
-          clearTimeout(timeoutId);
           setIsTemplateLoading(false);
         }
       } else if (isDesigner) {
@@ -162,7 +118,7 @@ export const useTemplateLoader = ({
     };
     
     loadTemplate();
-  }, [templateId, customStyles, isEditor, isDesigner, user, documentId, toast]);
+  }, [templateId, customStyles, isEditor, isDesigner, user, documentId]);
   
   return {
     templateStyles,

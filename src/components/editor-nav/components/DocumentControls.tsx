@@ -30,13 +30,14 @@ export const DocumentControls = ({
   currentRole
 }: DocumentControlsProps) => {
   const { toast } = useToast();
-  
-  // Remove the different button sizes based on role - use a consistent size
+  const isDesigner = currentRole === "designer";
+  const buttonSize = isDesigner ? "xxs" : "sm";
+
   const handleLoadDocument = (doc: Document) => {
     if (onLoadDocument) {
       onLoadDocument(doc);
       toast({
-        title: `${currentRole === "designer" ? "Template" : "Document"} loaded`,
+        title: `${isDesigner ? "Template" : "Document"} loaded`,
         description: `"${doc.title}" has been loaded.`,
       });
     }
@@ -48,7 +49,7 @@ export const DocumentControls = ({
         <DropdownMenuTrigger asChild>
           <Button 
             variant="default" 
-            size="sm" 
+            size={buttonSize} 
             className="flex items-center gap-2 rounded-[7.5px] h-[40px]"
             disabled={isLoadingDocs}
           >
@@ -58,7 +59,7 @@ export const DocumentControls = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
           {documents.length === 0 ? (
-            <DropdownMenuItem disabled>No {currentRole === "designer" ? "templates" : "documents"} found</DropdownMenuItem>
+            <DropdownMenuItem disabled>No {isDesigner ? "templates" : "documents"} found</DropdownMenuItem>
           ) : (
             documents.map((doc) => (
               <DropdownMenuItem 
@@ -78,7 +79,7 @@ export const DocumentControls = ({
 
       <Button 
         variant="default" 
-        size="sm" 
+        size={buttonSize} 
         className="flex items-center gap-2 rounded-[7.5px] h-[40px]"
         onClick={onSave}
         disabled={isSaving}

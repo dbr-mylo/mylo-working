@@ -34,7 +34,7 @@ export const EditorViewContent = ({
   }
 
   return (
-    <div className={`min-h-[${height}] w-[${width}] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
+    <div className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto mt-0 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]`}>
       {/* Apply template styles with high specificity to override editor choices */}
       {stylesContent && (
         <DocumentStyles customStyles={`
@@ -62,7 +62,7 @@ export const EditorViewContent = ({
         ref={previewRef} 
         onClick={onClick}
         dangerouslySetInnerHTML={{ __html: content }} 
-        className="cursor-pointer template-styled p-[1in]" 
+        className="cursor-pointer template-styled" 
       />
     </div>
   );

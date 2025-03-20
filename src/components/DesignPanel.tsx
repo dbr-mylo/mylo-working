@@ -5,9 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast"; 
 import { useEditorSetup } from "@/components/rich-text/useEditor";
-import { useTemplateStyles } from "@/hooks/useTemplateStyles";
+import { useTemplateStyles } from "@/components/design/useTemplateStyles";
 import { DesignerStandaloneView } from "@/components/design/DesignerStandaloneView";
-import { EditorView } from "@/components/editor/EditorView";
+import { EditorView } from "@/components/design/EditorView";
 
 interface DesignPanelProps {
   content: string;
@@ -69,7 +69,6 @@ export const DesignPanel = ({ content, isEditable, templateId }: DesignPanelProp
     }
   };
   
-  // Initialize editor setup for designer mode
   const editorSetup = isEditable && isStandalone ? 
     useEditorSetup({ 
       content: designContent, 

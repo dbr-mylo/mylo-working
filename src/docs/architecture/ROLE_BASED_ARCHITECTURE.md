@@ -9,18 +9,17 @@ This document explains the role-based architecture of the application, which ada
 
 ## Core Roles
 
-The application recognizes three primary user roles:
+The application recognizes two primary user roles:
 
 1. **Designer** - Creates and manages design systems, templates, and styles
 2. **Editor** - Creates and edits content using the design system
-3. **Admin** - Manages users, permissions, and system settings
 
 ## Role-Based Rendering
 
 Components adapt their rendering based on user roles through the role-based rendering system:
 
 ```tsx
-import { DesignerOnly, EditorOnly, AdminOnly } from '@/utils/roles';
+import { DesignerOnly, EditorOnly } from '@/utils/roles';
 
 const DocumentToolbar = () => {
   return (
@@ -38,11 +37,6 @@ const DocumentToolbar = () => {
         <StyleControls />
         <TemplateControls />
       </DesignerOnly>
-      
-      {/* Admin-specific tools */}
-      <AdminOnly>
-        <SystemControls />
-      </AdminOnly>
     </div>
   );
 };
@@ -99,19 +93,18 @@ const DocumentActions = () => {
 
 ## Role Capability Matrix
 
-| Capability | Designer | Editor | Admin |
-|------------|----------|--------|-------|
-| View Content | ✅ | ✅ | ✅ |
-| Edit Content | ✅ | ✅ | ✅ |
-| Create Content | ✅ | ✅ | ✅ |
-| Delete Content | ✅ | ✅ | ✅ |
-| Create Styles | ✅ | ❌ | ✅ |
-| Edit Styles | ✅ | ❌ | ✅ |
-| Apply Styles | ✅ | ✅ | ✅ |
-| Create Templates | ✅ | ❌ | ✅ |
-| Apply Templates | ✅ | ✅ | ✅ |
-| Manage Users | ❌ | ❌ | ✅ |
-| System Settings | ❌ | ❌ | ✅ |
+| Capability | Designer | Editor |
+|------------|----------|--------|
+| View Content | ✅ | ✅ |
+| Edit Content | ✅ | ✅ |
+| Create Content | ✅ | ✅ |
+| Delete Content | ✅ | ✅ |
+| Create Styles | ✅ | ❌ |
+| Edit Styles | ✅ | ❌ |
+| Apply Styles | ✅ | ✅ |
+| Create Templates | ✅ | ❌ |
+| Apply Templates | ✅ | ✅ |
+| System Settings | ✅ | ❌ |
 
 ## Role-Based Components
 
@@ -123,7 +116,6 @@ src/
     common/      # Components used by all roles
     designer/    # Designer-specific components
     editor/      # Editor-specific components
-    admin/       # Admin-specific components
 ```
 
 ### Designer Components
@@ -175,14 +167,7 @@ const AppRoutes = () => {
       <ProtectedRoute 
         path="/design-system" 
         element={<DesignSystem />} 
-        requiredRoles={[ROLES.DESIGNER, ROLES.ADMIN]}
-      />
-      
-      {/* Admin-only routes */}
-      <ProtectedRoute 
-        path="/admin" 
-        element={<AdminPanel />} 
-        requiredRoles={[ROLES.ADMIN]}
+        requiredRoles={[ROLES.DESIGNER]}
       />
     </Routes>
   );
@@ -204,8 +189,6 @@ const useDocumentState = (documentId) => {
     return useDesignerDocumentState(documentId);
   } else if (role === ROLES.EDITOR) {
     return useEditorDocumentState(documentId);
-  } else if (role === ROLES.ADMIN) {
-    return useAdminDocumentState(documentId);
   }
   
   // Fallback to basic document state
@@ -280,16 +263,6 @@ export const EditorOnly: React.FC = ({ children }) => {
   
   return <>{children}</>;
 };
-
-export const AdminOnly: React.FC = ({ children }) => {
-  const { user } = useUser();
-  
-  if (!user || !hasRole(user, ROLES.ADMIN)) {
-    return null;
-  }
-  
-  return <>{children}</>;
-};
 ```
 
 ### Role Hooks
@@ -310,12 +283,11 @@ export const useRolePermissions = () => {
   
   // Define permissions based on role
   const permissions = {
-    canEditContent: [ROLES.DESIGNER, ROLES.EDITOR, ROLES.ADMIN].includes(role),
-    canManageStyles: [ROLES.DESIGNER, ROLES.ADMIN].includes(role),
-    canManageTemplates: [ROLES.DESIGNER, ROLES.ADMIN].includes(role),
-    canPublish: [ROLES.DESIGNER, ROLES.EDITOR, ROLES.ADMIN].includes(role),
-    canManageUsers: [ROLES.ADMIN].includes(role),
-    canManageSystem: [ROLES.ADMIN].includes(role),
+    canEditContent: [ROLES.DESIGNER, ROLES.EDITOR].includes(role),
+    canManageStyles: [ROLES.DESIGNER].includes(role),
+    canManageTemplates: [ROLES.DESIGNER].includes(role),
+    canPublish: [ROLES.DESIGNER, ROLES.EDITOR].includes(role),
+    canManageSystem: [ROLES.DESIGNER].includes(role),
   };
   
   return permissions;
@@ -342,14 +314,6 @@ Different roles have different workflows within the application:
 4. **Edit and Refine** - Refine the document content
 5. **Publish** - Publish the document
 
-### Admin Workflow
-
-1. **Manage Users** - Add, remove, and assign roles to users
-2. **System Settings** - Configure system settings
-3. **Monitor Usage** - Monitor system usage
-4. **Manage Content** - Oversee content management
-5. **Manage Design System** - Oversee design system
-
 ## Best Practices
 
 1. **Clear Role Separation** - Keep clear boundaries between role-specific functionality
@@ -369,9 +333,7 @@ The role system is implemented using several key patterns:
 const getUserRole = (user) => {
   if (!user) return null;
   
-  if (user.roles.includes('admin')) {
-    return ROLES.ADMIN;
-  } else if (user.roles.includes('designer')) {
+  if (user.roles.includes('designer')) {
     return ROLES.DESIGNER;
   } else if (user.roles.includes('editor')) {
     return ROLES.EDITOR;
@@ -393,8 +355,6 @@ const RoleBasedEditor = () => {
       return <DesignerEditor />;
     case ROLES.EDITOR:
       return <ContentEditor />;
-    case ROLES.ADMIN:
-      return <AdminEditor />;
     default:
       return <ViewOnlyEditor />;
   }

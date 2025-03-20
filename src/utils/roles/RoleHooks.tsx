@@ -48,11 +48,11 @@ export function useIsDesignerOrAdmin(): boolean {
 }
 
 /**
- * Hook to check if user has designer role (replacement for useIsAdmin)
- * Designer role now inherits admin capabilities
+ * Hook to check if user has editor role (replacement for useIsEditorOrAdmin)
+ * This hook maintains backward compatibility
  */
-export function useIsAdmin(): boolean {
-  return useIsDesigner();
+export function useIsEditorOrAdmin(): boolean {
+  return useIsEditor();
 }
 
 /**

@@ -153,7 +153,6 @@ export const useGuestRole = () => {
   // Helper functions for specific roles
   const continueAsGuestEditor = () => setGuestRole("editor");
   const continueAsGuestDesigner = () => setGuestRole("designer");
-  const continueAsGuestAdmin = () => setGuestRole("admin");
 
   return {
     loadGuestRole,
@@ -161,7 +160,6 @@ export const useGuestRole = () => {
     setGuestRole,
     clearGuestRole,
     continueAsGuestEditor,
-    continueAsGuestDesigner,
-    continueAsGuestAdmin
+    continueAsGuestDesigner
   };
 };

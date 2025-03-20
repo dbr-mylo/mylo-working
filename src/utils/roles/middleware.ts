@@ -26,8 +26,7 @@ export const useRoleValidation = (
   const requiredRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
   
   // Check if current role is in required roles
-  const isAuthorized = !isLoading && role !== null && 
-    (requiredRoles.includes(role) || role === 'admin');
+  const isAuthorized = !isLoading && role !== null && requiredRoles.includes(role);
   
   // Check if authenticated (has user or guest role)
   const isAuthenticated = !isLoading && (user !== null || role !== null);

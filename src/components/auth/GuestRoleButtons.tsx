@@ -8,8 +8,7 @@ interface GuestRoleButtonsProps {
 export const GuestRoleButtons = ({ isDisabled }: GuestRoleButtonsProps) => {
   const { 
     continueAsGuestEditor, 
-    continueAsGuestDesigner, 
-    continueAsGuestAdmin 
+    continueAsGuestDesigner 
   } = useAuth();
 
   return (
@@ -27,13 +26,6 @@ export const GuestRoleButtons = ({ isDisabled }: GuestRoleButtonsProps) => {
         disabled={isDisabled}
       >
         Designer
-      </button>
-      <button
-        onClick={continueAsGuestAdmin}
-        className="auth-guest-button"
-        disabled={isDisabled}
-      >
-        Admin
       </button>
     </div>
   );

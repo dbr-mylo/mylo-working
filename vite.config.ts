@@ -26,11 +26,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: 'dist',
+      outDir: 'dist', // Explicitly set the output directory
       rollupOptions: {
-        input: {
-          main: path.resolve(__dirname, 'index.html'),
-        },
+        input: path.resolve(__dirname, 'index.html'), // Simplified to a single entry point
         external: [
           // Mark external scripts that shouldn't be processed by Vite
           'https://cdn.gpteng.co/gptengineer.js'

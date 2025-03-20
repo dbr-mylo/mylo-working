@@ -1,24 +1,17 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useIsAdmin } from '@/utils/roles';
 
 /**
  * Hook for clearing application caches
  * 
- * This hook provides functionality to clear various caches in the application
- * and is restricted to admin users only.
+ * This hook provides functionality to clear various caches in the application.
+ * The component using this hook is responsible for checking admin permissions.
  */
 export const useCacheClearing = () => {
   const [isClearing, setIsClearing] = useState(false);
-  const isAdmin = useIsAdmin();
 
   const clearLocalStorageCache = () => {
-    if (!isAdmin) {
-      toast.error("You don't have permission to clear caches");
-      return;
-    }
-
     try {
       // Clear editor-related caches
       localStorage.removeItem('editor_font_size');
@@ -39,11 +32,6 @@ export const useCacheClearing = () => {
   };
 
   const clearMemoryCache = () => {
-    if (!isAdmin) {
-      toast.error("You don't have permission to clear caches");
-      return;
-    }
-
     try {
       setIsClearing(true);
       
@@ -71,11 +59,6 @@ export const useCacheClearing = () => {
   };
 
   const clearAllCaches = () => {
-    if (!isAdmin) {
-      toast.error("You don't have permission to clear caches");
-      return;
-    }
-
     clearLocalStorageCache();
     clearMemoryCache();
     toast.success("All caches cleared successfully");

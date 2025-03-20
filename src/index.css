@@ -1,10 +1,10 @@
+
 /* Import modular CSS files */
 @import "./styles/variables.css";
 @import "./styles/typography.css";
 @import "./styles/editor.css";
 @import "./styles/animations.css";
 @import "./styles/auth.css";
-
 
 /* =============================================
    Base Tailwind Imports
@@ -13,3 +13,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   Custom Global CSS for Popups & Dropdowns
+============================================= */
+@layer utilities {
+  /* Fix for all dropdown and portal elements */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+  
+  /* Font size dropdown stacking context fix */
+  .font-size-dropdown-content,
+  [data-radix-select-content],
+  [role="dialog"],
+  [role="tooltip"],
+  [role="menu"] {
+    z-index: 9999 !important;
+    background-color: white !important;
+  }
+  
+  /* Portal-level z-index fixes */
+  [data-radix-portal] {
+    z-index: 9999 !important;
+  }
+  
+  /* Allow clicks on portal content */
+  [data-radix-portal] > * {
+    pointer-events: auto !important;
+  }
+  
+  /* Specific selector for editor dropdown visibility */
+  .editor-toolbar-container [data-radix-select-viewport],
+  .editor-toolbar [data-radix-select-viewport] {
+    background-color: white !important;
+  }
+  
+  /* Critical position fix for Select content in editor */
+  [data-role="editor"] [data-radix-select-content][data-side="bottom"] {
+    transform: translateY(5px) !important;
+  }
+}

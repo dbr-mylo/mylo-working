@@ -1,3 +1,4 @@
+
 /* =============================================
    Designer Mode Specific Styles
 ============================================= */
@@ -9,6 +10,8 @@
   /* New spacing for editor toolbar to ensure proper alignment */
   .editor-toolbar-container {
     margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 50;
   }
   
   /* Standard document container styles across all views */
@@ -22,58 +25,38 @@
   /* =============================================
      Font Size Enforcement Rules
   ============================================= */
-  /* Ensure inline styles take precedence over everything */
-  [style*="font-size"] {
-    font-size: unset !important;
+  /* Prevent font sizes from exceeding maximum limits */
+  .ProseMirror p,
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3,
+  .ProseMirror h4,
+  .ProseMirror h5,
+  .ProseMirror h6 {
+    font-size: inherit !important;
+    line-height: inherit !important;
   }
   
-  /* Target preserve-styling spans with highest specificity */
-  .preserve-styling[style*="font-size"] {
-    font-size: unset !important;
+  /* Override inline style attributes to enforce font size */
+  .ProseMirror p[style*="font-size"],
+  .ProseMirror h1[style*="font-size"],
+  .ProseMirror h2[style*="font-size"],
+  .ProseMirror h3[style*="font-size"],
+  .ProseMirror h4[style*="font-size"],
+  .ProseMirror h5[style*="font-size"],
+  .ProseMirror h6[style*="font-size"] {
+    font-size: inherit !important;
   }
   
-  /* Special class for our font size extension with max specificity */
-  .custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Ensure we override any Tailwind prose-sm styles that set font sizes */
-  .prose-sm .ProseMirror {
-    font-size: initial !important;
-  }
-  
-  /* Make sure no parent can override font sizes of styled elements */
-  .prose-sm [style*="font-size"],
-  .prose [style*="font-size"] {
-    font-size: unset !important;
-  }
-  
-  /* Override for data-font-size attribute */
-  [data-font-size] {
-    font-size: attr(data-font-size px) !important;
-  }
-  
-  /* New more specific rules to ensure font size consistency */
-  .prose .custom-font-size,
-  .prose-sm .custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Ensure font size is applied when using data attributes */
-  [data-style-fontSize] {
-    font-size: attr(data-style-fontSize) !important;
-  }
-  
-  /* Override for any DOM elements with custom font size attributes */
-  [style*="font-size"].custom-font-size,
-  span[style*="font-size"].custom-font-size,
-  p[style*="font-size"].custom-font-size {
-    font-size: unset !important;
-  }
-  
-  /* Enforce that any element that has both a style and a data attribute uses the style */
-  [style*="font-size"][data-font-size] {
-    font-size: unset !important;
+  /* Override inline style attributes to enforce line height */
+  .ProseMirror p[style*="line-height"],
+  .ProseMirror h1[style*="line-height"],
+  .ProseMirror h2[style*="line-height"],
+  .ProseMirror h3[style*="line-height"],
+  .ProseMirror h4[style*="line-height"],
+  .ProseMirror h5[style*="line-height"],
+  .ProseMirror h6[style*="line-height"] {
+    line-height: inherit !important;
   }
   
   /* =============================================
@@ -85,27 +68,30 @@
   nav + .editor-toolbar-container,
   nav + div .editor-toolbar {
     position: relative;
-    z-index: 50 !important;
+    z-index: 50;
   }
   
-  /* Ensure the Radix select dropdown shows above content */
+  /* Font size dropdown specific styles */
+  .font-size-dropdown-content {
+    z-index: 9999 !important;
+    background-color: white !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Fix for Radix UI dropdowns */
   [data-radix-popper-content-wrapper] {
-    z-index: 9999 !important; /* Highest z-index */
-    position: relative !important;
-    pointer-events: auto !important;
+    z-index: 9999 !important;
   }
   
-  /* Fix for menus and dropdowns to appear correctly */
-  .SelectContent, 
-  [role="dialog"],
-  [role="tooltip"],
-  [role="menu"],
-  [data-state="open"] ~ [data-radix-popper-content] {
-    z-index: 9999 !important; /* Highest z-index */
+  /* Editor-specific portal positioning fixes */
+  [data-role="editor"] [data-radix-select-portal] > [data-radix-select-content],
+  [data-role="editor"] [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
   }
   
-  /* Explicitly target Radix popover content */
-  [data-radix-popper-content] {
+  /* Portal-level z-index fixes */
+  [data-radix-portal] {
     z-index: 9999 !important;
   }
   
@@ -119,7 +105,7 @@
   .sonner-toast,
   div[data-sonner-toast],
   div[data-toast-container] {
-    z-index: 99999 !important; /* Super high z-index */
+    z-index: 99999 !important;
     position: relative !important;
   }
   
@@ -151,18 +137,15 @@
     overflow: hidden !important;
   }
   
-  /* Override Radix UI default styles */
-  [data-radix-popper-content-wrapper] > div {
-    border-radius: 0.375rem !important;
-    overflow: hidden !important;
-    background-color: white !important;
-  }
-  
-  /* Force dropdown menu to be visible */
-  .SelectContent[data-state="open"],
-  [data-radix-popper-content-wrapper][data-state="open"] {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+  /* Dropdown animation */
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

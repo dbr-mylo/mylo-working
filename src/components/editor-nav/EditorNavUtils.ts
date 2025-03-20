@@ -91,22 +91,3 @@ export const deleteLocalDocument = (documentId: string, role: string | null): bo
   }
   return false;
 };
-
-// New function to manage preview visibility preference
-export const getPreviewVisibilityPreference = (): boolean => {
-  try {
-    const preference = localStorage.getItem('designerPreviewVisible');
-    return preference ? preference === 'true' : true; // Default to true if not set
-  } catch (error) {
-    console.error('Error getting preview visibility preference:', error);
-    return true; // Default to true on error
-  }
-};
-
-export const setPreviewVisibilityPreference = (isVisible: boolean): void => {
-  try {
-    localStorage.setItem('designerPreviewVisible', isVisible.toString());
-  } catch (error) {
-    console.error('Error setting preview visibility preference:', error);
-  }
-};

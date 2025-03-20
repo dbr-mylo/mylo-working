@@ -122,3 +122,45 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export type Database = {
+  public: {
+    Tables: {
+      documents: {
+        Row: {
+          id: string
+          title: string
+          content: string | null
+          owner_id: string | null
+          created_at: string | null
+          updated_at: string | null
+          is_template: boolean | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          content?: string | null
+          owner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          is_template?: boolean | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string | null
+          owner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          is_template?: boolean | null
+        }
+      }
+      // Add other tables similarly
+      design_templates: { /* ... */ }
+      document_templates: { /* ... */ }
+      profiles: { /* ... */ }
+      user_roles: { /* ... */ }
+    }
+    // Rest of the interface
+  }
+}

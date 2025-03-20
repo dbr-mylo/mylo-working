@@ -42,13 +42,6 @@ export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback })
 };
 
 /**
- * Admin-specific component
- */
-export const AdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <RoleOnly role="admin" children={children} fallback={fallback} />;
-};
-
-/**
  * Component that renders for multiple roles
  */
 export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({ 
@@ -63,20 +56,6 @@ export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({
   }
   
   return <>{fallback}</>;
-};
-
-/**
- * Designer or Admin only component
- */
-export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
-};
-
-/**
- * Editor or Admin only component
- */
-export const EditorOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['editor', 'admin']} children={children} fallback={fallback} />;
 };
 
 /**
@@ -100,12 +79,12 @@ export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({
  * Component that renders only for users who can create content
  */
 export const ContentCreatorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['editor', 'designer', 'admin']} children={children} fallback={fallback} />;
+  return <MultiRoleOnly roles={['editor', 'designer']} children={children} fallback={fallback} />;
 };
 
 /**
  * Component that renders only for users who can manage templates
  */
 export const TemplateManagerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+  return <DesignerOnly children={children} fallback={fallback} />;
 };

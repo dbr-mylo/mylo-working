@@ -4,7 +4,6 @@ import { Template } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { templateErrorHandler } from "@/services/template/TemplateErrorHandler";
-import { transformToDocuments } from "../utils/templateTransform";
 
 /**
  * Hook for loading templates based on user role
@@ -22,17 +21,8 @@ export const useTemplateLoader = () => {
     setIsLoading(true);
     try {
       // Use different loading strategy based on role
-      if (role === 'admin') {
-        // Admins can see all templates
-        const { data, error } = await supabase
-          .from('design_templates')
-          .select('id, name, styles, owner_id, status, category, version, created_at, updated_at')
-          .order('updated_at', { ascending: false });
-          
-        if (error) throw error;
-        setTemplates(data as Template[]);
-      } else if (role === 'designer') {
-        // Designers see their own templates and published templates
+      if (role === 'designer') {
+        // Designers can see all templates (previously admin capability)
         const { data, error } = await supabase
           .from('design_templates')
           .select('id, name, styles, owner_id, status, category, version, created_at, updated_at')

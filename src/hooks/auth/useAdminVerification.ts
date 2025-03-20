@@ -6,20 +6,20 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 /**
- * Hook for strengthened admin role verification
- * Provides additional security checks for admin actions
+ * Hook for strengthened designer role verification
+ * Provides additional security checks for designer actions
  */
-export const useAdminVerification = () => {
+export const useDesignerVerification = () => {
   const { user, role } = useAuth();
   const [isVerifying, setIsVerifying] = useState(false);
 
   /**
-   * Verify admin role with database check
+   * Verify designer role with database check
    * Provides additional verification beyond just checking local state
    */
-  const verifyAdminRole = useCallback(async (): Promise<boolean> => {
-    // Not logged in or not admin in local state
-    if (!user || role !== 'admin') {
+  const verifyDesignerRole = useCallback(async (): Promise<boolean> => {
+    // Not logged in or not designer in local state
+    if (!user || role !== 'designer') {
       roleAuditLogger.logRoleChange({
         userId: user?.id || null,
         previousRole: role,
@@ -27,7 +27,7 @@ export const useAdminVerification = () => {
         timestamp: Date.now(),
         source: 'system',
         success: false,
-        error: 'Admin verification failed - Not admin in local state'
+        error: 'Designer verification failed - Not designer in local state'
       });
       return false;
     }
@@ -35,14 +35,14 @@ export const useAdminVerification = () => {
     try {
       setIsVerifying(true);
       
-      // Double check with database that user still has admin role
+      // Double check with database that user still has designer role
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
         .single();
       
-      if (error || !data || data.role !== 'admin') {
+      if (error || !data || data.role !== 'designer') {
         roleAuditLogger.logRoleChange({
           userId: user?.id || null,
           previousRole: role,
@@ -50,18 +50,18 @@ export const useAdminVerification = () => {
           timestamp: Date.now(),
           source: 'system',
           success: false,
-          error: error?.message || 'Admin verification failed - Database check'
+          error: error?.message || 'Designer verification failed - Database check'
         });
         
-        toast.error('Your admin session could not be verified');
+        toast.error('Your designer session could not be verified');
         return false;
       }
       
-      // Admin verification successful
+      // Designer verification successful
       roleAuditLogger.logRoleChange({
         userId: user?.id,
         previousRole: role,
-        newRole: 'admin',
+        newRole: 'designer',
         timestamp: Date.now(),
         source: 'system',
         success: true
@@ -69,8 +69,8 @@ export const useAdminVerification = () => {
       
       return true;
     } catch (error) {
-      console.error('Admin verification error:', error);
-      toast.error('An error occurred while verifying admin status');
+      console.error('Designer verification error:', error);
+      toast.error('An error occurred while verifying designer status');
       return false;
     } finally {
       setIsVerifying(false);
@@ -78,15 +78,15 @@ export const useAdminVerification = () => {
   }, [user, role]);
 
   /**
-   * Execute a function only if admin verification passes
+   * Execute a function only if designer verification passes
    * @param fn Function to execute if verification passes
    * @param onFailure Optional callback for failure case
    */
-  const withAdminVerification = useCallback(async <T,>(
+  const withDesignerVerification = useCallback(async <T,>(
     fn: () => Promise<T>, 
     onFailure?: () => void
   ): Promise<T | undefined> => {
-    const isVerified = await verifyAdminRole();
+    const isVerified = await verifyDesignerRole();
     
     if (isVerified) {
       return await fn();
@@ -96,12 +96,14 @@ export const useAdminVerification = () => {
       }
       return undefined;
     }
-  }, [verifyAdminRole]);
+  }, [verifyDesignerRole]);
 
   return {
-    isAdmin: role === 'admin',
+    isDesigner: role === 'designer',
     isVerifying,
-    verifyAdminRole,
-    withAdminVerification
+    verifyDesignerRole,
+    withDesignerVerification
   };
 };
+
+export const useAdminVerification = useDesignerVerification;

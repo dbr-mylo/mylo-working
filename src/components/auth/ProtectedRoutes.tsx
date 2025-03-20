@@ -69,8 +69,8 @@ export const RoleProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth" replace />;
   }
   
-  // Admin can access all routes
-  if (role === "admin") {
+  // Designer has elevated permissions (similar to former admin role)
+  if (role === "designer") {
     return <>{children || <Outlet />}</>;
   }
   
@@ -97,9 +97,9 @@ export const RoleProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 /**
- * Route that requires admin role
+ * Route that requires designer role (replacing AdminRoute)
  */
-export const AdminRoute: React.FC<ProtectedRouteProps> = ({
+export const DesignerRoute: React.FC<ProtectedRouteProps> = ({
   children,
   redirectTo = "/"
 }) => {
@@ -116,9 +116,9 @@ export const AdminRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth" replace />;
   }
   
-  // If not admin, redirect
-  if (role !== "admin") {
-    toast.error("This page requires administrator privileges");
+  // If not designer, redirect
+  if (role !== "designer") {
+    toast.error("This page requires designer privileges");
     
     // Log unauthorized admin access attempt
     roleAuditLogger.logRoleChange({
@@ -128,7 +128,7 @@ export const AdminRoute: React.FC<ProtectedRouteProps> = ({
       timestamp: Date.now(),
       source: 'system',
       success: false,
-      error: 'Unauthorized admin access attempt'
+      error: 'Unauthorized designer access attempt'
     });
     
     return <Navigate to={redirectTo} replace />;

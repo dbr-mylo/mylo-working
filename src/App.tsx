@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from 'sonner';
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -8,7 +8,7 @@ import DocumentSelection from "@/pages/DocumentSelection";
 import { AuthImplementationRouter } from "@/components/auth/AuthImplementationRouter";
 import { AuthFeatureFlagsProvider } from "@/components/auth/AuthFeatureFlag";
 import NotFound from "@/pages/NotFound";
-import Index from "@/pages/Index"; // Add the missing import
+import Index from "@/pages/Index";
 import "./App.css";
 
 function App() {
@@ -23,6 +23,17 @@ function App() {
               </AuthenticatedRoute>
             } />
             <Route path="/document/:documentId" element={
+              <AuthenticatedRoute>
+                <Index />
+              </AuthenticatedRoute>
+            } />
+            {/* Add route for /editor - redirects to index page with document ID parameter */}
+            <Route path="/editor" element={
+              <AuthenticatedRoute>
+                <DocumentSelection />
+              </AuthenticatedRoute>
+            } />
+            <Route path="/editor/:documentId" element={
               <AuthenticatedRoute>
                 <Index />
               </AuthenticatedRoute>

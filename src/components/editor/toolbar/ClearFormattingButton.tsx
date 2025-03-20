@@ -53,6 +53,7 @@ export const ClearFormattingButton: React.FC<ClearFormattingButtonProps> = ({ ed
       onClick={handleClearFormatting}
       title="Clear formatting"
       disabled={!editor || editor.state.selection.empty}
+      className="border-0 p-1 hover:bg-accent/50"
     >
       <RemoveFormatting className="h-3.5 w-3.5" />
     </Button>

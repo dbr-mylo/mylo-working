@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Palette } from "lucide-react";
+import { Paintbrush } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ColorPickerProps {
@@ -39,14 +39,13 @@ export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
         <Button 
           variant="outline" 
           size={buttonSize} 
-          className={`flex items-center gap-1 ${isDesigner ? 'w-[70px] h-7' : 'w-[80px] h-8'}`}
+          className={`flex items-center gap-1 ${isDesigner ? 'h-7 px-2' : 'h-8 px-2.5'}`}
         >
           <div 
-            className="w-3 h-3 rounded-sm border border-gray-300" 
+            className="w-3 h-3 rounded-full border border-gray-300" 
             style={{ backgroundColor: value }}
           />
-          <Palette className="h-3 w-3" />
-          <span className="sr-only">Color</span>
+          <Paintbrush className="h-3 w-3" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2">

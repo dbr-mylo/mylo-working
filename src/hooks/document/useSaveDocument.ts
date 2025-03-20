@@ -36,9 +36,11 @@ export function useSaveDocument({
   const saveDocument = useCallback(async (): Promise<void> => {
     try {
       console.log(`Saving ${itemType} with content length:`, content ? content.length : 0);
-      console.log("Content preview:", content ? content.substring(0, 100) : "empty");
+      console.log(`Current role: ${role}, User authenticated: ${!!user}`);
+      console.log(`Document ID: ${currentDocumentId || 'new'}, Title: ${documentTitle}`);
       
       if (!content || !content.trim()) {
+        console.log(`Cannot save empty ${itemType}`);
         toast({
           title: `Cannot save empty ${itemType}`,
           description: `Please add some content to your ${itemType} before saving.`,
@@ -59,8 +61,9 @@ export function useSaveDocument({
           toast,
           isDesigner
         );
+        console.log(`Supabase save completed for ${itemType}`);
       } else if (role) {
-        console.log(`Saving ${itemType} for ${role} user`);
+        console.log(`Saving ${itemType} for ${role} user to localStorage`);
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
@@ -68,7 +71,9 @@ export function useSaveDocument({
           role,
           toast
         );
+        console.log(`localStorage save completed for ${itemType}`);
       } else {
+        console.log('No role or user, cannot save');
         toast({
           title: "Authentication required",
           description: `Please log in or continue as a guest to save ${isDesigner ? "templates" : "documents"}.`,
@@ -79,14 +84,15 @@ export function useSaveDocument({
       
       if (savedDocument) {
         console.log(`${isDesigner ? "Template" : "Document"} saved successfully with ID:`, savedDocument.id);
-        console.log("Saved content length:", savedDocument.content ? savedDocument.content.length : 0);
-        console.log("Saved content preview:", savedDocument.content ? savedDocument.content.substring(0, 100) : "empty");
         
         setInitialContent(content);
+        console.log('Initial content updated with current content');
         
         if (!currentDocumentId) {
           setCurrentDocumentId(savedDocument.id);
+          console.log(`New document ID set: ${savedDocument.id}`);
           navigate(`/editor/${savedDocument.id}`, { replace: true });
+          console.log(`Navigation to /editor/${savedDocument.id}`);
         }
       }
       

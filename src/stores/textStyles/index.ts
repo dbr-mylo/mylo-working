@@ -9,6 +9,7 @@ import {
   getDefaultStyle,
   getStylesWithParent,
   getStyleWithInheritance,
+  getInheritanceChain,
   SaveTextStyleInput
 } from './styleOperations';
 import { 
@@ -34,6 +35,7 @@ export const textStyleStore = {
   getDefaultStyle,
   getStylesWithParent,
   getStyleWithInheritance,
+  getInheritanceChain,
   generateCSSFromTextStyles,
   clearCachedStylesByPattern,
   clearDefaultResetStyle,

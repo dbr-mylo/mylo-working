@@ -9,10 +9,11 @@
 
 import { useState } from "react";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
-import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { Editor } from "@tiptap/react";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { DesignerToolbar } from "@/components/designer/toolbar/DesignerToolbar";
 
 interface DesignerStandaloneViewProps {
   content: string;
@@ -46,21 +47,19 @@ export const DesignerStandaloneView = ({
 
   return (
     <div className="w-full flex flex-col">
-      {isEditable && (
+      {isEditable && editorSetup?.editor && (
         <div className="w-full">
           <div className="bg-white border-b border-slate-200 z-10">
             <div className="flex items-center justify-between px-4">
-              {editorSetup?.editor && (
-                <div className="flex-1 py-2">
-                  <EditorToolbar 
-                    editor={editorSetup.editor}
-                    currentFont={editorSetup.currentFont}
-                    currentColor={editorSetup.currentColor}
-                    onFontChange={editorSetup.handleFontChange}
-                    onColorChange={editorSetup.handleColorChange}
-                  />
-                </div>
-              )}
+              <div className="flex-1 py-2">
+                <DesignerToolbar 
+                  editor={editorSetup.editor}
+                  currentFont={editorSetup.currentFont}
+                  currentColor={editorSetup.currentColor}
+                  onFontChange={editorSetup.handleFontChange}
+                  onColorChange={editorSetup.handleColorChange}
+                />
+              </div>
             </div>
           </div>
         </div>

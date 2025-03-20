@@ -1,58 +1,80 @@
 
-import { Button } from "@/components/ui/button";
-import { TextStyle } from "@/lib/types";
-import { Check, Text } from "lucide-react";
+import React from 'react';
+import { TextStyle } from '@/lib/types';
+import { Check, Link2 } from 'lucide-react';
 
 interface StyleListItemProps {
   style: TextStyle;
-  onSelect: (style: TextStyle) => void;  // Updated to pass the entire style object
-  compact?: boolean; // New prop to handle compact mode for use in cards
+  onSelect: (style: TextStyle) => void;
+  isSelected?: boolean;
+  compact?: boolean; // Added the compact prop to the interface
 }
 
-export const StyleListItem = ({ style, onSelect, compact = false }: StyleListItemProps) => {
+export const StyleListItem = ({ 
+  style, 
+  onSelect, 
+  isSelected = false,
+  compact = false // Added default value
+}: StyleListItemProps) => {
   const handleClick = () => {
-    onSelect(style);  // Pass the entire style object, not just the ID
+    onSelect(style);
   };
 
+  // If compact mode is enabled, render a simpler version
   if (compact) {
-    // Compact version for use in StyleListItemCard
     return (
-      <div
-        className="flex items-center gap-2"
+      <div 
+        className="p-1 rounded-md cursor-pointer hover:bg-accent/50 transition-colors flex items-center gap-2"
         onClick={handleClick}
       >
-        <div className="h-5 w-5 flex items-center justify-center rounded-full bg-muted">
-          <Text className="h-3 w-3 text-muted-foreground" />
-        </div>
-        <span 
-          className="font-medium text-xs"
-          style={{
-            fontFamily: style.fontFamily || 'inherit',
-            fontWeight: style.fontWeight || 'inherit'
+        <div 
+          className="flex-1"
+          style={{ 
+            fontFamily: style.fontFamily,
+            fontWeight: style.fontWeight,
+            fontSize: '0.875rem',
+            color: style.color
           }}
         >
           {style.name}
-        </span>
+        </div>
+        
+        {style.parentId && (
+          <Link2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+        )}
       </div>
     );
   }
 
-  // Original button-based version
+  // Regular view (not compact)
   return (
-    <Button
-      key={style.id}
-      variant="ghost"
-      size="xs"
-      className="w-full justify-between text-left font-normal hover:bg-accent transition-colors py-2"
+    <div 
+      className={`
+        p-2 rounded-md cursor-pointer hover:bg-accent transition-colors
+        flex items-center gap-2 group
+        ${isSelected ? 'bg-accent' : ''}
+      `}
       onClick={handleClick}
     >
-      <div className="flex items-center gap-2">
-        <div className="h-5 w-5 flex items-center justify-center rounded-full bg-muted">
-          <Text className="h-3 w-3 text-muted-foreground" />
-        </div>
-        <span className="font-medium">{style.name}</span>
+      <div 
+        className="flex-1"
+        style={{ 
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          fontSize: '0.875rem', // Always show at a readable size
+          color: style.color
+        }}
+      >
+        {style.name}
       </div>
-      <Check className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50" />
-    </Button>
+      
+      {isSelected && (
+        <Check className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100" />
+      )}
+      
+      {style.parentId && (
+        <Link2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+      )}
+    </div>
   );
 };

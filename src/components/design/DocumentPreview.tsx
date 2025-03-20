@@ -11,6 +11,7 @@ import { Editor } from "@tiptap/react";
 import { useDocumentId } from "./preview/useDocumentId";
 import { useTemplateLoader } from "./preview/useTemplateLoader";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
+import { textStyleStore } from "@/stores/textStyles";
 
 interface DocumentPreviewProps {
   content: string;
@@ -28,8 +29,8 @@ export const DocumentPreview = ({
   content, 
   customStyles, 
   isEditable, 
-  onContentChange,
-  onElementSelect,
+  onContentChange = () => {},
+  onElementSelect = () => {},
   renderToolbarOutside = false,
   externalToolbar = false,
   editorInstance = null,
@@ -67,12 +68,51 @@ export const DocumentPreview = ({
   
   const dimensions = extractDimensionsFromCSS(templateStyles);
   
+  // Create a wrapper function that converts handleApplyStyle to return a Promise
+  const handleApplyStyleToElement = async (styleId: string): Promise<void> => {
+    try {
+      // Get the style with inheritance
+      const style = await textStyleStore.getStyleWithInheritance(styleId);
+      if (!style) {
+        throw new Error(`Style with ID "${styleId}" not found`);
+      }
+      
+      // Convert the style to a Record<string, string> for handleApplyStyle
+      const styleRecord: Record<string, string> = {
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        color: style.color,
+        lineHeight: style.lineHeight,
+        letterSpacing: style.letterSpacing
+      };
+      
+      // Add optional properties if they exist
+      if (style.textAlign) styleRecord.textAlign = style.textAlign;
+      if (style.textTransform) styleRecord.textTransform = style.textTransform;
+      if (style.textDecoration) styleRecord.textDecoration = style.textDecoration;
+      
+      // Apply the style to the element
+      handleApplyStyle(styleRecord);
+      
+      // Set data attribute for the style ID
+      if (selectedElement) {
+        selectedElement.setAttribute('data-style-id', styleId);
+      }
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error applying style:", error);
+      return Promise.reject(error);
+    }
+  };
+  
   return (
     <div className="bg-editor-panel rounded-md">
       {!isEditable && selectedElement && (
         <SelectedElementBar 
           selectedElement={selectedElement}
-          onApplyStyle={handleApplyStyle}
+          onApplyStyle={handleApplyStyleToElement}
         />
       )}
       

@@ -52,7 +52,7 @@ export const EditableContent = ({
         content={content}
         onUpdate={onContentChange}
         isEditable={true}
-        hideToolbar={false} // Always show toolbar for designers
+        hideToolbar={hideToolbar} // Set based on passed prop
         renderToolbarOutside={renderToolbarOutside}
         externalToolbar={externalToolbar}
         externalEditorInstance={editorInstance}
@@ -65,15 +65,17 @@ export const EditableContent = ({
   // EDITOR PATH - Safe to modify
   // For editor role, render toolbar above the document container
   return (
-    <div className="editor-content-container mt-0 mb-6">
+    <div className="editor-content-container">
       {/* Main document container */}
-      <div style={{ width: width, margin: '0 auto' }} className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
+      <div style={{ width, margin: '0 auto' }} className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)]">
         <div className="font-editor">
           <RichTextEditor
             content={content}
             onUpdate={onContentChange}
             isEditable={true}
             hideToolbar={hideToolbar}
+            externalToolbar={externalToolbar}
+            externalEditorInstance={editorInstance}
             applyTemplateStyling={shouldApplyTemplate}
             templateStyles={templateStyles}
           />

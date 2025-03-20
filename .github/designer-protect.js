@@ -13,6 +13,13 @@ const fs = require('fs');
 
 // List of protected files (designer-specific)
 const PROTECTED_FILES = [
+  // Core designer components
+  'src/components/designer/core',
+  'src/components/designer/typography',
+  'src/components/designer/preview',
+  'src/components/designer/template',
+  
+  // Legacy paths (in case they still exist)
   'src/components/design/DesignerStandaloneView.tsx',
   'src/components/design/DesignerSidebar.tsx',
   'src/components/design/typography',

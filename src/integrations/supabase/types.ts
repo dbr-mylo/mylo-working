@@ -12,60 +12,66 @@ export type Database = {
       design_templates: {
         Row: {
           category: string | null
-          created_at: string | null
+          created_at: string
           id: string
           name: string
           owner_id: string | null
-          status: string | null
+          status: string
           styles: string
-          updated_at: string | null
-          version: number | null
+          updated_at: string
+          version: number
         }
         Insert: {
           category?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           name: string
           owner_id?: string | null
-          status?: string | null
+          status?: string
           styles: string
-          updated_at?: string | null
-          version?: number | null
+          updated_at?: string
+          version?: number
         }
         Update: {
           category?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           name?: string
           owner_id?: string | null
-          status?: string | null
+          status?: string
           styles?: string
-          updated_at?: string | null
-          version?: number | null
+          updated_at?: string
+          version?: number
         }
         Relationships: []
       }
       document_templates: {
         Row: {
-          applied_at: string | null
-          document_id: string | null
+          applied_at: string
+          created_at: string
+          document_id: string
           id: string
           template_id: string | null
-          template_version: number | null
+          template_version: number
+          updated_at: string
         }
         Insert: {
-          applied_at?: string | null
-          document_id?: string | null
+          applied_at?: string
+          created_at?: string
+          document_id: string
           id?: string
           template_id?: string | null
-          template_version?: number | null
+          template_version: number
+          updated_at?: string
         }
         Update: {
-          applied_at?: string | null
-          document_id?: string | null
+          applied_at?: string
+          created_at?: string
+          document_id?: string
           id?: string
           template_id?: string | null
-          template_version?: number | null
+          template_version?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -87,81 +93,75 @@ export type Database = {
       documents: {
         Row: {
           content: string | null
-          created_at: string | null
+          created_at: string
           id: string
           is_template: boolean | null
           owner_id: string | null
+          status: Database["public"]["Enums"]["document_status"] | null
           title: string
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           is_template?: boolean | null
           owner_id?: string | null
-          title: string
-          updated_at?: string | null
+          status?: Database["public"]["Enums"]["document_status"] | null
+          title?: string
+          updated_at?: string
         }
         Update: {
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           is_template?: boolean | null
           owner_id?: string | null
+          status?: Database["public"]["Enums"]["document_status"] | null
           title?: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
-          avatar_url: string | null
-          full_name: string | null
+          created_at: string
+          display_name: string | null
           id: string
-          updated_at: string | null
-          username: string | null
-          website: string | null
+          updated_at: string
         }
         Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
+          created_at?: string
+          display_name?: string | null
           id: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
+          updated_at?: string
         }
         Update: {
-          avatar_url?: string | null
-          full_name?: string | null
+          created_at?: string
+          display_name?: string | null
           id?: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       user_roles: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
-          role: string
-          updated_at: string | null
-          user_id: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          role: string
-          updated_at?: string | null
-          user_id?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          role?: string
-          updated_at?: string | null
-          user_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -170,10 +170,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          required_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      document_status: "draft" | "published"
+      user_role: "editor" | "designer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -4,15 +4,12 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { useCacheClearing } from "@/utils/roles";
 import { useIsAdmin } from "@/utils/roles";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const CacheControls = () => {
   const { isClearing, clearAllCaches } = useCacheClearing();
   const isAdmin = useIsAdmin();
-  const { user } = useAuth();
-  
-  // Only show admin controls if the user is both authenticated and has admin role
-  if (!isAdmin || !user) return null;
+
+  if (!isAdmin) return null;
 
   return (
     <div className="mt-6 border-t pt-4">

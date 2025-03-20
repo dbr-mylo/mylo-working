@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
@@ -121,7 +122,7 @@ export const StylesList = ({ onEditStyle, editorInstance }: StylesListProps) => 
       // Apply the style to the selected text
       try {
         console.log("Applying style to selection:", style.id);
-        await styleApplication.applyStyleToSelection(style.id);
+        await styleApplication.applyStyle(style.id);
         toast({
           title: "Style applied",
           description: `Applied "${style.name}" to selected text`

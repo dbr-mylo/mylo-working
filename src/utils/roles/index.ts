@@ -1,13 +1,7 @@
 
-/**
- * Role-Specific Rendering Utilities
- * 
- * This utility provides components and functions to help separate
- * designer, editor, and admin role-specific code paths.
- */
-
-// Re-export everything from the individual files
-export * from './RoleComponents';
+// Re-export all role hooks and components
 export * from './RoleHooks';
+export * from './RoleComponents'; 
 export * from './RoleFunctions';
+export { StandaloneEditorOnly } from './EditorOnly';
 export * from './types';

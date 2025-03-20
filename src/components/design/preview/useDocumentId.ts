@@ -1,16 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 
-export const useDocumentId = () => {
-  const [documentId, setDocumentId] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const path = window.location.pathname;
-    const match = path.match(/\/editor\/([^\/]+)/);
-    if (match && match[1]) {
-      setDocumentId(match[1]);
-    }
-  }, []);
-  
-  return documentId;
+export const useDocumentId = (): string | null => {
+  const { documentId } = useParams();
+  return documentId || null;
 };

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FileText, X } from "lucide-react";
 import type { EditorNavProps } from "@/lib/types";
@@ -28,7 +29,8 @@ export const EditorNav = ({
     currentRole === "designer" ? "Create Template Title" : "Create Document Title"
   );
   
-  const navHeight = currentRole === "designer" ? "h-10" : "h-14";
+  // Use the same nav height for both roles to ensure consistent padding
+  const navHeight = "h-14";
   const documentType = currentRole === "designer" ? "template" : "document";
 
   const { title, handleTitleChange, handleTitleBlur } = useDocumentTitle({

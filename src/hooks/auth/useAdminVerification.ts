@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { roleAuditLogger } from "@/utils/roles/auditLogger";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +7,7 @@ import { toast } from "sonner";
 /**
  * Hook for strengthened designer role verification
  * Provides additional security checks for designer actions
+ * (Previously named useAdminVerification, renamed for clarity)
  */
 export const useDesignerVerification = () => {
   const { user, role } = useAuth();
@@ -106,4 +106,5 @@ export const useDesignerVerification = () => {
   };
 };
 
+// Keep backward compatibility for existing code that uses useAdminVerification
 export const useAdminVerification = useDesignerVerification;

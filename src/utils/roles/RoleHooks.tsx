@@ -40,6 +40,22 @@ export function useIsEditor(): boolean {
 }
 
 /**
+ * Hook to check if user has designer role (replacement for useIsDesignerOrAdmin)
+ * This hook maintains backward compatibility with components that previously checked for admin or designer
+ */
+export function useIsDesignerOrAdmin(): boolean {
+  return useIsDesigner();
+}
+
+/**
+ * Hook to check if user has designer role (replacement for useIsAdmin)
+ * Designer role now inherits admin capabilities
+ */
+export function useIsAdmin(): boolean {
+  return useIsDesigner();
+}
+
+/**
  * Hook to check if user has one of multiple roles
  */
 export function useHasAnyRole(roles: UserRole[]): boolean {

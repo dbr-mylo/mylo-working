@@ -1,4 +1,3 @@
-
 /**
  * DesignerStandaloneView Component
  * 
@@ -7,11 +6,13 @@
  * unless absolutely necessary. Changes here directly impact the designer experience.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DocumentPreview } from "@/components/design/DocumentPreview";
 import { EditorToolbar } from "@/components/rich-text/EditorToolbar";
 import { Editor } from "@tiptap/react";
 import { DesignerSidebar } from "@/components/design/DesignerSidebar";
+import { PreviewToggleButton } from "@/components/design/PreviewToggleButton";
+import { getPreviewVisibilityPreference, setPreviewVisibilityPreference } from "@/components/editor-nav/EditorNavUtils";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 
 interface DesignerStandaloneViewProps {
@@ -39,6 +40,18 @@ export const DesignerStandaloneView = ({
   onContentChange,
   onElementSelect
 }: DesignerStandaloneViewProps) => {
+  const [isPreviewVisible, setIsPreviewVisible] = useState(() => {
+    return getPreviewVisibilityPreference();
+  });
+  
+  useEffect(() => {
+    setPreviewVisibilityPreference(isPreviewVisible);
+  }, [isPreviewVisible]);
+  
+  const handleTogglePreview = () => {
+    setIsPreviewVisible(prev => !prev);
+  };
+
   // Extract dimensions from template styles
   const dimensions = extractDimensionsFromCSS(customStyles);
   const width = dimensions?.width || '8.5in';
@@ -61,12 +74,18 @@ export const DesignerStandaloneView = ({
                   />
                 </div>
               )}
+              <div className="flex items-center h-full">
+                <PreviewToggleButton 
+                  isPreviewVisible={isPreviewVisible} 
+                  onToggle={handleTogglePreview} 
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
       <div className="flex flex-row flex-1">
-        <div className="w-full bg-editor-panel overflow-auto">
+        <div className={isPreviewVisible ? "w-1/2 bg-editor-panel overflow-auto border-r border-editor-border" : "w-full bg-editor-panel overflow-auto"}>
           <div className="p-4 md:p-8">
             <div className="mx-auto">
               <DocumentPreview 
@@ -82,6 +101,20 @@ export const DesignerStandaloneView = ({
             </div>
           </div>
         </div>
+        
+        {isPreviewVisible && (
+          <div className="w-1/2 bg-editor-panel overflow-auto">
+            <div className="p-4 md:p-8">
+              <div className="mb-3">
+                <h3 className="text-base font-medium text-editor-heading mb-2">Document Preview</h3>
+                <div 
+                  dangerouslySetInnerHTML={{ __html: designContent }} 
+                  className={`min-h-[${height}] w-[${width}] p-[1in] mx-auto bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.12),_0_1px_2px_rgba(0,0,0,0.24)] prose prose-sm max-w-none`}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         <DesignerSidebar editorInstance={editorSetup?.editor} />
       </div>

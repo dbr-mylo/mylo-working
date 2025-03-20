@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Editor } from '@tiptap/react';
 import { 
   Select,
@@ -24,34 +24,9 @@ interface FontSelectProps {
 }
 
 export const FontSelect: React.FC<FontSelectProps> = ({ editor }) => {
-  const [currentFont, setCurrentFont] = useState('Inter');
-  
-  // Update the current font when editor selection changes
-  useEffect(() => {
-    const updateFontState = () => {
-      const fontFamily = editor.getAttributes('textStyle').fontFamily;
-      if (fontFamily) {
-        setCurrentFont(fontFamily);
-      } else {
-        setCurrentFont('Inter'); // Default to Inter if no font set
-      }
-    };
-    
-    // Initial check
-    updateFontState();
-    
-    // Add listeners
-    editor.on('selectionUpdate', updateFontState);
-    editor.on('transaction', updateFontState);
-    
-    return () => {
-      editor.off('selectionUpdate', updateFontState);
-      editor.off('transaction', updateFontState);
-    };
-  }, [editor]);
+  const currentFont = editor.getAttributes('textStyle').fontFamily || 'Inter';
 
   const handleFontChange = (font: string) => {
-    setCurrentFont(font);
     editor.chain().focus().setFontFamily(font).run();
   };
 

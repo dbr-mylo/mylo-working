@@ -23,7 +23,6 @@ export const FontFamily = Extension.create({
   addOptions() {
     return {
       types: ['textStyle'],
-      defaultFont: 'Inter',
     };
   },
   
@@ -33,8 +32,8 @@ export const FontFamily = Extension.create({
         types: this.options.types,
         attributes: {
           fontFamily: {
-            default: this.options.defaultFont,
-            parseHTML: element => element.style.fontFamily?.replace(/['"]/g, '') || this.options.defaultFont,
+            default: 'Inter',
+            parseHTML: element => element.style.fontFamily?.replace(/['"]/g, ''),
             renderHTML: attributes => {
               if (!attributes.fontFamily) return {};
               return {
@@ -88,5 +87,3 @@ export const FontFamily = Extension.create({
     };
   },
 });
-
-export default FontFamily;

@@ -7,4 +7,6 @@ export * from './middleware';
 export * from './auditLogger';
 export * from './types';
 export * from './persistence';
-export * from './EditorOnly';
+
+// Re-export EditorOnly explicitly to resolve the ambiguity
+export { EditorOnly } from './EditorOnly';

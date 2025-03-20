@@ -28,7 +28,7 @@ class TemplateService {
   /**
    * Gets all templates, with optional forced refresh
    */
-  async getTemplates(forceRefresh = false): Promise<Template[]> {
+  async getTemplates(forceRefresh = false, timeoutMs = 5000): Promise<Template[]> {
     // Return cached templates if available and not expired
     const cachedTemplates = this.cache.getCachedTemplates();
     if (cachedTemplates && !forceRefresh) {
@@ -37,10 +37,22 @@ class TemplateService {
     }
 
     try {
-      const { data, error } = await supabase
+      // Add timeout protection
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Template fetch timeout')), timeoutMs);
+      });
+      
+      const fetchPromise = supabase
         .from('design_templates')
         .select('*')
         .order('updated_at', { ascending: false });
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
+        .then(result => result as typeof fetchPromise extends Promise<infer T> ? T : never)
+        .catch(err => {
+          console.error("Template fetch error or timeout:", err);
+          throw err;
+        });
 
       if (error) {
         throw error;
@@ -59,14 +71,15 @@ class TemplateService {
         return this.localStorage.getLocalTemplates();
       }
       
-      throw error;
+      // If we're here, return empty array instead of throwing to prevent app crashes
+      return [];
     }
   }
 
   /**
    * Gets a template by ID
    */
-  async getTemplateById(id: string): Promise<Template | null> {
+  async getTemplateById(id: string, timeoutMs = 5000): Promise<Template | null> {
     // Return from cache if available
     const cachedTemplate = this.cache.getCachedTemplate(id);
     if (cachedTemplate) {
@@ -74,11 +87,23 @@ class TemplateService {
     }
 
     try {
-      const { data, error } = await supabase
+      // Add timeout protection
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Template fetch timeout')), timeoutMs);
+      });
+      
+      const fetchPromise = supabase
         .from('design_templates')
         .select('*')
         .eq('id', id)
         .single();
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
+        .then(result => result as typeof fetchPromise extends Promise<infer T> ? T : never)
+        .catch(err => {
+          console.error("Template fetch error or timeout:", err);
+          return { data: null, error: err };
+        });
 
       if (error) {
         if (error.code === 'PGRST116') {

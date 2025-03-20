@@ -1,16 +1,31 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Document } from "@/lib/types";
 
-export async function fetchDocumentFromSupabase(id: string, userId: string, toast: ReturnType<typeof useToast>["toast"]) {
+export async function fetchDocumentFromSupabase(id: string, userId: string, toast: ReturnType<typeof useToast>["toast"], timeoutMs = 8000) {
   try {
-    const { data, error } = await supabase
+    const timeoutPromise = new Promise<null>((_, reject) => {
+      setTimeout(() => reject(new Error('Document fetch timeout')), timeoutMs);
+    });
+    
+    const fetchPromise = supabase
       .from('documents')
       .select('id, content, title, updated_at')
       .eq('id', id)
       .eq('owner_id', userId)
-      .single();
+      .maybeSingle();
+    
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
+      .then(result => result as typeof fetchPromise extends Promise<infer T> ? T : never)
+      .catch(err => {
+        console.error("Document fetch error or timeout:", err);
+        toast({
+          title: "Connection issue",
+          description: "There was a problem connecting to the database. Using local data if available.",
+          variant: "destructive",
+        });
+        return { data: null, error: err };
+      });
     
     if (error) {
       if (error.code === 'PGRST116') {
@@ -38,7 +53,12 @@ export async function fetchDocumentFromSupabase(id: string, userId: string, toas
     return null;
   } catch (error) {
     console.error("Error fetching document from Supabase:", error);
-    throw error;
+    toast({
+      title: "Error loading document",
+      description: "Trying local storage as fallback.",
+      variant: "destructive",
+    });
+    return null;
   }
 }
 
@@ -61,7 +81,6 @@ export function fetchDocumentFromLocalStorage(id: string, role: string, toast: R
         console.log(`Found ${role} document in localStorage:`, doc);
         console.log(`Document content from localStorage:`, doc.content ? doc.content.substring(0, 100) : "empty");
         
-        // Ensure content is a string
         if (doc.content && typeof doc.content === 'object') {
           doc.content = JSON.stringify(doc.content);
         } else if (doc.content === null || doc.content === undefined) {
@@ -91,19 +110,22 @@ export function fetchDocumentFromLocalStorage(id: string, role: string, toast: R
     return null;
   } catch (error) {
     console.error(`Error loading local ${role} document:`, error);
-    throw error;
+    toast({
+      title: "Error loading document",
+      description: "Could not load document from local storage.",
+      variant: "destructive",
+    });
+    return null;
   }
 }
 
 export function loadDocument(doc: Document) {
-  // Make sure content is always a string
   let docContent = "";
   
   if (doc.content) {
     if (typeof doc.content === 'string') {
       docContent = doc.content;
     } else {
-      // If not a string, convert to string (e.g., if it's an object)
       docContent = JSON.stringify(doc.content);
     }
   }

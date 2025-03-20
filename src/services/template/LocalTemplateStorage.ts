@@ -1,84 +1,104 @@
 
 import { Template } from "@/lib/types";
-import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 /**
- * Local storage implementation for templates
- * Used as a fallback for guest users without database access
+ * Class for storing templates in localStorage (for guest users)
  */
 export class LocalTemplateStorage {
-  private readonly STORAGE_KEY = 'designerTemplates';
-  
+  private storageKey = 'local_templates';
+
   /**
-   * Gets all templates from localStorage
+   * Retrieves all local templates
    */
   getLocalTemplates(): Template[] {
     try {
-      const templates = localStorage.getItem(this.STORAGE_KEY);
-      return templates ? JSON.parse(templates) : [];
+      const storedTemplates = localStorage.getItem(this.storageKey);
+      if (!storedTemplates) return [];
+      
+      return JSON.parse(storedTemplates);
     } catch (error) {
-      console.error("Error reading templates from localStorage:", error);
+      console.error("Error retrieving local templates:", error);
       return [];
     }
   }
 
   /**
-   * Gets a specific template by ID from localStorage
+   * Gets a local template by ID
    */
   getLocalTemplateById(id: string): Template | null {
-    const templates = this.getLocalTemplates();
-    return templates.find(t => t.id === id) || null;
+    try {
+      const templates = this.getLocalTemplates();
+      return templates.find(template => template.id === id) || null;
+    } catch (error) {
+      console.error(`Error retrieving local template with ID ${id}:`, error);
+      return null;
+    }
   }
 
   /**
-   * Creates a new template in localStorage
+   * Creates a new local template
    */
   createLocalTemplate(template: Omit<Template, 'id'>): Template {
-    const templates = this.getLocalTemplates();
-    const newTemplate: Template = {
-      ...template,
-      id: `local-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    templates.push(newTemplate);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templates));
-    toast.success(`Template "${newTemplate.name}" created locally`);
-    return newTemplate;
+    try {
+      const templates = this.getLocalTemplates();
+      
+      const newTemplate: Template = {
+        ...template,
+        id: uuidv4(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      templates.push(newTemplate);
+      localStorage.setItem(this.storageKey, JSON.stringify(templates));
+      
+      return newTemplate;
+    } catch (error) {
+      console.error("Error creating local template:", error);
+      throw error;
+    }
   }
 
   /**
-   * Updates an existing template in localStorage
+   * Updates an existing local template
    */
   updateLocalTemplate(id: string, updates: Partial<Template>): Template {
-    const templates = this.getLocalTemplates();
-    const index = templates.findIndex(t => t.id === id);
-    
-    if (index === -1) {
-      throw new Error(`Template with ID ${id} not found`);
+    try {
+      const templates = this.getLocalTemplates();
+      const templateIndex = templates.findIndex(template => template.id === id);
+      
+      if (templateIndex === -1) {
+        throw new Error(`Template with ID ${id} not found`);
+      }
+      
+      templates[templateIndex] = {
+        ...templates[templateIndex],
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem(this.storageKey, JSON.stringify(templates));
+      
+      return templates[templateIndex];
+    } catch (error) {
+      console.error(`Error updating local template with ID ${id}:`, error);
+      throw error;
     }
-    
-    const updatedTemplate: Template = {
-      ...templates[index],
-      ...updates,
-      updated_at: new Date().toISOString()
-    };
-    
-    templates[index] = updatedTemplate;
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templates));
-    toast.success(`Template "${updatedTemplate.name}" updated locally`);
-    return updatedTemplate;
   }
 
   /**
-   * Deletes a template from localStorage
+   * Deletes a local template
    */
   deleteLocalTemplate(id: string): void {
-    const templates = this.getLocalTemplates();
-    const filteredTemplates = templates.filter(t => t.id !== id);
-    
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredTemplates));
-    toast.success("Template deleted locally");
+    try {
+      const templates = this.getLocalTemplates();
+      const updatedTemplates = templates.filter(template => template.id !== id);
+      
+      localStorage.setItem(this.storageKey, JSON.stringify(updatedTemplates));
+    } catch (error) {
+      console.error(`Error deleting local template with ID ${id}:`, error);
+      throw error;
+    }
   }
 }

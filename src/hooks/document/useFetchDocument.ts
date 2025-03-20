@@ -4,7 +4,8 @@ import { NavigateFunction } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { 
   fetchDocumentFromSupabase, 
-  fetchDocumentFromLocalStorage 
+  fetchDocumentFromLocalStorage,
+  loadDocument 
 } from "@/utils/documentFetchUtils";
 import { UserRole } from "@/lib/types";
 
@@ -35,75 +36,65 @@ export function useFetchDocument({
 
   const fetchDocument = useCallback(async (id: string) => {
     setIsLoading(true);
+    
+    // Set a timeout to prevent infinite loading state
+    const timeoutId = setTimeout(() => {
+      console.warn("Document fetch timeout reached, using fallback or proceeding");
+      setIsLoading(false);
+    }, 10000); // 10 second timeout
+
     try {
       console.log(`Fetching ${itemType} with ID:`, id);
       
+      let documentData = null;
+      
       if (user) {
         console.log("Fetching for authenticated user:", user.id);
-        const data = await fetchDocumentFromSupabase(id, user.id, toast);
-        if (data) {
-          console.log(`${isDesigner ? "Template" : "Document"} fetched from Supabase:`, data.id);
-          console.log("Content length from Supabase:", data.content ? data.content.length : 0);
-          console.log("Content preview:", data.content ? data.content.substring(0, 100) : "empty");
-          
-          if (data.content) {
-            setContent(data.content);
-            setInitialContent(data.content);
-          } else {
-            console.warn(`${isDesigner ? "Template" : "Document"} has no content!`);
-            setContent("");
-            setInitialContent("");
-          }
-          
-          if (data.title) {
-            setDocumentTitle(data.title);
-          }
-          setCurrentDocumentId(data.id);
+        documentData = await fetchDocumentFromSupabase(id, user.id, toast);
+      } 
+      
+      // If Supabase fetch failed or user is not authenticated, try localStorage
+      if (!documentData && role) {
+        console.log(`No document from Supabase, fetching for ${role} user from localStorage`);
+        documentData = fetchDocumentFromLocalStorage(id, role, toast);
+      }
+      
+      if (documentData) {
+        console.log(`${isDesigner ? "Template" : "Document"} fetched:`, documentData.id);
+        
+        if (documentData.content) {
+          setContent(documentData.content);
+          setInitialContent(documentData.content);
         } else {
-          navigate('/');
-          return;
+          console.warn(`${isDesigner ? "Template" : "Document"} has no content!`);
+          setContent("");
+          setInitialContent("");
         }
-      } else if (role) {
-        console.log(`Fetching for ${role} user`);
-        const doc = fetchDocumentFromLocalStorage(id, role, toast);
-        if (doc) {
-          console.log(`${isDesigner ? "Template" : "Document"} fetched from localStorage for ${role}:`, doc.id);
-          console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
-          console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
-          
-          if (doc.content) {
-            setContent(doc.content);
-            setInitialContent(doc.content);
-            
-            setTimeout(() => {
-              // Use a different approach to verify content was set without referencing content directly
-              console.log("Verify content setting complete");
-            }, 100);
-          } else {
-            console.warn(`Document from localStorage for ${role} has no content!`);
-            setContent("");
-            setInitialContent("");
-          }
-          
-          setDocumentTitle(doc.title || "");
-          setCurrentDocumentId(doc.id);
-        } else {
-          console.error(`${isDesigner ? "Template" : "Document"} not found in localStorage for ${role}, redirecting to home`);
-          navigate('/');
-        }
+        
+        setDocumentTitle(documentData.title || "");
+        setCurrentDocumentId(documentData.id);
+      } else {
+        console.log("No document found, redirecting to home");
+        toast({
+          title: `${isDesigner ? "Template" : "Document"} not found`,
+          description: "Redirecting to home page",
+          variant: "destructive",
+        });
+        navigate('/');
       }
     } catch (error) {
       console.error(`Error fetching ${itemType}:`, error);
       toast({
         title: `Error loading ${itemType}`,
-        description: `There was a problem loading your ${itemType}.`,
+        description: "There was a problem loading your content. Redirecting to home page.",
         variant: "destructive",
       });
       navigate('/');
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
-  }, [user, role, setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, navigate, toast]);
+  }, [user, role, setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, navigate, toast, isDesigner]);
 
   return { fetchDocument };
 }

@@ -1,110 +1,55 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { roleAuditLogger } from "@/utils/roles/auditLogger";
-import { supabase } from "@/integrations/supabase/client";
-import { useCallback, useState } from "react";
-import { toast } from "sonner";
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { UserRole } from '@/lib/types';
 
 /**
- * Hook for strengthened designer role verification
- * Provides additional security checks for designer actions
- * (Previously named useAdminVerification, renamed for clarity)
+ * Hook to verify if a user should have the designer role
  */
 export const useDesignerVerification = () => {
-  const { user, role } = useAuth();
-  const [isVerifying, setIsVerifying] = useState(false);
+  const { user, role, setRole } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Verify designer role with database check
-   * Provides additional verification beyond just checking local state
-   */
-  const verifyDesignerRole = useCallback(async (): Promise<boolean> => {
-    // Not logged in or not designer in local state
-    if (!user || role !== 'designer') {
-      roleAuditLogger.logRoleChange({
-        userId: user?.id || null,
-        previousRole: role,
-        newRole: role,
-        timestamp: Date.now(),
-        source: 'system',
-        success: false,
-        error: 'Designer verification failed - Not designer in local state'
-      });
-      return false;
-    }
-
-    try {
-      setIsVerifying(true);
+  useEffect(() => {
+    const verifyDesignerRole = async () => {
+      if (!user) return;
       
-      // Double check with database that user still has designer role
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (error || !data || data.role !== 'designer') {
-        roleAuditLogger.logRoleChange({
-          userId: user?.id || null,
-          previousRole: role,
-          newRole: data?.role || null,
-          timestamp: Date.now(),
-          source: 'system',
-          success: false,
-          error: error?.message || 'Designer verification failed - Database check'
-        });
+      try {
+        setIsLoading(true);
         
-        toast.error('Your designer session could not be verified');
-        return false;
+        // Check if user has the designer role in the profiles table
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          throw error;
+        }
+        
+        // If user has a designer role in the database but not in state, update state
+        if (data?.role === 'designer' && role !== 'designer') {
+          console.log('Setting user role to designer based on database verification');
+          setRole('designer' as UserRole);
+        } 
+        // If user doesn't have designer role in the database but has it in state, update state
+        else if (data?.role !== 'designer' && role === 'designer') {
+          console.log('User does not have designer privileges, updating role');
+          setRole('editor' as UserRole);
+        }
+      } catch (err) {
+        console.error('Error verifying designer role:', err);
+        setError('Failed to verify designer permissions');
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Designer verification successful
-      roleAuditLogger.logRoleChange({
-        userId: user?.id,
-        previousRole: role,
-        newRole: 'designer',
-        timestamp: Date.now(),
-        source: 'system',
-        success: true
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Designer verification error:', error);
-      toast.error('An error occurred while verifying designer status');
-      return false;
-    } finally {
-      setIsVerifying(false);
-    }
-  }, [user, role]);
-
-  /**
-   * Execute a function only if designer verification passes
-   * @param fn Function to execute if verification passes
-   * @param onFailure Optional callback for failure case
-   */
-  const withDesignerVerification = useCallback(async <T,>(
-    fn: () => Promise<T>, 
-    onFailure?: () => void
-  ): Promise<T | undefined> => {
-    const isVerified = await verifyDesignerRole();
+    };
     
-    if (isVerified) {
-      return await fn();
-    } else {
-      if (onFailure) {
-        onFailure();
-      }
-      return undefined;
-    }
-  }, [verifyDesignerRole]);
-
-  return {
-    isDesigner: role === 'designer',
-    isVerifying,
-    verifyDesignerRole,
-    withDesignerVerification
-  };
+    verifyDesignerRole();
+  }, [user, role, setRole]);
+  
+  return { isLoading, error };
 };
-
-// Keep backward compatibility for existing code that uses useAdminVerification
-export const useAdminVerification = useDesignerVerification;

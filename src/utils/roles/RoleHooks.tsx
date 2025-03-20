@@ -1,85 +1,74 @@
 
-/**
- * Role-Specific Hooks
- * 
- * These hooks provide easy ways to check the user's role or get role-specific values.
- */
-
+import { useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/types';
+import { useCacheClearing } from './hooks/useCacheClearing';
+import { useCacheClearer } from './hooks/useCacheClearer';
 
 /**
- * Hook to get role-specific value
+ * Check if the current user has the designer role
  */
-export function useRoleSpecificValue<T>(designerValue: T, editorValue: T): T {
-  const { role } = useAuth();
-  
-  if (role === 'designer') {
-    return designerValue;
-  } else if (role === 'editor') {
-    return editorValue;
-  }
-  
-  return editorValue; // Default to editor
-}
-
-/**
- * Hook to check if current user has designer role
- */
-export function useIsDesigner(): boolean {
+export const useIsDesigner = () => {
   const { role } = useAuth();
   return role === 'designer';
-}
+};
 
 /**
- * Hook to check if current user has editor role
+ * Check if the current user has the editor role
  */
-export function useIsEditor(): boolean {
+export const useIsEditor = () => {
   const { role } = useAuth();
   return role === 'editor';
-}
+};
 
 /**
- * Hook to check if user has designer role (replacement for useIsDesignerOrAdmin)
- * This hook maintains backward compatibility with components that previously checked for admin or designer
+ * Get the current user's role
  */
-export function useIsDesignerOrAdmin(): boolean {
-  return useIsDesigner();
-}
-
-/**
- * Hook to check if user has editor role (replacement for useIsEditorOrAdmin)
- * This hook maintains backward compatibility
- */
-export function useIsEditorOrAdmin(): boolean {
-  return useIsEditor();
-}
-
-/**
- * Hook to check if user has one of multiple roles
- */
-export function useHasAnyRole(roles: UserRole[]): boolean {
+export const useUserRole = () => {
   const { role } = useAuth();
-  return role ? roles.includes(role) : false;
-}
+  return role;
+};
 
 /**
- * Hook to check if user can manage templates
+ * Check if the current user has a specific role
  */
-export function useCanManageTemplates(): boolean {
-  return useIsDesigner();
-}
+export const useHasRole = (requiredRole: UserRole) => {
+  const { role } = useAuth();
+  return role === requiredRole;
+};
 
 /**
- * Hook to check if user can publish templates
+ * Check if the current user is authenticated
  */
-export function useCanPublishTemplates(): boolean {
-  return useIsDesigner();
-}
+export const useIsAuthenticated = () => {
+  const { user } = useAuth();
+  return !!user;
+};
 
 /**
- * Hook to check if user can use templates
+ * Legacy support for cache clearing functionality
+ * @deprecated Use useCacheClearer instead
  */
-export function useCanUseTemplates(): boolean {
-  return useHasAnyRole(['editor', 'designer']);
-}
+export { useCacheClearing };
+
+/**
+ * Export new cache clearer hook
+ */
+export { useCacheClearer };
+
+/**
+ * Get permissions based on the current user's role
+ */
+export const useRolePermissions = () => {
+  const isDesigner = useIsDesigner();
+  const isEditor = useIsEditor();
+  
+  return {
+    canEditContent: isDesigner || isEditor,
+    canManageStyles: isDesigner,
+    canManageTemplates: isDesigner,
+    canPublish: isDesigner || isEditor,
+    canClearCache: isDesigner,
+    canManageSystem: isDesigner
+  };
+};

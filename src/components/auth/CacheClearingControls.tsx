@@ -1,11 +1,15 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { useCacheClearer } from "@/utils/roles/hooks/useCacheClearer";
 import { useIsDesigner } from "@/utils/roles";
 
-export const CacheControls = () => {
+/**
+ * Component that provides cache clearing controls
+ * Only visible to users with the designer role
+ */
+export const CacheClearingControls = () => {
   const { isClearing, clearAllCaches } = useCacheClearer();
   const isDesigner = useIsDesigner();
 
@@ -13,7 +17,7 @@ export const CacheControls = () => {
 
   return (
     <div className="mt-6 border-t pt-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Management Controls</h3>
+      <h3 className="text-sm font-medium text-gray-700 mb-2">System Management</h3>
       <Button
         variant="outline"
         size="sm"
@@ -21,11 +25,15 @@ export const CacheControls = () => {
         onClick={clearAllCaches}
         disabled={isClearing}
       >
-        <RotateCcw className={`w-4 h-4 ${isClearing ? 'animate-spin' : ''}`} />
-        Clear Application Caches
+        {isClearing ? (
+          <RotateCcw className="w-4 h-4 animate-spin" />
+        ) : (
+          <Trash2 className="w-4 h-4" />
+        )}
+        Clear All Caches
       </Button>
       <p className="text-xs text-gray-500 mt-2">
-        Clears browser storage and memory caches used by the editor
+        Clears all browser storage, memory caches, and template caches
       </p>
     </div>
   );

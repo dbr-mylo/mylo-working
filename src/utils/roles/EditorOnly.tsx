@@ -7,7 +7,7 @@ import { RoleComponentProps } from './types';
  * Component that only renders its children when the current user has the 'editor' role.
  * Can optionally show fallback content for other roles.
  */
-export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({ 
+export const EditorOnly: React.FC<RoleComponentProps> = ({ 
   children, 
   fallback = null 
 }) => {
@@ -15,3 +15,9 @@ export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({
   
   return isEditor ? <>{children}</> : <>{fallback}</>;
 };
+
+/**
+ * Legacy name for EditorOnly component to maintain backward compatibility
+ * @deprecated Use EditorOnly instead
+ */
+export const StandaloneEditorOnly = EditorOnly;

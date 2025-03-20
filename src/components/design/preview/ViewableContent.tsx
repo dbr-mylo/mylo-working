@@ -7,7 +7,7 @@
  */
 
 import { useRef, useState } from "react";
-import { useIsDesigner, useIsAdmin } from "@/utils/roles";
+import { useIsDesigner } from "@/utils/roles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { DesignerViewContent } from "./DesignerViewContent";
 import { EditorViewContent } from "./EditorViewContent";
@@ -34,7 +34,6 @@ export const ViewableContent = ({
   templateId = ''
 }: ViewableContentProps) => {
   const isDesigner = useIsDesigner();
-  const isAdmin = useIsAdmin();
   const [loadedStyles, setLoadedStyles] = useState(templateStyles);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   
@@ -70,8 +69,8 @@ export const ViewableContent = ({
   // Get the appropriate styles to use
   const stylesContent = loadedStyles || templateStyles;
 
-  // DESIGNER/ADMIN PATH
-  if (isDesigner || isAdmin) {
+  // DESIGNER PATH (removed admin check)
+  if (isDesigner) {
     return (
       <DesignerViewContent
         content={content}

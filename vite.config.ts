@@ -27,13 +27,19 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
+      // Add specific esbuild options to handle the multiple input files error
+      assetsDir: 'assets',
+      emptyOutDir: true,
       rollupOptions: {
-        // Use a single entry point to avoid multiple input files error
-        input: {
-          main: path.resolve(__dirname, 'index.html'),
+        input: path.resolve(__dirname, 'index.html'), // Simplified to direct path
+        output: {
+          // Ensure proper chunking
+          manualChunks: undefined,
+          entryFileNames: 'assets/[name].[hash].js',
+          chunkFileNames: 'assets/[name].[hash].js',
+          assetFileNames: 'assets/[name].[hash].[ext]'
         },
-        // External scripts that shouldn't be processed by Vite
-        external: ['https://cdn.gpteng.co/gptengineer.js']
+        external: ['https://cdn.gpteng.co/gptengineer.js'] // Keep external scripts
       },
     },
   };

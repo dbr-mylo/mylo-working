@@ -38,7 +38,7 @@ export const DocumentPreview = ({
 }: DocumentPreviewProps) => {
   const { role } = useAuth();
   const isDesigner = role === "designer";
-  const isEditor = role === "editor";
+  const isEditor = role === "writer"; // Updated to check for 'writer' role
   
   const documentId = useDocumentId();
   

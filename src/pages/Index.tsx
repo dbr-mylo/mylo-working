@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,7 +45,7 @@ const Index = () => {
     }
   }, [documentMeta]);
   
-  const isEditorEditable = role === "editor";
+  const isEditorEditable = role === "writer";
   const isDesignEditable = role === "designer";
   
   // Initialize editor setup for the shared toolbar
@@ -142,7 +141,7 @@ const Index = () => {
         />
       );
     } else {
-      // For editor role, render the split view
+      // For writer role, render the split view
       return isMobile ? (
         <MobileEditor
           content={content}
@@ -168,7 +167,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-editor-bg">
       <EditorNav 
-        currentRole={role || "editor"} 
+        currentRole={role || "writer"} 
         content={content}
         documentTitle={documentTitle}
         onTitleChange={handleTitleChange}
@@ -179,8 +178,8 @@ const Index = () => {
         onTemplateChange={setTemplateId}
       />
       
-      {/* Add the toolbar container below the nav when in editor mode */}
-      {role === "editor" && (
+      {/* Add the toolbar container below the nav when in writer mode */}
+      {role === "writer" && (
         <EditorToolbarContainer 
           editor={editorInstance} 
           isEditable={isEditorEditable}

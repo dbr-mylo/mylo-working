@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,8 +20,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     return null;
   }
 
-  // If user is in editor role, use the editor-specific toolbar
-  if (role === 'editor') {
+  // If user is in writer role, use the editor-specific toolbar
+  if (role === 'writer') {
     return <EditorToolbar editor={editor} />;
   }
   

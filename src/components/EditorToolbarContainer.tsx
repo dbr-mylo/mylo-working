@@ -2,7 +2,7 @@
 import React from 'react';
 import { Toolbar } from './editor/Toolbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 import { Editor } from '@tiptap/react';
 
 interface EditorToolbarContainerProps {
@@ -15,10 +15,10 @@ export const EditorToolbarContainer = ({
   isEditable = true 
 }: EditorToolbarContainerProps) => {
   const { role } = useAuth();
-  const isEditor = useIsEditor();
+  const isWriter = useIsWriter();
   
-  // Only show the toolbar if we're in editor role and it should be editable
-  if (!isEditor || !isEditable || !editor) {
+  // Only show the toolbar if we're in writer role and it should be editable
+  if (!isWriter || !isEditable || !editor) {
     return null;
   }
 

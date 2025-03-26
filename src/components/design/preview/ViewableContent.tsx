@@ -7,7 +7,7 @@
  */
 
 import { useRef, useState } from "react";
-import { useIsDesigner, useIsAdmin } from "@/utils/roles";
+import { useIsDesigner, useIsAdmin, useIsWriter } from "@/utils/roles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { DesignerViewContent } from "./DesignerViewContent";
 import { EditorViewContent } from "./EditorViewContent";
@@ -35,6 +35,7 @@ export const ViewableContent = ({
 }: ViewableContentProps) => {
   const isDesigner = useIsDesigner();
   const isAdmin = useIsAdmin();
+  const isWriter = useIsWriter();
   const [loadedStyles, setLoadedStyles] = useState(templateStyles);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   
@@ -86,7 +87,7 @@ export const ViewableContent = ({
     );
   } 
 
-  // EDITOR PATH
+  // WRITER PATH
   return (
     <EditorViewContent
       content={content}

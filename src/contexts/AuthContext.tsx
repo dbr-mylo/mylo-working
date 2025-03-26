@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       let userRole: UserRole = roleData.role as UserRole;
       if (userRole === 'editor') {
-        userRole = 'writer';
+        userRole = 'writer'; // Convert 'editor' to 'writer' for backward compatibility
       }
 
       setAuthState({

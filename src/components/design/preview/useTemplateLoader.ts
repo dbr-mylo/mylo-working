@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +19,7 @@ export const useTemplateLoader = ({
   const { role, user } = useAuth();
   const { toast } = useToast();
   const isDesigner = role === "designer";
-  const isEditor = role === "editor";
+  const isEditor = role === "writer"; // Updated to check for 'writer' role
   
   const [templateStyles, setTemplateStyles] = useState(customStyles);
   const [templateName, setTemplateName] = useState('');

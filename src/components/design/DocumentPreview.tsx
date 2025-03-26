@@ -12,6 +12,7 @@ import { useDocumentId } from "./preview/useDocumentId";
 import { useTemplateLoader } from "./preview/useTemplateLoader";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
 import { textStyleStore } from "@/stores/textStyles";
+import { useIsDesigner, useIsWriter } from "@/utils/roles";
 
 interface DocumentPreviewProps {
   content: string;
@@ -36,9 +37,8 @@ export const DocumentPreview = ({
   editorInstance = null,
   templateId = ''
 }: DocumentPreviewProps) => {
-  const { role } = useAuth();
-  const isDesigner = role === "designer";
-  const isEditor = role === "writer"; // Updated to check for 'writer' role
+  const isDesigner = useIsDesigner();
+  const isWriter = useIsWriter();
   
   const documentId = useDocumentId();
   

@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { EditorNav } from "@/components/editor-nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,12 +13,17 @@ import { textStyleStore } from "@/stores/textStyles";
 import { Editor } from "@tiptap/react";
 import { EditorToolbarContainer } from "@/components/EditorToolbarContainer";
 import { useEditorSetup } from "@/components/rich-text/useEditor";
+import { useIsDesigner, useIsWriter } from "@/utils/roles";
 
 const Index = () => {
   const { documentId } = useParams();
   const { role } = useAuth();
   const { width } = useWindowSize();
   const isMobile = width < 1281;
+  
+  // Use role hooks
+  const isDesigner = useIsDesigner();
+  const isWriter = useIsWriter();
   
   // State for template ID and shared editor instance
   const [templateId, setTemplateId] = useState<string | undefined>(undefined);
@@ -45,8 +51,8 @@ const Index = () => {
     }
   }, [documentMeta]);
   
-  const isEditorEditable = role === "writer";
-  const isDesignEditable = role === "designer";
+  const isEditorEditable = isWriter;
+  const isDesignEditable = isDesigner;
   
   // Initialize editor setup for the shared toolbar
   const editorSetup = useEditorSetup({
@@ -119,7 +125,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-editor-bg">
         <EditorNav 
-          currentRole={role || "editor"} 
+          currentRole={role || "writer"} 
           documentTitle="Style Inheritance Test"
           onTitleChange={handleTitleChange}
           onSave={saveDocument}
@@ -133,7 +139,7 @@ const Index = () => {
   
   // Render different layouts based on user role
   const renderContent = () => {
-    if (role === "designer") {
+    if (isDesigner) {
       return (
         <DesignPanel 
           content={content}
@@ -179,7 +185,7 @@ const Index = () => {
       />
       
       {/* Add the toolbar container below the nav when in writer mode */}
-      {role === "writer" && (
+      {isWriter && (
         <EditorToolbarContainer 
           editor={editorInstance} 
           isEditable={isEditorEditable}

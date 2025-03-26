@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +9,7 @@ import { AlignmentButtonGroup } from './toolbar/AlignmentButtonGroup';
 import { IndentButtonGroup } from './toolbar/IndentButtonGroup';
 import { ClearFormattingButton } from './toolbar/ClearFormattingButton';
 import { TextControls } from './toolbar/TextControls';
+import { useIsWriter } from '@/utils/roles';
 
 interface ToolbarProps {
   editor: Editor;
@@ -15,13 +17,14 @@ interface ToolbarProps {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   const { role } = useAuth();
+  const isWriter = useIsWriter();
   
   if (!editor) {
     return null;
   }
 
   // If user is in writer role, use the editor-specific toolbar
-  if (role === 'writer') {
+  if (isWriter) {
     return <EditorToolbar editor={editor} />;
   }
   

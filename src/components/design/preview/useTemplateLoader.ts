@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { templateStore } from "@/stores/templateStore";
 import { extractDimensionsFromCSS, generateDimensionsCSS } from "@/utils/templateUtils";
+import { useIsDesigner, useIsWriter } from "@/utils/roles";
 
 interface UseTemplateLoaderProps {
   templateId?: string;
@@ -16,10 +18,10 @@ export const useTemplateLoader = ({
   customStyles,
   documentId 
 }: UseTemplateLoaderProps) => {
-  const { role, user } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const isDesigner = role === "designer";
-  const isEditor = role === "writer"; // Updated to check for 'writer' role
+  const isDesigner = useIsDesigner();
+  const isWriter = useIsWriter();
   
   const [templateStyles, setTemplateStyles] = useState(customStyles);
   const [templateName, setTemplateName] = useState('');
@@ -41,7 +43,7 @@ export const useTemplateLoader = ({
   // Load template from database
   useEffect(() => {
     const loadTemplate = async () => {
-      if (templateId && isEditor) {
+      if (templateId && isWriter) {
         setIsTemplateLoading(true);
         try {
           const { data: template, error } = await supabase
@@ -117,7 +119,7 @@ export const useTemplateLoader = ({
     };
     
     loadTemplate();
-  }, [templateId, customStyles, isEditor, isDesigner, user, documentId]);
+  }, [templateId, customStyles, isWriter, isDesigner, user, documentId]);
   
   return {
     templateStyles,

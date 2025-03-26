@@ -80,6 +80,22 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canManageUsers: true,
     canManageAllTemplates: true,
     canManageAllStyles: true
+  },
+  // Add editor role for backward compatibility
+  editor: {
+    canModifyTemplate: false,
+    canEditLayout: false,
+    canCreateTemplate: false,
+    canPublishTemplate: false,
+    showToolbar: true,
+    showPreview: false,
+    canApplyStyles: true,
+    canCreateStyles: false,
+    defaultDocumentWrapper: 'white-page',
+    defaultView: 'split',
+    canManageUsers: false,
+    canManageAllTemplates: false,
+    canManageAllStyles: false
   }
 };
 
@@ -126,7 +142,7 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  * Check if the current role is writer
  */
 export const isWriterRole = (role: UserRole | null): boolean => {
-  return role === 'writer';
+  return role === 'writer' || role === 'editor'; // Support both for backward compatibility
 };
 
 /**

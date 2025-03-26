@@ -35,10 +35,10 @@ export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback 
 };
 
 /**
- * Editor-specific component
+ * Writer-specific component
  */
-export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <RoleOnly role="editor" children={children} fallback={fallback} />;
+export const WriterOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <RoleOnly role="writer" children={children} fallback={fallback} />;
 };
 
 /**
@@ -73,10 +73,10 @@ export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fa
 };
 
 /**
- * Editor or Admin only component
+ * Writer or Admin only component
  */
-export const EditorOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['editor', 'admin']} children={children} fallback={fallback} />;
+export const WriterOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <MultiRoleOnly roles={['writer', 'admin']} children={children} fallback={fallback} />;
 };
 
 /**
@@ -100,7 +100,7 @@ export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({
  * Component that renders only for users who can create content
  */
 export const ContentCreatorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['editor', 'designer', 'admin']} children={children} fallback={fallback} />;
+  return <MultiRoleOnly roles={['writer', 'designer', 'admin']} children={children} fallback={fallback} />;
 };
 
 /**
@@ -108,4 +108,19 @@ export const ContentCreatorOnly: React.FC<RoleComponentProps> = ({ children, fal
  */
 export const TemplateManagerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+};
+
+// For backward compatibility
+/**
+ * @deprecated Use WriterOnly instead
+ */
+export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <WriterOnly children={children} fallback={fallback} />;
+};
+
+/**
+ * @deprecated Use WriterOrAdminOnly instead
+ */
+export const EditorOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  return <WriterOrAdminOnly children={children} fallback={fallback} />;
 };

@@ -14,18 +14,18 @@ export function renderForRole<T>(
   role: UserRole | null,
   options: {
     designer: T;
-    editor: T;
+    writer: T;
     admin: T;
     default?: T;
   }
 ): T {
   if (role === 'designer') {
     return options.designer;
-  } else if (role === 'editor') {
-    return options.editor;
+  } else if (role === 'writer') {
+    return options.writer;
   } else if (role === 'admin') {
     return options.admin;
   }
   
-  return options.default || options.editor;
+  return options.default || options.writer;
 }

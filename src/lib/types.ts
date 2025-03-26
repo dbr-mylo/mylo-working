@@ -54,7 +54,7 @@ export interface EditorNavProps {
   onTemplateChange?: (templateId: string) => void;
 }
 
-export type UserRole = 'editor' | 'designer' | 'admin';
+export type UserRole = 'writer' | 'designer' | 'admin';
 
 export interface Template {
   id: string;

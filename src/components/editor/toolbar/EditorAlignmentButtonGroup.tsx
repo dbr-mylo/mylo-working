@@ -3,18 +3,18 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 
 interface EditorAlignmentButtonGroupProps {
   editor: Editor;
 }
 
 export const EditorAlignmentButtonGroup: React.FC<EditorAlignmentButtonGroupProps> = ({ editor }) => {
-  // Make sure this component is only used in editor role
-  const isEditor = useIsEditor();
+  // Make sure this component is only used in writer role
+  const isWriter = useIsWriter();
   
-  if (!isEditor) {
-    console.warn("EditorAlignmentButtonGroup used outside of editor role context");
+  if (!isWriter) {
+    console.warn("EditorAlignmentButtonGroup used outside of writer role context");
     return null;
   }
   

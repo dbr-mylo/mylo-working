@@ -3,18 +3,18 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Indent, Outdent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 
 interface EditorIndentButtonGroupProps {
   editor: Editor;
 }
 
 export const EditorIndentButtonGroup: React.FC<EditorIndentButtonGroupProps> = ({ editor }) => {
-  // Make sure this component is only used in editor role
-  const isEditor = useIsEditor();
+  // Make sure this component is only used in writer role
+  const isWriter = useIsWriter();
   
-  if (!isEditor) {
-    console.warn("EditorIndentButtonGroup used outside of editor role context");
+  if (!isWriter) {
+    console.warn("EditorIndentButtonGroup used outside of writer role context");
     return null;
   }
   

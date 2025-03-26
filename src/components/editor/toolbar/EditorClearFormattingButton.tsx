@@ -5,7 +5,7 @@ import { RemoveFormatting } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clearFormatting } from '../../rich-text/utils/textFormatting';
 import { useToast } from '@/hooks/use-toast';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 
 interface EditorClearFormattingButtonProps {
   editor: Editor;
@@ -14,11 +14,11 @@ interface EditorClearFormattingButtonProps {
 export const EditorClearFormattingButton: React.FC<EditorClearFormattingButtonProps> = ({ editor }) => {
   const { toast } = useToast();
   
-  // Make sure this component is only used in editor role
-  const isEditor = useIsEditor();
+  // Make sure this component is only used in writer role
+  const isWriter = useIsWriter();
   
-  if (!isEditor) {
-    console.warn("EditorClearFormattingButton used outside of editor role context");
+  if (!isWriter) {
+    console.warn("EditorClearFormattingButton used outside of writer role context");
     return null;
   }
   

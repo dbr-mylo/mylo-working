@@ -11,18 +11,18 @@ import { UserRole } from '@/lib/types';
 /**
  * Hook to get role-specific value
  */
-export function useRoleSpecificValue<T>(designerValue: T, editorValue: T, adminValue: T = designerValue): T {
+export function useRoleSpecificValue<T>(designerValue: T, writerValue: T, adminValue: T = designerValue): T {
   const { role } = useAuth();
   
   if (role === 'designer') {
     return designerValue;
-  } else if (role === 'editor') {
-    return editorValue;
+  } else if (role === 'writer') {
+    return writerValue;
   } else if (role === 'admin') {
     return adminValue;
   }
   
-  return editorValue;
+  return writerValue;
 }
 
 /**
@@ -34,11 +34,11 @@ export function useIsDesigner(): boolean {
 }
 
 /**
- * Hook to check if current user has editor role
+ * Hook to check if current user has writer role
  */
-export function useIsEditor(): boolean {
+export function useIsWriter(): boolean {
   const { role } = useAuth();
-  return role === 'editor';
+  return role === 'writer';
 }
 
 /**
@@ -65,10 +65,10 @@ export function useIsDesignerOrAdmin(): boolean {
 }
 
 /**
- * Hook to check if user has editor or admin role
+ * Hook to check if user has writer or admin role
  */
-export function useIsEditorOrAdmin(): boolean {
-  return useHasAnyRole(['editor', 'admin']);
+export function useIsWriterOrAdmin(): boolean {
+  return useHasAnyRole(['writer', 'admin']);
 }
 
 /**
@@ -89,5 +89,20 @@ export function useCanPublishTemplates(): boolean {
  * Hook to check if user can use templates
  */
 export function useCanUseTemplates(): boolean {
-  return useHasAnyRole(['editor', 'designer', 'admin']);
+  return useHasAnyRole(['writer', 'designer', 'admin']);
+}
+
+// Maintain backward compatibility with old hook names
+/**
+ * @deprecated Use useIsWriter instead
+ */
+export function useIsEditor(): boolean {
+  return useIsWriter();
+}
+
+/**
+ * @deprecated Use useIsWriterOrAdmin instead
+ */
+export function useIsEditorOrAdmin(): boolean {
+  return useIsWriterOrAdmin();
 }

@@ -1,18 +1,17 @@
 
 import React from 'react';
-import { useIsEditor } from './RoleHooks';
+import { useIsWriter } from './RoleHooks';
 import { RoleComponentProps } from './types';
 
 /**
- * Component that only renders its children when the current user has the 'editor' role.
+ * Component that only renders its children when the current user has the 'writer' role.
  * Can optionally show fallback content for other roles.
  */
 export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({ 
   children, 
   fallback = null 
 }) => {
-  const isEditor = useIsEditor();
+  const isWriter = useIsWriter();
   
-  return isEditor ? <>{children}</> : <>{fallback}</>;
+  return isWriter ? <>{children}</> : <>{fallback}</>;
 };
-

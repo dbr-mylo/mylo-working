@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +8,10 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  continueAsGuestEditor: () => void;
+  continueAsGuestWriter: () => void;
   continueAsGuestDesigner: () => void;
   continueAsGuestAdmin: () => void;
+  continueAsGuestEditor: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,9 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (roleError) throw roleError;
 
+      let userRole: UserRole = roleData.role as UserRole;
+      if (userRole === 'editor') {
+        userRole = 'writer';
+      }
+
       setAuthState({
         user: profile,
-        role: roleData.role as UserRole,
+        role: userRole,
         isLoading: false,
       });
     } catch (error) {
@@ -115,13 +120,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const continueAsGuestEditor = () => {
+  const continueAsGuestWriter = () => {
     setAuthState({
       user: null,
-      role: "editor",
+      role: "writer",
       isLoading: false
     });
-    toast.success("Continuing as Editor");
+    toast.success("Continuing as Writer");
     navigate("/");
   };
 
@@ -145,15 +150,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate("/");
   };
 
+  const continueAsGuestEditor = () => {
+    continueAsGuestWriter();
+  };
+
   return (
     <AuthContext.Provider value={{ 
       ...authState, 
       signIn, 
       signUp, 
       signOut, 
-      continueAsGuestEditor, 
+      continueAsGuestWriter,
       continueAsGuestDesigner,
-      continueAsGuestAdmin
+      continueAsGuestAdmin,
+      continueAsGuestEditor
     }}>
       {children}
     </AuthContext.Provider>

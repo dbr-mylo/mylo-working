@@ -3,7 +3,7 @@
  * Role-based Feature Configuration
  * 
  * This utility provides configuration settings and feature flags
- * based on user roles to maintain separation between editor and designer functions.
+ * based on user roles to maintain separation between writer and designer functions.
  */
 
 import { UserRole } from "@/lib/types";
@@ -51,7 +51,7 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
     canManageAllTemplates: false,
     canManageAllStyles: false
   },
-  editor: {
+  writer: {
     canModifyTemplate: false,
     canEditLayout: false,
     canCreateTemplate: false,
@@ -88,8 +88,8 @@ const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
  */
 export const getRoleFeatures = (role: UserRole | null): RoleFeatureFlags => {
   if (!role) {
-    // Default to editor if no role provided
-    return ROLE_FEATURE_CONFIG.editor;
+    // Default to writer if no role provided
+    return ROLE_FEATURE_CONFIG.writer;
   }
   return ROLE_FEATURE_CONFIG[role];
 };
@@ -123,10 +123,10 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
 };
 
 /**
- * Check if the current role is editor
+ * Check if the current role is writer
  */
-export const isEditorRole = (role: UserRole | null): boolean => {
-  return role === 'editor';
+export const isWriterRole = (role: UserRole | null): boolean => {
+  return role === 'writer';
 };
 
 /**
@@ -134,4 +134,11 @@ export const isEditorRole = (role: UserRole | null): boolean => {
  */
 export const isAdminRole = (role: UserRole | null): boolean => {
   return role === 'admin';
+};
+
+/**
+ * @deprecated Use isWriterRole instead
+ */
+export const isEditorRole = (role: UserRole | null): boolean => {
+  return isWriterRole(role);
 };

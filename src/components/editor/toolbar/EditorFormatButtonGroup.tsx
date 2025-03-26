@@ -4,7 +4,7 @@ import { Editor } from '@tiptap/react';
 import { Bold, Italic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '../../rich-text/utils/colorPreservation';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 
 interface EditorFormatButtonGroupProps {
   editor: Editor;
@@ -12,11 +12,11 @@ interface EditorFormatButtonGroupProps {
 }
 
 export const EditorFormatButtonGroup: React.FC<EditorFormatButtonGroupProps> = ({ editor, currentColor }) => {
-  // Make sure this component is only used in editor role
-  const isEditor = useIsEditor();
+  // Make sure this component is only used in writer role
+  const isWriter = useIsWriter();
   
-  if (!isEditor) {
-    console.warn("EditorFormatButtonGroup used outside of editor role context");
+  if (!isWriter) {
+    console.warn("EditorFormatButtonGroup used outside of writer role context");
     return null;
   }
   

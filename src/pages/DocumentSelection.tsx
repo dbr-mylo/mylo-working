@@ -41,19 +41,27 @@ const DocumentSelection = () => {
         setDocuments(uniqueDocuments);
       } else if (role) {
         try {
-          const uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
-          setDocuments(uniqueDocs);
+          // Handle both 'writer' and 'editor' (legacy) roles
+          const storageKey = role === 'designer' ? 'designerDocuments' : 
+                            (role === 'writer' ? 'writerDocuments' : 'editorDocuments');
           
-          // Also update the localStorage with deduplicated list if needed
-          const storageKey = role === 'designer' ? 'designerDocuments' : 'editorDocuments';
-          const localDocs = localStorage.getItem(storageKey);
-          if (localDocs && JSON.parse(localDocs).length !== uniqueDocs.length) {
-            localStorage.setItem(storageKey, JSON.stringify(uniqueDocs));
-            toast({
-              title: `Duplicate ${itemTypePlural} removed`,
-              description: `We've cleaned up some duplicate ${itemTypePlural} for you.`,
-            });
+          // For backward compatibility
+          let uniqueDocs;
+          if (role === 'writer') {
+            // Try to get documents from both 'writerDocuments' and 'editorDocuments'
+            const writerDocs = JSON.parse(localStorage.getItem('writerDocuments') || '[]');
+            const legacyEditorDocs = JSON.parse(localStorage.getItem('editorDocuments') || '[]');
+            
+            // Merge and deduplicate
+            uniqueDocs = deduplicateDocuments([...writerDocs, ...legacyEditorDocs]);
+            
+            // Save merged docs back to writerDocuments
+            localStorage.setItem('writerDocuments', JSON.stringify(uniqueDocs));
+          } else {
+            uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
           }
+          
+          setDocuments(uniqueDocs);
         } catch (error) {
           console.error(`Error loading ${role} ${itemTypePlural}:`, error);
           setDocuments([]);
@@ -97,8 +105,21 @@ const DocumentSelection = () => {
       if (user) {
         await deleteDocumentFromSupabase(documentToDelete, user.id);
       } else if (role) {
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, role);
+        // Handle both writer and legacy editor roles
+        const storageRole = role === 'writer' ? 'writer' : role;
+        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, storageRole);
         setDocuments(updatedDocs);
+        
+        // For writer role, also clean up any documents in the legacy 'editorDocuments'
+        if (role === 'writer') {
+          try {
+            const legacyDocs = JSON.parse(localStorage.getItem('editorDocuments') || '[]');
+            const filteredLegacyDocs = legacyDocs.filter((doc: Document) => doc.id !== documentToDelete);
+            localStorage.setItem('editorDocuments', JSON.stringify(filteredLegacyDocs));
+          } catch (e) {
+            console.error("Error cleaning legacy editor documents:", e);
+          }
+        }
       }
       
       setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentToDelete));

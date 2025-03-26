@@ -4,7 +4,7 @@ import { Editor } from '@tiptap/react';
 import { List, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { preserveColorAfterFormatting } from '../../rich-text/utils/colorPreservation';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 
 interface EditorListButtonGroupProps {
   editor: Editor;
@@ -12,11 +12,11 @@ interface EditorListButtonGroupProps {
 }
 
 export const EditorListButtonGroup: React.FC<EditorListButtonGroupProps> = ({ editor, currentColor }) => {
-  // Make sure this component is only used in editor role
-  const isEditor = useIsEditor();
+  // Make sure this component is only used in writer role
+  const isWriter = useIsWriter();
   
-  if (!isEditor) {
-    console.warn("EditorListButtonGroup used outside of editor role context");
+  if (!isWriter) {
+    console.warn("EditorListButtonGroup used outside of writer role context");
     return null;
   }
   

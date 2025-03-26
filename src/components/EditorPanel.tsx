@@ -2,9 +2,9 @@
 /**
  * EditorPanel Component
  * 
- * This component is specifically for the editor role.
+ * This component is specifically for the writer role.
  * It should NOT include designer-specific functionality.
- * Use the useIsEditor() hook from roles module to enforce this separation.
+ * Use the useIsWriter() hook from roles module to enforce this separation.
  */
 
 import { RichTextEditor } from "@/components/RichTextEditor";
@@ -12,7 +12,7 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsEditor } from "@/utils/roles";
+import { useIsWriter } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 
 export const EditorPanel = ({
@@ -24,7 +24,7 @@ export const EditorPanel = ({
 }: EditorPanelProps & { editorInstance?: Editor | null }) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
-  const isEditor = useIsEditor(); // Confirm we're in editor role
+  const isWriter = useIsWriter(); // Confirm we're in writer role
 
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);
@@ -39,9 +39,9 @@ export const EditorPanel = ({
     onContentChange(newContent);
   };
 
-  // This component should only be used in editor mode
-  if (!isEditor) {
-    console.warn("EditorPanel component used outside of editor role context");
+  // This component should only be used in writer mode
+  if (!isWriter) {
+    console.warn("EditorPanel component used outside of writer role context");
   }
   
   return (

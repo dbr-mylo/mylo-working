@@ -4,9 +4,9 @@
  * 
  * WARNING: This component contains role-specific rendering logic.
  * Changes to the designer role functionality (isDesigner === true) should be avoided.
- * Only modify the editor role section unless absolutely necessary.
+ * Only modify the writer role section unless absolutely necessary.
  * 
- * To make changes to editor functionality only, focus on the non-designer code path.
+ * To make changes to writer functionality only, focus on the non-designer code path.
  */
 
 import { RichTextEditor } from "@/components/RichTextEditor";
@@ -35,8 +35,8 @@ export const EditableContent = ({
 }: EditableContentProps) => {
   const isDesigner = useIsDesigner();
   
-  // Important: For editor role, we explicitly set this to false to prevent template styling
-  // from affecting the editable content, allowing editors to format text freely
+  // Important: For writer role, we explicitly set this to false to prevent template styling
+  // from affecting the editable content, allowing writers to format text freely
   const shouldApplyTemplate = false;
   
   // Extract dimensions from template styles
@@ -62,8 +62,8 @@ export const EditableContent = ({
     );
   } 
 
-  // EDITOR PATH - Safe to modify
-  // For editor role, render toolbar above the document container
+  // WRITER PATH - Safe to modify
+  // For writer role, render toolbar above the document container
   return (
     <div className="editor-content-container">
       {/* Main document container */}

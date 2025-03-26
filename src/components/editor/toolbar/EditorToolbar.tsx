@@ -8,7 +8,7 @@ import { EditorListButtonGroup } from './EditorListButtonGroup';
 import { EditorAlignmentButtonGroup } from './EditorAlignmentButtonGroup';
 import { EditorIndentButtonGroup } from './EditorIndentButtonGroup';
 import { EditorClearFormattingButton } from './EditorClearFormattingButton';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 import { StandaloneEditorOnly } from '@/utils/roles';
 
 interface EditorToolbarProps {
@@ -17,7 +17,7 @@ interface EditorToolbarProps {
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const { toast } = useToast();
-  const isEditor = useIsEditor();
+  const isWriter = useIsWriter();
   
   // Initialize toolbar event handlers
   useEffect(() => {
@@ -30,7 +30,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     };
   }, []);
   
-  if (!editor || !isEditor) {
+  if (!editor || !isWriter) {
     return null;
   }
 

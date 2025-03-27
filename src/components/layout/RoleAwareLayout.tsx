@@ -2,7 +2,7 @@
 import React from "react";
 import { EditorNav } from "@/components/editor-nav";
 import { RoleNavigation } from "@/components/navigation/RoleNavigation";
-import { UserRole } from "@/lib/types";
+import { UserRole, Document } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 interface RoleAwareLayoutProps {
@@ -12,7 +12,7 @@ interface RoleAwareLayoutProps {
   documentTitle?: string;
   onTitleChange?: (title: string) => Promise<void>;
   onSave?: () => Promise<void>;
-  onLoadDocument?: (documentId: string) => Promise<void>;
+  onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
   templateId?: string;
   onTemplateChange?: (templateId: string | undefined) => void;

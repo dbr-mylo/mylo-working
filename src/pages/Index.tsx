@@ -6,6 +6,7 @@ import { DesignerView } from "@/components/views/DesignerView";
 import { WriterView } from "@/components/views/WriterView";
 import { LoadingView } from "@/components/views/LoadingView";
 import { StyleTestView } from "@/components/views/StyleTestView";
+import { Document } from "@/lib/types";
 
 const Index = () => {
   const {
@@ -43,6 +44,13 @@ const Index = () => {
     );
   }
   
+  // Create a wrapper function to match the expected type
+  const handleLoadDocument = (doc: Document) => {
+    if (loadDocument) {
+      loadDocument(doc);
+    }
+  };
+  
   // Render regular document layout with appropriate view
   return (
     <RoleAwareLayout
@@ -51,7 +59,7 @@ const Index = () => {
       documentTitle={documentTitle}
       onTitleChange={handleTitleChange}
       onSave={saveDocument}
-      onLoadDocument={loadDocument}
+      onLoadDocument={handleLoadDocument}
       initialContent={initialContent}
       templateId={templateId}
     >

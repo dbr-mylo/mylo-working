@@ -1,285 +1,266 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { FileText, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { FileText, Check, Filter } from 'lucide-react';
 
 interface TestItem {
   id: string;
-  category: string;
-  component: string;
   description: string;
-  completed: boolean;
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'passed' | 'failed' | 'untested';
   notes: string;
 }
 
-const initialTestItems: TestItem[] = [
-  // Base Components Tests
-  { id: '1', category: 'Base Components', component: 'BaseFormatButtonGroup', description: 'Bold button applies bold formatting', completed: false, notes: '' },
-  { id: '2', category: 'Base Components', component: 'BaseFormatButtonGroup', description: 'Italic button applies italic formatting', completed: false, notes: '' },
-  { id: '3', category: 'Base Components', component: 'BaseListButtonGroup', description: 'Bullet list button creates bullet lists', completed: false, notes: '' },
-  { id: '4', category: 'Base Components', component: 'BaseListButtonGroup', description: 'Ordered list button creates ordered lists', completed: false, notes: '' },
-  { id: '5', category: 'Base Components', component: 'BaseAlignmentButtonGroup', description: 'Left align button aligns text to the left', completed: false, notes: '' },
-  { id: '6', category: 'Base Components', component: 'BaseAlignmentButtonGroup', description: 'Center align button centers text', completed: false, notes: '' },
-  { id: '7', category: 'Base Components', component: 'BaseAlignmentButtonGroup', description: 'Right align button aligns text to the right', completed: false, notes: '' },
-  { id: '8', category: 'Base Components', component: 'BaseIndentButtonGroup', description: 'Indent button increases paragraph indentation', completed: false, notes: '' },
-  { id: '9', category: 'Base Components', component: 'BaseIndentButtonGroup', description: 'Outdent button decreases paragraph indentation', completed: false, notes: '' },
-  { id: '10', category: 'Base Components', component: 'BaseClearFormattingButton', description: 'Clear formatting button removes all formatting', completed: false, notes: '' },
-  
-  // Writer Role Components Tests
-  { id: '11', category: 'Writer Components', component: 'WriterFormatButtonGroup', description: 'Writer role can access and use bold button', completed: false, notes: '' },
-  { id: '12', category: 'Writer Components', component: 'WriterFormatButtonGroup', description: 'Writer role can access and use italic button', completed: false, notes: '' },
-  { id: '13', category: 'Writer Components', component: 'WriterListButtonGroup', description: 'Writer role can create bullet lists', completed: false, notes: '' },
-  { id: '14', category: 'Writer Components', component: 'WriterListButtonGroup', description: 'Writer role can create ordered lists', completed: false, notes: '' },
-  { id: '15', category: 'Writer Components', component: 'WriterAlignmentButtonGroup', description: 'Writer role can align text left/center/right', completed: false, notes: '' },
-  { id: '16', category: 'Writer Components', component: 'WriterIndentButtonGroup', description: 'Writer role can indent and outdent paragraphs', completed: false, notes: '' },
-  { id: '17', category: 'Writer Components', component: 'WriterClearFormattingButton', description: 'Writer role can clear text formatting', completed: false, notes: '' },
-  
-  // Designer Role Components Tests
-  { id: '18', category: 'Designer Components', component: 'DesignerFormatButtonGroup', description: 'Designer role can access and use bold button', completed: false, notes: '' },
-  { id: '19', category: 'Designer Components', component: 'DesignerFormatButtonGroup', description: 'Designer role can access and use italic button', completed: false, notes: '' },
-  { id: '20', category: 'Designer Components', component: 'DesignerListButtonGroup', description: 'Designer role can create bullet lists', completed: false, notes: '' },
-  { id: '21', category: 'Designer Components', component: 'DesignerListButtonGroup', description: 'Designer role can create ordered lists', completed: false, notes: '' },
-  { id: '22', category: 'Designer Components', component: 'DesignerAlignmentButtonGroup', description: 'Designer role can align text left/center/right', completed: false, notes: '' },
-  { id: '23', category: 'Designer Components', component: 'DesignerIndentButtonGroup', description: 'Designer role can indent and outdent paragraphs', completed: false, notes: '' },
-  { id: '24', category: 'Designer Components', component: 'DesignerClearFormattingButton', description: 'Designer role can clear text formatting', completed: false, notes: '' },
-  
-  // Integration Tests
-  { id: '25', category: 'Integration', component: 'Toolbar Integration', description: 'Writer toolbar shows correct components', completed: false, notes: '' },
-  { id: '26', category: 'Integration', component: 'Toolbar Integration', description: 'Designer toolbar shows correct components', completed: false, notes: '' },
-  { id: '27', category: 'Integration', component: 'Role-based Access', description: 'Writer role gets writer-specific UI', completed: false, notes: '' },
-  { id: '28', category: 'Integration', component: 'Role-based Access', description: 'Designer role gets designer-specific UI', completed: false, notes: '' },
-  
-  // Color Preservation Tests
-  { id: '29', category: 'Color Preservation', component: 'Bold with Color', description: 'Bold formatting preserves text color', completed: false, notes: '' },
-  { id: '30', category: 'Color Preservation', component: 'Italic with Color', description: 'Italic formatting preserves text color', completed: false, notes: '' },
-  { id: '31', category: 'Color Preservation', component: 'Lists with Color', description: 'List formatting preserves text color', completed: false, notes: '' },
-  
-  // Edge Cases
-  { id: '32', category: 'Edge Cases', component: 'No Selection', description: 'Buttons are disabled when no text is selected (if applicable)', completed: false, notes: '' },
-  { id: '33', category: 'Edge Cases', component: 'Mixed Formatting', description: 'Buttons show correct state for mixed formatted text', completed: false, notes: '' },
-  { id: '34', category: 'Edge Cases', component: 'Long Text', description: 'Toolbar functions correctly with very long text content', completed: false, notes: '' },
-  
-  // Accessibility Tests
-  { id: '35', category: 'Accessibility', component: 'Keyboard Navigation', description: 'All toolbar functions accessible via keyboard', completed: false, notes: '' },
-  { id: '36', category: 'Accessibility', component: 'Screen Reader', description: 'Toolbar buttons have proper aria labels', completed: false, notes: '' },
-  { id: '37', category: 'Accessibility', component: 'Focus Indicators', description: 'Buttons show clear focus states', completed: false, notes: '' },
-  
-  // Mobile Tests
-  { id: '38', category: 'Responsiveness', component: 'Mobile View', description: 'Toolbar renders correctly on mobile viewports', completed: false, notes: '' },
-  { id: '39', category: 'Responsiveness', component: 'Touch Targets', description: 'Buttons are large enough for touch interaction', completed: false, notes: '' },
-];
-
 export const ManualTestChecklist = () => {
-  const [testItems, setTestItems] = useState<TestItem[]>(initialTestItems);
-  const [filter, setFilter] = useState<string>('all');
   const { toast } = useToast();
-  
-  // Toggle checkbox
-  const toggleCheckbox = (id: string) => {
-    setTestItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, completed: !item.completed } : item
+  const [filter, setFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [testItems, setTestItems] = useState<TestItem[]>([
+    // Base toolbar tests
+    { id: 'base-1', description: 'Base toolbar renders correctly', category: 'base', priority: 'high', status: 'untested', notes: '' },
+    { id: 'base-2', description: 'Text formatting buttons (bold, italic) function correctly', category: 'base', priority: 'high', status: 'untested', notes: '' },
+    { id: 'base-3', description: 'List controls create appropriate markup', category: 'base', priority: 'medium', status: 'untested', notes: '' },
+    { id: 'base-4', description: 'Text alignment controls change text alignment properly', category: 'base', priority: 'medium', status: 'untested', notes: '' },
+    { id: 'base-5', description: 'Indentation controls adjust text indentation correctly', category: 'base', priority: 'low', status: 'untested', notes: '' },
+    
+    // Writer role tests
+    { id: 'writer-1', description: 'Writer toolbar components render for writer role', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'writer-2', description: 'Writer toolbar components do NOT render for designer role', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'writer-3', description: 'Text controls display correctly for writer role', category: 'role-writer', priority: 'medium', status: 'untested', notes: '' },
+    { id: 'writer-4', description: 'EditorToolbar properly shows content for writer role only', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'writer-5', description: 'StandaloneEditorOnly component correctly shows content for writer role', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'writer-6', description: 'useIsWriter hook returns true for both writer and editor roles', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'writer-7', description: 'WriterOnly component shows content for both writer and editor roles', category: 'role-writer', priority: 'high', status: 'untested', notes: '' },
+    
+    // Designer role tests
+    { id: 'designer-1', description: 'Designer toolbar components render for designer role', category: 'role-designer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'designer-2', description: 'Designer toolbar components do NOT render for writer role', category: 'role-designer', priority: 'high', status: 'untested', notes: '' },
+    { id: 'designer-3', description: 'Designer-specific controls function properly', category: 'role-designer', priority: 'medium', status: 'untested', notes: '' },
+    { id: 'designer-4', description: 'DesignerOnly component correctly shows content for designer role only', category: 'role-designer', priority: 'high', status: 'untested', notes: '' },
+    
+    // Role-based hooks and components
+    { id: 'hooks-1', description: 'useIsWriter correctly identifies writer role', category: 'hooks', priority: 'high', status: 'untested', notes: '' },
+    { id: 'hooks-2', description: 'useIsWriter correctly identifies legacy editor role', category: 'hooks', priority: 'high', status: 'untested', notes: '' },
+    { id: 'hooks-3', description: 'useIsDesigner correctly identifies designer role', category: 'hooks', priority: 'high', status: 'untested', notes: '' },
+    { id: 'hooks-4', description: 'WriterOnly component shows content for writer role', category: 'hooks', priority: 'high', status: 'untested', notes: '' },
+    { id: 'hooks-5', description: 'DesignerOnly component shows content for designer role', category: 'hooks', priority: 'high', status: 'untested', notes: '' },
+    { id: 'hooks-6', description: 'AdminOnly component shows content for admin role', category: 'hooks', priority: 'medium', status: 'untested', notes: '' },
+    { id: 'hooks-7', description: 'MultiRoleOnly component works with an array of roles', category: 'hooks', priority: 'medium', status: 'untested', notes: '' },
+    
+    // Integration tests
+    { id: 'integration-1', description: 'Toolbar renders properly when role is changed dynamically', category: 'integration', priority: 'high', status: 'untested', notes: '' },
+    { id: 'integration-2', description: 'Role-specific components update when role changes', category: 'integration', priority: 'high', status: 'untested', notes: '' },
+    { id: 'integration-3', description: 'Role-based permissions apply correctly across the application', category: 'integration', priority: 'high', status: 'untested', notes: '' },
+  ]);
+
+  const updateTestStatus = (id: string, status: 'passed' | 'failed' | 'untested') => {
+    setTestItems(items => 
+      items.map(item => 
+        item.id === id ? { ...item, status } : item
       )
     );
+
+    toast({
+      title: `Test #${id} marked as ${status}`,
+      duration: 2000,
+    });
   };
-  
-  // Update test item notes
-  const updateNotes = (id: string, notes: string) => {
-    setTestItems(prev => 
-      prev.map(item => 
+
+  const updateTestNotes = (id: string, notes: string) => {
+    setTestItems(items => 
+      items.map(item => 
         item.id === id ? { ...item, notes } : item
       )
     );
   };
+
+  // Filter and search functionality
+  const filteredTests = testItems.filter(item => {
+    const matchesFilter = filter === 'all' || item.category === filter;
+    const matchesSearch = searchTerm === '' || 
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.id.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  // Stats calculations
+  const totalTests = filteredTests.length;
+  const passedTests = filteredTests.filter(item => item.status === 'passed').length;
+  const failedTests = filteredTests.filter(item => item.status === 'failed').length;
+  const untestedTests = filteredTests.filter(item => item.status === 'untested').length;
   
-  // Reset all tests
-  const resetTests = () => {
-    setTestItems(initialTestItems);
-    toast({
-      title: "Tests Reset",
-      description: "All test results have been reset",
-    });
+  const getStatusBadgeColor = (status: string) => {
+    switch(status) {
+      case 'passed': return 'bg-green-500';
+      case 'failed': return 'bg-red-500';
+      case 'untested': return 'bg-yellow-500';
+      default: return 'bg-gray-500';
+    }
   };
-  
-  // Generate report
-  const generateReport = () => {
-    const reportDate = new Date().toISOString().split('T')[0];
-    const totalTests = testItems.length;
-    const completedTests = testItems.filter(item => item.completed).length;
-    const passPercentage = Math.round((completedTests / totalTests) * 100);
+
+  const exportReport = () => {
+    const reportData = {
+      date: new Date().toISOString(),
+      summary: {
+        total: totalTests,
+        passed: passedTests,
+        failed: failedTests,
+        untested: untestedTests
+      },
+      tests: testItems
+    };
     
-    const report = `
-# Toolbar Manual Test Report
-
-Date: ${reportDate}
-
-## Summary
-- Total Tests: ${totalTests}
-- Completed Tests: ${completedTests}
-- Completion: ${passPercentage}%
-
-## Test Results by Category
-
-${Array.from(new Set(testItems.map(item => item.category))).map(category => {
-  const categoryItems = testItems.filter(item => item.category === category);
-  const categoryCompleted = categoryItems.filter(item => item.completed).length;
-  
-  return `
-### ${category}
-- Tests: ${categoryItems.length}
-- Completed: ${categoryCompleted}
-- Completion: ${Math.round((categoryCompleted / categoryItems.length) * 100)}%
-
-${categoryItems.map(item => `
-- [${item.completed ? 'x' : ' '}] ${item.component}: ${item.description}
-  ${item.notes ? `  Notes: ${item.notes}` : ''}
-`).join('')}
-`;
-}).join('\n')}
-`;
-    
-    // Create a downloadable text file
-    const blob = new Blob([report], { type: 'text/plain' });
+    const jsonString = JSON.stringify(reportData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
+    
     const a = document.createElement('a');
     a.href = url;
-    a.download = `toolbar-manual-test-report-${reportDate}.md`;
+    a.download = `role-based-test-report-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
     toast({
-      title: "Report Generated",
-      description: "Manual test report has been downloaded",
+      title: "Test report exported",
+      description: "Report successfully downloaded as JSON file",
+      duration: 3000,
     });
   };
-  
-  // Filter test items based on selected filter
-  const filteredItems = filter === 'all' 
-    ? testItems 
-    : testItems.filter(item => item.category === filter);
-  
-  // Calculate progress
-  const progress = {
-    total: testItems.length,
-    completed: testItems.filter(item => item.completed).length,
-    percentage: Math.round((testItems.filter(item => item.completed).length / testItems.length) * 100)
-  };
-  
-  // Get unique categories for filter
-  const categories = Array.from(new Set(testItems.map(item => item.category)));
-  
+
   return (
-    <div className="p-4 border rounded-lg">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Manual Testing Checklist</h2>
-        
-        <div className="space-x-2">
-          <Button 
-            onClick={resetTests} 
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <RefreshCw size={16} />
-            Reset
-          </Button>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Role-Based Toolbar Component Test Checklist</span>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="ml-2">
+              {totalTests} Tests
+            </Badge>
+            <Badge className="bg-green-500">
+              Passed: {passedTests}
+            </Badge>
+            <Badge className="bg-red-500">
+              Failed: {failedTests}
+            </Badge>
+            <Badge className="bg-yellow-500">
+              Untested: {untestedTests}
+            </Badge>
+          </div>
+        </CardTitle>
+        <CardDescription>
+          Manual test checklist for verifying role-based toolbar components functionality
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center mb-4 space-x-2">
+          <Input 
+            placeholder="Search tests..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
           
-          <Button 
-            onClick={generateReport} 
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <FileText size={16} />
-            Generate Report
+          <div className="flex-1" />
+          
+          <div className="flex items-center space-x-1">
+            <Filter className="w-4 h-4 mr-1" />
+            <span className="text-sm">Filter:</span>
+          </div>
+          
+          <Tabs defaultValue="all" value={filter} onValueChange={setFilter}>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="base">Base</TabsTrigger>
+              <TabsTrigger value="role-writer">Writer Role</TabsTrigger>
+              <TabsTrigger value="role-designer">Designer Role</TabsTrigger>
+              <TabsTrigger value="hooks">Hooks</TabsTrigger>
+              <TabsTrigger value="integration">Integration</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Button size="sm" variant="outline" onClick={exportReport}>
+            <FileText className="w-4 h-4 mr-1" />
+            Export Report
           </Button>
         </div>
-      </div>
-      
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex justify-between text-sm mb-1">
-          <span>Progress: {progress.completed}/{progress.total} tests completed</span>
-          <span>{progress.percentage}%</span>
-        </div>
-        <div className="w-full bg-muted rounded-full h-2.5">
-          <div 
-            className="bg-primary h-2.5 rounded-full" 
-            style={{ width: `${progress.percentage}%` }}
-          ></div>
-        </div>
-      </div>
-      
-      {/* Filters */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Button 
-          onClick={() => setFilter('all')}
-          variant={filter === 'all' ? 'default' : 'outline'}
-          size="sm"
-        >
-          All
-        </Button>
         
-        {categories.map(category => (
-          <Button 
-            key={category}
-            onClick={() => setFilter(category)}
-            variant={filter === category ? 'default' : 'outline'}
-            size="sm"
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-      
-      <Separator className="my-4" />
-      
-      {/* Checklist */}
-      <div className="space-y-6">
-        {Array.from(new Set(filteredItems.map(item => item.category))).map(category => (
-          <div key={category}>
-            <h3 className="text-lg font-semibold mb-2">{category}</h3>
-            
-            <div className="space-y-3">
-              {filteredItems
-                .filter(item => item.category === category)
-                .map(item => (
-                  <div key={item.id} className="grid grid-cols-[auto,1fr] gap-3 items-start p-3 border rounded-md bg-card">
-                    <Checkbox 
-                      id={`test-${item.id}`} 
-                      checked={item.completed}
-                      onCheckedChange={() => toggleCheckbox(item.id)}
-                    />
-                    
-                    <div>
-                      <label 
-                        htmlFor={`test-${item.id}`}
-                        className="font-medium cursor-pointer flex flex-col sm:flex-row sm:justify-between"
-                      >
-                        <span className="text-sm">{item.component}: {item.description}</span>
-                        <span className={`text-xs ${item.completed ? 'text-green-500' : 'text-muted-foreground'}`}>
-                          {item.completed ? 'Completed' : 'Pending'}
-                        </span>
-                      </label>
+        <ScrollArea className="h-[600px] pr-4">
+          <div className="space-y-4">
+            {filteredTests.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No tests match your current filters
+              </div>
+            ) : (
+              filteredTests.map((test) => (
+                <Card key={test.id} className="p-4">
+                  <div className="flex items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <span className="font-medium text-md">{test.id}: {test.description}</span>
+                        <Badge variant="outline" className="ml-2">
+                          {test.category}
+                        </Badge>
+                        <Badge variant="outline" className="ml-2">
+                          {test.priority} priority
+                        </Badge>
+                        <Badge className={`ml-2 ${getStatusBadgeColor(test.status)}`}>
+                          {test.status}
+                        </Badge>
+                      </div>
                       
-                      <textarea
-                        placeholder="Add notes here..."
-                        className="mt-2 w-full p-2 text-sm bg-muted/50 border rounded-md min-h-[60px]"
-                        value={item.notes}
-                        onChange={(e) => updateNotes(item.id, e.target.value)}
+                      <Textarea 
+                        placeholder="Add test notes here..."
+                        value={test.notes}
+                        onChange={(e) => updateTestNotes(test.id, e.target.value)}
+                        className="min-h-[80px] mb-2"
                       />
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant={test.status === 'passed' ? 'default' : 'outline'} 
+                          className="flex items-center" 
+                          onClick={() => updateTestStatus(test.id, 'passed')}
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Pass
+                        </Button>
+                        
+                        <Button 
+                          size="sm" 
+                          variant={test.status === 'failed' ? 'destructive' : 'outline'} 
+                          onClick={() => updateTestStatus(test.id, 'failed')}
+                        >
+                          Fail
+                        </Button>
+                        
+                        <Button 
+                          size="sm" 
+                          variant={test.status === 'untested' ? 'secondary' : 'outline'} 
+                          onClick={() => updateTestStatus(test.id, 'untested')}
+                        >
+                          Mark Untested
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                ))}
-            </div>
+                </Card>
+              ))
+            )}
           </div>
-        ))}
-      </div>
-    </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,10 +8,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/utils/roles";
 import { DesignerRoute, WriterRoute } from "@/components/routes/ProtectedRoutes";
+import React from "react";
 import Index from "./pages/Index";
 import DocumentSelection from "./pages/DocumentSelection";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import RegressionTestRoute from "./routes/RegressionTestRoute";
 
 const queryClient = new QueryClient();
 
@@ -96,7 +99,7 @@ const AppRoutes = () => (
     <Route path="/content/*" element={<ProtectedRoute><WriterRoute><WriterPages /></WriterRoute></ProtectedRoute>} />
     
     <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
-    <Route path="/testing/regression" element={<React.lazy(() => import('./routes/RegressionTestRoute'))} />
+    <Route path="/testing/regression" element={<RegressionTestRoute />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

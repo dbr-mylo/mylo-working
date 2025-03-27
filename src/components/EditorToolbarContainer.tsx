@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toolbar } from './editor/Toolbar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,13 +17,17 @@ export const EditorToolbarContainer = ({
   const { role } = useAuth();
   const isWriter = useIsWriter();
   
-  // Only show the toolbar if we're in writer role and it should be editable
+  // Early return if no editor or not editable
   if (!editor || !isEditable) {
     return null;
   }
   
-  // We're removing the isWriter check here since it might be blocking the toolbar
-  // We'll still keep the data-role attribute for debugging purposes
+  // Only show toolbar for writer role
+  if (!isWriter) {
+    console.log("Toolbar hidden: User role is not writer", role);
+    return null;
+  }
+  
   return (
     <div className="editor-toolbar-container border-b border-editor-border bg-white px-4 py-1.5 relative z-50" data-role={role}>
       <div className="mx-auto">

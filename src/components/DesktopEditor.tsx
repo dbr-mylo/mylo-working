@@ -2,14 +2,14 @@
 /**
  * DesktopEditor Component
  * 
- * This component provides a split view for the editor role,
+ * This component provides a split view for the writer role,
  * showing both the editable document and preview.
  */
 
 import React from 'react';
 import { EditorPanel } from '@/components/EditorPanel';
 import { DocumentPreview } from '@/components/design/DocumentPreview';
-import { useIsEditor } from '@/utils/roles';
+import { useIsWriter } from '@/utils/roles';
 import { Editor } from '@tiptap/react';
 import { useTemplateStyles } from '@/hooks/useTemplateStyles';
 
@@ -30,13 +30,13 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
   templateId,
   editorInstance
 }) => {
-  const isEditor = useIsEditor();
+  const isWriter = useIsWriter();
   
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);
   
-  if (!isEditor) {
-    console.warn("DesktopEditor used outside of editor role");
+  if (!isWriter) {
+    console.warn("DesktopEditor used outside of writer role");
     return null;
   }
   

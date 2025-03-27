@@ -3,8 +3,7 @@
  * EditorPanel Component
  * 
  * This component is specifically for the writer role.
- * It should NOT include designer-specific functionality.
- * Use the useIsWriter() hook from roles module to enforce this separation.
+ * It provides the editable document view with proper dimensions.
  */
 
 import { RichTextEditor } from "@/components/RichTextEditor";
@@ -12,8 +11,9 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsWriter, WriterOnly } from "@/utils/roles";
+import { useIsWriter } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
+import { EditorToolbarContainer } from "@/components/EditorToolbarContainer";
 
 export const EditorPanel = ({
   content,
@@ -24,7 +24,7 @@ export const EditorPanel = ({
 }: EditorPanelProps & { editorInstance?: Editor | null }) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
-  const isWriter = useIsWriter(); // Confirm we're in writer role
+  const isWriter = useIsWriter();
 
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);
@@ -39,24 +39,35 @@ export const EditorPanel = ({
     onContentChange(newContent);
   };
   
+  // Early return if not writer role
+  if (!isWriter) {
+    console.warn("EditorPanel used outside of writer role context");
+    return null;
+  }
+  
   return (
-    <WriterOnly>
-      <div className="p-4 md:p-8">
-        <div className="mx-auto">
-          {/* Document container with proper dimensions */}
-          <div className="mx-auto" style={{ width: pageWidth }}>
-            <RichTextEditor 
-              content={content} 
-              onUpdate={handleContentUpdate}
-              isEditable={isEditable}
-              hideToolbar={true} // Always hide the toolbar since we're showing it in the container
-              templateStyles={customStyles}
-              externalEditorInstance={editorInstance}
-              externalToolbar={true}
-            />
-          </div>
+    <div className="p-4 md:p-8">
+      {/* External editor toolbar - shown when editor instance is provided */}
+      {editorInstance && isEditable && (
+        <div className="mb-4">
+          <EditorToolbarContainer editor={editorInstance} isEditable={isEditable} />
+        </div>
+      )}
+      
+      <div className="mx-auto">
+        {/* Document container with proper dimensions */}
+        <div className="mx-auto" style={{ width: pageWidth }}>
+          <RichTextEditor 
+            content={content} 
+            onUpdate={handleContentUpdate}
+            isEditable={isEditable}
+            hideToolbar={!!editorInstance} // Hide the toolbar if we have an external one
+            templateStyles={customStyles}
+            externalEditorInstance={editorInstance}
+            externalToolbar={!!editorInstance}
+          />
         </div>
       </div>
-    </WriterOnly>
+    </div>
   );
 };

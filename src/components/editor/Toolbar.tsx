@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { EditorToolbar } from './toolbar/EditorToolbar';
 import { TextControls } from './toolbar/TextControls';
-import { useIsWriter } from '@/utils/roles';
 import { WriterFormatButtonGroup } from '@/components/toolbar/writer/WriterFormatButtonGroup';
 import { WriterListButtonGroup } from '@/components/toolbar/writer/WriterListButtonGroup';
 import { WriterAlignmentButtonGroup } from '@/components/toolbar/writer/WriterAlignmentButtonGroup';
@@ -15,13 +13,10 @@ interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
-  // Remove the isWriter check here since EditorToolbarContainer already handles that
-  
   if (!editor) {
     return null;
   }
 
-  // Let's use the EditorToolbar for all users now
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
   
   return (

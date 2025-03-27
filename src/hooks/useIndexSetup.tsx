@@ -42,6 +42,7 @@ export const useIndexSetup = () => {
     }
   }, [documentMeta]);
   
+  // Determine editability based on user role
   const isEditorEditable = isWriter;
   const isDesignEditable = isDesigner;
   
@@ -52,10 +53,13 @@ export const useIndexSetup = () => {
     isEditable: isEditorEditable
   });
   
-  // Store the editor instance for sharing
+  // Store the editor instance for sharing when available
   useEffect(() => {
     if (editorSetup.editor) {
+      console.log("Setting editor instance in useIndexSetup");
       setEditorInstance(editorSetup.editor);
+    } else {
+      console.log("Editor instance not available yet in useIndexSetup");
     }
   }, [editorSetup.editor]);
   
@@ -72,7 +76,6 @@ export const useIndexSetup = () => {
   
   // Clear editor cache on component mount to reset problematic styles
   useEffect(() => {
-    // Clear styles caches on component mount - more thorough approach
     try {
       console.log("Performing initial cache cleanup");
       // Standard cleanup
@@ -97,6 +100,7 @@ export const useIndexSetup = () => {
       }
       
       console.log("Index component rendered with documentId:", documentId);
+      console.log("Role:", role, "isWriter:", isWriter, "isDesigner:", isDesigner);
       console.log("Initial content:", content ? `Length: ${content.length}` : "empty");
     } catch (error) {
       console.error("Error clearing cache on mount:", error);

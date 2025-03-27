@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useIndexSetup } from "@/hooks/useIndexSetup";
-import { DocumentLayout } from "@/components/layout/DocumentLayout";
+import { RoleAwareLayout } from "@/components/layout/RoleAwareLayout";
 import { DesignerView } from "@/components/views/DesignerView";
 import { WriterView } from "@/components/views/WriterView";
 import { LoadingView } from "@/components/views/LoadingView";
@@ -45,7 +45,7 @@ const Index = () => {
   
   // Render regular document layout with appropriate view
   return (
-    <DocumentLayout
+    <RoleAwareLayout
       role={role}
       content={content}
       documentTitle={documentTitle}
@@ -54,10 +54,6 @@ const Index = () => {
       onLoadDocument={loadDocument}
       initialContent={initialContent}
       templateId={templateId}
-      onTemplateChange={setTemplateId}
-      editorInstance={editorInstance}
-      isEditorEditable={isEditorEditable}
-      isWriter={isWriter}
     >
       {isDesigner ? (
         <DesignerView 
@@ -75,7 +71,7 @@ const Index = () => {
           editorInstance={editorInstance}
         />
       )}
-    </DocumentLayout>
+    </RoleAwareLayout>
   );
 };
 

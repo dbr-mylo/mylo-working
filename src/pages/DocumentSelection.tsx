@@ -1,186 +1,83 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { RoleAwareLayout } from "@/components/layout/RoleAwareLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import type { Document } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { DocumentList } from "@/components/document/DocumentList";
-import { DeleteDocumentDialog } from "@/components/document/DeleteDocumentDialog";
-import {
-  fetchUserDocumentsFromSupabase,
-  fetchGuestDocumentsFromLocalStorage,
-  deleteDocumentFromSupabase,
-  deleteDocumentFromLocalStorage,
-  deduplicateDocuments
-} from "@/utils/documentUtils";
+import { useIsWriter, useIsDesigner, useIsAdmin } from "@/utils/roles";
 
 const DocumentSelection = () => {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const { user, role } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const { role } = useAuth();
+  const isWriter = useIsWriter();
+  const isDesigner = useIsDesigner();
+  const isAdmin = useIsAdmin();
   
-  const isDesigner = role === "designer";
-  const itemType = isDesigner ? "template" : "document";
-  const itemTypePlural = isDesigner ? "templates" : "documents";
-
-  useEffect(() => {
-    fetchUserDocuments();
-  }, [user, role]);
-
-  const fetchUserDocuments = async () => {
-    setIsLoading(true);
-    try {
-      if (user) {
-        const data = await fetchUserDocumentsFromSupabase(user.id);
-        const uniqueDocuments = deduplicateDocuments(data);
-        setDocuments(uniqueDocuments);
-      } else if (role) {
-        try {
-          // Handle both 'writer' and 'editor' (legacy) roles
-          const storageKey = role === 'designer' ? 'designerDocuments' : 
-                            (role === 'writer' ? 'writerDocuments' : 'editorDocuments');
-          
-          // For backward compatibility
-          let uniqueDocs;
-          if (role === 'writer') {
-            // Try to get documents from both 'writerDocuments' and 'editorDocuments'
-            const writerDocs = JSON.parse(localStorage.getItem('writerDocuments') || '[]');
-            const legacyEditorDocs = JSON.parse(localStorage.getItem('editorDocuments') || '[]');
-            
-            // Merge and deduplicate
-            uniqueDocs = deduplicateDocuments([...writerDocs, ...legacyEditorDocs]);
-            
-            // Save merged docs back to writerDocuments
-            localStorage.setItem('writerDocuments', JSON.stringify(uniqueDocs));
-          } else {
-            uniqueDocs = fetchGuestDocumentsFromLocalStorage(role);
-          }
-          
-          setDocuments(uniqueDocs);
-        } catch (error) {
-          console.error(`Error loading ${role} ${itemTypePlural}:`, error);
-          setDocuments([]);
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching ${itemTypePlural}:`, error);
-      toast({
-        title: `Error loading ${itemTypePlural}`,
-        description: `There was a problem loading your ${itemTypePlural}.`,
-        variant: "destructive",
-      });
-      setDocuments([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCreateNewDocument = () => {
-    navigate("/editor");
-  };
-
-  const handleOpenDocument = (docId: string) => {
-    navigate(`/editor/${docId}`);
-  };
-
-  const confirmDelete = (e: React.MouseEvent, docId: string) => {
-    e.stopPropagation();
-    setDocumentToDelete(docId);
-  };
-
-  const cancelDelete = () => {
-    setDocumentToDelete(null);
-  };
-
-  const handleDeleteDocument = async () => {
-    if (!documentToDelete) return;
-    
-    setIsDeleting(true);
-    try {
-      if (user) {
-        await deleteDocumentFromSupabase(documentToDelete, user.id);
-      } else if (role) {
-        // Handle both writer and legacy editor roles
-        const storageRole = role === 'writer' ? 'writer' : role;
-        const updatedDocs = deleteDocumentFromLocalStorage(documentToDelete, storageRole);
-        setDocuments(updatedDocs);
-        
-        // For writer role, also clean up any documents in the legacy 'editorDocuments'
-        if (role === 'writer') {
-          try {
-            const legacyDocs = JSON.parse(localStorage.getItem('editorDocuments') || '[]');
-            const filteredLegacyDocs = legacyDocs.filter((doc: Document) => doc.id !== documentToDelete);
-            localStorage.setItem('editorDocuments', JSON.stringify(filteredLegacyDocs));
-          } catch (e) {
-            console.error("Error cleaning legacy editor documents:", e);
-          }
-        }
-      }
-      
-      setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentToDelete));
-      
-      toast({
-        title: `${isDesigner ? "Template" : "Document"} deleted`,
-        description: `Your ${itemType} has been successfully deleted.`,
-      });
-    } catch (error) {
-      console.error(`Error deleting ${itemType}:`, error);
-      toast({
-        title: `Error deleting ${itemType}`,
-        description: `There was a problem deleting your ${itemType}.`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-      setDocumentToDelete(null);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-editor-bg p-8">
-      <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
-        <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-editor-heading mb-2">
-            Your {isDesigner ? "Design Templates" : "Documents"}
-          </h1>
-          <p className="text-editor-text">
-            Select a {itemType} to edit or create a new one
-          </p>
-        </header>
+    <RoleAwareLayout role={role}>
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-2xl font-bold mb-6">Document Dashboard</h1>
         
-        <div className="mb-6">
-          <Button 
-            onClick={handleCreateNewDocument}
-            className="text-base bg-black text-white hover:bg-black/80"
-          >
-            Create New {isDesigner ? "Template" : "Document"}
-          </Button>
-        </div>
-
-        <div className="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto">
-          <DocumentList
-            documents={documents}
-            isLoading={isLoading}
-            onDeleteDocument={confirmDelete}
-            onSelectDocument={handleOpenDocument}
-            isDesigner={isDesigner}
-          />
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Writer Section */}
+          {(isWriter || isAdmin) && (
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <h2 className="text-xl font-semibold mb-4">Writer Dashboard</h2>
+              <p className="text-gray-600 mb-4">
+                Access and manage your documents and drafts.
+              </p>
+              <div className="space-y-2">
+                <a 
+                  href="/content/write" 
+                  className="block p-3 bg-blue-50 hover:bg-blue-100 rounded-md"
+                >
+                  Create New Document
+                </a>
+                <a 
+                  href="/content/documents" 
+                  className="block p-3 bg-blue-50 hover:bg-blue-100 rounded-md"
+                >
+                  View All Documents
+                </a>
+                <a 
+                  href="/content/drafts" 
+                  className="block p-3 bg-blue-50 hover:bg-blue-100 rounded-md"
+                >
+                  View Drafts
+                </a>
+              </div>
+            </div>
+          )}
+          
+          {/* Designer Section */}
+          {(isDesigner || isAdmin) && (
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <h2 className="text-xl font-semibold mb-4">Designer Dashboard</h2>
+              <p className="text-gray-600 mb-4">
+                Manage templates and design settings.
+              </p>
+              <div className="space-y-2">
+                <a 
+                  href="/design/templates" 
+                  className="block p-3 bg-purple-50 hover:bg-purple-100 rounded-md"
+                >
+                  Manage Templates
+                </a>
+                <a 
+                  href="/design/layout" 
+                  className="block p-3 bg-purple-50 hover:bg-purple-100 rounded-md"
+                >
+                  Edit Layouts
+                </a>
+                <a 
+                  href="/design/design-settings" 
+                  className="block p-3 bg-purple-50 hover:bg-purple-100 rounded-md"
+                >
+                  Design Settings
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      <DeleteDocumentDialog
-        isOpen={documentToDelete !== null}
-        isDeleting={isDeleting}
-        onCancel={cancelDelete}
-        onConfirm={handleDeleteDocument}
-        isDesigner={isDesigner}
-      />
-    </div>
+    </RoleAwareLayout>
   );
 };
 

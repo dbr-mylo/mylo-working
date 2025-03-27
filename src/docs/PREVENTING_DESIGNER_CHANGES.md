@@ -3,58 +3,83 @@
 
 This document outlines the strategies implemented to prevent accidental modifications to designer-specific functionality.
 
-## 1. Warning Comments
+## 1. Role-Based Component Structure
 
-All designer-related components now include prominent warning comments at the top of the file. These comments clearly indicate which parts of the code should not be modified, especially sections that handle the designer role.
+All components are now organized with clear role separation:
+- `src/components/designer/...` - Designer-specific components
+- `src/components/editor/...` - Writer-specific components
+- `src/components/rich-text/...` - Shared rich text editor functionality
 
-Example:
+## 2. Role-Specific Utility Hooks
+
+The system now uses dedicated hooks for role checking:
+- `useIsDesigner()` - Check if current user has designer role
+- `useIsWriter()` - Check if current user has writer role
+- `useIsAdmin()` - Check if current user has admin role
+- `useHasAnyRole([roles])` - Check if user has any of the specified roles
+
+## 3. Early Return Pattern
+
+All role-specific components now include early returns with warning logs:
+```tsx
+const MyDesignerComponent = () => {
+  const isDesigner = useIsDesigner();
+  
+  if (!isDesigner) {
+    console.warn("MyDesignerComponent used outside of designer role context");
+    return null;
+  }
+  
+  // Designer-specific functionality
+};
+```
+
+## 4. Role-Based Conditional Rendering
+
+Higher-level components now conditionally render based on user role:
+```tsx
+const DocumentContent = () => {
+  const isDesigner = useIsDesigner();
+  const isWriter = useIsWriter();
+  
+  if (isDesigner) {
+    return <DesignerView />;
+  }
+  
+  if (isWriter) {
+    return <WriterView />;
+  }
+  
+  return <AccessDenied />;
+};
+```
+
+## 5. Role-Specific Component Wrappers
+
+Specialized components are available for role-based rendering:
+- `<DesignerOnly>` - Only renders content for designer role
+- `<WriterOnly>` - Only renders content for writer role
+- `<AdminOnly>` - Only renders content for admin role
+- `<MultiRoleOnly roles={['designer', 'admin']}>` - Renders for multiple roles
+
+## 6. Warning Documentation
+
+All designer components now include warning comments:
 ```tsx
 /**
- * WARNING: This component contains role-specific rendering logic.
- * Changes to the designer role functionality (isDesigner === true) should be avoided.
- * Only modify the editor role section unless absolutely necessary.
+ * WARNING: CORE DESIGNER COMPONENT
+ * This component is specifically for the designer role and should not be modified
+ * unless absolutely necessary. Changes here directly impact the designer experience.
  */
 ```
 
-## 2. Role-Specific Rendering Utilities
-
-We've implemented utility components and hooks in `src/utils/roleSpecificRendering.tsx` to enforce separation between designer and editor code paths:
-
-- `<DesignerOnly>` and `<EditorOnly>` components
-- `useIsDesigner()` and `useIsEditor()` hooks
-- `useRoleSpecificValue()` hook for role-based values
-- `renderForRole()` function for conditional rendering
-
-## 3. Role-Based Feature Flags
-
-The `src/utils/roleConfig.ts` file provides a centralized configuration system for role-specific features:
-
-- Feature flags indicate which functionality is available to which role
-- Helper functions to check role permissions
-- Prevents accidental enabling of designer features for editors
-
-## 4. Documentation
-
-A detailed documentation file at `src/docs/DESIGNER_COMPONENTS.md` lists all designer-specific components that should not be modified.
-
-## 5. Git Hook Protection
-
-A pre-commit hook script at `.github/designer-protect.js` can be installed to prevent accidental commits that modify designer files.
-
 ## Best Practices
 
-When working with components that support both roles:
+When developing new features:
 
-1. Always use the role-specific utilities and hooks
-2. Maintain clear separation between designer and editor code paths
-3. When in doubt, use the `<DesignerOnly>` or `<EditorOnly>` components
-4. Test all changes with both roles before committing
-
-## Installing the Git Hook
-
-To enable the git hook protection:
-
-1. Copy `.github/designer-protect.js` to `.git/hooks/pre-commit`
-2. Make it executable: `chmod +x .git/hooks/pre-commit`
-
-This will prevent accidental commits that modify designer files.
+1. Always use the role-specific hooks for role checks
+2. Place components in the correct role-specific directories
+3. Use early returns with console warnings
+4. Add appropriate warning comments to designer components
+5. Test all changes with both designer and writer roles
+6. Use the role-specific component wrappers when possible

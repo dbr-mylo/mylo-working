@@ -5,3 +5,4 @@ export * from './useToolbarTestResult';
 export * from './useToolbarTestExecution';
 export * from './usePersistentTestResults';
 export * from './useTestFiltering';
+export * from './test-runners';

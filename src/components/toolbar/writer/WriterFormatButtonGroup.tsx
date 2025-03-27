@@ -2,7 +2,6 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { BaseFormatButtonGroup } from '../base/BaseFormatButtonGroup';
-import { useIsWriter } from '@/utils/roles';
 
 interface WriterFormatButtonGroupProps {
   editor: Editor;
@@ -13,14 +12,7 @@ export const WriterFormatButtonGroup: React.FC<WriterFormatButtonGroupProps> = (
   editor,
   currentColor
 }) => {
-  const isWriter = useIsWriter();
-  
-  // Check if this component is used in the correct role context
-  if (!isWriter) {
-    console.warn("WriterFormatButtonGroup used outside of writer role context");
-    return null;
-  }
-  
+  // Remove redundant role checking since parent component already does this
   return (
     <BaseFormatButtonGroup 
       editor={editor} 

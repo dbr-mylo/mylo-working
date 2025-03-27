@@ -16,7 +16,7 @@ export function useRoleSpecificValue<T>(designerValue: T, writerValue: T, adminV
   
   if (role === 'designer') {
     return designerValue;
-  } else if (role === 'writer') {
+  } else if (role === 'writer' || role === 'editor') {
     return writerValue;
   } else if (role === 'admin') {
     return adminValue;
@@ -34,11 +34,11 @@ export function useIsDesigner(): boolean {
 }
 
 /**
- * Hook to check if current user has writer role
+ * Hook to check if current user has writer role (includes legacy 'editor' role)
  */
 export function useIsWriter(): boolean {
   const { role } = useAuth();
-  return role === 'writer';
+  return role === 'writer' || role === 'editor' || role === 'admin';
 }
 
 /**
@@ -54,6 +54,10 @@ export function useIsAdmin(): boolean {
  */
 export function useHasAnyRole(roles: UserRole[]): boolean {
   const { role } = useAuth();
+  // Special case for 'editor' role - map it to 'writer' for compatibility
+  if (role === 'editor' && roles.includes('writer')) {
+    return true;
+  }
   return role ? roles.includes(role) : false;
 }
 
@@ -68,7 +72,7 @@ export function useIsDesignerOrAdmin(): boolean {
  * Hook to check if user has writer or admin role
  */
 export function useIsWriterOrAdmin(): boolean {
-  return useHasAnyRole(['writer', 'admin']);
+  return useHasAnyRole(['writer', 'admin']) || useIsEditor(); // Include legacy editor role
 }
 
 /**
@@ -97,7 +101,8 @@ export function useCanUseTemplates(): boolean {
  * @deprecated Use useIsWriter instead
  */
 export function useIsEditor(): boolean {
-  return useIsWriter();
+  const { role } = useAuth();
+  return role === 'editor' || role === 'writer';
 }
 
 /**

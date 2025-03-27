@@ -2,7 +2,6 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { BaseClearFormattingButton } from '../base/BaseClearFormattingButton';
-import { useIsWriter } from '@/utils/roles';
 
 interface WriterClearFormattingButtonProps {
   editor: Editor;
@@ -11,14 +10,7 @@ interface WriterClearFormattingButtonProps {
 export const WriterClearFormattingButton: React.FC<WriterClearFormattingButtonProps> = ({
   editor
 }) => {
-  const isWriter = useIsWriter();
-  
-  // Check if this component is used in the correct role context
-  if (!isWriter) {
-    console.warn("WriterClearFormattingButton used outside of writer role context");
-    return null;
-  }
-  
+  // Remove redundant role checking since parent component already does this
   return (
     <BaseClearFormattingButton 
       editor={editor} 

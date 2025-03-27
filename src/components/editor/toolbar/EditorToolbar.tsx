@@ -3,8 +3,7 @@ import React, { useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { useToast } from '@/hooks/use-toast';
 import { TextControls } from './TextControls';
-import { useIsWriter } from '@/utils/roles';
-import { StandaloneEditorOnly } from '@/utils/roles';
+import { StandaloneWriterOnly } from '@/utils/roles';
 import { WriterFormatButtonGroup } from '@/components/toolbar/writer/WriterFormatButtonGroup';
 import { WriterListButtonGroup } from '@/components/toolbar/writer/WriterListButtonGroup';
 import { WriterAlignmentButtonGroup } from '@/components/toolbar/writer/WriterAlignmentButtonGroup';
@@ -17,7 +16,6 @@ interface EditorToolbarProps {
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const { toast } = useToast();
-  const isWriter = useIsWriter();
   
   // Initialize toolbar event handlers
   useEffect(() => {
@@ -30,14 +28,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     };
   }, []);
   
-  if (!editor || !isWriter) {
+  if (!editor) {
     return null;
   }
 
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
 
   return (
-    <StandaloneEditorOnly>
+    <StandaloneWriterOnly>
       <div className="rounded-md bg-background p-1 flex flex-wrap gap-3 items-center editor-toolbar-buttons">
         {/* Text styling controls - font family, font size and color */}
         <TextControls editor={editor} />
@@ -57,6 +55,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         {/* Clear formatting button */}
         <WriterClearFormattingButton editor={editor} />
       </div>
-    </StandaloneEditorOnly>
+    </StandaloneWriterOnly>
   );
 };

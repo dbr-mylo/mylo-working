@@ -6,8 +6,10 @@ import { RoleComponentProps } from './types';
 /**
  * Component that only renders its children when the current user has the 'writer' role.
  * Can optionally show fallback content for other roles.
+ * 
+ * This includes both 'writer' and legacy 'editor' roles for backward compatibility.
  */
-export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({ 
+export const StandaloneWriterOnly: React.FC<RoleComponentProps> = ({ 
   children, 
   fallback = null 
 }) => {
@@ -15,3 +17,8 @@ export const StandaloneEditorOnly: React.FC<RoleComponentProps> = ({
   
   return isWriter ? <>{children}</> : <>{fallback}</>;
 };
+
+/**
+ * @deprecated Use StandaloneWriterOnly instead
+ */
+export const StandaloneEditorOnly = StandaloneWriterOnly;

@@ -20,7 +20,12 @@ export const RoleOnly: React.FC<{
 }> = ({ role, children, fallback = null }) => {
   const { role: userRole } = useAuth();
   
-  if (userRole === role) {
+  // Special case for writer/editor role compatibility
+  if (role === 'writer' && (userRole === 'writer' || userRole === 'editor' || userRole === 'admin')) {
+    return <>{children}</>;
+  }
+  
+  if (userRole === role || (userRole === 'admin' && role !== 'admin')) {
     return <>{children}</>;
   }
   
@@ -58,6 +63,11 @@ export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({
 }) => {
   const { role: userRole } = useAuth();
   
+  // Special case for editor role mapped to writer
+  if (userRole === 'editor' && roles.includes('writer')) {
+    return <>{children}</>;
+  }
+  
   if (userRole && roles.includes(userRole)) {
     return <>{children}</>;
   }
@@ -88,6 +98,11 @@ export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({
   fallback = null 
 }) => {
   const { role: userRole } = useAuth();
+  
+  // Special case for editor role mapped to writer
+  if (userRole === 'editor' && excludeRoles.includes('writer')) {
+    return <>{fallback}</>;
+  }
   
   if (userRole && !excludeRoles.includes(userRole)) {
     return <>{children}</>;

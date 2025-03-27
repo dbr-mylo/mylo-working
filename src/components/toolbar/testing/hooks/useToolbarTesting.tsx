@@ -12,12 +12,37 @@ export interface TestResult {
 }
 
 export const useToolbarTesting = () => {
-  const [currentTest, setCurrentTest] = useState('base');
-  const [content, setContent] = useState('<p>Test content for toolbar components</p>');
+  const [currentTest, setCurrentTest] = useState<string>(() => {
+    const savedTest = localStorage.getItem('toolbar-current-test');
+    return savedTest || 'base';
+  });
+  
+  const [content, setContent] = useState<string>(() => {
+    const savedContent = localStorage.getItem('toolbar-content');
+    return savedContent || '<p>Test content for toolbar components</p>';
+  });
+  
   const { toast } = useToast();
-  const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
+  
+  const [testResults, setTestResults] = useState<Record<string, TestResult>>(() => {
+    const savedResults = localStorage.getItem('toolbar-test-results');
+    if (savedResults) {
+      try {
+        return JSON.parse(savedResults);
+      } catch (e) {
+        console.error('Error parsing saved test results:', e);
+        return {};
+      }
+    }
+    return {};
+  });
+  
   const { role } = useAuth();
-  const [selectedRoleForTesting, setSelectedRoleForTesting] = useState<UserRole | null>(role);
+  
+  const [selectedRoleForTesting, setSelectedRoleForTesting] = useState<UserRole | null>(() => {
+    const savedRole = localStorage.getItem('toolbar-selected-role');
+    return savedRole ? savedRole as UserRole : role;
+  });
   
   // Get role hooks for direct testing
   const isWriter = useIsWriter();
@@ -27,6 +52,33 @@ export const useToolbarTesting = () => {
   useEffect(() => {
     setSelectedRoleForTesting(role);
   }, [role]);
+
+  // Save current test to localStorage
+  useEffect(() => {
+    localStorage.setItem('toolbar-current-test', currentTest);
+  }, [currentTest]);
+  
+  // Save content to localStorage
+  useEffect(() => {
+    localStorage.setItem('toolbar-content', content);
+  }, [content]);
+  
+  // Save test results to localStorage
+  useEffect(() => {
+    localStorage.setItem('toolbar-test-results', JSON.stringify(testResults));
+  }, [testResults]);
+  
+  // Save selected role to localStorage
+  useEffect(() => {
+    if (selectedRoleForTesting) {
+      localStorage.setItem('toolbar-selected-role', selectedRoleForTesting);
+    }
+  }, [selectedRoleForTesting]);
+
+  const resetTestResults = () => {
+    setTestResults({});
+    localStorage.removeItem('toolbar-test-results');
+  };
 
   const runTest = async (testType: string) => {
     setTestResults({});
@@ -207,6 +259,7 @@ export const useToolbarTesting = () => {
     setTestResults,
     selectedRoleForTesting,
     setSelectedRoleForTesting,
-    runTest
+    runTest,
+    resetTestResults
   };
 };

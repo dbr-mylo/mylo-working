@@ -22,7 +22,8 @@ export const ToolbarTester = () => {
     testResults, 
     selectedRoleForTesting, 
     setSelectedRoleForTesting,
-    runTest 
+    runTest,
+    resetTestResults
   } = useToolbarTesting();
   
   const { role } = useAuth();
@@ -98,7 +99,7 @@ export const ToolbarTester = () => {
           <TestResults results={testResults} />
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button variant="outline" onClick={() => window.location.reload()}>
+          <Button variant="outline" onClick={resetTestResults}>
             Reset Tests
           </Button>
         </CardFooter>

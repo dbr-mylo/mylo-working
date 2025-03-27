@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserRole } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
 import { RoleSystemAnalysis } from './RoleSystemAnalysis';
 
 export const ToolbarTester = () => {
@@ -19,7 +19,6 @@ export const ToolbarTester = () => {
   const { role, continueAsGuestWriter, continueAsGuestDesigner, continueAsGuestAdmin, continueAsGuestEditor } = useAuth();
   const [selectedRoleForTesting, setSelectedRoleForTesting] = useState<UserRole | null>(role);
   
-  // Update selected role when auth role changes
   useEffect(() => {
     setSelectedRoleForTesting(role);
   }, [role]);
@@ -27,7 +26,6 @@ export const ToolbarTester = () => {
   const changeTestingRole = (newRole: UserRole) => {
     setSelectedRoleForTesting(newRole);
     
-    // Use the appropriate function to change the role
     switch(newRole) {
       case 'writer':
         continueAsGuestWriter();
@@ -51,7 +49,6 @@ export const ToolbarTester = () => {
   };
   
   const runTest = async (testType: string) => {
-    // Simulating a test run
     setTestResults({});
     
     toast({
@@ -60,10 +57,8 @@ export const ToolbarTester = () => {
       duration: 3000,
     });
     
-    // Simulate test execution time
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Mock test results
     let results: Record<string, { passed: boolean; message: string }> = {};
     
     if (testType === 'base') {
@@ -74,8 +69,6 @@ export const ToolbarTester = () => {
         'base-lists': { passed: true, message: 'List controls create appropriate markup' },
       };
     } else if (testType === 'writer') {
-      // Role-specific tests for writer toolbar components
-      // These will change based on the current role
       const writerRoleTest = role === 'writer' || role === 'editor' || role === 'admin';
       const writerComponentsVisible = writerRoleTest;
       
@@ -106,7 +99,6 @@ export const ToolbarTester = () => {
         },
       };
     } else if (testType === 'designer') {
-      // Role-specific tests for designer toolbar components
       const designerRoleTest = role === 'designer' || role === 'admin';
       const designerComponentsVisible = designerRoleTest;
       
@@ -137,10 +129,6 @@ export const ToolbarTester = () => {
         },
       };
     } else if (testType === 'role-hooks') {
-      // Tests specifically for role hooks and components
-      
-      // This simulates testing all the hooks - in a real implementation
-      // we would actually call the hooks and check their return values
       const isWriterHookCorrect = (role === 'writer' || role === 'editor' || role === 'admin');
       const isDesignerHookCorrect = (role === 'designer' || role === 'admin');
       const isAdminHookCorrect = (role === 'admin');
@@ -217,7 +205,7 @@ export const ToolbarTester = () => {
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <span className="font-medium">Current Role:</span>
-                <Badge variant="outline" className="text-sm font-medium">
+                <Badge className="text-sm font-medium">
                   {role || 'No Role'}
                 </Badge>
               </div>
@@ -309,7 +297,7 @@ export const ToolbarTester = () => {
                   <Shield className="h-4 w-4" />
                   <AlertTitle>Role Context</AlertTitle>
                   <AlertDescription>
-                    Current role: <Badge variant="outline">{role || 'No Role'}</Badge>
+                    Current role: <Badge>{role || 'No Role'}</Badge>
                   </AlertDescription>
                 </Alert>
               </div>

@@ -28,10 +28,10 @@ export const TestResults: React.FC<TestResultsProps> = ({ results }) => {
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-medium">Test Results</h3>
         <div className="flex items-center gap-2">
-          <Badge variant={passPercentage === 100 ? "success" : passPercentage > 80 ? "default" : "destructive"}>
+          <Badge variant={passPercentage === 100 ? "default" : passPercentage > 80 ? "default" : "destructive"} className={passPercentage === 100 ? "bg-green-500 hover:bg-green-600" : undefined}>
             {passedCount}/{totalCount} Passed
           </Badge>
-          <Badge variant={passPercentage === 100 ? "success" : "outline"}>
+          <Badge variant={passPercentage === 100 ? "outline" : "outline"} className={passPercentage === 100 ? "text-green-500 border-green-500" : undefined}>
             {passPercentage}%
           </Badge>
         </div>
@@ -48,7 +48,7 @@ export const TestResults: React.FC<TestResultsProps> = ({ results }) => {
             <div className="w-full">
               <div className="flex items-center justify-between">
                 <AlertTitle>{testId}</AlertTitle>
-                <Badge variant={result.passed ? "success" : "destructive"} className="ml-2">
+                <Badge variant={result.passed ? "default" : "destructive"} className={result.passed ? "bg-green-500 hover:bg-green-600" : undefined}>
                   {result.passed ? "PASSED" : "FAILED"}
                 </Badge>
               </div>

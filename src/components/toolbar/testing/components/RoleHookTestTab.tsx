@@ -223,7 +223,10 @@ export const RoleHookTestTab: React.FC<RoleHookTestTabProps> = ({ role }) => {
                     <div className="bg-red-100 p-2 rounded text-sm">
                       Writer-only content is hidden ({role !== 'writer' && role !== 'editor' && role !== 'admin' ? 'CORRECT ✓' : 'INCORRECT ✗'})
                     </div>
-                  } />
+                  }>
+                    {/* Intentionally empty children - fixed to add this required prop */}
+                    <></>
+                  </WriterOnly>
                 </div>
               </div>
               
@@ -242,7 +245,10 @@ export const RoleHookTestTab: React.FC<RoleHookTestTabProps> = ({ role }) => {
                     <div className="bg-red-100 p-2 rounded text-sm">
                       Designer-only content is hidden ({role !== 'designer' && role !== 'admin' ? 'CORRECT ✓' : 'INCORRECT ✗'})
                     </div>
-                  } />
+                  }>
+                    {/* Intentionally empty children - fixed to add this required prop */}
+                    <></>
+                  </DesignerOnly>
                 </div>
               </div>
               
@@ -261,7 +267,10 @@ export const RoleHookTestTab: React.FC<RoleHookTestTabProps> = ({ role }) => {
                     <div className="bg-red-100 p-2 rounded text-sm">
                       Admin-only content is hidden ({role !== 'admin' ? 'CORRECT ✓' : 'INCORRECT ✗'})
                     </div>
-                  } />
+                  }>
+                    {/* Intentionally empty children - fixed to add this required prop */}
+                    <></>
+                  </AdminOnly>
                 </div>
               </div>
               

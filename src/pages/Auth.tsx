@@ -122,19 +122,19 @@ export default function Auth() {
           
           <div className="auth-guest-buttons">
             <button
-              onClick={continueAsGuestWriter}
+              onClick={() => continueAsGuestWriter()}
               className="auth-guest-button"
             >
               Writer
             </button>
             <button
-              onClick={continueAsGuestDesigner}
+              onClick={() => continueAsGuestDesigner()}
               className="auth-guest-button"
             >
               Designer
             </button>
             <button
-              onClick={continueAsGuestAdmin}
+              onClick={() => continueAsGuestAdmin()}
               className="auth-guest-button"
             >
               Admin

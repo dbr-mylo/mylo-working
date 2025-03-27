@@ -9,22 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Check, Filter } from 'lucide-react';
-
-interface TestItem {
-  id: string;
-  description: string;
-  category: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'passed' | 'failed' | 'untested';
-  notes: string;
-}
+import { FileText, Check, Filter, RefreshCw } from 'lucide-react';
+import { usePersistentTestResults, TestItem } from './hooks';
 
 export const ManualTestChecklist = () => {
   const { toast } = useToast();
   const [filter, setFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [testItems, setTestItems] = useState<TestItem[]>([
+  
+  const initialTestItems: TestItem[] = [
     // Base toolbar tests
     { id: 'base-1', description: 'Base toolbar renders correctly', category: 'base', priority: 'high', status: 'untested', notes: '' },
     { id: 'base-2', description: 'Text formatting buttons (bold, italic) function correctly', category: 'base', priority: 'high', status: 'untested', notes: '' },
@@ -60,28 +53,14 @@ export const ManualTestChecklist = () => {
     { id: 'integration-1', description: 'Toolbar renders properly when role is changed dynamically', category: 'integration', priority: 'high', status: 'untested', notes: '' },
     { id: 'integration-2', description: 'Role-specific components update when role changes', category: 'integration', priority: 'high', status: 'untested', notes: '' },
     { id: 'integration-3', description: 'Role-based permissions apply correctly across the application', category: 'integration', priority: 'high', status: 'untested', notes: '' },
-  ]);
+  ];
 
-  const updateTestStatus = (id: string, status: 'passed' | 'failed' | 'untested') => {
-    setTestItems(items => 
-      items.map(item => 
-        item.id === id ? { ...item, status } : item
-      )
-    );
-
-    toast({
-      title: `Test #${id} marked as ${status}`,
-      duration: 2000,
-    });
-  };
-
-  const updateTestNotes = (id: string, notes: string) => {
-    setTestItems(items => 
-      items.map(item => 
-        item.id === id ? { ...item, notes } : item
-      )
-    );
-  };
+  const { 
+    testItems, 
+    updateTestStatus, 
+    updateTestNotes, 
+    resetAllTests 
+  } = usePersistentTestResults(initialTestItems);
 
   // Filter and search functionality
   const filteredTests = testItems.filter(item => {
@@ -104,6 +83,17 @@ export const ManualTestChecklist = () => {
       case 'failed': return 'bg-red-500';
       case 'untested': return 'bg-yellow-500';
       default: return 'bg-gray-500';
+    }
+  };
+
+  const handleResetAllTests = () => {
+    if (confirm('Are you sure you want to reset all test results? This action cannot be undone.')) {
+      resetAllTests();
+      toast({
+        title: "All tests reset",
+        description: "All test results have been reset to untested",
+        duration: 3000,
+      });
     }
   };
 
@@ -192,6 +182,11 @@ export const ManualTestChecklist = () => {
           <Button size="sm" variant="outline" onClick={exportReport}>
             <FileText className="w-4 h-4 mr-1" />
             Export Report
+          </Button>
+          
+          <Button size="sm" variant="outline" onClick={handleResetAllTests}>
+            <RefreshCw className="w-4 h-4 mr-1" />
+            Reset All
           </Button>
         </div>
         

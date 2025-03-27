@@ -3,26 +3,27 @@
  * Role-Specific Hooks
  * 
  * These hooks provide easy ways to check the user's role or get role-specific values.
+ * They now use the centralized role functions to ensure consistency.
  */
 
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/types';
+import {
+  isDesignerRole,
+  isWriterRole,
+  isAdminRole,
+  isDesignerOrAdminRole,
+  isWriterOrAdminRole,
+  getRoleSpecificValue,
+  hasAnyRole
+} from './RoleFunctions';
 
 /**
  * Hook to get role-specific value
  */
 export function useRoleSpecificValue<T>(designerValue: T, writerValue: T, adminValue: T = designerValue): T {
   const { role } = useAuth();
-  
-  if (role === 'designer') {
-    return designerValue;
-  } else if (role === 'writer' || role === 'editor') {
-    return writerValue;
-  } else if (role === 'admin') {
-    return adminValue;
-  }
-  
-  return writerValue;
+  return getRoleSpecificValue(role, designerValue, writerValue, adminValue);
 }
 
 /**
@@ -30,7 +31,7 @@ export function useRoleSpecificValue<T>(designerValue: T, writerValue: T, adminV
  */
 export function useIsDesigner(): boolean {
   const { role } = useAuth();
-  return role === 'designer';
+  return isDesignerRole(role);
 }
 
 /**
@@ -38,7 +39,7 @@ export function useIsDesigner(): boolean {
  */
 export function useIsWriter(): boolean {
   const { role } = useAuth();
-  return role === 'writer' || role === 'editor' || role === 'admin';
+  return isWriterRole(role) || isAdminRole(role);
 }
 
 /**
@@ -46,7 +47,7 @@ export function useIsWriter(): boolean {
  */
 export function useIsAdmin(): boolean {
   const { role } = useAuth();
-  return role === 'admin';
+  return isAdminRole(role);
 }
 
 /**
@@ -54,25 +55,23 @@ export function useIsAdmin(): boolean {
  */
 export function useHasAnyRole(roles: UserRole[]): boolean {
   const { role } = useAuth();
-  // Special case for 'editor' role - map it to 'writer' for compatibility
-  if (role === 'editor' && roles.includes('writer')) {
-    return true;
-  }
-  return role ? roles.includes(role) : false;
+  return hasAnyRole(role, roles);
 }
 
 /**
  * Hook to check if user has designer or admin role
  */
 export function useIsDesignerOrAdmin(): boolean {
-  return useHasAnyRole(['designer', 'admin']);
+  const { role } = useAuth();
+  return isDesignerOrAdminRole(role);
 }
 
 /**
  * Hook to check if user has writer or admin role
  */
 export function useIsWriterOrAdmin(): boolean {
-  return useHasAnyRole(['writer', 'admin']) || useIsEditor(); // Include legacy editor role
+  const { role } = useAuth();
+  return isWriterOrAdminRole(role);
 }
 
 /**
@@ -101,8 +100,7 @@ export function useCanUseTemplates(): boolean {
  * @deprecated Use useIsWriter instead
  */
 export function useIsEditor(): boolean {
-  const { role } = useAuth();
-  return role === 'editor' || role === 'writer';
+  return useIsWriter();
 }
 
 /**

@@ -1,28 +1,29 @@
 
-import { UserRole } from "@/lib/types";
+import { ReactNode } from 'react';
+import { UserRole } from '@/lib/types';
 
 /**
- * Props for role-specific components
+ * Props for components that render based on a specific role
  */
 export interface RoleComponentProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 /**
- * Props for multi-role components
+ * Props for components that render based on multiple roles
  */
 export interface MultiRoleComponentProps {
   roles: UserRole[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 /**
- * Props for exclude-roles components
+ * Props for components that exclude specific roles
  */
 export interface ExcludeRolesProps {
   excludeRoles: UserRole[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }

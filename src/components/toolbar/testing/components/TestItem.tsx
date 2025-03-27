@@ -2,10 +2,9 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check } from 'lucide-react';
 import { TestItem as TestItemType } from '../hooks/usePersistentTestResults';
+import { TestStatusButtons } from './TestStatusButtons';
 
 interface TestItemProps {
   test: TestItemType;
@@ -44,33 +43,11 @@ export const TestItemComponent: React.FC<TestItemProps> = ({
             className="min-h-[80px] mb-2"
           />
           
-          <div className="flex items-center space-x-2">
-            <Button 
-              size="sm" 
-              variant={test.status === 'passed' ? 'default' : 'outline'} 
-              className="flex items-center" 
-              onClick={() => updateTestStatus(test.id, 'passed')}
-            >
-              <Check className="w-4 h-4 mr-1" />
-              Pass
-            </Button>
-            
-            <Button 
-              size="sm" 
-              variant={test.status === 'failed' ? 'destructive' : 'outline'} 
-              onClick={() => updateTestStatus(test.id, 'failed')}
-            >
-              Fail
-            </Button>
-            
-            <Button 
-              size="sm" 
-              variant={test.status === 'untested' ? 'secondary' : 'outline'} 
-              onClick={() => updateTestStatus(test.id, 'untested')}
-            >
-              Mark Untested
-            </Button>
-          </div>
+          <TestStatusButtons 
+            id={test.id}
+            currentStatus={test.status}
+            updateTestStatus={updateTestStatus}
+          />
         </div>
       </div>
     </Card>

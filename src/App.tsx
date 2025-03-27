@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsAdmin } from "@/utils/roles";
+import { useIsAdmin, useIsWriter, useIsDesigner } from "@/utils/roles";
 import { DesignerRoute, WriterRoute } from "@/components/routes/ProtectedRoutes";
 import React from "react";
 import Index from "./pages/Index";
@@ -34,14 +34,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Admin route wrapper
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading, role } = useAuth();
   const isAdmin = useIsAdmin();
+  const { user, isLoading } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>;
   }
   
-  if (!user && !role) {
+  if (!user) {
     return <Navigate to="/auth" />;
   }
   
@@ -54,13 +54,13 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Auth route wrapper (redirects to home if already authenticated)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading, role } = useAuth();
+  const { user, isLoading } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>;
   }
   
-  if (user || role) {
+  if (user) {
     return <Navigate to="/" />;
   }
   
@@ -80,7 +80,6 @@ const DesignerPages = () => (
 // Writer-specific pages
 const WriterPages = () => (
   <Routes>
-    <Route path="/write" element={<Navigate to="/editor" />} />
     <Route path="/documents" element={<DocumentSelection />} />
     <Route path="/drafts" element={<div>Drafts (Coming Soon)</div>} />
     <Route path="*" element={<Navigate to="/editor" />} />

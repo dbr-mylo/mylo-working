@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WriterOnly, DesignerOnly, AdminOnly } from "@/utils/roles/RoleComponents";
+import { useIsWriter, useIsDesigner, useIsAdmin } from "@/utils/roles";
 import { FileText, Pencil, Layout, Settings, Box } from "lucide-react";
 
 export const RoleNavigation = () => {
@@ -18,9 +19,14 @@ export const RoleNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // Use the role hooks for consistent role checking
+  const isWriter = useIsWriter();
+  const isDesigner = useIsDesigner();
+  const isAdmin = useIsAdmin();
+  
   // Define navigation items based on roles
   const writerNavItems = [
-    { href: "/content/write", label: "Write", icon: <Pencil className="h-4 w-4 mr-2" /> },
+    { href: "/editor", label: "Editor", icon: <Pencil className="h-4 w-4 mr-2" /> },
     { href: "/content/documents", label: "Documents", icon: <FileText className="h-4 w-4 mr-2" /> },
     { href: "/content/drafts", label: "Drafts", icon: <Box className="h-4 w-4 mr-2" /> }
   ];
@@ -48,51 +54,46 @@ export const RoleNavigation = () => {
           </NavigationMenuLink>
         </NavigationMenuItem>
         
-        <NavigationMenuItem>
-          <NavigationMenuLink
-            className={navigationMenuTriggerStyle() + (isActive("/editor") ? " bg-accent" : "")}
-            onClick={() => navigate("/editor")}
-          >
-            Editor
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        
         {/* Writer-specific navigation */}
-        <WriterOnly>
-          {writerNavItems.map((item) => (
-            <NavigationMenuItem key={item.href}>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
-                onClick={() => navigate(item.href)}
-              >
-                <span className="flex items-center">
-                  {item.icon}
-                  {item.label}
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
-        </WriterOnly>
+        {isWriter && (
+          <>
+            {writerNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => navigate(item.href)}
+                >
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </>
+        )}
         
         {/* Designer-specific navigation */}
-        <DesignerOnly>
-          {designerNavItems.map((item) => (
-            <NavigationMenuItem key={item.href}>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
-                onClick={() => navigate(item.href)}
-              >
-                <span className="flex items-center">
-                  {item.icon}
-                  {item.label}
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
-        </DesignerOnly>
+        {isDesigner && (
+          <>
+            {designerNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => navigate(item.href)}
+                >
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </>
+        )}
         
         {/* Admin-specific navigation */}
-        <AdminOnly>
+        {isAdmin && (
           <NavigationMenuItem>
             <NavigationMenuLink
               className={navigationMenuTriggerStyle() + (isActive("/admin") ? " bg-accent" : "")}
@@ -101,7 +102,7 @@ export const RoleNavigation = () => {
               Admin Panel
             </NavigationMenuLink>
           </NavigationMenuItem>
-        </AdminOnly>
+        )}
       </NavigationMenuList>
     </NavigationMenu>
   );

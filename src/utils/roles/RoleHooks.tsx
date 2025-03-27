@@ -39,8 +39,7 @@ export function useIsDesigner(): boolean {
  */
 export function useIsWriter(): boolean {
   const { role } = useAuth();
-  // Fix: Make sure we properly check for both writer, editor, and admin roles
-  return isWriterRole(role) || isAdminRole(role);
+  return isWriterRole(role);
 }
 
 /**
@@ -93,7 +92,7 @@ export function useCanPublishTemplates(): boolean {
  * Hook to check if user can use templates
  */
 export function useCanUseTemplates(): boolean {
-  return useHasAnyRole(['writer', 'designer', 'admin']);
+  return useHasAnyRole(['writer', 'editor', 'designer', 'admin']);
 }
 
 // Maintain backward compatibility with old hook names

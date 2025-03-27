@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/lib/types';
+import { useIsWriter, useIsDesigner, useIsAdmin } from '@/utils/roles';
 
 export interface TestResult {
   passed: boolean;
   message: string;
+  details?: string;
 }
 
 export const useToolbarTesting = () => {
@@ -16,6 +18,11 @@ export const useToolbarTesting = () => {
   const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
   const { role } = useAuth();
   const [selectedRoleForTesting, setSelectedRoleForTesting] = useState<UserRole | null>(role);
+  
+  // Get role hooks for direct testing
+  const isWriter = useIsWriter();
+  const isDesigner = useIsDesigner();
+  const isAdmin = useIsAdmin();
   
   useEffect(() => {
     setSelectedRoleForTesting(role);
@@ -30,7 +37,7 @@ export const useToolbarTesting = () => {
       duration: 3000,
     });
     
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     let results: Record<string, TestResult> = {};
     
@@ -42,7 +49,9 @@ export const useToolbarTesting = () => {
         'base-lists': { passed: true, message: 'List controls create appropriate markup' },
       };
     } else if (testType === 'writer') {
+      // Test both direct hook values and expected values based on current role
       const writerRoleTest = role === 'writer' || role === 'editor' || role === 'admin';
+      const writerHookTest = isWriter; // Should be true for writer, editor, or admin
       const writerComponentsVisible = writerRoleTest;
       
       results = {
@@ -65,14 +74,23 @@ export const useToolbarTesting = () => {
             'Writer state not active for non-writer role (expected)' 
         },
         'writer-access': { 
-          passed: writerRoleTest, 
-          message: writerRoleTest ? 
-            'Access control correctly allows writer role access' : 
-            'Access control correctly prevents non-writer role access' 
+          passed: writerRoleTest === writerHookTest, 
+          message: writerRoleTest === writerHookTest ? 
+            'Role hooks correctly identify writer role: ' + (writerHookTest ? 'true' : 'false') : 
+            `Role hook inconsistency: expected ${writerRoleTest} but got ${writerHookTest}`,
+          details: writerRoleTest === writerHookTest ? undefined : 
+            `Current role: ${role}\nIs writer based on role value: ${writerRoleTest}\nIs writer based on hook: ${writerHookTest}`
         },
+        'writer-component-rendering': {
+          passed: writerRoleTest === writerHookTest,
+          message: 'Writer components render correctly based on role',
+          details: `Current role: ${role}\nWriterOnly component visibility: ${writerHookTest}`
+        }
       };
     } else if (testType === 'designer') {
+      // Test both direct hook values and expected values based on current role
       const designerRoleTest = role === 'designer' || role === 'admin';
+      const designerHookTest = isDesigner; // Should be true for designer or admin
       const designerComponentsVisible = designerRoleTest;
       
       results = {
@@ -95,46 +113,68 @@ export const useToolbarTesting = () => {
             'Designer state inactive for non-designer role (expected)' 
         },
         'designer-access': { 
-          passed: designerRoleTest, 
-          message: designerRoleTest ? 
-            'Access control works for designer role' : 
-            'Access control correctly prevents non-designer role access' 
+          passed: designerRoleTest === designerHookTest, 
+          message: designerRoleTest === designerHookTest ? 
+            'Role hooks correctly identify designer role: ' + (designerHookTest ? 'true' : 'false') : 
+            `Role hook inconsistency: expected ${designerRoleTest} but got ${designerHookTest}`,
+          details: designerRoleTest === designerHookTest ? undefined : 
+            `Current role: ${role}\nIs designer based on role value: ${designerRoleTest}\nIs designer based on hook: ${designerHookTest}`
         },
+        'designer-component-rendering': {
+          passed: designerRoleTest === designerHookTest,
+          message: 'Designer components render correctly based on role',
+          details: `Current role: ${role}\nDesignerOnly component visibility: ${designerHookTest}`
+        }
       };
     } else if (testType === 'role-hooks') {
-      const isWriterHookCorrect = (role === 'writer' || role === 'editor' || role === 'admin');
-      const isDesignerHookCorrect = (role === 'designer' || role === 'admin');
-      const isAdminHookCorrect = (role === 'admin');
+      const isWriterHookCorrect = isWriter === (role === 'writer' || role === 'editor' || role === 'admin');
+      const isDesignerHookCorrect = isDesigner === (role === 'designer' || role === 'admin');
+      const isAdminHookCorrect = isAdmin === (role === 'admin');
       
       results = {
         'hook-is-writer': { 
-          passed: isWriterHookCorrect === (role === 'writer' || role === 'editor' || role === 'admin'), 
-          message: `useIsWriter hook ${isWriterHookCorrect ? 'correctly identifies' : 'fails to identify'} writer role`
+          passed: isWriterHookCorrect, 
+          message: `useIsWriter hook ${isWriterHookCorrect ? 'correctly identifies' : 'fails to identify'} writer role`,
+          details: isWriterHookCorrect ? undefined : 
+            `Current role: ${role}\nExpected useIsWriter result: ${role === 'writer' || role === 'editor' || role === 'admin'}\nActual useIsWriter result: ${isWriter}` 
         },
         'hook-is-designer': { 
-          passed: isDesignerHookCorrect === (role === 'designer' || role === 'admin'), 
-          message: `useIsDesigner hook ${isDesignerHookCorrect ? 'correctly identifies' : 'fails to identify'} designer role`
+          passed: isDesignerHookCorrect, 
+          message: `useIsDesigner hook ${isDesignerHookCorrect ? 'correctly identifies' : 'fails to identify'} designer role`,
+          details: isDesignerHookCorrect ? undefined : 
+            `Current role: ${role}\nExpected useIsDesigner result: ${role === 'designer' || role === 'admin'}\nActual useIsDesigner result: ${isDesigner}`
         },
         'hook-is-admin': { 
-          passed: isAdminHookCorrect === (role === 'admin'), 
-          message: `useIsAdmin hook ${isAdminHookCorrect ? 'correctly identifies' : 'fails to identify'} admin role`
+          passed: isAdminHookCorrect, 
+          message: `useIsAdmin hook ${isAdminHookCorrect ? 'correctly identifies' : 'fails to identify'} admin role`,
+          details: isAdminHookCorrect ? undefined : 
+            `Current role: ${role}\nExpected useIsAdmin result: ${role === 'admin'}\nActual useIsAdmin result: ${isAdmin}`
         },
         'component-writer-only': { 
-          passed: (role === 'writer' || role === 'editor' || role === 'admin'), 
-          message: `WriterOnly component ${(role === 'writer' || role === 'editor' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`
+          passed: isWriter === (role === 'writer' || role === 'editor' || role === 'admin'), 
+          message: `WriterOnly component ${(role === 'writer' || role === 'editor' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`,
+          details: `Current role: ${role}\nWriterOnly visibility: ${isWriter}`
         },
         'component-designer-only': { 
-          passed: (role === 'designer' || role === 'admin'), 
-          message: `DesignerOnly component ${(role === 'designer' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`
+          passed: isDesigner === (role === 'designer' || role === 'admin'), 
+          message: `DesignerOnly component ${(role === 'designer' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`,
+          details: `Current role: ${role}\nDesignerOnly visibility: ${isDesigner}`
         },
         'component-admin-only': { 
-          passed: (role === 'admin'), 
-          message: `AdminOnly component ${(role === 'admin') ? 'correctly shows' : 'correctly hides'} content`
+          passed: isAdmin === (role === 'admin'), 
+          message: `AdminOnly component ${(role === 'admin') ? 'correctly shows' : 'correctly hides'} content`,
+          details: `Current role: ${role}\nAdminOnly visibility: ${isAdmin}`
         },
         'standalone-editor-only': { 
-          passed: (role === 'writer' || role === 'editor' || role === 'admin'), 
-          message: `StandaloneEditorOnly ${(role === 'writer' || role === 'editor' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`
+          passed: isWriter === (role === 'writer' || role === 'editor' || role === 'admin'), 
+          message: `StandaloneEditorOnly ${(role === 'writer' || role === 'editor' || role === 'admin') ? 'correctly shows' : 'correctly hides'} content`,
+          details: `Current role: ${role}\nStandaloneEditorOnly visibility (via isWriter): ${isWriter}`
         },
+        'consistent-legacy-support': {
+          passed: (role === 'editor') ? isWriter : true,
+          message: `Legacy 'editor' role ${(role === 'editor' && isWriter) ? 'correctly handled' : ((role === 'editor' && !isWriter) ? 'incorrectly handled' : 'not applicable for current role')}`,
+          details: (role === 'editor') ? `Current role: editor\nWriter hook result: ${isWriter}\nShould treat 'editor' as 'writer': true` : undefined
+        }
       };
     }
     

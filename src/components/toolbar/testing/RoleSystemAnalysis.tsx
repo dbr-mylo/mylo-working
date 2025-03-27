@@ -1,43 +1,54 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  CoreIssuesList,
-  RoleHooksTable,
-  RoleComponentsTable,
-  ToolbarComponentsTable,
-  MigrationStrategy,
-  KeyRoleFiles
-} from './components';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RoleHooksTable } from './components/RoleHooksTable';
+import { RoleComponentsTable } from './components/RoleComponentsTable';
+import { ToolbarComponentsTable } from './components/ToolbarComponentsTable';
+import { CoreIssuesList } from './components/CoreIssuesList';
+import { MigrationStrategy } from './components/MigrationStrategy';
+import { KeyRoleFiles } from './components/KeyRoleFiles';
+import { RoleSystemMigrationStatus } from './components/RoleSystemMigrationStatus';
 
-/**
- * Role System Analysis
- * 
- * This component documents the current role system implementation analysis
- * as part of Phase 1 preparation for the role-based access control system refactoring.
- */
-
-export const RoleSystemAnalysis = () => {
+export const RoleSystemAnalysis: React.FC = () => {
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <CardTitle>Role System Analysis</CardTitle>
         <CardDescription>
-          Comprehensive analysis of the current role-based access control system
+          Comprehensive analysis of the role-based access control system implementation
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[500px] w-full pr-4">
-          <div className="space-y-6">
+        {/* New Migration Status Overview */}
+        <RoleSystemMigrationStatus />
+        
+        <Tabs defaultValue="overview">
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="implementations">Role Implementations</TabsTrigger>
+            <TabsTrigger value="components">Component Analysis</TabsTrigger>
+            <TabsTrigger value="strategy">Migration Strategy</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
             <CoreIssuesList />
+            <KeyRoleFiles />
+          </TabsContent>
+          
+          <TabsContent value="implementations" className="space-y-4">
             <RoleHooksTable />
             <RoleComponentsTable />
+          </TabsContent>
+          
+          <TabsContent value="components" className="space-y-4">
             <ToolbarComponentsTable />
+          </TabsContent>
+          
+          <TabsContent value="strategy" className="space-y-4">
             <MigrationStrategy />
-            <KeyRoleFiles />
-          </div>
-        </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

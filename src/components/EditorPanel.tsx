@@ -11,7 +11,7 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsWriter } from "@/utils/roles";
+import { useIsWriter, useIsWriterOrAdmin } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 import { EditorToolbarContainer } from "@/components/EditorToolbarContainer";
 
@@ -24,7 +24,7 @@ export const EditorPanel = ({
 }: EditorPanelProps & { editorInstance?: Editor | null }) => {
   const { width } = useWindowSize();
   const isMobile = width < 1281;
-  const isWriter = useIsWriter();
+  const isWriter = useIsWriterOrAdmin();
 
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);

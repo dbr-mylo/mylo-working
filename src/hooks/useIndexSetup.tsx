@@ -61,6 +61,13 @@ export const useIndexSetup = () => {
     } else {
       console.log("Editor instance not available yet in useIndexSetup");
     }
+    
+    // Clean up editor instance on unmount
+    return () => {
+      if (editorSetup.editor) {
+        console.log("Cleaning up editor instance in useIndexSetup");
+      }
+    };
   }, [editorSetup.editor]);
   
   // Add a console log to track content changes

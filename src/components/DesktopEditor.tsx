@@ -9,7 +9,7 @@
 import React from 'react';
 import { EditorPanel } from '@/components/EditorPanel';
 import { DocumentPreview } from '@/components/design/DocumentPreview';
-import { useIsWriter } from '@/utils/roles';
+import { useIsWriter, useIsWriterOrAdmin } from '@/utils/roles';
 import { Editor } from '@tiptap/react';
 import { useTemplateStyles } from '@/hooks/useTemplateStyles';
 
@@ -30,7 +30,7 @@ export const DesktopEditor: React.FC<DesktopEditorProps> = ({
   templateId,
   editorInstance
 }) => {
-  const isWriter = useIsWriter();
+  const isWriter = useIsWriterOrAdmin();
   
   // Get template styles
   const { customStyles } = useTemplateStyles(templateId);

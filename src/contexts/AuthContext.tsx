@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       let userRole: UserRole = roleData.role as UserRole;
       if (userRole === 'editor') {
+        console.log("Converting legacy 'editor' role to 'writer'");
         userRole = 'writer'; // Convert 'editor' to 'writer' for backward compatibility
       }
 
@@ -74,6 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: userRole,
         isLoading: false,
       });
+      
+      console.log(`User authenticated with role: ${userRole}`);
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Error fetching user data");
@@ -157,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
+    console.log("Legacy 'editor' role mapped to 'writer' role");
     continueAsGuestWriter(shouldNavigate);
   };
 

@@ -14,6 +14,7 @@ import DocumentSelection from "./pages/DocumentSelection";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import RegressionTestRoute from "./routes/RegressionTestRoute";
+import { TemplateManager } from "@/components/design/TemplateManager";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 // Designer-specific pages
 const DesignerPages = () => (
   <Routes>
-    <Route path="/templates" element={<div>Template Management (Coming Soon)</div>} />
+    <Route path="/templates" element={<TemplateManager />} />
     <Route path="/design-settings" element={<div>Design Settings (Coming Soon)</div>} />
     <Route path="/layout" element={<div>Layout Editor (Coming Soon)</div>} />
     <Route path="*" element={<Navigate to="/editor" />} />
@@ -94,8 +95,11 @@ const AppRoutes = () => (
     <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
     
     {/* Role-specific routes */}
-    <Route path="/design/*" element={<ProtectedRoute><DesignerRoute><DesignerPages /></DesignerRoute></ProtectedRoute>} />
-    <Route path="/content/*" element={<ProtectedRoute><WriterRoute><WriterPages /></WriterRoute></ProtectedRoute>} />
+    <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
+    <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
+    
+    {/* Direct template management route */}
+    <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
     
     <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
     <Route path="/testing/regression" element={<RegressionTestRoute />} />

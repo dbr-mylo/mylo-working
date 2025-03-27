@@ -19,7 +19,7 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  * Check if a role is a writer role (includes legacy 'editor' role)
  */
 export const isWriterRole = (role: UserRole | null): boolean => {
-  // Fix: Make sure both 'writer' and 'editor' are considered writer roles
+  // Always consider both 'writer' and 'editor' as writer roles for backward compatibility
   return role === 'writer' || role === 'editor';
 };
 
@@ -53,12 +53,12 @@ export const getRoleSpecificValue = <T,>(
   writerValue: T,
   adminValue: T = designerValue
 ): T => {
-  if (isDesignerRole(role)) {
+  if (isAdminRole(role)) {
+    return adminValue;
+  } else if (isDesignerRole(role)) {
     return designerValue;
   } else if (isWriterRole(role)) {
     return writerValue;
-  } else if (isAdminRole(role)) {
-    return adminValue;
   }
   
   // Default to writer value if role is undefined

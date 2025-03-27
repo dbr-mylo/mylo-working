@@ -32,7 +32,7 @@ export const RoleNavigation = () => {
   ];
   
   const designerNavItems = [
-    { href: "/design/templates", label: "Templates", icon: <FileText className="h-4 w-4 mr-2" /> },
+    { href: "/templates", label: "Templates", icon: <FileText className="h-4 w-4 mr-2" /> },
     { href: "/design/layout", label: "Layout", icon: <Layout className="h-4 w-4 mr-2" /> },
     { href: "/design/design-settings", label: "Settings", icon: <Settings className="h-4 w-4 mr-2" /> }
   ];

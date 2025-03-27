@@ -14,6 +14,7 @@ interface ToolbarProps {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   if (!editor) {
+    console.log("Toolbar render skipped: No editor instance");
     return null;
   }
 

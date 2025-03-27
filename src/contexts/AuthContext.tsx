@@ -8,10 +8,10 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  continueAsGuestWriter: () => void;
-  continueAsGuestDesigner: () => void;
-  continueAsGuestAdmin: () => void;
-  continueAsGuestEditor: () => void;
+  continueAsGuestWriter: (shouldNavigate?: boolean) => void;
+  continueAsGuestDesigner: (shouldNavigate?: boolean) => void;
+  continueAsGuestAdmin: (shouldNavigate?: boolean) => void;
+  continueAsGuestEditor: (shouldNavigate?: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -120,38 +120,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const continueAsGuestWriter = () => {
+  const continueAsGuestWriter = (shouldNavigate: boolean = true) => {
     setAuthState({
       user: null,
       role: "writer",
       isLoading: false
     });
     toast.success("Continuing as Writer");
-    navigate("/");
+    if (shouldNavigate) {
+      navigate("/");
+    }
   };
 
-  const continueAsGuestDesigner = () => {
+  const continueAsGuestDesigner = (shouldNavigate: boolean = true) => {
     setAuthState({
       user: null,
       role: "designer",
       isLoading: false
     });
     toast.success("Continuing as Designer");
-    navigate("/");
+    if (shouldNavigate) {
+      navigate("/");
+    }
   };
 
-  const continueAsGuestAdmin = () => {
+  const continueAsGuestAdmin = (shouldNavigate: boolean = true) => {
     setAuthState({
       user: null,
       role: "admin",
       isLoading: false
     });
     toast.success("Continuing as Admin");
-    navigate("/");
+    if (shouldNavigate) {
+      navigate("/");
+    }
   };
 
-  const continueAsGuestEditor = () => {
-    continueAsGuestWriter();
+  const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
+    continueAsGuestWriter(shouldNavigate);
   };
 
   return (

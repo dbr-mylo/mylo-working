@@ -19,18 +19,19 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ selectedRole, setSel
   const changeTestingRole = (newRole: UserRole) => {
     setSelectedRole(newRole);
     
+    // Use the updated continueAsGuest functions with shouldNavigate=false
     switch(newRole) {
       case 'writer':
-        continueAsGuestWriter();
+        continueAsGuestWriter(false);
         break;
       case 'designer':
-        continueAsGuestDesigner();
+        continueAsGuestDesigner(false);
         break;
       case 'admin':
-        continueAsGuestAdmin();
+        continueAsGuestAdmin(false);
         break;
       case 'editor':
-        continueAsGuestEditor();
+        continueAsGuestEditor(false);
         break;
     }
     

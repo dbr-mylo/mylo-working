@@ -1,4 +1,3 @@
-
 /**
  * Role-Specific Component Rendering
  * 
@@ -55,7 +54,7 @@ export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback 
  */
 export const WriterOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return isWriterRole(role) ? <>{children}</> : <>{fallback}</>;
+  return isWriterRole(role) || isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**

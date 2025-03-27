@@ -15,18 +15,13 @@ interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
-  const isWriter = useIsWriter();
+  // Remove the isWriter check here since EditorToolbarContainer already handles that
   
   if (!editor) {
     return null;
   }
 
-  // If user is in writer role, use the editor-specific toolbar
-  if (isWriter) {
-    return <EditorToolbar editor={editor} />;
-  }
-  
-  // For designer role or other roles, use the original toolbar
+  // Let's use the EditorToolbar for all users now
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
   
   return (

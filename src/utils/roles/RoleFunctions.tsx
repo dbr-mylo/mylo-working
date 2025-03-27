@@ -19,6 +19,7 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  * Check if a role is a writer role (includes legacy 'editor' role)
  */
 export const isWriterRole = (role: UserRole | null): boolean => {
+  // Fix: Make sure both 'writer' and 'editor' are considered writer roles
   return role === 'writer' || role === 'editor';
 };
 

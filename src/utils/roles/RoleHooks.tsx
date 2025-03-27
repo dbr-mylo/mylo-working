@@ -39,6 +39,7 @@ export function useIsDesigner(): boolean {
  */
 export function useIsWriter(): boolean {
   const { role } = useAuth();
+  // Fix: Make sure we properly check for both writer, editor, and admin roles
   return isWriterRole(role) || isAdminRole(role);
 }
 

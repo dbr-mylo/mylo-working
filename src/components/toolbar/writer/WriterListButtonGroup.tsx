@@ -12,7 +12,7 @@ export const WriterListButtonGroup: React.FC<WriterListButtonGroupProps> = ({
   editor,
   currentColor
 }) => {
-  // Remove redundant role checking since parent component already does this
+  // Remove role checking since parent component already handles this
   return (
     <BaseListButtonGroup 
       editor={editor} 

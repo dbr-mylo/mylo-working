@@ -12,7 +12,7 @@ export const WriterFormatButtonGroup: React.FC<WriterFormatButtonGroupProps> = (
   editor,
   currentColor
 }) => {
-  // Remove redundant role checking since parent component already does this
+  // Remove role checking since parent component already handles this
   return (
     <BaseFormatButtonGroup 
       editor={editor} 

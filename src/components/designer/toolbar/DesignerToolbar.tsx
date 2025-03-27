@@ -4,13 +4,13 @@ import { Editor } from '@tiptap/react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsDesigner } from '@/utils/roles';
 import { DesignerTextControls } from './DesignerTextControls';
-import { DesignerFormatButtonGroup } from './DesignerFormatButtonGroup';
-import { DesignerListButtonGroup } from './DesignerListButtonGroup';
 import { DesignerStyleControls } from './DesignerStyleControls';
-import { DesignerClearFormattingButton } from './DesignerClearFormattingButton';
-import { DesignerAlignmentButtonGroup } from './DesignerAlignmentButtonGroup';
-import { DesignerIndentButtonGroup } from './DesignerIndentButtonGroup';
 import { Separator } from '@/components/ui/separator';
+import { DesignerFormatButtonGroup } from '@/components/toolbar/designer/DesignerFormatButtonGroup';
+import { DesignerListButtonGroup } from '@/components/toolbar/designer/DesignerListButtonGroup';
+import { DesignerAlignmentButtonGroup } from '@/components/toolbar/designer/DesignerAlignmentButtonGroup';
+import { DesignerIndentButtonGroup } from '@/components/toolbar/designer/DesignerIndentButtonGroup';
+import { DesignerClearFormattingButton } from '@/components/toolbar/designer/DesignerClearFormattingButton';
 
 interface DesignerToolbarProps {
   editor: Editor;

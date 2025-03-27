@@ -3,13 +3,13 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { EditorToolbar } from './toolbar/EditorToolbar';
-import { FormatButtonGroup } from './toolbar/FormatButtonGroup'; 
-import { ListButtonGroup } from './toolbar/ListButtonGroup';
-import { AlignmentButtonGroup } from './toolbar/AlignmentButtonGroup';
-import { IndentButtonGroup } from './toolbar/IndentButtonGroup';
-import { ClearFormattingButton } from './toolbar/ClearFormattingButton';
 import { TextControls } from './toolbar/TextControls';
 import { useIsWriter } from '@/utils/roles';
+import { WriterFormatButtonGroup } from '@/components/toolbar/writer/WriterFormatButtonGroup';
+import { WriterListButtonGroup } from '@/components/toolbar/writer/WriterListButtonGroup';
+import { WriterAlignmentButtonGroup } from '@/components/toolbar/writer/WriterAlignmentButtonGroup';
+import { WriterIndentButtonGroup } from '@/components/toolbar/writer/WriterIndentButtonGroup';
+import { WriterClearFormattingButton } from '@/components/toolbar/writer/WriterClearFormattingButton';
 
 interface ToolbarProps {
   editor: Editor;
@@ -37,19 +37,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       <TextControls editor={editor} />
       
       {/* Text formatting buttons - bold and italic */}
-      <FormatButtonGroup editor={editor} currentColor={currentColor} />
+      <WriterFormatButtonGroup editor={editor} currentColor={currentColor} />
 
       {/* List buttons - bullet and ordered lists */}
-      <ListButtonGroup editor={editor} currentColor={currentColor} />
+      <WriterListButtonGroup editor={editor} currentColor={currentColor} />
       
       {/* Text alignment buttons */}
-      <AlignmentButtonGroup editor={editor} />
+      <WriterAlignmentButtonGroup editor={editor} />
       
       {/* Indentation controls */}
-      <IndentButtonGroup editor={editor} />
+      <WriterIndentButtonGroup editor={editor} />
       
       {/* Clear formatting button */}
-      <ClearFormattingButton editor={editor} />
+      <WriterClearFormattingButton editor={editor} />
     </div>
   );
 };

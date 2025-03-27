@@ -12,7 +12,7 @@ import type { EditorPanelProps } from "@/lib/types";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTemplateStyles } from "@/hooks/useTemplateStyles";
 import { extractDimensionsFromCSS } from "@/utils/templateUtils";
-import { useIsWriter } from "@/utils/roles";
+import { useIsWriter, WriterOnly } from "@/utils/roles";
 import { Editor } from "@tiptap/react";
 
 export const EditorPanel = ({
@@ -38,28 +38,25 @@ export const EditorPanel = ({
     console.log("Content updated in EditorPanel");
     onContentChange(newContent);
   };
-
-  // This component should only be used in writer mode
-  if (!isWriter) {
-    console.warn("EditorPanel component used outside of writer role context");
-  }
   
   return (
-    <div className="p-4 md:p-8">
-      <div className="mx-auto">
-        {/* Document container with proper dimensions */}
-        <div className="mx-auto" style={{ width: pageWidth }}>
-          <RichTextEditor 
-            content={content} 
-            onUpdate={handleContentUpdate}
-            isEditable={isEditable}
-            hideToolbar={true} // Always hide the toolbar since we're showing it in the container
-            templateStyles={customStyles}
-            externalEditorInstance={editorInstance}
-            externalToolbar={true}
-          />
+    <WriterOnly>
+      <div className="p-4 md:p-8">
+        <div className="mx-auto">
+          {/* Document container with proper dimensions */}
+          <div className="mx-auto" style={{ width: pageWidth }}>
+            <RichTextEditor 
+              content={content} 
+              onUpdate={handleContentUpdate}
+              isEditable={isEditable}
+              hideToolbar={true} // Always hide the toolbar since we're showing it in the container
+              templateStyles={customStyles}
+              externalEditorInstance={editorInstance}
+              externalToolbar={true}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </WriterOnly>
   );
 };

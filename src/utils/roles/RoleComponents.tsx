@@ -9,6 +9,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/types';
 import { RoleComponentProps, MultiRoleComponentProps, ExcludeRolesProps } from './types';
+import { isWriterRole, isDesignerRole, isAdminRole, hasAnyRole } from './RoleFunctions';
 
 /**
  * Component that only renders its children for a specific role
@@ -20,12 +21,21 @@ export const RoleOnly: React.FC<{
 }> = ({ role, children, fallback = null }) => {
   const { role: userRole } = useAuth();
   
-  // Special case for writer/editor role compatibility
-  if (role === 'writer' && (userRole === 'writer' || userRole === 'editor' || userRole === 'admin')) {
+  // Use the centralized role checking functions
+  if (role === 'writer' && isWriterRole(userRole)) {
     return <>{children}</>;
   }
   
-  if (userRole === role || (userRole === 'admin' && role !== 'admin')) {
+  if (role === 'designer' && (isDesignerRole(userRole) || isAdminRole(userRole))) {
+    return <>{children}</>;
+  }
+  
+  if (role === 'admin' && isAdminRole(userRole)) {
+    return <>{children}</>;
+  }
+  
+  // Direct comparison for any other roles
+  if (userRole === role) {
     return <>{children}</>;
   }
   
@@ -36,21 +46,24 @@ export const RoleOnly: React.FC<{
  * Designer-specific component
  */
 export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <RoleOnly role="designer" children={children} fallback={fallback} />;
+  const { role } = useAuth();
+  return isDesignerRole(role) || isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
  * Writer-specific component
  */
 export const WriterOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <RoleOnly role="writer" children={children} fallback={fallback} />;
+  const { role } = useAuth();
+  return isWriterRole(role) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
  * Admin-specific component
  */
 export const AdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <RoleOnly role="admin" children={children} fallback={fallback} />;
+  const { role } = useAuth();
+  return isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -61,32 +74,24 @@ export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({
   children, 
   fallback = null 
 }) => {
-  const { role: userRole } = useAuth();
-  
-  // Special case for editor role mapped to writer
-  if (userRole === 'editor' && roles.includes('writer')) {
-    return <>{children}</>;
-  }
-  
-  if (userRole && roles.includes(userRole)) {
-    return <>{children}</>;
-  }
-  
-  return <>{fallback}</>;
+  const { role } = useAuth();
+  return hasAnyRole(role, roles) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
  * Designer or Admin only component
  */
 export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['designer', 'admin']} children={children} fallback={fallback} />;
+  const { role } = useAuth();
+  return (isDesignerRole(role) || isAdminRole(role)) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
  * Writer or Admin only component
  */
 export const WriterOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
-  return <MultiRoleOnly roles={['writer', 'admin']} children={children} fallback={fallback} />;
+  const { role } = useAuth();
+  return (isWriterRole(role) || isAdminRole(role)) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -97,18 +102,12 @@ export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({
   children, 
   fallback = null 
 }) => {
-  const { role: userRole } = useAuth();
+  const { role } = useAuth();
   
-  // Special case for editor role mapped to writer
-  if (userRole === 'editor' && excludeRoles.includes('writer')) {
-    return <>{fallback}</>;
-  }
+  if (!role) return <>{fallback}</>;
   
-  if (userRole && !excludeRoles.includes(userRole)) {
-    return <>{children}</>;
-  }
-  
-  return <>{fallback}</>;
+  // Use hasAnyRole in reverse to exclude roles
+  return !hasAnyRole(role, excludeRoles) ? <>{children}</> : <>{fallback}</>;
 };
 
 /**

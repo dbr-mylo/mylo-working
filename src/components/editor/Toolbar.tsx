@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { useAuth } from '@/contexts/AuthContext';
 import { EditorToolbar } from './toolbar/EditorToolbar';
 import { TextControls } from './toolbar/TextControls';
 import { useIsWriter } from '@/utils/roles';
@@ -16,7 +15,6 @@ interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
-  const { role } = useAuth();
   const isWriter = useIsWriter();
   
   if (!editor) {

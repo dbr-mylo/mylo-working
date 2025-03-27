@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -229,7 +230,7 @@ export const ToolbarTester = () => {
               </div>
             </div>
             
-            <Alert variant="outline" className="mb-2">
+            <Alert className="mb-2">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Role-Based Testing</AlertTitle>
               <AlertDescription>

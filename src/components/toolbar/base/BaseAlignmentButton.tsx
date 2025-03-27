@@ -2,7 +2,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 interface BaseAlignmentButtonProps {
   editor: Editor;
@@ -43,9 +43,6 @@ export const AlignLeftButton: React.FC<{
   editor: Editor;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, size }) => {
-  // Import the AlignLeft icon dynamically
-  const AlignLeft = require('lucide-react').AlignLeft;
-
   const handleAlignLeft = () => {
     editor.chain().focus().setTextAlign('left').run();
   };
@@ -66,9 +63,6 @@ export const AlignCenterButton: React.FC<{
   editor: Editor;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, size }) => {
-  // Import the AlignCenter icon dynamically
-  const AlignCenter = require('lucide-react').AlignCenter;
-
   const handleAlignCenter = () => {
     editor.chain().focus().setTextAlign('center').run();
   };
@@ -89,9 +83,6 @@ export const AlignRightButton: React.FC<{
   editor: Editor;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, size }) => {
-  // Import the AlignRight icon dynamically
-  const AlignRight = require('lucide-react').AlignRight;
-
   const handleAlignRight = () => {
     editor.chain().focus().setTextAlign('right').run();
   };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, List, ListOrdered } from 'lucide-react';
 import { preserveColorAfterFormatting } from '@/components/rich-text/utils/colorPreservation';
 
 interface BaseListButtonProps {
@@ -11,9 +11,9 @@ interface BaseListButtonProps {
   isActive: boolean;
   onClick: () => void;
   title: string;
+  currentColor: string;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
   className?: string;
-  disabled?: boolean;
   ariaLabel?: string;
 }
 
@@ -24,7 +24,6 @@ export const BaseListButton: React.FC<BaseListButtonProps> = ({
   title,
   size = "xs",
   className = "",
-  disabled = false,
   ariaLabel,
 }) => {
   return (
@@ -32,7 +31,6 @@ export const BaseListButton: React.FC<BaseListButtonProps> = ({
       variant="ghost"
       size={size}
       onClick={onClick}
-      disabled={disabled}
       className={`border-0 p-1 ${isActive ? 'bg-accent' : 'hover:bg-accent/50'} ${className}`}
       aria-label={ariaLabel || title}
       title={title}
@@ -48,9 +46,6 @@ export const BulletListButton: React.FC<{
   currentColor: string;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, currentColor, size }) => {
-  // Import the List icon dynamically
-  const List = require('lucide-react').List;
-
   const handleToggleBulletList = () => {
     preserveColorAfterFormatting(
       editor, 
@@ -66,6 +61,7 @@ export const BulletListButton: React.FC<{
       isActive={editor.isActive('bulletList')}
       onClick={handleToggleBulletList}
       title="Bullet List"
+      currentColor={currentColor}
       size={size}
     />
   );
@@ -76,9 +72,6 @@ export const OrderedListButton: React.FC<{
   currentColor: string;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, currentColor, size }) => {
-  // Import the ListOrdered icon dynamically
-  const ListOrdered = require('lucide-react').ListOrdered;
-
   const handleToggleOrderedList = () => {
     preserveColorAfterFormatting(
       editor, 
@@ -94,6 +87,7 @@ export const OrderedListButton: React.FC<{
       isActive={editor.isActive('orderedList')}
       onClick={handleToggleOrderedList}
       title="Ordered List"
+      currentColor={currentColor}
       size={size}
     />
   );

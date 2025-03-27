@@ -2,7 +2,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Bold, Italic } from 'lucide-react';
 import { preserveColorAfterFormatting } from '@/components/rich-text/utils/colorPreservation';
 
 interface BaseFormatButtonProps {
@@ -49,9 +49,6 @@ export const BoldButton: React.FC<{
   currentColor: string;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, currentColor, size }) => {
-  // Import the Bold icon dynamically
-  const Bold = require('lucide-react').Bold;
-
   const handleToggleBold = () => {
     if (!editor) return;
     
@@ -88,9 +85,6 @@ export const ItalicButton: React.FC<{
   currentColor: string;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, currentColor, size }) => {
-  // Import the Italic icon dynamically
-  const Italic = require('lucide-react').Italic;
-
   const handleToggleItalic = () => {
     preserveColorAfterFormatting(
       editor, 

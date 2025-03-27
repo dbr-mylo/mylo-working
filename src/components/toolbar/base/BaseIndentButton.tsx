@@ -2,7 +2,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Indent, Outdent } from 'lucide-react';
 
 interface BaseIndentButtonProps {
   editor: Editor;
@@ -36,14 +36,11 @@ export const BaseIndentButton: React.FC<BaseIndentButtonProps> = ({
   );
 };
 
-// Specific indent button types
+// Indent button types
 export const IndentButton: React.FC<{
   editor: Editor;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, size }) => {
-  // Import the Indent icon dynamically
-  const Indent = require('lucide-react').Indent;
-
   const handleIndent = () => {
     if (editor) {
       if (editor.isActive('bulletList')) {
@@ -67,7 +64,7 @@ export const IndentButton: React.FC<{
       editor={editor}
       icon={Indent}
       onClick={handleIndent}
-      title="Indent paragraph"
+      title="Indent Paragraph"
       size={size}
     />
   );
@@ -77,9 +74,6 @@ export const OutdentButton: React.FC<{
   editor: Editor;
   size?: "default" | "sm" | "xs" | "xxs" | "lg" | "icon";
 }> = ({ editor, size }) => {
-  // Import the Outdent icon dynamically
-  const Outdent = require('lucide-react').Outdent;
-
   const handleOutdent = () => {
     if (editor) {
       if (editor.isActive('bulletList')) {
@@ -103,7 +97,7 @@ export const OutdentButton: React.FC<{
       editor={editor}
       icon={Outdent}
       onClick={handleOutdent}
-      title="Outdent paragraph"
+      title="Outdent Paragraph"
       size={size}
     />
   );

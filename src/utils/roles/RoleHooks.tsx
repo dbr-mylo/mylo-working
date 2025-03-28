@@ -3,7 +3,7 @@
  * Role-Specific Hooks
  * 
  * These hooks provide easy ways to check the user's role or get role-specific values.
- * They now use the centralized role functions to ensure consistency.
+ * They use the centralized role functions for consistency across the application.
  */
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,7 +19,7 @@ import {
 } from './RoleFunctions';
 
 /**
- * Hook to get role-specific value
+ * Hook to get role-specific value based on current user's role
  */
 export function useRoleSpecificValue<T>(designerValue: T, writerValue: T, adminValue: T = designerValue): T {
   const { role } = useAuth();
@@ -75,21 +75,21 @@ export function useIsWriterOrAdmin(): boolean {
 }
 
 /**
- * Hook to check if user can manage templates
+ * Hook to check if user can manage templates (designer or admin)
  */
 export function useCanManageTemplates(): boolean {
   return useHasAnyRole(['designer', 'admin']);
 }
 
 /**
- * Hook to check if user can publish templates
+ * Hook to check if user can publish templates (designer or admin)
  */
 export function useCanPublishTemplates(): boolean {
   return useHasAnyRole(['designer', 'admin']);
 }
 
 /**
- * Hook to check if user can use templates
+ * Hook to check if user can use templates (writer, designer, or admin)
  */
 export function useCanUseTemplates(): boolean {
   return useHasAnyRole(['writer', 'editor', 'designer', 'admin']);
@@ -100,6 +100,7 @@ export function useCanUseTemplates(): boolean {
  * @deprecated Use useIsWriter instead
  */
 export function useIsEditor(): boolean {
+  console.warn('useIsEditor is deprecated, use useIsWriter instead');
   return useIsWriter();
 }
 
@@ -107,5 +108,6 @@ export function useIsEditor(): boolean {
  * @deprecated Use useIsWriterOrAdmin instead
  */
 export function useIsEditorOrAdmin(): boolean {
+  console.warn('useIsEditorOrAdmin is deprecated, use useIsWriterOrAdmin instead');
   return useIsWriterOrAdmin();
 }

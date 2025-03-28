@@ -1,3 +1,4 @@
+
 /**
  * Role-Specific Component Rendering
  * 
@@ -20,15 +21,17 @@ export const RoleOnly: React.FC<{
 }> = ({ role, children, fallback = null }) => {
   const { role: userRole } = useAuth();
   
-  // Use the centralized role checking functions
+  // Writer role special case - check using the centralized function
   if (role === 'writer' && isWriterRole(userRole)) {
     return <>{children}</>;
   }
   
+  // Designer role special case - also accessible by admin
   if (role === 'designer' && (isDesignerRole(userRole) || isAdminRole(userRole))) {
     return <>{children}</>;
   }
   
+  // Admin role
   if (role === 'admin' && isAdminRole(userRole)) {
     return <>{children}</>;
   }
@@ -38,6 +41,7 @@ export const RoleOnly: React.FC<{
     return <>{children}</>;
   }
   
+  // If no match, render fallback
   return <>{fallback}</>;
 };
 
@@ -46,7 +50,13 @@ export const RoleOnly: React.FC<{
  */
 export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return isDesignerRole(role) || isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
+  const allowed = isDesignerRole(role) || isAdminRole(role); 
+  
+  if (!allowed) {
+    console.log("DesignerOnly content hidden: User does not have designer role");
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -54,7 +64,13 @@ export const DesignerOnly: React.FC<RoleComponentProps> = ({ children, fallback 
  */
 export const WriterOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return isWriterRole(role) || isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
+  const allowed = isWriterRole(role) || isAdminRole(role);
+  
+  if (!allowed) {
+    console.log("WriterOnly content hidden: User does not have writer role");
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -62,7 +78,13 @@ export const WriterOnly: React.FC<RoleComponentProps> = ({ children, fallback })
  */
 export const AdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return isAdminRole(role) ? <>{children}</> : <>{fallback}</>;
+  const allowed = isAdminRole(role);
+  
+  if (!allowed) {
+    console.log("AdminOnly content hidden: User does not have admin role");
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -74,7 +96,13 @@ export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({
   fallback = null 
 }) => {
   const { role } = useAuth();
-  return hasAnyRole(role, roles) ? <>{children}</> : <>{fallback}</>;
+  const allowed = hasAnyRole(role, roles);
+  
+  if (!allowed) {
+    console.log(`MultiRoleOnly content hidden: User role ${role} not in allowed roles [${roles.join(', ')}]`);
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -82,7 +110,13 @@ export const MultiRoleOnly: React.FC<MultiRoleComponentProps> = ({
  */
 export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return (isDesignerRole(role) || isAdminRole(role)) ? <>{children}</> : <>{fallback}</>;
+  const allowed = isDesignerRole(role) || isAdminRole(role);
+  
+  if (!allowed) {
+    console.log("DesignerOrAdminOnly content hidden: User does not have designer or admin role");
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -90,7 +124,13 @@ export const DesignerOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fa
  */
 export const WriterOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
   const { role } = useAuth();
-  return (isWriterRole(role) || isAdminRole(role)) ? <>{children}</> : <>{fallback}</>;
+  const allowed = isWriterRole(role) || isAdminRole(role);
+  
+  if (!allowed) {
+    console.log("WriterOrAdminOnly content hidden: User does not have writer or admin role");
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -103,10 +143,19 @@ export const ExcludeRoles: React.FC<ExcludeRolesProps> = ({
 }) => {
   const { role } = useAuth();
   
-  if (!role) return <>{fallback}</>;
+  if (!role) {
+    console.log("ExcludeRoles defaulting to fallback: No user role defined");
+    return <>{fallback}</>;
+  }
   
   // Use hasAnyRole in reverse to exclude roles
-  return !hasAnyRole(role, excludeRoles) ? <>{children}</> : <>{fallback}</>;
+  const allowed = !hasAnyRole(role, excludeRoles);
+  
+  if (!allowed) {
+    console.log(`ExcludeRoles content hidden: User role ${role} is in excluded roles [${excludeRoles.join(', ')}]`);
+  }
+  
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
 /**
@@ -128,6 +177,7 @@ export const TemplateManagerOnly: React.FC<RoleComponentProps> = ({ children, fa
  * @deprecated Use WriterOnly instead
  */
 export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  console.warn('EditorOnly is deprecated, use WriterOnly instead');
   return <WriterOnly children={children} fallback={fallback} />;
 };
 
@@ -135,5 +185,6 @@ export const EditorOnly: React.FC<RoleComponentProps> = ({ children, fallback })
  * @deprecated Use WriterOrAdminOnly instead
  */
 export const EditorOrAdminOnly: React.FC<RoleComponentProps> = ({ children, fallback }) => {
+  console.warn('EditorOrAdminOnly is deprecated, use WriterOrAdminOnly instead');
   return <WriterOrAdminOnly children={children} fallback={fallback} />;
 };

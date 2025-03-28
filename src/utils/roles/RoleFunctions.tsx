@@ -19,7 +19,7 @@ export const isDesignerRole = (role: UserRole | null): boolean => {
  * Check if a role is a writer role (includes legacy 'editor' role)
  */
 export const isWriterRole = (role: UserRole | null): boolean => {
-  // Always consider both 'writer' and 'editor' as writer roles for backward compatibility
+  // Always consider both 'writer' and legacy 'editor' roles for backward compatibility
   return role === 'writer' || role === 'editor';
 };
 
@@ -45,7 +45,9 @@ export const isWriterOrAdminRole = (role: UserRole | null): boolean => {
 };
 
 /**
- * Get a role-specific value
+ * Get a role-specific value based on the user's role
+ * 
+ * Allows providing specific values for each role and handles null roles gracefully
  */
 export const getRoleSpecificValue = <T,>(
   role: UserRole | null,
@@ -62,11 +64,14 @@ export const getRoleSpecificValue = <T,>(
   }
   
   // Default to writer value if role is undefined
+  console.warn('No role defined, defaulting to writer role behavior');
   return writerValue;
 };
 
 /**
  * Check if a role has any of the specified roles
+ * 
+ * Handles the special case of 'editor' role being treated as 'writer'
  */
 export const hasAnyRole = (role: UserRole | null, roles: UserRole[]): boolean => {
   if (!role) return false;
@@ -79,7 +84,6 @@ export const hasAnyRole = (role: UserRole | null, roles: UserRole[]): boolean =>
   return roles.includes(role);
 };
 
-// For backward compatibility
 /**
  * @deprecated Use isWriterRole instead
  */

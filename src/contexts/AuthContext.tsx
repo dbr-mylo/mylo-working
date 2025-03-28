@@ -26,9 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for persisted role in localStorage
+    const persistedRole = localStorage.getItem('userRole') as UserRole | null;
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         fetchUserData(session.user.id);
+      } else if (persistedRole) {
+        // If no active session but we have a persisted role (guest mode)
+        console.log(`Restoring persisted role: ${persistedRole}`);
+        setAuthState(state => ({ ...state, role: persistedRole, isLoading: false }));
       } else {
         setAuthState(state => ({ ...state, isLoading: false }));
       }
@@ -40,7 +47,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         await fetchUserData(session.user.id);
       } else {
-        setAuthState({ user: null, role: null, isLoading: false });
+        // Clear role when user signs out, but check for persisted guest role
+        const guestRole = localStorage.getItem('userRole') as UserRole | null;
+        setAuthState({ 
+          user: null, 
+          role: guestRole, 
+          isLoading: false 
+        });
       }
     });
 
@@ -71,6 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userRole = 'writer'; // Convert 'editor' to 'writer' for backward compatibility
       }
 
+      // Persist role to localStorage for session recovery
+      localStorage.setItem('userRole', userRole);
+      
       setAuthState({
         user: profile,
         role: userRole,
@@ -81,6 +97,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Error fetching user data");
+      
+      // Clear persisted role on error
+      localStorage.removeItem('userRole');
+      
       setAuthState(state => ({ ...state, isLoading: false }));
     }
   };
@@ -125,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestWriter = (shouldNavigate: boolean = true) => {
+    localStorage.setItem('userRole', 'writer');
     setAuthState({
       user: null,
       role: "writer",
@@ -137,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestDesigner = (shouldNavigate: boolean = true) => {
+    localStorage.setItem('userRole', 'designer');
     setAuthState({
       user: null,
       role: "designer",
@@ -149,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const continueAsGuestAdmin = (shouldNavigate: boolean = true) => {
+    localStorage.setItem('userRole', 'admin');
     setAuthState({
       user: null,
       role: "admin",
@@ -162,7 +185,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
     console.log("Legacy 'editor' role mapped to 'writer' role");
-    continueAsGuestWriter(shouldNavigate);
+    localStorage.setItem('userRole', 'writer');
+    setAuthState({
+      user: null,
+      role: "writer",
+      isLoading: false
+    });
+    toast.success("Continuing as Writer (Editor role has been renamed)");
+    if (shouldNavigate) {
+      navigate("/");
+    }
   };
 
   return (

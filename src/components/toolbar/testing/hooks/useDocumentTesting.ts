@@ -23,9 +23,9 @@ export const useDocumentTesting = ({
     if (!editor) {
       setTestResults({
         'editor.missing': {
-          name: 'Editor Instance',
           passed: false,
           message: 'No editor instance available',
+          name: 'Editor Instance',
           timestamp: new Date().toISOString()
         }
       });

@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import React from 'react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -394,6 +395,14 @@ export function useRoleAwareErrorHandling() {
 }
 
 /**
+ * Interface for the resolution steps container
+ */
+export interface GuidedResolutionProps {
+  error: unknown;
+  resolutionSteps: string[];
+}
+
+/**
  * Create a guided error resolution component
  * @param error The error to resolve
  * @param resolutionSteps Steps to resolve the error
@@ -402,7 +411,7 @@ export function createGuidedResolution(
   error: unknown, 
   resolutionSteps: string[]
 ): React.ReactElement {
-  return (
+  const GuidedResolution = () => (
     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
       <h3 className="text-sm font-medium text-blue-800">How to resolve this issue:</h3>
       <ol className="mt-2 pl-5 list-decimal text-sm text-blue-700 space-y-1">
@@ -412,6 +421,8 @@ export function createGuidedResolution(
       </ol>
     </div>
   );
+  
+  return <GuidedResolution />;
 }
 
 /**

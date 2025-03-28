@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ErrorBoundary } from '@/components/errors';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ErrorBoundary } from "@/components/errors";
 
 /**
  * A component that deliberately throws an error to test error boundaries
@@ -14,11 +14,12 @@ const ErrorComponent = () => {
   return <div>This will never render</div>;
 };
 
-interface ErrorTestComponentProps {
+/**
+ * A container component that wraps ErrorComponent with an ErrorBoundary
+ */
+export const ErrorTestComponent: React.FC<{
   showErrorTest: boolean;
-}
-
-export const ErrorTestComponent: React.FC<ErrorTestComponentProps> = ({ showErrorTest }) => {
+}> = ({ showErrorTest }) => {
   if (!showErrorTest) return null;
   
   return (

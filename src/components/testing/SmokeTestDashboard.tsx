@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { smokeTestRunner } from "@/utils/testing/smokeTesting";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle, XCircle, Play, Info, Shield } from "lucide-react";
 import { toast } from "sonner";
-import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
+import { ErrorBoundary } from "@/components/errors";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDevelopmentEnvironment } from "@/utils/navigation/routeValidation";

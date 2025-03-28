@@ -1,10 +1,9 @@
-
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
+import { ErrorBoundary } from "@/components/errors";
 
 const NotFound = () => {
   const location = useLocation();

@@ -16,7 +16,7 @@ import NotFound from "./pages/NotFound";
 import RegressionTestRoute from "./routes/RegressionTestRoute";
 import SmokeTestRoute from "./routes/SmokeTestRoute";
 import { TemplateManager } from "@/components/design/TemplateManager";
-import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors/ErrorBoundary";
+import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors";
 import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
 

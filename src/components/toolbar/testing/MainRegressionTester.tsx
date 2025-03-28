@@ -1,46 +1,32 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ToolbarTester } from './ToolbarTester';
 import { ManualTestChecklist } from './ManualTestChecklist';
-import { RoleSystemAnalysis } from './RoleSystemAnalysis';
-import { RoleSystemMigrationStatus } from './components/RoleSystemMigrationStatus';
-import { Badge } from '@/components/ui/badge';
+import { ToolbarTester } from './ToolbarTester';
+import { DocumentEditingTester } from './DocumentEditingTester';
 
 export const MainRegressionTester = () => {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">Role System Testing</h1>
-        <p className="text-muted-foreground mb-4">
-          Test and analyze the role-based component implementation for consistency and correctness
-        </p>
-        <div className="flex items-center gap-2 mb-6">
-          <Badge className="bg-green-500 hover:bg-green-600">Phase 4 Complete</Badge>
-          <Badge variant="outline" className="text-green-500 border-green-500">Documentation Enhanced</Badge>
-        </div>
-        
-        {/* Standalone Migration Status Overview */}
-        <RoleSystemMigrationStatus />
-      </div>
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-6">Regression Testing Suite</h1>
       
-      <Tabs defaultValue="toolbar-tester">
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="toolbar-tester">Toolbar Tests</TabsTrigger>
-          <TabsTrigger value="manual-checklist">Manual Verification</TabsTrigger>
-          <TabsTrigger value="system-analysis">System Analysis</TabsTrigger>
+      <Tabs defaultValue="checklist">
+        <TabsList className="mb-4">
+          <TabsTrigger value="checklist">Manual Test Checklist</TabsTrigger>
+          <TabsTrigger value="toolbar">Toolbar Component Tests</TabsTrigger>
+          <TabsTrigger value="editor">Document Editing Tests</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="toolbar-tester">
-          <ToolbarTester />
-        </TabsContent>
-        
-        <TabsContent value="manual-checklist">
+        <TabsContent value="checklist">
           <ManualTestChecklist />
         </TabsContent>
         
-        <TabsContent value="system-analysis">
-          <RoleSystemAnalysis />
+        <TabsContent value="toolbar">
+          <ToolbarTester />
+        </TabsContent>
+        
+        <TabsContent value="editor">
+          <DocumentEditingTester />
         </TabsContent>
       </Tabs>
     </div>

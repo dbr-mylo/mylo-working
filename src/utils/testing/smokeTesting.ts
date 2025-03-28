@@ -1,19 +1,13 @@
 
 import { toast } from "sonner";
-
-interface TestResult {
-  component: string;
-  passed: boolean;
-  error?: unknown;
-  timestamp: Date;
-}
+import { SmokeTestResult } from "@/hooks/useSmokeTest";
 
 /**
  * Simple in-browser smoke testing utility
  * Keeps track of component render tests
  */
 class SmokeTestRunner {
-  private results: TestResult[] = [];
+  private results: SmokeTestResult[] = [];
   private enabled: boolean = false;
   
   /**
@@ -38,10 +32,12 @@ class SmokeTestRunner {
       callback();
       
       // Record success
-      const result: TestResult = {
+      const result: SmokeTestResult = {
         component: componentName,
         passed: true,
-        timestamp: new Date()
+        timestamp: new Date().toISOString(),
+        error: undefined,
+        context: {}
       };
       
       this.results.push(result);
@@ -49,11 +45,12 @@ class SmokeTestRunner {
       return true;
     } catch (error) {
       // Record failure
-      const result: TestResult = {
+      const result: SmokeTestResult = {
         component: componentName,
         passed: false,
-        error,
-        timestamp: new Date()
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
+        context: {}
       };
       
       this.results.push(result);
@@ -73,7 +70,7 @@ class SmokeTestRunner {
   /**
    * Get all test results
    */
-  public getResults(): TestResult[] {
+  public getResults(): SmokeTestResult[] {
     return [...this.results];
   }
   

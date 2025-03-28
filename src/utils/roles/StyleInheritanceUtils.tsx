@@ -82,7 +82,7 @@ export const calculateEffectiveStyle = (
   inheritedStyles: TextStyle[]
 ): TextStyle => {
   // Start with an empty style object
-  let effectiveStyle: Partial<TextStyle> = { ...style };
+  let effectiveStyle = { ...style } as Partial<TextStyle>;
   
   // Apply each inherited style in reverse order (from most distant ancestor to closest)
   [...inheritedStyles].reverse().forEach(parentStyle => {
@@ -92,7 +92,8 @@ export const calculateEffectiveStyle = (
     // Apply parent properties for any property not explicitly set in the child
     Object.entries(styleProperties).forEach(([key, value]) => {
       if (value !== undefined && effectiveStyle[key as keyof TextStyle] === undefined) {
-        effectiveStyle[key as keyof TextStyle] = value as unknown as any;
+        // Explicitly cast the key and value to ensure type safety
+        (effectiveStyle as any)[key] = value;
       }
     });
   });

@@ -82,3 +82,33 @@ export function RoleAwareErrorMessage({
     </Alert>
   );
 }
+
+/**
+ * A fallback component that displays role-specific error messages
+ * Used in error boundaries as a fallback component
+ */
+export function RoleAwareErrorFallback({ 
+  error, 
+  context 
+}: { 
+  error: unknown; 
+  context: string;
+}) {
+  const { role } = useAuth();
+  const errorMessage = getRoleSpecificErrorMessage(error, role, context);
+  
+  return (
+    <div className="p-6 max-w-xl mx-auto my-8 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+      <h2 className="text-xl font-semibold text-red-800 mb-4">
+        Application Error
+      </h2>
+      <Alert variant="destructive" className="mb-4">
+        <AlertTitle>Something went wrong</AlertTitle>
+        <AlertDescription>{errorMessage}</AlertDescription>
+      </Alert>
+      <p className="text-gray-600 mt-4">
+        Please try refreshing the page or contact support if the problem persists.
+      </p>
+    </div>
+  );
+}

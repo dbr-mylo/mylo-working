@@ -67,8 +67,8 @@ export const TestPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <TestFilters
-                filter={categoryFilter}
-                setFilter={setCategoryFilter}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
                 priorityFilter={priorityFilter}
                 setPriorityFilter={setPriorityFilter}
                 searchTerm={searchTerm}
@@ -110,3 +110,4 @@ export const TestPage: React.FC = () => {
     </div>
   );
 };
+

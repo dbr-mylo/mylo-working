@@ -18,3 +18,5 @@ export * from './TestItem';
 export * from './TestStatusButtons';
 export * from './TestItemHeader';
 export * from './TestNotes';
+export * from './TestDetails';
+export * from './TestDashboard';

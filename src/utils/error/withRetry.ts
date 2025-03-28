@@ -41,3 +41,6 @@ export function withRetry<T extends (...args: any[]) => Promise<any>>(
     throw lastError;
   }) as T;
 }
+
+// Re-export RetryConfig from types for backward compatibility
+export type { RetryConfig };

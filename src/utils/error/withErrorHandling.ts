@@ -1,5 +1,7 @@
+
 import { handleError } from "./handleError";
-import { withRetry, RetryConfig } from "./withRetry";
+import { withRetry } from "./withRetry";
+import { RetryConfig } from "./types";
 
 /**
  * Wraps an async function with error handling and retry logic
@@ -15,11 +17,11 @@ export function withErrorHandling<T, Args extends any[]>(
   userMessage?: string,
   retryConfig?: RetryConfig
 ): (...args: Args) => Promise<T | undefined> {
-  return async (...args: Args) => {
+  return async (...args: Args): Promise<T | undefined> => {
     try {
       // Apply retry logic if configuration is provided
       if (retryConfig) {
-        return await withRetry(() => fn(...args), retryConfig);
+        return await withRetry(fn, retryConfig)(...args);
       }
       // Otherwise, just run the function
       return await fn(...args);
@@ -42,7 +44,7 @@ export function withSyncErrorHandling<T, Args extends any[]>(
   context: string,
   userMessage?: string
 ): (...args: Args) => T | undefined {
-  return (...args: Args) => {
+  return (...args: Args): T | undefined => {
     try {
       return fn(...args);
     } catch (error) {

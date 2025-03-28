@@ -14,7 +14,8 @@ export {
   type ErrorHandler,
   type ErrorTracker,
   type SeverityLevel,
-  type RetryConfig
+  type RetryConfig,
+  type ResolutionStep
 } from './types';
 export { 
   withErrorHandling,

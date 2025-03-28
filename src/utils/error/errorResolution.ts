@@ -9,9 +9,9 @@ import { ResolutionStep } from './types';
 export function getErrorResolutionSteps(
   error: unknown, 
   context: string
-): string[] {
+): ResolutionStep[] {
   // Default steps for generic errors
-  let steps = [
+  let steps: ResolutionStep[] = [
     "Refresh the page and try again.",
     "Check your internet connection.",
     "Clear your browser cache.",

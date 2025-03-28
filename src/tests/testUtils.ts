@@ -11,5 +11,8 @@ export const extendExpect = () => {
   console.log('Testing utilities initialized');
 };
 
+// Export Vitest functions for consistent usage across tests
+export { beforeEach, afterEach } from 'vitest';
+
 // Call this in setup
 extendExpect();

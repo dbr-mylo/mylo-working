@@ -61,3 +61,8 @@ export const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
   delayMs: 300,
   retryCondition: () => true,
 };
+
+/**
+ * Type for resolution steps
+ */
+export type ResolutionStep = string;

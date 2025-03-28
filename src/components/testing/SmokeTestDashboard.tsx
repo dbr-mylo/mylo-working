@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { smokeTestRunner } from "@/utils/testing/smokeTesting";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDevelopmentEnvironment } from "@/utils/navigation/routeValidation";
+import { SmokeTestDashboardProps } from "./SmokeTestDashboardProps";
 
 /**
  * A component that deliberately throws an error to test error boundaries
@@ -25,7 +25,7 @@ const ErrorComponent = () => {
 /**
  * Dashboard for running smoke tests with role-based UI adaptations
  */
-export const SmokeTestDashboard = () => {
+export const SmokeTestDashboard: React.FC<SmokeTestDashboardProps> = ({ onTestRunComplete }) => {
   const [results, setResults] = useState(smokeTestRunner.getResults());
   const [showErrorTest, setShowErrorTest] = useState(false);
   const [testEnabled, setTestEnabled] = useState(
@@ -68,8 +68,14 @@ export const SmokeTestDashboard = () => {
   const runAllTests = () => {
     toast("Running all smoke tests...");
     // This would typically run all registered smoke tests
-    // For now, we'll just log that we would run them
     console.log("Running all smoke tests");
+    
+    // Report results to parent component if callback is provided
+    const testResults = smokeTestRunner.getResults();
+    if (onTestRunComplete) {
+      onTestRunComplete(testResults);
+    }
+    
     toast.success("All tests completed", {
       description: `${summary.passed} passed, ${summary.failed} failed`,
     });

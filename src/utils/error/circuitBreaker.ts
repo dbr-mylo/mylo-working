@@ -167,7 +167,8 @@ export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>
 ): T {
   const circuitBreaker = new CircuitBreaker(config);
   
+  // Use type assertion to fix the type mismatch
   return ((...args: Parameters<T>): ReturnType<T> => {
     return circuitBreaker.execute(() => fn(...args)) as ReturnType<T>;
-  }) as T;
+  }) as unknown as T;
 }

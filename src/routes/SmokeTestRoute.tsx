@@ -73,8 +73,8 @@ const SmokeTestRoute = () => {
   return (
     <RoleAwareLayout role={role} showRoleNavigation={false}>
       {showDevWarning && (
-        <Alert variant="warning" className="mb-2 mx-auto max-w-6xl mt-4">
-          <AlertTriangle className="h-4 w-4 mr-2" />
+        <Alert variant="default" className="mb-2 mx-auto max-w-6xl mt-4 border-yellow-400 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4 mr-2 text-yellow-500" />
           <AlertTitle>Development Mode</AlertTitle>
           <AlertDescription>
             You're accessing the Smoke Test Dashboard in development mode. In production, 

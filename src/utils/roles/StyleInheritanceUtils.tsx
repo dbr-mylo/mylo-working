@@ -1,3 +1,4 @@
+
 import { TextStyle } from "@/lib/types";
 
 /**
@@ -91,7 +92,7 @@ export const calculateEffectiveStyle = (
     // Apply parent properties for any property not explicitly set in the child
     Object.entries(styleProperties).forEach(([key, value]) => {
       if (value !== undefined && effectiveStyle[key as keyof TextStyle] === undefined) {
-        effectiveStyle[key as keyof TextStyle] = value as any;
+        effectiveStyle[key as keyof TextStyle] = value as unknown as any;
       }
     });
   });

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AlertCircle, RefreshCw, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import {
   getRoleSpecificErrorMessage, 
   getErrorResolutionSteps, 
   createGuidedResolution 
-} from '@/utils/errorHandling';
+} from '@/utils/error';
 
 interface ErrorDisplayProps {
   error: unknown;

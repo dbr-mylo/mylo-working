@@ -8,7 +8,7 @@ import {
   isTestingRoute,
   canAccessTestingRoute
 } from "@/utils/navigation/routeValidation";
-import { withErrorHandling } from "@/utils/errorHandling";
+import { withErrorHandling } from "@/utils/error/withErrorHandling";
 import { useState, useEffect } from "react";
 
 /**

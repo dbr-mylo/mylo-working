@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { handleError } from "@/utils/errorHandling";
 
 interface UseDocumentSaveProps {
   onSave?: () => Promise<void>;
@@ -36,6 +37,11 @@ export const useDocumentSave = ({
         console.log(`Calling onSave function for ${documentType}`);
         await onSave();
         console.log(`onSave function completed for ${documentType}`);
+        
+        toast({
+          title: `${documentType} saved`,
+          description: `Your ${documentType} has been saved successfully.`,
+        });
       }
       
       if (loadDocuments) {
@@ -44,12 +50,11 @@ export const useDocumentSave = ({
         console.log(`Documents list reloaded for ${documentType}`);
       }
     } catch (error) {
-      console.error(`Error saving ${documentType}:`, error);
-      toast({
-        title: `Error saving ${documentType}`,
-        description: `There was a problem saving your ${documentType}. Please try again.`,
-        variant: "destructive",
-      });
+      handleError(
+        error, 
+        `useDocumentSave.handleSave(${documentType})`,
+        `There was a problem saving your ${documentType}. Please try again.`
+      );
     } finally {
       setIsSaving(false);
       console.log(`Save process completed for ${documentType}`);

@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { textStyleStore } from "@/stores/textStyles";
 import { TextStyle, TypographyStyles } from "@/lib/types";
+import { handleError } from "@/utils/errorHandling";
 
 interface UseStyleOperationsProps {
   styles: TypographyStyles;
@@ -86,12 +87,11 @@ export const useStyleOperations = ({
         description: "Text style has been saved successfully"
       });
     } catch (error) {
-      console.error("Error saving style:", error);
-      toast({
-        title: "Error saving style",
-        description: "There was a problem saving your text style",
-        variant: "destructive"
-      });
+      handleError(
+        error, 
+        "useStyleOperations.handleSaveStyle", 
+        "There was a problem saving your text style"
+      );
     }
   };
 
@@ -119,12 +119,11 @@ export const useStyleOperations = ({
         description: "Text style has been deleted successfully"
       });
     } catch (error) {
-      console.error("Error deleting style:", error);
-      toast({
-        title: "Error deleting style",
-        description: "There was a problem deleting the text style",
-        variant: "destructive"
-      });
+      handleError(
+        error, 
+        "useStyleOperations.handleDeleteStyle", 
+        "There was a problem deleting the text style"
+      );
     }
   };
 

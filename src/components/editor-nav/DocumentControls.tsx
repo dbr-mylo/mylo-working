@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { handleError } from "@/utils/errorHandling";
 
 interface DocumentControlsProps {
   onSave: (() => Promise<void>) | undefined;
@@ -36,12 +37,20 @@ export const DocumentControls = ({
   const buttonSize = isDesigner ? "xxs" : "sm";
 
   const handleLoadDocument = (doc: Document) => {
-    if (onLoadDocument) {
-      onLoadDocument(doc);
-      toast({
-        title: `${isDesigner ? "Template" : "Document"} loaded`,
-        description: `"${doc.title}" has been loaded.`,
-      });
+    try {
+      if (onLoadDocument) {
+        onLoadDocument(doc);
+        toast({
+          title: `${isDesigner ? "Template" : "Document"} loaded`,
+          description: `"${doc.title}" has been loaded.`,
+        });
+      }
+    } catch (error) {
+      handleError(
+        error,
+        "DocumentControls.handleLoadDocument",
+        `Failed to load ${itemType}. Please try again.`
+      );
     }
   };
 
@@ -59,14 +68,17 @@ export const DocumentControls = ({
     try {
       if (onSave) {
         await onSave();
+        toast({
+          title: `${itemType} saved`,
+          description: `Your ${itemType} has been saved successfully.`,
+        });
       }
     } catch (error) {
-      console.error("Error in handleSave:", error);
-      toast({
-        title: `Error saving ${itemType}`,
-        description: `There was a problem saving your ${itemType}. Please try again.`,
-        variant: "destructive",
-      });
+      handleError(
+        error,
+        "DocumentControls.handleSave",
+        `There was a problem saving your ${itemType}. Please try again.`
+      );
     } finally {
       setIsSaving(false);
     }

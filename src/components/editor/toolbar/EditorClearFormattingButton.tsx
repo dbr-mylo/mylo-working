@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { clearFormatting } from '../../rich-text/utils/textFormatting';
 import { useToast } from '@/hooks/use-toast';
 import { useIsWriter } from '@/utils/roles';
+import { handleError } from '@/utils/errorHandling';
 
 interface EditorClearFormattingButtonProps {
   editor: Editor;
@@ -25,34 +26,42 @@ export const EditorClearFormattingButton: React.FC<EditorClearFormattingButtonPr
   const handleClearFormatting = () => {
     if (!editor) return;
     
-    // Check if text is selected
-    if (editor.state.selection.empty) {
-      toast({
-        title: "No text selected",
-        description: "Please select some text to clear its formatting.",
-        variant: "default",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    // Clear the formatting
-    clearFormatting(editor);
-    
-    // Show success toast
-    toast({
-      title: "Formatting cleared",
-      description: "All formatting has been removed from the selected text.",
-      variant: "default",
-      duration: 2000,
-    });
-    
-    // Force editor to refresh
-    setTimeout(() => {
-      if (editor.isEditable) {
-        editor.commands.focus();
+    try {
+      // Check if text is selected
+      if (editor.state.selection.empty) {
+        toast({
+          title: "No text selected",
+          description: "Please select some text to clear its formatting.",
+          variant: "default",
+          duration: 3000,
+        });
+        return;
       }
-    }, 50);
+      
+      // Clear the formatting
+      clearFormatting(editor);
+      
+      // Show success toast
+      toast({
+        title: "Formatting cleared",
+        description: "All formatting has been removed from the selected text.",
+        variant: "default",
+        duration: 2000,
+      });
+      
+      // Force editor to refresh
+      setTimeout(() => {
+        if (editor.isEditable) {
+          editor.commands.focus();
+        }
+      }, 50);
+    } catch (error) {
+      handleError(
+        error,
+        "EditorClearFormattingButton.handleClearFormatting",
+        "Failed to clear formatting"
+      );
+    }
   };
 
   return (

@@ -15,8 +15,24 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import RegressionTestRoute from "./routes/RegressionTestRoute";
 import { TemplateManager } from "@/components/design/TemplateManager";
+import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors/ErrorBoundary";
 
-const queryClient = new QueryClient();
+// Create a query client with error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      // Important: Use onError for logging but don't handle the error here
+      // Let the error propagate to the error boundary
+    },
+    mutations: {
+      retry: 1,
+      // Important: Use onError for logging but don't handle the error here
+      // Let the error propagate to the error boundary
+    },
+  },
+});
 
 // Protected route wrapper for any authenticated user
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -88,38 +104,42 @@ const WriterPages = () => (
 );
 
 const AppRoutes = () => (
-  <Routes>
-    <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-    <Route path="/" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
-    <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-    <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-    
-    {/* Role-specific routes */}
-    <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
-    <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
-    
-    {/* Direct template management route */}
-    <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
-    
-    <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
-    <Route path="/testing/regression" element={<RegressionTestRoute />} />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
+  <ErrorBoundary context="AppRoutes" fallback={<RoleAwareErrorFallback error={new Error("Application failed to load")} context="application" />}>
+    <Routes>
+      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
+      <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      
+      {/* Role-specific routes */}
+      <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
+      <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
+      
+      {/* Direct template management route */}
+      <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
+      
+      <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
+      <Route path="/testing/regression" element={<RegressionTestRoute />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </ErrorBoundary>
 );
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary context="App">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

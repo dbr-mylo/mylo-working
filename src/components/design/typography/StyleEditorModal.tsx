@@ -4,6 +4,9 @@ import { StyleForm } from "./StyleForm";
 import { TextStyle, StyleFormData } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { handleError } from "@/utils/errorHandling";
+import { ErrorDisplay } from "@/components/errors/ErrorDisplay";
+import { useState } from "react";
 
 interface StyleEditorModalProps {
   style: TextStyle | null;
@@ -19,9 +22,13 @@ export const StyleEditorModal = ({
   onStyleSaved,
 }: StyleEditorModalProps) => {
   const { toast } = useToast();
+  const [error, setError] = useState<unknown>(null);
   
   const handleSave = async (formData: StyleFormData) => {
     try {
+      // Reset any previous errors
+      setError(null);
+      
       const styleData = {
         ...formData,
         id: style?.id, // If editing, keep the existing ID
@@ -37,12 +44,12 @@ export const StyleEditorModal = ({
       onStyleSaved();
       onClose();
     } catch (error) {
-      console.error("Error saving style:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save text style",
-        variant: "destructive",
-      });
+      setError(error);
+      handleError(
+        error, 
+        "StyleEditorModal.handleSave", 
+        "Failed to save text style"
+      );
     }
   };
 
@@ -56,6 +63,14 @@ export const StyleEditorModal = ({
         </DialogHeader>
         
         <div className="px-3 pb-3">
+          {error && (
+            <ErrorDisplay 
+              error={error} 
+              context="StyleEditorModal" 
+              className="mb-4"
+            />
+          )}
+          
           <StyleForm 
             initialValues={style || undefined}
             onSubmit={handleSave}

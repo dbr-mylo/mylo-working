@@ -1,4 +1,6 @@
+
 import * as React from "react"
+import { toast as sonnerToast } from "sonner"
 
 import type {
   ToastActionElement,
@@ -168,6 +170,27 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// Enhance the toast functions to also show Sonner toasts for consistent UI
+function enhancedToast(props: Toast & { variant?: "default" | "destructive" }) {
+  // Show traditional toast
+  const result = toast(props);
+  
+  // Also show Sonner toast
+  const { title, description, variant } = props;
+  
+  if (variant === "destructive") {
+    sonnerToast.error(title as string, {
+      description: description as string,
+    });
+  } else {
+    sonnerToast(title as string, {
+      description: description as string,
+    });
+  }
+  
+  return result;
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -183,9 +206,9 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: enhancedToast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, enhancedToast as toast }

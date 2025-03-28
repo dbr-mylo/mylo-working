@@ -3,10 +3,11 @@ import { useCallback } from 'react';
 import { Editor } from '@tiptap/react';
 import { textStyleStore } from '@/stores/textStyles';
 import { useToast } from '@/hooks/use-toast';
-import { handleError } from '@/utils/errorHandling';
+import { handleError, useRoleAwareErrorHandling } from '@/utils/errorHandling';
 
 export const useStyleApplication = (editor: Editor | null) => {
   const { toast } = useToast();
+  const { handleRoleAwareError } = useRoleAwareErrorHandling();
 
   const applyStyle = useCallback(async (styleId: string) => {
     if (!editor) {
@@ -88,13 +89,13 @@ export const useStyleApplication = (editor: Editor | null) => {
       });
       
     } catch (error) {
-      handleError(
+      handleRoleAwareError(
         error, 
         "useStyleApplication.applyStyle", 
         "Could not apply the style to the selected text"
       );
     }
-  }, [editor, toast]);
+  }, [editor, toast, handleRoleAwareError]);
   
   return { applyStyle };
 };

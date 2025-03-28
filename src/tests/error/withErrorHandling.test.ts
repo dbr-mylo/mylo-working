@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { withErrorHandling, withSyncErrorHandling } from '@/utils/error/withErrorHandling';
 import { handleError } from '@/utils/error/handleError';
+import { beforeEach } from '../testUtils';
 
 // Mock dependencies
 vi.mock('@/utils/error/handleError', () => ({

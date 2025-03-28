@@ -4,6 +4,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorDisplay, EmptyStateWithError, RecoverableErrorState } from '@/components/errors/ErrorDisplay';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleSpecificErrorMessage } from '@/utils/error/roleSpecificErrors';
+import { beforeEach } from '../../testUtils';
+import '@testing-library/jest-dom'; // Import jest-dom for the matchers
 
 // Mock dependencies
 vi.mock('@/contexts/AuthContext', () => ({
@@ -23,8 +25,8 @@ vi.mock('@/utils/error/errorResolution', () => ({
 describe('ErrorDisplay', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useAuth.mockReturnValue({ role: 'user' });
-    getRoleSpecificErrorMessage.mockImplementation((error) => {
+    (useAuth as any).mockReturnValue({ role: 'user' });
+    (getRoleSpecificErrorMessage as any).mockImplementation((error) => {
       return error instanceof Error ? error.message : String(error);
     });
   });

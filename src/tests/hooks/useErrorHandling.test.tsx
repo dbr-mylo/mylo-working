@@ -5,6 +5,7 @@ import { useRoleAwareErrorHandling } from '@/hooks/useErrorHandling';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleError } from '@/utils/error/handleError';
 import { getRoleSpecificErrorMessage } from '@/utils/error/roleSpecificErrors';
+import { beforeEach } from '../testUtils';
 
 // Mock dependencies
 vi.mock('@/contexts/AuthContext', () => ({
@@ -22,8 +23,8 @@ vi.mock('@/utils/error/roleSpecificErrors', () => ({
 describe('useRoleAwareErrorHandling', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useAuth.mockReturnValue({ role: 'user' });
-    getRoleSpecificErrorMessage.mockReturnValue('Role-specific error message');
+    (useAuth as any).mockReturnValue({ role: 'user' });
+    (getRoleSpecificErrorMessage as any).mockReturnValue('Role-specific error message');
   });
   
   it('should get role from auth context', () => {
@@ -56,7 +57,7 @@ describe('useRoleAwareErrorHandling', () => {
   });
   
   it('should handle different roles from auth context', () => {
-    useAuth.mockReturnValue({ role: 'admin' });
+    (useAuth as any).mockReturnValue({ role: 'admin' });
     
     const { result } = renderHook(() => useRoleAwareErrorHandling());
     const error = new Error('Test error');

@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { AlertCircle, RefreshCw, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  getRoleSpecificErrorMessage, 
-  getErrorResolutionSteps, 
-  createGuidedResolution 
-} from '@/utils/error';
+import { getRoleSpecificErrorMessage } from "@/utils/error/roleSpecificErrors";
+import { getErrorResolutionSteps } from "@/utils/error/errorResolution";
+import { createGuidedResolution } from "@/components/errors/ErrorResolutionFactory";
 
 interface ErrorDisplayProps {
   error: unknown;

@@ -1,6 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { SmokeTestDashboard } from "@/components/testing/SmokeTestDashboard";
+import { SmokeTestDashboardProps } from "@/components/testing/SmokeTestDashboardProps";
 import { RoleAwareLayout } from "@/components/layout/RoleAwareLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

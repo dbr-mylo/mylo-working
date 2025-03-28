@@ -6,3 +6,5 @@ export * from './withRetry';
 export * from './withErrorHandling';
 export * from './circuitBreaker';
 export * from './roleSpecificErrors';
+export * from './errorResolution';
+export * from './types';

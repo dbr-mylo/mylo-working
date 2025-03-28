@@ -5,11 +5,11 @@ import { TestResult } from '../useToolbarTestResult';
 /**
  * Runs tests for document editing operations
  * @param editor The editor instance to test
- * @returns Object containing test results
+ * @returns Promise resolving to an object containing test results
  */
-export const runDocumentEditingTests = (
+export const runDocumentEditingTests = async (
   editor: Editor | null
-): Record<string, TestResult> => {
+): Promise<Record<string, TestResult>> => {
   const results: Record<string, TestResult> = {};
   
   // Skip tests if editor is not available

@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { TestResult } from '../hooks/useToolbarTestResult';
 
 interface TestPerformanceMetricsProps {
@@ -58,8 +58,15 @@ export const TestPerformanceMetrics: React.FC<TestPerformanceMetricsProps> = ({ 
             <Bar 
               dataKey="duration" 
               name="Duration (ms)"
-              fill={(data: PerformanceData) => (data.status === 'passed' ? '#10b981' : '#ef4444')}
-            />
+              fill="#10b981" // Default color
+            >
+              {performanceData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.status === 'passed' ? '#10b981' : '#ef4444'} 
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

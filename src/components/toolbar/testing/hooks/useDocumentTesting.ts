@@ -80,7 +80,7 @@ export const useDocumentTesting = ({
     try {
       // Use withRetry to automatically retry the test run if it fails
       const runTestsWithRetry = withRetry(
-        () => runDocumentEditingTests(editor),
+        async () => await runDocumentEditingTests(editor),
         { 
           maxAttempts: maxRetries + 1, // Initial attempt + retries
           delayMs: 200,
@@ -111,7 +111,7 @@ export const useDocumentTesting = ({
       setLastRunTime(timestamp);
       
       // Count passed/failed tests
-      const passedTests = Object.values(results).filter(r => r.passed).length;
+      const passedTests = Object.values(results).filter(test => test.passed).length;
       const totalTests = Object.keys(results).length;
       
       // Send analytics if enabled

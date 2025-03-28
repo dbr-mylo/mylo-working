@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Editor } from '@tiptap/react';
 import { textStyleStore } from '@/stores/textStyles';
 import { useToast } from '@/hooks/use-toast';
+import { handleError } from '@/utils/errorHandling';
 
 export const useStyleApplication = (editor: Editor | null) => {
   const { toast } = useToast();
@@ -14,11 +15,24 @@ export const useStyleApplication = (editor: Editor | null) => {
     }
     
     try {
+      // Validate input
+      if (!styleId) {
+        throw new Error("Invalid style ID provided");
+      }
+      
       // Get the style with all inherited properties
       const style = await textStyleStore.getStyleWithInheritance(styleId);
       
       if (!style) {
-        console.error("Style not found:", styleId);
+        throw new Error(`Style not found: ${styleId}`);
+      }
+      
+      // Check if there is any selected text
+      if (editor.state.selection.empty) {
+        toast({
+          title: "No text selected",
+          description: "Please select some text to apply the style",
+        });
         return;
       }
       
@@ -72,13 +86,13 @@ export const useStyleApplication = (editor: Editor | null) => {
         title: "Style applied",
         description: `Applied "${style.name}" style to text`
       });
+      
     } catch (error) {
-      console.error("Error applying style:", error);
-      toast({
-        title: "Could not apply style",
-        description: "An error occurred while applying the style",
-        variant: "destructive"
-      });
+      handleError(
+        error, 
+        "useStyleApplication.applyStyle", 
+        "Could not apply the style to the selected text"
+      );
     }
   }, [editor, toast]);
   

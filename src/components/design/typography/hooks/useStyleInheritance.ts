@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { TextStyle } from "@/lib/types";
 import { textStyleStore } from "@/stores/textStyles";
 import { useToast } from "@/hooks/use-toast";
+import { filterValidParentStyles, wouldCreateCircularDependency } from "@/utils/roles/StyleInheritanceUtils";
 
 interface UseStyleInheritanceProps {
   currentStyleId?: string;
@@ -28,12 +29,27 @@ export const useStyleInheritance = ({ currentStyleId, parentId }: UseStyleInheri
         
         if (!isMounted) return;
         
+        // Use our utility function to filter out invalid parent styles
         const filteredStyles = filterValidParentStyles(fetchedStyles, currentStyleId);
         setStyles(filteredStyles);
         
         if (parentId) {
-          const chain = await fetchInheritanceChain(parentId, fetchedStyles);
-          setInheritanceChain(chain);
+          // Fetch the inheritance chain
+          try {
+            const chain = await textStyleStore.getInheritanceChain(parentId);
+            
+            // Check for circular dependencies
+            if (chain.some(s => s.id === currentStyleId)) {
+              setError("Circular reference detected in style inheritance");
+              setInheritanceChain([]);
+            } else {
+              setInheritanceChain(chain);
+            }
+          } catch (err) {
+            console.error("Error fetching inheritance chain:", err);
+            setError("Failed to load inheritance chain");
+            setInheritanceChain([]);
+          }
         } else {
           setInheritanceChain([]);
         }
@@ -60,59 +76,6 @@ export const useStyleInheritance = ({ currentStyleId, parentId }: UseStyleInheri
       isMounted = false;
     };
   }, [currentStyleId, parentId, toast]);
-
-  const fetchInheritanceChain = async (styleId: string, allStyles: TextStyle[]): Promise<TextStyle[]> => {
-    const chain: TextStyle[] = [];
-    let currentId = styleId;
-    
-    const visitedIds = new Set<string>();
-    
-    while (currentId && !visitedIds.has(currentId)) {
-      visitedIds.add(currentId);
-      
-      const style = allStyles.find(s => s.id === currentId);
-      if (!style) break;
-      
-      chain.push(style);
-      currentId = style.parentId || '';
-    }
-    
-    return chain;
-  };
-
-  const filterValidParentStyles = (allStyles: TextStyle[], styleId?: string): TextStyle[] => {
-    if (!styleId) return allStyles;
-    
-    return allStyles.filter(style => 
-      style.id !== styleId && 
-      !wouldCreateCircularDependency(style.id, styleId, allStyles)
-    );
-  };
-
-  const wouldCreateCircularDependency = (
-    potentialParentId: string,
-    childStyleId: string,
-    allStyles: TextStyle[],
-    visited: Set<string> = new Set()
-  ): boolean => {
-    if (visited.has(potentialParentId)) {
-      return true;
-    }
-    
-    visited.add(potentialParentId);
-    
-    const style = allStyles.find(s => s.id === potentialParentId);
-    
-    if (!style || !style.parentId) {
-      return false;
-    }
-    
-    if (style.parentId === childStyleId) {
-      return true;
-    }
-    
-    return wouldCreateCircularDependency(style.parentId, childStyleId, allStyles, visited);
-  };
 
   return {
     styles,

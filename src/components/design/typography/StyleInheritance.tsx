@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { useStyleInheritance } from "./hooks/useStyleInheritance";
@@ -25,6 +25,17 @@ export const StyleInheritance = ({
     currentStyleId,
     parentId
   });
+
+  // Show toast for serious errors
+  useEffect(() => {
+    if (error && error.includes("Circular reference")) {
+      toast({
+        title: "Circular Reference Detected",
+        description: "This would create a circular inheritance pattern, which is not allowed",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const handleParentChange = (value: string | undefined) => {
     try {
@@ -56,7 +67,7 @@ export const StyleInheritance = ({
         error={error}
       />
       
-      <InheritanceChain inheritanceChain={inheritanceChain} />
+      <InheritanceChain inheritanceChain={inheritanceChain} error={error} />
       
       {error ? (
         <div className="flex items-center text-xs text-destructive mt-1">

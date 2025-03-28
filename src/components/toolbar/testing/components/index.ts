@@ -14,7 +14,8 @@ export * from './ToolbarComponentsTable';
 export * from './RoleSystemMigrationStatus';
 export * from './TestFilters';
 export * from './TestStats';
-export * from './TestItem';
+// Use explicit named export for TestItemComponent instead of wildcard to avoid ambiguity
+export { TestItemComponent } from './TestItem';
 export * from './TestStatusButtons';
 export * from './TestItemHeader';
 export * from './TestNotes';

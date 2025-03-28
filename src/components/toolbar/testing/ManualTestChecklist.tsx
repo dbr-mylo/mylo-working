@@ -19,11 +19,13 @@ export const ManualTestChecklist = () => {
     updateTestStatus, 
     updateTestNotes, 
     resetAllTests 
-  } = usePersistentTestResults(initialTestItems);
+  } = usePersistentTestResults();
 
   const {
-    filter,
-    setFilter,
+    categoryFilter,
+    setCategoryFilter,
+    priorityFilter,
+    setPriorityFilter,
     searchTerm,
     setSearchTerm,
     filteredTests,
@@ -52,8 +54,10 @@ export const ManualTestChecklist = () => {
       </CardHeader>
       <CardContent>
         <TestFilters 
-          filter={filter}
-          setFilter={setFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onExport={handleExportReport}

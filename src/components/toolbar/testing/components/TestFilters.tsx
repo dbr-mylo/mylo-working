@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/select";
 
 interface TestFiltersProps {
-  filter: string;
-  setFilter: (filter: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (filter: string) => void;
   priorityFilter: string;
   setPriorityFilter: (priority: string) => void;
   searchTerm: string;
@@ -25,8 +25,8 @@ interface TestFiltersProps {
 }
 
 export const TestFilters: React.FC<TestFiltersProps> = ({
-  filter,
-  setFilter,
+  categoryFilter,
+  setCategoryFilter,
   priorityFilter,
   setPriorityFilter,
   searchTerm,
@@ -91,7 +91,7 @@ export const TestFilters: React.FC<TestFiltersProps> = ({
           <span className="text-sm">Category:</span>
         </div>
         
-        <Tabs defaultValue="all" value={filter} onValueChange={setFilter}>
+        <Tabs defaultValue="all" value={categoryFilter} onValueChange={setCategoryFilter}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="base">Base</TabsTrigger>

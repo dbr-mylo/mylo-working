@@ -16,3 +16,5 @@ export * from './TestFilters';
 export * from './TestStats';
 export * from './TestItem';
 export * from './TestStatusButtons';
+export * from './TestItemHeader';
+export * from './TestNotes';

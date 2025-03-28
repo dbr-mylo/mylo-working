@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { TestItem as TestItemType } from '../hooks/usePersistentTestResults';
 import { TestStatusButtons } from './TestStatusButtons';
+import { TestItemHeader } from './TestItemHeader';
+import { TestNotes } from './TestNotes';
 
 interface TestItemProps {
   test: TestItemType;
@@ -19,28 +19,22 @@ export const TestItemComponent: React.FC<TestItemProps> = ({
   updateTestNotes,
   getStatusBadgeColor
 }) => {
+  const handleNotesChange = (notes: string) => {
+    updateTestNotes(test.id, notes);
+  };
+
   return (
     <Card key={test.id} className="p-4">
       <div className="flex items-start">
         <div className="flex-1">
-          <div className="flex items-center mb-2">
-            <span className="font-medium text-md">{test.id}: {test.description}</span>
-            <Badge variant="outline" className="ml-2">
-              {test.category}
-            </Badge>
-            <Badge variant="outline" className="ml-2">
-              {test.priority} priority
-            </Badge>
-            <Badge className={`ml-2 ${getStatusBadgeColor(test.status)}`}>
-              {test.status}
-            </Badge>
-          </div>
+          <TestItemHeader 
+            test={test} 
+            getStatusBadgeColor={getStatusBadgeColor} 
+          />
           
-          <Textarea 
-            placeholder="Add test notes here..."
-            value={test.notes}
-            onChange={(e) => updateTestNotes(test.id, e.target.value)}
-            className="min-h-[80px] mb-2"
+          <TestNotes 
+            notes={test.notes} 
+            onChange={handleNotesChange} 
           />
           
           <TestStatusButtons 

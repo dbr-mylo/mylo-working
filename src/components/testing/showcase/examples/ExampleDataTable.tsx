@@ -181,7 +181,10 @@ export const ExampleDataTable: React.FC<ExampleDataTableProps> = ({ onTestRunCom
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.email}</TableCell>
                 <TableCell>
-                  <Badge variant={row.score >= 90 ? "success" : row.score >= 70 ? "outline" : "secondary"}>
+                  <Badge 
+                    variant={row.score >= 90 ? "outline" : row.score >= 70 ? "outline" : "secondary"}
+                    className={row.score >= 90 ? "border-green-500 text-green-500" : row.score >= 70 ? "border-blue-500 text-blue-500" : ""}
+                  >
                     {row.score}
                   </Badge>
                 </TableCell>

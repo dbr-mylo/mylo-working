@@ -1,7 +1,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ErrorDisplay, EmptyStateWithError, RecoverableErrorState } from '@/components/errors/ErrorDisplay';
+import { ErrorDisplay, EmptyStateWithError, RecoverableErrorState } from '@/components/errors/display';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleSpecificErrorMessage } from '@/utils/error/roleSpecificErrors';
 import { beforeEach } from '../../testUtils';

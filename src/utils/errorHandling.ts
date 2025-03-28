@@ -401,7 +401,7 @@ export function useRoleAwareErrorHandling() {
 export function createGuidedResolution(
   error: unknown, 
   resolutionSteps: string[]
-): React.ReactNode {
+): React.ReactElement {
   return (
     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
       <h3 className="text-sm font-medium text-blue-800">How to resolve this issue:</h3>

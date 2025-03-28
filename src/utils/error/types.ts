@@ -1,42 +1,63 @@
 
 /**
- * Error handling types
+ * Error context containing metadata about the error
  */
+export interface ErrorContext {
+  /** Component or function where the error occurred */
+  source: string;
+  /** User-friendly message to display */
+  userMessage?: string;
+  /** Technical error message for logs */
+  techMessage?: string;
+  /** Timestamp when the error occurred */
+  timestamp?: number;
+  /** Unique ID for the error instance */
+  errorId?: string;
+  /** Any additional context information */
+  meta?: Record<string, any>;
+}
 
 /**
- * Configuration for retry logic
+ * Error severity levels for categorizing errors
+ */
+export enum SeverityLevel {
+  INFO = 'info',
+  WARNING = 'warning',
+  ERROR = 'error',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Error handler interface
+ */
+export interface ErrorHandler {
+  (error: unknown, context: string, userMessage?: string): void;
+}
+
+/**
+ * Error tracker interface for analytics
+ */
+export interface ErrorTracker {
+  (error: unknown, context: ErrorContext, severity?: SeverityLevel): void;
+}
+
+/**
+ * Configuration for retry mechanism
  */
 export interface RetryConfig {
   /** Maximum number of retry attempts */
-  maxAttempts: number;
-  /** Base delay between retries in milliseconds */
-  baseDelay: number;
-  /** Whether to use exponential backoff for retries */
-  useExponentialBackoff?: boolean;
-  /** Optional callback to run before each retry */
-  onRetry?: (attempt: number, error: unknown) => void;
+  maxAttempts?: number;
+  /** Delay between retries in milliseconds */
+  delayMs?: number;
+  /** Function to determine if an error should trigger a retry */
+  retryCondition?: (error: unknown) => boolean;
 }
 
 /**
- * Configuration for circuit breaker pattern
+ * Default configuration for retry mechanism
  */
-export interface CircuitBreakerConfig {
-  /** Failure threshold to trip the circuit */
-  failureThreshold: number;
-  /** Reset timeout in milliseconds */
-  resetTimeout: number;
-  /** Optional callback when circuit trips */
-  onCircuitOpen?: () => void;
-  /** Optional callback when circuit resets */
-  onCircuitClose?: () => void;
-}
-
-/**
- * Resolution step for guided error resolution
- */
-export interface ResolutionStep {
-  /** Step instruction text */
-  text: string;
-  /** Optional action to perform */
-  action?: () => void;
-}
+export const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
+  maxAttempts: 3,
+  delayMs: 300,
+  retryCondition: () => true,
+};

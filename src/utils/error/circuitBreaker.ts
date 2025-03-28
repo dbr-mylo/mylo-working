@@ -154,3 +154,20 @@ export class CircuitBreaker {
     return this.state.status;
   }
 }
+
+/**
+ * Create a function with circuit breaker protection
+ * @param fn The function to protect 
+ * @param config Circuit breaker configuration
+ * @returns A protected function that will throw if circuit is open
+ */
+export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+  fn: T, 
+  config: CircuitBreakerConfig = {}
+): T {
+  const circuitBreaker = new CircuitBreaker(config);
+  
+  return ((...args: Parameters<T>): ReturnType<T> => {
+    return circuitBreaker.execute(() => fn(...args)) as ReturnType<T>;
+  }) as T;
+}

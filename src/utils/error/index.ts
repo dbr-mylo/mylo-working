@@ -4,8 +4,7 @@ export { trackError } from './analytics';
 export { 
   CircuitBreaker,
   createCircuitBreaker,
-  // Export with a renamed type to avoid conflict
-  type CircuitBreakerConfig as CircuitBreakerOptions
+  type CircuitBreakerConfig 
 } from './circuitBreaker';
 export { getErrorResolutionSteps } from './errorResolution';
 export { handleError } from './handleError';
@@ -14,14 +13,11 @@ export {
   type ErrorContext,
   type ErrorHandler,
   type ErrorTracker,
-  type SeverityLevel
+  type SeverityLevel,
+  type RetryConfig
 } from './types';
 export { 
   withErrorHandling,
   withSyncErrorHandling
 } from './withErrorHandling';
-export { 
-  withRetry,
-  // Export with a renamed type to avoid conflict 
-  type RetryConfig as RetryOptions
-} from './withRetry';
+export { withRetry } from './withRetry';

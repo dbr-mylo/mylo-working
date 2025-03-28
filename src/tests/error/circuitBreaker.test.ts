@@ -1,7 +1,6 @@
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createCircuitBreaker } from '@/utils/error/circuitBreaker';
-import { afterEach } from '../testUtils';
 
 describe('Circuit Breaker', () => {
   const mockFn = vi.fn();
@@ -14,7 +13,7 @@ describe('Circuit Breaker', () => {
     mockFn.mockResolvedValueOnce('success');
     
     const protectedFn = createCircuitBreaker(mockFn, {
-      maxFailures: 2,
+      failureThreshold: 2,
       resetTimeout: 1000
     });
     
@@ -29,7 +28,7 @@ describe('Circuit Breaker', () => {
     mockFn.mockRejectedValue(error);
     
     const protectedFn = createCircuitBreaker(mockFn, {
-      maxFailures: 2,
+      failureThreshold: 2,
       resetTimeout: 1000
     });
     
@@ -43,7 +42,7 @@ describe('Circuit Breaker', () => {
     
     // Circuit open - should throw CircuitOpenError without calling function
     vi.clearAllMocks();
-    await expect(protectedFn()).rejects.toThrow('Circuit is open');
+    await expect(protectedFn()).rejects.toThrow('Service unavailable');
     expect(mockFn).not.toHaveBeenCalled();
   });
   
@@ -58,7 +57,7 @@ describe('Circuit Breaker', () => {
     mockTime.mockReturnValue(now);
     
     const protectedFn = createCircuitBreaker(mockFn, {
-      maxFailures: 2,
+      failureThreshold: 2,
       resetTimeout: 1000
     });
     
@@ -68,7 +67,7 @@ describe('Circuit Breaker', () => {
     
     // Circuit open - should reject without calling
     vi.clearAllMocks();
-    await expect(protectedFn()).rejects.toThrow('Circuit is open');
+    await expect(protectedFn()).rejects.toThrow('Service unavailable');
     expect(mockFn).not.toHaveBeenCalled();
     
     // Time travel past reset timeout

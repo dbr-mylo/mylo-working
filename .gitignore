@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+*.DS_Store
+*.swp
+*.tmp
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,3 +30,17 @@ dist-ssr
 # Cache directories
 .vite/
 .cache/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore backup Markdown or temp docs
+*~           # e.g. README.md~
+*.bak        # backup files
+*.orig       # merge conflict leftovers
+
+# Docs and specs folder should be tracked
+!docs/
+!*.md

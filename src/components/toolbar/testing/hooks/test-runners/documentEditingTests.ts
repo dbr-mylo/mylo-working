@@ -93,23 +93,33 @@ export const runDocumentEditingTests = async (
     editor.commands.insertContent('Test undo/redo');
     const contentAfterInsert = editor.getHTML();
     
-    editor.commands.undo();
-    const contentAfterUndo = editor.getHTML();
-    
-    editor.commands.redo();
-    const contentAfterRedo = editor.getHTML();
-    
-    const undoWorks = contentAfterUndo === initialContent;
-    const redoWorks = contentAfterRedo === contentAfterInsert;
-    
-    results['editor.undoRedo'] = {
-      passed: undoWorks && redoWorks,
-      message: undoWorks && redoWorks 
-        ? 'Undo and redo functions work correctly' 
-        : `${!undoWorks ? 'Undo failed. ' : ''}${!redoWorks ? 'Redo failed.' : ''}`,
-      name: 'Undo/Redo Functionality',
-      timestamp: new Date().toISOString()
-    };
+    // Only proceed with undo/redo if insertContent worked
+    if (contentAfterInsert !== initialContent) {
+      editor.commands.undo();
+      const contentAfterUndo = editor.getHTML();
+      
+      editor.commands.redo();
+      const contentAfterRedo = editor.getHTML();
+      
+      const undoWorks = contentAfterUndo === initialContent;
+      const redoWorks = contentAfterRedo === contentAfterInsert;
+      
+      results['editor.undoRedo'] = {
+        passed: undoWorks && redoWorks,
+        message: undoWorks && redoWorks 
+          ? 'Undo and redo functions work correctly' 
+          : `${!undoWorks ? 'Undo failed. ' : ''}${!redoWorks ? 'Redo failed.' : ''}`,
+        name: 'Undo/Redo Functionality',
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      results['editor.undoRedo'] = {
+        passed: false,
+        message: 'Could not test undo/redo as content insertion failed',
+        name: 'Undo/Redo Functionality',
+        timestamp: new Date().toISOString()
+      };
+    }
     
     // Reset editor content
     editor.commands.setContent(initialContent);
@@ -124,23 +134,36 @@ export const runDocumentEditingTests = async (
   
   // Test 5: Color application
   try {
-    const initialContent = editor.getHTML();
-    editor.commands.selectAll();
-    editor.commands.setColor('#ff0000');
-    
-    const hasColorMark = editor.isActive('textStyle', { color: '#ff0000' });
-    
-    results['editor.formatting.color'] = {
-      passed: hasColorMark,
-      message: hasColorMark 
-        ? 'Successfully applied text color' 
-        : 'Failed to apply text color',
-      name: 'Text Color',
-      timestamp: new Date().toISOString()
-    };
-    
-    // Reset editor content
-    editor.commands.setContent(initialContent);
+    // First check if setColor command exists
+    if (typeof editor.commands.setColor !== 'function') {
+      results['editor.formatting.color'] = {
+        passed: false,
+        message: 'Editor does not support color formatting. Make sure Color extension is added.',
+        name: 'Text Color',
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      const initialContent = editor.getHTML();
+      editor.commands.selectAll();
+      editor.commands.setColor('#ff0000');
+      
+      // Different editors might handle this differently, so check multiple ways
+      const hasColorMark = editor.isActive('textStyle', { color: '#ff0000' }) || 
+                          editor.getHTML().includes('color: #ff0000') ||
+                          editor.getHTML().includes('color:#ff0000');
+      
+      results['editor.formatting.color'] = {
+        passed: hasColorMark,
+        message: hasColorMark 
+          ? 'Successfully applied text color' 
+          : 'Failed to apply text color',
+        name: 'Text Color',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Reset editor content
+      editor.commands.setContent(initialContent);
+    }
   } catch (error) {
     results['editor.formatting.color'] = {
       passed: false,

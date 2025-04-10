@@ -5,6 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import { FontFamily } from '@/components/rich-text/extensions/FontFamily';
+import { FontSize } from '@/components/rich-text/extensions/FontSize';
 import { useDocumentTesting } from './hooks/useDocumentTesting';
 import { TestResultsChart } from './components/TestResultsChart';
 import { TestPerformanceMetrics } from './components/TestPerformanceMetrics';
@@ -14,9 +18,18 @@ import { Loader2, RefreshCw } from 'lucide-react';
 export const DocumentEditingTester = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  // Initialize TipTap editor for testing
+  // Initialize TipTap editor for testing with all required extensions
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      TextStyle,
+      Color,
+      FontFamily,
+      FontSize.configure({
+        types: ['textStyle'],
+        defaultSize: '16px',
+      })
+    ],
     content: `
       <h2>Document Editing Test Content</h2>
       <p>This content is used to run tests on the document editing functionality.</p>

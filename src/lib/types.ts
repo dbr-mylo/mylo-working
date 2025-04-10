@@ -19,7 +19,7 @@ export interface Document {
   title: string;
   content: string;
   updated_at: string;
-  meta?: Record<string, any>;
+  meta?: DocumentMeta;
 }
 
 export interface DocumentMeta {
@@ -37,6 +37,7 @@ export interface UseDocumentReturn {
   isLoading: boolean;
   saveDocument: () => Promise<void>;
   loadDocument: (doc: Document) => void;
+  documentMeta?: DocumentMeta;
 }
 
 export interface EditorNavProps {
@@ -44,12 +45,13 @@ export interface EditorNavProps {
   onSave?: () => Promise<void>;
   content?: string;
   documentTitle?: string;
-  onTitleChange?: (title: string) => void;
+  onTitleChange?: (title: string) => Promise<void>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
   templateId?: string;
   showRoleNavigation?: boolean;
   currentDocument?: Document | null;
+  onTemplateChange?: (templateId: string) => void;
 }
 
 export type UserRole = "designer" | "editor" | "writer" | "admin" | null;

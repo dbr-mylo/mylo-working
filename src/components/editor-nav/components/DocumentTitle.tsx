@@ -1,6 +1,5 @@
 
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
 
 interface DocumentTitleProps {
   title: string;

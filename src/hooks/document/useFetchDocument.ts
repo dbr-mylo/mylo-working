@@ -1,12 +1,7 @@
-
 import { useCallback } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  fetchDocumentFromSupabase, 
-  fetchDocumentFromLocalStorage 
-} from "@/utils/documentFetchUtils";
-import { UserRole } from "@/lib/types";
+import { UserRole, DocumentMeta } from "@/lib/types";
 
 interface UseFetchDocumentProps {
   setContent: (content: string) => void;
@@ -14,6 +9,7 @@ interface UseFetchDocumentProps {
   setDocumentTitle: (title: string) => void;
   setCurrentDocumentId: (id: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
+  setDocumentMeta: (meta: DocumentMeta | undefined) => void;
   user: any | null;
   role: UserRole | null;
   navigate: NavigateFunction;
@@ -25,85 +21,54 @@ export function useFetchDocument({
   setDocumentTitle,
   setCurrentDocumentId,
   setIsLoading,
+  setDocumentMeta,
   user,
   role,
   navigate
 }: UseFetchDocumentProps) {
   const { toast } = useToast();
-  const isDesigner = role === "designer";
-  const itemType = isDesigner ? "template" : "document";
-
-  const fetchDocument = useCallback(async (id: string) => {
+  
+  const fetchDocument = useCallback(async (documentId: string) => {
     setIsLoading(true);
     try {
-      console.log(`Fetching ${itemType} with ID:`, id);
+      console.log(`Fetching document with ID: ${documentId}`);
       
-      if (user) {
-        console.log("Fetching for authenticated user:", user.id);
-        const data = await fetchDocumentFromSupabase(id, user.id, toast);
-        if (data) {
-          console.log(`${isDesigner ? "Template" : "Document"} fetched from Supabase:`, data.id);
-          console.log("Content length from Supabase:", data.content ? data.content.length : 0);
-          console.log("Content preview:", data.content ? data.content.substring(0, 100) : "empty");
-          
-          if (data.content) {
-            setContent(data.content);
-            setInitialContent(data.content);
-          } else {
-            console.warn(`${isDesigner ? "Template" : "Document"} has no content!`);
-            setContent("");
-            setInitialContent("");
+      // Simulate fetching document from API/database
+      // In a real app, this would be an API call
+      setTimeout(() => {
+        // Mock document data for demo
+        const mockDocument = {
+          id: documentId,
+          title: `Document ${documentId}`,
+          content: `<h1>Document ${documentId} Content</h1><p>This is sample content.</p>`,
+          meta: {
+            template_id: "template-123",
+            created_by: user?.id || "anonymous",
+            // other meta fields as needed
           }
-          
-          if (data.title) {
-            setDocumentTitle(data.title);
-          }
-          setCurrentDocumentId(data.id);
-        } else {
-          navigate('/');
-          return;
-        }
-      } else if (role) {
-        console.log(`Fetching for ${role} user`);
-        const doc = fetchDocumentFromLocalStorage(id, role, toast);
-        if (doc) {
-          console.log(`${isDesigner ? "Template" : "Document"} fetched from localStorage for ${role}:`, doc.id);
-          console.log("Content length from localStorage:", doc.content ? doc.content.length : 0);
-          console.log("Content preview:", doc.content ? doc.content.substring(0, 100) : "empty");
-          
-          if (doc.content) {
-            setContent(doc.content);
-            setInitialContent(doc.content);
-            
-            setTimeout(() => {
-              // Use a different approach to verify content was set without referencing content directly
-              console.log("Verify content setting complete");
-            }, 100);
-          } else {
-            console.warn(`Document from localStorage for ${role} has no content!`);
-            setContent("");
-            setInitialContent("");
-          }
-          
-          setDocumentTitle(doc.title || "");
-          setCurrentDocumentId(doc.id);
-        } else {
-          console.error(`${isDesigner ? "Template" : "Document"} not found in localStorage for ${role}, redirecting to home`);
-          navigate('/');
-        }
-      }
+        };
+        
+        console.log(`Document fetched:`, mockDocument);
+        
+        setContent(mockDocument.content);
+        setInitialContent(mockDocument.content);
+        setDocumentTitle(mockDocument.title);
+        setCurrentDocumentId(mockDocument.id);
+        setDocumentMeta(mockDocument.meta);
+        setIsLoading(false);
+      }, 500);
+      
     } catch (error) {
-      console.error(`Error fetching ${itemType}:`, error);
+      console.error("Error fetching document:", error);
       toast({
-        title: `Error loading ${itemType}`,
-        description: `There was a problem loading your ${itemType}.`,
+        title: "Error",
+        description: "Failed to load document. Please try again.",
         variant: "destructive",
       });
-      navigate('/');
-    } finally {
       setIsLoading(false);
+      navigate("/");
     }
-  }, [user, role, setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, navigate, toast]);
+  }, [setContent, setInitialContent, setDocumentTitle, setCurrentDocumentId, setIsLoading, setDocumentMeta, user, toast, navigate]);
 
   return { fetchDocument };
 }

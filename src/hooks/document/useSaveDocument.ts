@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { UserRole, Document } from "@/lib/types";
+import { UserRole, Document, DocumentMeta } from "@/lib/types";
 import { 
   saveDocumentToSupabase, 
   saveDocumentToLocalStorage 
@@ -12,6 +12,7 @@ interface UseSaveDocumentProps {
   content: string;
   currentDocumentId: string | null;
   documentTitle: string;
+  documentMeta?: DocumentMeta;
   user: any | null;
   role: UserRole | null;
   setInitialContent: (content: string) => void;
@@ -23,6 +24,7 @@ export function useSaveDocument({
   content,
   currentDocumentId,
   documentTitle,
+  documentMeta,
   user,
   role,
   setInitialContent,
@@ -59,7 +61,8 @@ export function useSaveDocument({
           documentTitle, 
           user.id,
           toast,
-          isDesigner
+          isDesigner,
+          documentMeta
         );
         console.log(`Supabase save completed for ${itemType}`);
       } else if (role) {
@@ -69,7 +72,8 @@ export function useSaveDocument({
           content,
           documentTitle,
           role,
-          toast
+          toast,
+          documentMeta
         );
         console.log(`localStorage save completed for ${itemType}`);
       } else {
@@ -111,7 +115,7 @@ export function useSaveDocument({
       });
       return;
     }
-  }, [content, currentDocumentId, documentTitle, user, role, setInitialContent, setCurrentDocumentId, navigate, toast]);
+  }, [content, currentDocumentId, documentTitle, documentMeta, user, role, setInitialContent, setCurrentDocumentId, navigate, toast]);
 
   return { saveDocument };
 }

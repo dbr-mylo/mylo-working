@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import type { Document, UseDocumentReturn } from "@/lib/types";
+import type { Document, UseDocumentReturn, DocumentMeta } from "@/lib/types";
 import { useFetchDocument } from "./useFetchDocument";
 import { useSaveDocument } from "./useSaveDocument";
 import { useLoadDocument } from "./useLoadDocument";
@@ -14,6 +14,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
   const [documentTitle, setDocumentTitle] = useState("");
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [documentMeta, setDocumentMeta] = useState<DocumentMeta | undefined>(undefined);
   const { user, role } = useAuth();
   const navigate = useNavigate();
   
@@ -30,6 +31,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setDocumentTitle,
     setCurrentDocumentId,
     setIsLoading,
+    setDocumentMeta,
     user,
     role,
     navigate
@@ -40,6 +42,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     content,
     currentDocumentId,
     documentTitle,
+    documentMeta,
     user,
     role,
     setInitialContent,
@@ -52,7 +55,8 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     setContent,
     setInitialContent,
     setDocumentTitle,
-    setCurrentDocumentId
+    setCurrentDocumentId,
+    setDocumentMeta
   });
 
   // Fetch document when documentId changes
@@ -65,6 +69,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
       setInitialContent("");
       setDocumentTitle("");
       setCurrentDocumentId(null);
+      setDocumentMeta(undefined);
       setIsLoading(false);
     }
   }, [documentId, user, role, fetchDocument]);
@@ -78,6 +83,7 @@ export function useDocument(documentId: string | undefined): UseDocumentReturn {
     currentDocumentId,
     isLoading,
     saveDocument,
-    loadDocument
+    loadDocument,
+    documentMeta
   };
 }

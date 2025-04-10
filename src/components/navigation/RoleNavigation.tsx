@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WriterOnly, DesignerOnly, AdminOnly } from "@/utils/roles/RoleComponents";
 import { useIsWriter, useIsDesigner, useIsAdmin } from "@/utils/roles";
-import { FileText, Pencil, Layout, Settings, Box, TestTube2, Home, Clock, Template, FolderOpen } from "lucide-react";
+import { FileText, Pencil, Layout, Settings, Box, TestTube2, Home, Clock, FileCode, FolderOpen } from "lucide-react";
 import { useValidatedNavigation } from "@/hooks/useValidatedNavigation";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
@@ -37,11 +37,11 @@ export const RoleNavigation = () => {
   const writerNavItems = [
     { href: "/editor", label: "Editor", icon: <Pencil className="h-4 w-4 mr-2" /> },
     { href: "/content/drafts", label: "Drafts", icon: <Box className="h-4 w-4 mr-2" /> },
-    { href: "/templates", label: "Templates", icon: <Template className="h-4 w-4 mr-2" /> }
+    { href: "/templates", label: "Templates", icon: <FileCode className="h-4 w-4 mr-2" /> }
   ];
   
   const designerNavItems = [
-    { href: "/templates", label: "Templates", icon: <Template className="h-4 w-4 mr-2" /> },
+    { href: "/templates", label: "Templates", icon: <FileCode className="h-4 w-4 mr-2" /> },
     { href: "/design/layout", label: "Layout", icon: <Layout className="h-4 w-4 mr-2" /> },
     { href: "/design/design-settings", label: "Design Settings", icon: <Settings className="h-4 w-4 mr-2" /> }
   ];

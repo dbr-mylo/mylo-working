@@ -32,7 +32,10 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   const currentRole = role || "editor";
   
   // Check if we're rendering children directly (like for Dashboard)
-  const renderDirectly = React.isValidElement(children) && children.type?.name === 'Dashboard';
+  const renderDirectly = React.isValidElement(children) && 
+    (children.type === 'Dashboard' || 
+     (typeof children.type === 'function' && 
+      children.type.displayName === 'Dashboard'));
   
   if (renderDirectly) {
     return <>{children}</>;

@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Project, Document } from "@/lib/types";
+import { Project, Folder } from "@/lib/types";
 import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
 
 interface ProjectsContextType {
@@ -281,7 +281,7 @@ export const ProjectsProvider: React.FC<{children: React.ReactNode}> = ({ childr
   // Create a folder within a project
   const createFolder = async (projectId: string, name: string, parentFolderId?: string): Promise<boolean> => {
     try {
-      const newFolder = {
+      const newFolder: Folder = {
         id: `folder-${Date.now()}`,
         name,
         parentId: parentFolderId || null,

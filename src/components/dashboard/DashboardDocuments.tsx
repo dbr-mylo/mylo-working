@@ -118,7 +118,7 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
           isLoading={projectsLoading}
         />
         
-        {selectedProject && (
+        {selectedProject && selectedProject.folders && (
           <div className="mt-6">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-medium text-gray-900">Folders</h3>
@@ -134,7 +134,7 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
             </div>
             
             <FolderTree
-              folders={selectedProject.folders || []}
+              folders={selectedProject.folders}
               projectId={selectedProject.id}
             />
           </div>
@@ -158,7 +158,7 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
             </TabsList>
             
             <Button
-              onClick={() => handleAddDocument()}
+              onClick={handleAddDocument}
               size="sm"
               className="ml-auto"
             >
@@ -172,7 +172,7 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
                 title="No documents yet"
                 description="Create your first document to get started"
                 buttonText="Create Document"
-                onClick={() => handleAddDocument()}
+                onClick={handleAddDocument}
               />
             ) : isSearching && filteredDocuments.length === 0 ? (
               <EmptyStatePrompt

@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import { Folder as FolderType } from "@/lib/types";
+import { Folder } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronDown, Folder, File, Plus, MoreHorizontal } from "lucide-react";
+import { ChevronRight, ChevronDown, Folder as FolderIcon, File, Plus, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 interface FolderTreeProps {
-  folders: FolderType[];
+  folders: Folder[];
   projectId: string;
 }
 
@@ -40,8 +40,8 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ folders, projectId }) =>
 };
 
 interface FolderTreeItemProps {
-  folder: FolderType;
-  folders: FolderType[];
+  folder: Folder;
+  folders: Folder[];
   level: number;
   projectId: string;
 }
@@ -123,7 +123,7 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({
           size="sm"
           className="px-2 py-1 h-7 justify-start flex-1 text-left font-normal"
         >
-          <Folder className="h-4 w-4 mr-2 text-gray-500" />
+          <FolderIcon className="h-4 w-4 mr-2 text-gray-500" />
           <span className="truncate">{folder.name}</span>
           <span className="ml-2 text-xs text-gray-500">
             ({folder.items?.length || 0})
@@ -139,7 +139,7 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleAddSubfolder}>
-                <Folder className="h-4 w-4 mr-2" />
+                <FolderIcon className="h-4 w-4 mr-2" />
                 Add Subfolder
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleAddDocument}>

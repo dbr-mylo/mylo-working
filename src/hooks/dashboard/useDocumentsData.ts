@@ -6,7 +6,7 @@ import { Document } from "@/lib/types";
 import { useValidatedNavigation } from "@/hooks/useValidatedNavigation";
 import { fetchUserDocumentsFromSupabase, fetchGuestDocumentsFromLocalStorage, deleteDocumentFromSupabase, deleteDocumentFromLocalStorage } from "@/utils/documentUtils";
 
-export const useDocumentsData = (projectId?: string | null) => {
+export const useDocumentsData = (projectId?: string | null, searchQuery?: string) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user, role } = useAuth();
@@ -32,6 +32,15 @@ export const useDocumentsData = (projectId?: string | null) => {
           docs = docs.filter(doc => doc.meta?.project_id === projectId);
         }
         
+        // Filter by search query if provided
+        if (searchQuery && searchQuery.trim() !== '') {
+          const query = searchQuery.toLowerCase().trim();
+          docs = docs.filter(doc => 
+            doc.title?.toLowerCase().includes(query) || 
+            doc.content?.toLowerCase().includes(query)
+          );
+        }
+        
         setDocuments(docs);
       } catch (error) {
         console.error("Error loading documents:", error);
@@ -42,7 +51,7 @@ export const useDocumentsData = (projectId?: string | null) => {
     };
     
     loadDocuments();
-  }, [user, role, projectId]);
+  }, [user, role, projectId, searchQuery]);
   
   const handleDeleteDocument = async (e: React.MouseEvent, documentId: string) => {
     e.stopPropagation();
@@ -74,10 +83,15 @@ export const useDocumentsData = (projectId?: string | null) => {
     }
   };
   
+  const handleAddDocument = () => {
+    navigateTo("/editor");
+  };
+  
   return {
     documents,
     isLoading,
     handleDeleteDocument,
-    handleSelectDocument
+    handleSelectDocument,
+    handleAddDocument
   };
 };

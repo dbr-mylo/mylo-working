@@ -14,6 +14,15 @@ import { TestResultsChart } from './components/TestResultsChart';
 import { TestPerformanceMetrics } from './components/TestPerformanceMetrics';
 import { TestAnalyticsDashboard } from './components/TestAnalyticsDashboard';
 import { Loader2, RefreshCw } from 'lucide-react';
+import Bold from '@tiptap/extension-bold';
+import { ColorPreservationStyles } from '@/components/rich-text/styles/formatting/ColorPreservationStyles';
+
+// Enhanced Bold extension with better color preservation - identical to what's used in useEditorCore
+const ColorPreservingBold = Bold.configure({
+  HTMLAttributes: {
+    class: 'color-preserving-bold',
+  }
+});
 
 export const DocumentEditingTester = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -21,8 +30,18 @@ export const DocumentEditingTester = () => {
   // Initialize TipTap editor for testing with all required extensions
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      TextStyle,
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        bold: false, // Disable default bold
+      }),
+      ColorPreservingBold, // Use our custom Bold extension
+      TextStyle.configure({
+        HTMLAttributes: {
+          class: 'preserve-styling',
+        },
+      }),
       Color,
       FontFamily,
       FontSize.configure({
@@ -55,6 +74,9 @@ export const DocumentEditingTester = () => {
   
   return (
     <div className="space-y-6">
+      {/* Apply the same CSS used in the main app */}
+      <ColorPreservationStyles />
+      
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

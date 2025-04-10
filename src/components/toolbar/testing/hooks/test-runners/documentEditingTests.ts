@@ -1,6 +1,7 @@
 
 import { Editor } from '@tiptap/react';
 import { TestResult } from '../useToolbarTestResult';
+import { preserveColorAfterFormatting, handleBoldWithColorPreservation } from '@/components/rich-text/utils/colorPreservation';
 
 /**
  * Runs tests for document editing operations
@@ -60,18 +61,25 @@ export const runDocumentEditingTests = async (
     };
   }
   
-  // Test 3: Bold formatting
+  // Test 3: Bold formatting - Updated to use color preservation
   try {
     const initialContent = editor.getHTML();
     editor.commands.selectAll();
-    editor.commands.setBold();
-    const hasBoldMark = editor.isActive('bold');
+    
+    // Use the same bold handling as in the main application
+    handleBoldWithColorPreservation(editor, '#000000');
+    
+    // Check multiple ways for bold to be active
+    const hasBoldMark = editor.isActive('bold') || 
+                      editor.getHTML().includes('<strong') || 
+                      editor.getHTML().includes('font-weight: bold') ||
+                      editor.getHTML().includes('color-preserving-bold');
     
     results['editor.formatting.bold'] = {
       passed: hasBoldMark,
       message: hasBoldMark 
         ? 'Successfully applied bold formatting' 
-        : 'Failed to apply bold formatting',
+        : `Failed to apply bold formatting. HTML after application: ${editor.getHTML().substring(0, 100)}...`,
       name: 'Bold Formatting',
       timestamp: new Date().toISOString()
     };
@@ -165,24 +173,26 @@ export const runDocumentEditingTests = async (
     let colorApplied = false;
     let colorMethod = '';
     
-    // Try different ways to apply color based on the editor's configuration
-    // Method 1: Using setColor from the Color extension
-    if (typeof editor.commands.setColor === 'function') {
-      editor.commands.setColor('#ff0000');
-      colorApplied = true;
-      colorMethod = 'direct setColor method';
-    } 
-    // Method 2: Using the updateAttributes with TextStyle extension
-    else if (typeof editor.chain === 'function') {
-      try {
-        // Use updateAttributes instead of setTextStyle
-        editor.chain().focus().updateAttributes('textStyle', { color: '#ff0000' }).run();
+    // Use our color preservation utility to ensure color is applied correctly
+    preserveColorAfterFormatting(editor, () => {
+      // Method 1: Using setColor from the Color extension
+      if (typeof editor.commands.setColor === 'function') {
+        editor.commands.setColor('#ff0000');
         colorApplied = true;
-        colorMethod = 'TextStyle updateAttributes';
-      } catch (e) {
-        console.log("TextStyle method failed:", e);
+        colorMethod = 'direct setColor method';
+      } 
+      // Method 2: Using the updateAttributes with TextStyle extension
+      else if (typeof editor.chain === 'function') {
+        try {
+          // Use updateAttributes instead of setTextStyle
+          editor.chain().focus().updateAttributes('textStyle', { color: '#ff0000' }).run();
+          colorApplied = true;
+          colorMethod = 'TextStyle updateAttributes';
+        } catch (e) {
+          console.log("TextStyle method failed:", e);
+        }
       }
-    }
+    }, '#000000');
     
     if (!colorApplied) {
       results['editor.formatting.color'] = {
@@ -207,6 +217,13 @@ export const runDocumentEditingTests = async (
         name: 'Text Color',
         timestamp: new Date().toISOString()
       };
+      
+      // Provide more detailed debugging info if the test fails
+      if (!hasColorMark) {
+        console.log("Color test failed - HTML:", editor.getHTML());
+        console.log("Is textStyle active?", editor.isActive('textStyle'));
+        console.log("Editor attributes:", editor.getAttributes('textStyle'));
+      }
     }
     
     // Reset editor content

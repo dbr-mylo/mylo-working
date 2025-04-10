@@ -22,8 +22,8 @@ export interface Document {
   title?: string;
   content?: string;
   userId?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
   isTemplate?: boolean; 
   version?: number;
   meta?: DocumentMeta;
@@ -37,6 +37,7 @@ export interface DocumentMeta {
   templateId?: string;
   templateVersion?: number;
   customFields?: Record<string, any>;
+  project_id?: string;
 }
 
 // Project and folder organization

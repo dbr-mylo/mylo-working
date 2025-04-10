@@ -50,8 +50,8 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
     } else if (activeTab === 'recent') {
       return documents
         .sort((a, b) => {
-          const dateA = a.updatedAt || a.createdAt || '';
-          const dateB = b.updatedAt || b.createdAt || '';
+          const dateA = a.updated_at || a.created_at || '';
+          const dateB = b.updated_at || b.created_at || '';
           return new Date(dateB).getTime() - new Date(dateA).getTime();
         })
         .slice(0, 5);

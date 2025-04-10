@@ -14,6 +14,7 @@ interface RoleAwareLayoutProps {
   children: React.ReactNode;
   initialContent?: string;
   templateId?: string;
+  showRoleNavigation?: boolean;  // Add the missing prop
 }
 
 export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
@@ -25,7 +26,8 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   onLoadDocument,
   children,
   initialContent = "",
-  templateId
+  templateId,
+  showRoleNavigation = true  // Add default value
 }) => {
   const { user } = useAuth();
   const currentRole = role || "editor";
@@ -41,6 +43,7 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
         onLoadDocument={onLoadDocument}
         initialContent={initialContent}
         templateId={templateId}
+        showRoleNavigation={showRoleNavigation}  // Pass to EditorNav if needed
       />
       <main className="flex-1 overflow-auto">
         {children}

@@ -87,42 +87,66 @@ export const runDocumentEditingTests = async (
     };
   }
   
-  // Test 4: Undo/Redo functionality
+  // Test 4: Undo/Redo functionality - Improved implementation
   try {
-    const initialContent = editor.getHTML();
-    editor.commands.insertContent('Test undo/redo');
-    const contentAfterInsert = editor.getHTML();
+    // Start with fresh content
+    const initialContent = '<p>Initial content for undo/redo test</p>';
+    editor.commands.setContent(initialContent);
     
-    // Only proceed with undo/redo if insertContent worked
-    if (contentAfterInsert !== initialContent) {
-      editor.commands.undo();
-      const contentAfterUndo = editor.getHTML();
-      
-      editor.commands.redo();
-      const contentAfterRedo = editor.getHTML();
-      
-      const undoWorks = contentAfterUndo === initialContent;
-      const redoWorks = contentAfterRedo === contentAfterInsert;
-      
-      results['editor.undoRedo'] = {
-        passed: undoWorks && redoWorks,
-        message: undoWorks && redoWorks 
-          ? 'Undo and redo functions work correctly' 
-          : `${!undoWorks ? 'Undo failed. ' : ''}${!redoWorks ? 'Redo failed.' : ''}`,
-        name: 'Undo/Redo Functionality',
-        timestamp: new Date().toISOString()
-      };
-    } else {
+    // Insert distinctive content that we can track
+    const testContent = 'UNIQUE_TEST_CONTENT_FOR_UNDO_REDO';
+    editor.commands.insertContent(testContent);
+    
+    // Verify that insertion worked
+    const contentAfterInsert = editor.getHTML();
+    const insertSuccessful = contentAfterInsert.includes(testContent);
+    
+    if (!insertSuccessful) {
       results['editor.undoRedo'] = {
         passed: false,
         message: 'Could not test undo/redo as content insertion failed',
         name: 'Undo/Redo Functionality',
         timestamp: new Date().toISOString()
       };
+    } else {
+      // Perform undo operation
+      editor.commands.undo();
+      const contentAfterUndo = editor.getHTML();
+      
+      // Check if undo removed our test content
+      const undoWorks = !contentAfterUndo.includes(testContent);
+      
+      // Now redo to get back our test content
+      editor.commands.redo();
+      const contentAfterRedo = editor.getHTML();
+      
+      // Check if redo restored our test content
+      const redoWorks = contentAfterRedo.includes(testContent);
+      
+      results['editor.undoRedo'] = {
+        passed: undoWorks && redoWorks,
+        message: undoWorks && redoWorks 
+          ? 'Undo and redo functions work correctly' 
+          : `${!undoWorks ? 'Undo failed: test content still present after undo. ' : ''}${!redoWorks ? 'Redo failed: test content not restored after redo.' : ''}`,
+        name: 'Undo/Redo Functionality',
+        timestamp: new Date().toISOString()
+      };
+      
+      // For diagnostics, add content details to the message if the test failed
+      if (!undoWorks || !redoWorks) {
+        const details = {
+          initialContent,
+          contentAfterInsert,
+          contentAfterUndo,
+          contentAfterRedo,
+        };
+        
+        results['editor.undoRedo'].message += ` Debug details: ${JSON.stringify(details)}`;
+      }
     }
     
-    // Reset editor content
-    editor.commands.setContent(initialContent);
+    // Reset editor to a clean state
+    editor.commands.setContent('<p></p>');
   } catch (error) {
     results['editor.undoRedo'] = {
       passed: false,

@@ -1,7 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
-import type { Document } from "@/lib/types";
+import type { Document, DocumentMeta } from "@/lib/types";
 
 export async function saveDocumentToSupabase(
   documentId: string | null,
@@ -9,11 +9,25 @@ export async function saveDocumentToSupabase(
   title: string,
   userId: string,
   toast: any,
-  isTemplate: boolean = false
+  isTemplate: boolean = false,
+  documentMeta?: DocumentMeta
 ): Promise<Document | null> {
   try {
     const now = new Date().toISOString();
     const documentTitle = title.trim() || 'Untitled Document';
+    
+    // Prepare the document data including optional meta field
+    const documentData: any = {
+      title: documentTitle,
+      content: content,
+      updated_at: now,
+      is_template: isTemplate
+    };
+    
+    // Add meta data if provided
+    if (documentMeta) {
+      documentData.meta = documentMeta;
+    }
     
     // If we have a document ID, update the existing document
     if (documentId) {
@@ -21,12 +35,7 @@ export async function saveDocumentToSupabase(
       
       const { data, error } = await supabase
         .from('documents')
-        .update({
-          title: documentTitle,
-          content: content,
-          updated_at: now,
-          is_template: isTemplate
-        })
+        .update(documentData)
         .eq('id', documentId)
         .eq('owner_id', userId)
         .select()
@@ -41,16 +50,13 @@ export async function saveDocumentToSupabase(
     else {
       console.log("Creating new document in Supabase");
       
+      // Add creation timestamp and owner for new documents
+      documentData.created_at = now;
+      documentData.owner_id = userId;
+      
       const { data, error } = await supabase
         .from('documents')
-        .insert({
-          title: documentTitle,
-          content: content,
-          owner_id: userId,
-          created_at: now,
-          updated_at: now,
-          is_template: isTemplate
-        })
+        .insert(documentData)
         .select()
         .single();
       
@@ -75,7 +81,8 @@ export function saveDocumentToLocalStorage(
   content: string,
   title: string,
   role: string,
-  toast: any
+  toast: any,
+  documentMeta?: DocumentMeta
 ): Document | null {
   try {
     const now = new Date().toISOString();
@@ -116,6 +123,11 @@ export function saveDocumentToLocalStorage(
           updated_at: now
         };
         
+        // Add meta data if provided
+        if (documentMeta) {
+          savedDocument.meta = documentMeta;
+        }
+        
         documents[documentIndex] = savedDocument;
         console.log(`Updated existing document in array`);
       } else {
@@ -127,6 +139,11 @@ export function saveDocumentToLocalStorage(
           content: content,
           updated_at: now
         };
+        
+        // Add meta data if provided
+        if (documentMeta) {
+          savedDocument.meta = documentMeta;
+        }
         
         documents.push(savedDocument);
         console.log(`Added document with existing ID to array`);
@@ -145,6 +162,11 @@ export function saveDocumentToLocalStorage(
         content: content,
         updated_at: now
       };
+      
+      // Add meta data if provided
+      if (documentMeta) {
+        savedDocument.meta = documentMeta;
+      }
       
       documents.push(savedDocument);
       console.log(`Added new document to array`);

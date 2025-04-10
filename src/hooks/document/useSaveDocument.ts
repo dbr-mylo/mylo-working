@@ -55,25 +55,25 @@ export function useSaveDocument({
       
       if (user) {
         console.log(`Saving ${itemType} for authenticated user:`, user.id);
+        // Fix: Adjust the arguments to match the expected parameter count (5-6)
         savedDocument = await saveDocumentToSupabase(
           currentDocumentId, 
           content, 
           documentTitle, 
           user.id,
           toast,
-          isDesigner,
-          documentMeta
+          isDesigner
         );
         console.log(`Supabase save completed for ${itemType}`);
       } else if (role) {
         console.log(`Saving ${itemType} for ${role} user to localStorage`);
+        // Fix: Adjust the arguments to match the expected parameter count (5)
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
           documentTitle,
           role,
-          toast,
-          documentMeta
+          toast
         );
         console.log(`localStorage save completed for ${itemType}`);
       } else {

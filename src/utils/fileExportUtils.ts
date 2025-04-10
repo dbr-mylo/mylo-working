@@ -145,12 +145,14 @@ export const importMyloFile = (
         }
         
         // Check if the file type matches the current role
+        // Fix: Handle the role-template type compatibility check properly
         if (
-          (currentRole === "designer" && fileContent.type !== "template") &&
-          (currentRole === "editor" && fileContent.type !== "document")
+          (currentRole === "designer" && fileContent.type !== "template") ||
+          (currentRole === "editor" && fileContent.type !== "document") ||
+          (currentRole === "writer" && fileContent.type !== "document")
         ) {
-          // Designer can open both templates and documents
-          // Editor can only open documents
+          // Designer can open both templates and documents, so we need to remove this condition
+          // and only check for editor/writer roles
           if (currentRole !== "designer") {
             throw new Error(`This file is a ${fileContent.type} and cannot be opened in ${currentRole} mode`);
           }

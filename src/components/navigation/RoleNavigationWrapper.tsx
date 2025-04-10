@@ -1,8 +1,7 @@
 
 import React from "react";
 import { RoleNavigation } from "./RoleNavigation";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { ErrorBoundary } from "@/components/errors/core/ErrorBoundary";
+import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 
 /**
  * Wrapper component that ensures RoleNavigation has the required context providers
@@ -10,9 +9,7 @@ import { ErrorBoundary } from "@/components/errors/core/ErrorBoundary";
 export const RoleNavigationWrapper = () => {
   return (
     <ErrorBoundary context="RoleNavigationWrapper">
-      <SidebarProvider>
-        <RoleNavigation />
-      </SidebarProvider>
+      <RoleNavigation />
     </ErrorBoundary>
   );
 };

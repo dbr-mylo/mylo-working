@@ -81,39 +81,43 @@ export const DocumentCard = ({
         className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
         onClick={handleClick}
       >
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium">{document.title}</h3>
-            {showStatus && document.status && (
-              <Badge className={`${getStatusColor(document.status)} text-xs`}>
-                {document.status}
-              </Badge>
-            )}
+        <div className="flex items-center">
+          <div className="mr-4">
+            {isTemplate ? 
+              <div className="h-10 w-10 rounded bg-blue-100 flex items-center justify-center">
+                <Edit className="h-5 w-5 text-blue-600" />
+              </div> :
+              <div className="h-10 w-10 rounded bg-gray-100 flex items-center justify-center">
+                <Edit className="h-5 w-5 text-gray-600" />
+              </div>
+            }
           </div>
-          <p className="text-xs text-gray-500">
-            {document.updated_at && formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}
-          </p>
+          <div>
+            <h3 className="font-medium">{document.title || "Untitled"}</h3>
+            <p className="text-sm text-gray-500">
+              {document.updated_at && `Updated ${formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}`}
+            </p>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
+          {showStatus && status && (
+            <Badge className={`mr-3 ${getStatusColor(status)}`}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Badge>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); if (onSelect) onSelect(document.id); }}>
-                <Edit className="h-4 w-4 mr-2" /> Edit
+              <DropdownMenuItem onClick={handleClick}>
+                Open
               </DropdownMenuItem>
-              {isDesigner && onToggleStatus && (
-                <DropdownMenuItem onClick={handleToggleStatus}>
-                  {document.status === 'published' ? 'Unpublish' : 'Publish'}
-                </DropdownMenuItem>
-              )}
               {onDelete && (
                 <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                  Delete
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -123,68 +127,60 @@ export const DocumentCard = ({
     );
   }
   
-  // Default grid view
+  // Grid mode (default)
   return (
     <Card 
-      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer" 
+      className="overflow-hidden hover:border-blue-300 transition-colors cursor-pointer"
       onClick={handleClick}
     >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">{document.title}</CardTitle>
-            <CardDescription>
-              {document.updated_at && (
-                <>
-                  Updated {formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}
-                </>
+      <CardHeader className="p-4 pb-0">
+        <div className="flex justify-between">
+          <CardTitle className="text-lg truncate">{document.title || "Untitled"}</CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleClick}>
+                Open
+              </DropdownMenuItem>
+              {onDelete && (
+                <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600">
+                  Delete
+                </DropdownMenuItem>
               )}
-            </CardDescription>
-          </div>
-          {showStatus && document.status && (
-            <Badge className={`${getStatusColor(document.status)}`}>
-              {document.status}
-            </Badge>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+        <CardDescription className="text-sm">
+          {document.updated_at && `Updated ${formatDistanceToNow(new Date(document.updated_at), { addSuffix: true })}`}
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="h-16 overflow-hidden text-sm text-gray-600">
+      <CardContent className="p-4">
+        <div className="h-24 bg-gray-50 rounded border flex items-center justify-center mb-2">
           {document.content ? (
-            document.content.substring(0, 80) + (document.content.length > 80 ? '...' : '')
+            <div className="w-full h-full p-2 overflow-hidden text-xs text-gray-600">
+              {document.content.substring(0, 100)}...
+            </div>
           ) : (
-            <span className="italic text-gray-400">
-              {isTemplate ? 'Empty template' : 'Empty document'}
-            </span>
+            <div className="text-gray-400 text-sm">No content</div>
           )}
         </div>
       </CardContent>
-      <CardFooter className="bg-gray-50 text-xs text-gray-500 py-2 flex justify-between">
-        <span>{isTemplate ? 'Template' : 'Document'} ID: {document.id.substring(0, 8)}</span>
-        
-        <div className="flex gap-1">
-          {isDesigner && onToggleStatus && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 px-2 text-xs"
-              onClick={handleToggleStatus}
-            >
-              {document.status === 'published' ? 'Unpublish' : 'Publish'}
-            </Button>
-          )}
-          
-          {onDelete && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={handleDeleteClick}
-            >
-              Delete
-            </Button>
-          )}
-        </div>
+      <CardFooter className="p-4 pt-0 flex justify-between">
+        {showStatus && status && (
+          <Badge className={getStatusColor(status)}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Badge>
+        )}
+        {onDelete && (
+          <Button variant="outline" size="sm" onClick={handleDeleteClick} className="ml-auto">
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

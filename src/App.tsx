@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -50,7 +49,12 @@ const RouteValidator = () => {
     
     if (!isValid && location.pathname !== "/not-found") {
       console.warn(`Invalid route detected: ${location.pathname} for role: ${role || 'unauthenticated'}`);
-      navigate("/not-found", { state: { from: location.pathname } });
+      navigate("/not-found", { 
+        state: { 
+          from: location.pathname, 
+          message: "Route not available for your role" 
+        } 
+      });
     }
   }, [location.pathname, role, navigate, location.state]);
   
@@ -140,13 +144,7 @@ const AppRoutes = () => {
       <RouteValidator />
       <Routes>
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <SidebarProvider>
-              <Dashboard />
-            </SidebarProvider>
-          </ProtectedRoute>
-        } />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />

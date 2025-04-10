@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditorNav } from "@/components/editor-nav";
@@ -14,7 +13,7 @@ interface RoleAwareLayoutProps {
   children: React.ReactNode;
   initialContent?: string;
   templateId?: string;
-  showRoleNavigation?: boolean;  // Add the missing prop
+  showRoleNavigation?: boolean;
 }
 
 export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
@@ -27,11 +26,19 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   children,
   initialContent = "",
   templateId,
-  showRoleNavigation = true  // Add default value
+  showRoleNavigation = true
 }) => {
   const { user } = useAuth();
   const currentRole = role || "editor";
   
+  // Check if we're rendering children directly (like for Dashboard)
+  const renderDirectly = React.isValidElement(children) && children.type?.name === 'Dashboard';
+  
+  if (renderDirectly) {
+    return <>{children}</>;
+  }
+  
+  // Otherwise, render with the EditorNav
   return (
     <div className="flex flex-col h-full">
       <EditorNav
@@ -43,7 +50,7 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
         onLoadDocument={onLoadDocument}
         initialContent={initialContent}
         templateId={templateId}
-        showRoleNavigation={showRoleNavigation}  // Pass to EditorNav if needed
+        showRoleNavigation={showRoleNavigation}
       />
       <main className="flex-1 overflow-auto">
         {children}

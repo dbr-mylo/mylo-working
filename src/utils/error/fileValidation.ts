@@ -29,7 +29,16 @@ export interface FileValidationResult {
 }
 
 /**
- * Validates a file before export
+ * Validates a document before export
+ * 
+ * This function ensures that:
+ * 1. The document has content
+ * 2. The document has a title 
+ * 3. The document size doesn't exceed limits for the selected format
+ * 
+ * @param document The document to validate
+ * @param fileType The export format (mylo, pdf, html)
+ * @returns Validation result with success/error details
  */
 export function validateFileForExport(
   document: Document,
@@ -108,6 +117,15 @@ export function validateFileForExport(
 
 /**
  * Validates a file before import
+ * 
+ * This function ensures that:
+ * 1. The file size doesn't exceed system limits
+ * 2. The file has the correct extension for the expected type
+ * 
+ * @param file The file to validate
+ * @param expectedType The expected file type (mylo, pdf, html)
+ * @param currentRole The current user role
+ * @returns Validation result with success/error details
  */
 export function validateFileForImport(
   file: File,

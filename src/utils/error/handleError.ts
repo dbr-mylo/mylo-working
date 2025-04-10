@@ -5,6 +5,13 @@ import { getUserFriendlyErrorMessage, classifyError, ErrorCategory } from "./err
 
 /**
  * Handles an error with consistent logging and user notification
+ * 
+ * This function centralizes error handling by:
+ * 1. Classifying the error for better reporting
+ * 2. Logging the error with context
+ * 3. Tracking the error for analytics
+ * 4. Displaying a user-friendly toast notification
+ * 
  * @param error The error to handle
  * @param context Context information about where the error occurred
  * @param userMessage Optional custom message to show to the user
@@ -45,6 +52,16 @@ export const handleError = (
 
 /**
  * Enhanced error handler with role-aware messaging
+ * 
+ * This function extends the basic error handler by providing
+ * role-specific error messages tailored to different user roles
+ * (e.g., admin, editor, designer)
+ * 
+ * @param error The error to handle
+ * @param context Context information about where the error occurred
+ * @param role The user's role (admin, editor, designer, etc.)
+ * @param userMessage Optional custom message to override the role-specific message
+ * @param shouldToast Whether to show a toast notification (default: true)
  */
 export const handleRoleAwareError = (
   error: unknown,

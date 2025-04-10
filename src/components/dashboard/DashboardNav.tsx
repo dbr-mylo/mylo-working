@@ -11,6 +11,7 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { SearchBar } from "./SearchBar";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface DashboardNavProps {
   onSearch?: (query: string) => void;
@@ -56,6 +57,8 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        
+        <ThemeToggle variant="icon" size="sm" />
         
         <TooltipProvider delayDuration={300}>
           <Tooltip>

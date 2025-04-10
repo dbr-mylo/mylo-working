@@ -1,15 +1,6 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
 import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
 import { 
   Home, 
@@ -22,6 +13,7 @@ import {
   Users
 } from "lucide-react";
 import { isWriterRole, isDesignerRole, isAdminRole } from "@/utils/roles";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export const DashboardSidebar = () => {
   const { user, role, signOut } = useAuth();
@@ -30,11 +22,14 @@ export const DashboardSidebar = () => {
   return (
     <div className="w-60 border-r border-sidebar-border bg-sidebar h-full overflow-y-auto">
       <div className="py-4 px-6 border-b border-sidebar-border">
-        <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-md bg-sidebar-primary flex items-center justify-center">
-            <span className="text-sidebar-primary-foreground font-bold text-lg">M</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded-md bg-sidebar-primary flex items-center justify-center">
+              <span className="text-sidebar-primary-foreground font-bold text-lg">M</span>
+            </div>
+            <span className="font-semibold text-xl text-sidebar-foreground">Mylo</span>
           </div>
-          <span className="font-semibold text-xl text-sidebar-foreground">Mylo</span>
+          <ThemeToggle size="sm" />
         </div>
       </div>
       

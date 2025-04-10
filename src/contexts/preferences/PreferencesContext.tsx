@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'system';
@@ -53,36 +54,21 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
+  const userId = user?.id || 'anonymous';
+  const preferenceKey = `user-preferences-${userId}`;
+
+  const [storedPreferences, setStoredPreferences] = useLocalStorage<UserPreferences>(
+    preferenceKey, 
+    defaultPreferences
+  );
+  
+  const [preferences, setPreferences] = useState<UserPreferences>(storedPreferences);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
-  // Load preferences from localStorage on mount
+  // Update the preferences when the user changes
   useEffect(() => {
-    try {
-      const userId = user?.id || 'anonymous';
-      const storedPrefs = localStorage.getItem(`user-preferences-${userId}`);
-      
-      if (storedPrefs) {
-        const parsedPrefs = JSON.parse(storedPrefs);
-        setPreferences(prev => ({
-          ...prev,
-          ...parsedPrefs,
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to load preferences:', error);
-    }
-  }, [user?.id]);
-
-  // Save preferences to localStorage when updated
-  useEffect(() => {
-    try {
-      const userId = user?.id || 'anonymous';
-      localStorage.setItem(`user-preferences-${userId}`, JSON.stringify(preferences));
-    } catch (error) {
-      console.error('Failed to save preferences:', error);
-    }
-  }, [preferences, user?.id]);
+    setPreferences(storedPreferences);
+  }, [storedPreferences]);
 
   // Calculate dark mode based on preferences and system settings
   useEffect(() => {
@@ -123,15 +109,19 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
     key: K,
     value: UserPreferences[K]
   ) => {
-    setPreferences(prev => ({
-      ...prev,
+    const updatedPreferences = {
+      ...preferences,
       [key]: value,
-    }));
-  }, []);
+    };
+    
+    setPreferences(updatedPreferences);
+    setStoredPreferences(updatedPreferences);
+  }, [preferences, setStoredPreferences]);
 
   const resetPreferences = useCallback(() => {
     setPreferences(defaultPreferences);
-  }, []);
+    setStoredPreferences(defaultPreferences);
+  }, [setStoredPreferences]);
 
   const value = {
     preferences,

@@ -156,7 +156,7 @@ export const runDocumentEditingTests = async (
     };
   }
   
-  // Test 5: Color application - Improved implementation for better compatibility
+  // Test 5: Color application - Fixed implementation with proper methods
   try {
     // First, try multiple ways to set text color based on different extension patterns
     const initialContent = editor.getHTML();
@@ -172,12 +172,13 @@ export const runDocumentEditingTests = async (
       colorApplied = true;
       colorMethod = 'direct setColor method';
     } 
-    // Method 2: Using the TextStyle extension
+    // Method 2: Using the updateAttributes with TextStyle extension
     else if (typeof editor.chain === 'function') {
       try {
-        editor.chain().focus().setTextStyle({ color: '#ff0000' }).run();
+        // Use updateAttributes instead of setTextStyle
+        editor.chain().focus().updateAttributes('textStyle', { color: '#ff0000' }).run();
         colorApplied = true;
-        colorMethod = 'TextStyle extension';
+        colorMethod = 'TextStyle updateAttributes';
       } catch (e) {
         console.log("TextStyle method failed:", e);
       }

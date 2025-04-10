@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {
@@ -80,10 +81,19 @@ export interface Template {
 export interface Project {
   id: string;
   name: string;
-  documentCount: number;
-  createdAt: string;
   description?: string;
-  owner_id?: string;
+  documents: string[];
+  createdAt: string;
+  updatedAt?: string;
+  folders?: Folder[];
+  documentCount?: number;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  items: string[];
 }
 
 export interface TextStyle {

@@ -45,9 +45,9 @@ const MOCK_PROJECTS: Project[] = [
     documents: ["doc-1", "doc-2"],
     createdAt: new Date().toISOString(),
     folders: [
-      { id: "folder-1", name: "Campaigns", parentId: null, 
-        items: ["doc-1"] }
-    ]
+      { id: "folder-1", name: "Campaigns", parentId: null, items: ["doc-1"] }
+    ],
+    documentCount: 2
   },
   {
     id: "project-2",
@@ -55,13 +55,15 @@ const MOCK_PROJECTS: Project[] = [
     description: "Legal document templates",
     documents: ["doc-3"],
     createdAt: new Date().toISOString(),
-    folders: []
+    folders: [],
+    documentCount: 1
   },
   {
     id: "project-3",
     name: "Personal Documents",
     documents: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    documentCount: 0
   }
 ];
 
@@ -127,7 +129,8 @@ export const ProjectsProvider: React.FC<{children: React.ReactNode}> = ({ childr
         name,
         description,
         documents: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        documentCount: 0
       };
       
       // Add to the local state

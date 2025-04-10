@@ -91,7 +91,7 @@ export const ProjectList = ({
               </div>
               <div className="flex items-center space-x-1">
                 <Badge variant="outline" className="h-5 text-xs bg-gray-50">
-                  {project.documents?.length || 0}
+                  {project.documentCount ?? project.documents?.length ?? 0}
                 </Badge>
                 <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-70" />
               </div>

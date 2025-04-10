@@ -1,4 +1,6 @@
 
+// Adding the Folder interface that was missing
+
 // User types
 export type UserRole = "admin" | "designer" | "editor" | "writer" | null;
 

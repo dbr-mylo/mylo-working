@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {
@@ -135,4 +136,11 @@ export interface AuthState {
   user: any | null;
   role: UserRole | null;
   isLoading: boolean;
+}
+
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'offline';
+
+export interface AutosaveState {
+  status: SaveStatus;
+  lastSaved: Date | null;
 }

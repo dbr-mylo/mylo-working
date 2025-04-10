@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Save, FolderOpen } from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Document } from "@/lib/types";
 import {
@@ -9,36 +10,79 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import { handleError } from "@/utils/errorHandling";
 
 interface DocumentControlsProps {
-  onSave: () => Promise<void>;
-  isSaving: boolean;
+  onSave: (() => Promise<void>) | undefined;
   onLoadDocument: ((doc: Document) => void) | undefined;
   documents: Document[];
   isLoadingDocs: boolean;
-  documentType: string;
-  currentRole: string;
+  content?: string;
+  isSaving?: boolean;
+  documentType?: string;
+  currentRole?: string;
 }
 
 export const DocumentControls = ({
   onSave,
-  isSaving,
   onLoadDocument,
   documents,
   isLoadingDocs,
-  documentType,
-  currentRole
+  content,
+  isSaving = false,
+  documentType = "document",
+  currentRole = "editor"
 }: DocumentControlsProps) => {
   const { toast } = useToast();
+  const { role } = useAuth();
   
-  // Remove the different button sizes based on role - use a consistent size
+  const isDesigner = role === "designer" || currentRole === "designer";
+  const itemType = isDesigner ? "template" : "document";
+  const buttonSize = isDesigner ? "xxs" : "sm";
+
   const handleLoadDocument = (doc: Document) => {
-    if (onLoadDocument) {
-      onLoadDocument(doc);
+    try {
+      if (onLoadDocument) {
+        onLoadDocument(doc);
+        toast({
+          title: `${isDesigner ? "Template" : "Document"} loaded`,
+          description: `"${doc.title}" has been loaded.`,
+        });
+      }
+    } catch (error) {
+      handleError(
+        error,
+        "DocumentControls.handleLoadDocument",
+        `Failed to load ${itemType}. Please try again.`
+      );
+    }
+  };
+
+  const handleSave = async () => {
+    if (!content || !content.trim()) {
       toast({
-        title: `${currentRole === "designer" ? "Template" : "Document"} loaded`,
-        description: `"${doc.title}" has been loaded.`,
+        title: `Cannot save empty ${itemType}`,
+        description: `Please add some content to your ${itemType}.`,
+        variant: "destructive",
       });
+      return;
+    }
+    
+    try {
+      if (onSave) {
+        await onSave();
+        toast({
+          title: `${itemType} saved`,
+          description: `Your ${itemType} has been saved successfully.`,
+        });
+      }
+    } catch (error) {
+      handleError(
+        error,
+        "DocumentControls.handleSave",
+        `There was a problem saving your ${itemType}. Please try again.`
+      );
     }
   };
 
@@ -48,7 +92,7 @@ export const DocumentControls = ({
         <DropdownMenuTrigger asChild>
           <Button 
             variant="default" 
-            size="sm" 
+            size={buttonSize} 
             className="flex items-center gap-2 rounded-[7.5px] h-[40px]"
             disabled={isLoadingDocs}
           >
@@ -58,7 +102,7 @@ export const DocumentControls = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
           {documents.length === 0 ? (
-            <DropdownMenuItem disabled>No {currentRole === "designer" ? "templates" : "documents"} found</DropdownMenuItem>
+            <DropdownMenuItem disabled>No {isDesigner ? "templates" : "documents"} found</DropdownMenuItem>
           ) : (
             documents.map((doc) => (
               <DropdownMenuItem 
@@ -78,9 +122,9 @@ export const DocumentControls = ({
 
       <Button 
         variant="default" 
-        size="sm" 
+        size={buttonSize} 
         className="flex items-center gap-2 rounded-[7.5px] h-[40px]"
-        onClick={onSave}
+        onClick={handleSave}
         disabled={isSaving}
       >
         <Save className="w-4 h-4" />

@@ -9,9 +9,11 @@ import {
   DocumentTitle, 
   DocumentControls, 
   ExternalActions,
-  CloseDocumentDialog 
+  CloseDocumentDialog,
+  SaveStatusIndicator
 } from "./components";
 import { useDocumentTitle, useCloseDocument, useDocumentSave } from "./hooks";
+import { useAutosaveSetup } from "@/hooks/useAutosaveSetup";
 
 export const EditorNav = ({ 
   currentRole, 
@@ -33,11 +35,13 @@ export const EditorNav = ({
   const navHeight = "h-14";
   const documentType = currentRole === "designer" ? "template" : "document";
 
+  // Title management
   const { title, handleTitleChange, handleTitleBlur } = useDocumentTitle({
     initialTitle: documentTitle,
     onTitleChange
   });
   
+  // Document closing logic
   const { showCloseDialog, setShowCloseDialog, handleCloseDocument, 
           handleCloseWithoutSaving, handleSaveAndClose } = useCloseDocument({
     content,
@@ -47,11 +51,22 @@ export const EditorNav = ({
     onSave
   });
   
+  // Manual save logic
   const { isSaving, handleSave } = useDocumentSave({
     onSave,
     loadDocuments,
     content,
     documentType
+  });
+  
+  // Autosave setup
+  const { saveStatus, lastSaved } = useAutosaveSetup({
+    content: content || '',
+    initialContent: initialContent || '',
+    documentTitle: title,
+    onSave,
+    debounceTime: 2000,
+    enabled: true
   });
 
   useEffect(() => {
@@ -94,6 +109,11 @@ export const EditorNav = ({
       </div>
       
       <div className="flex items-center space-x-2">
+        {/* Autosave Status Indicator */}
+        <div className="mr-4">
+          <SaveStatusIndicator status={saveStatus} lastSaved={lastSaved} />
+        </div>
+        
         <DocumentControls
           onSave={handleSave}
           isSaving={isSaving}
@@ -129,7 +149,7 @@ export const EditorNav = ({
       />
     </nav>
   );
-};
+}
 
 export * from './components';
 export * from './hooks';

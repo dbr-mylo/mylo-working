@@ -18,9 +18,9 @@ export const useDashboardProjects = () => {
       try {
         // For now we'll use mock data - in Phase 3 this would be connected to backend
         const mockProjects: Project[] = [
-          { id: '1', name: 'Personal Documents', documentCount: 5, createdAt: new Date().toISOString() },
-          { id: '2', name: 'Work', documentCount: 8, createdAt: new Date().toISOString() },
-          { id: '3', name: 'Templates', documentCount: 3, createdAt: new Date().toISOString() }
+          { id: '1', name: 'Personal Documents', documentCount: 5, documents: [], createdAt: new Date().toISOString() },
+          { id: '2', name: 'Work', documentCount: 8, documents: [], createdAt: new Date().toISOString() },
+          { id: '3', name: 'Templates', documentCount: 3, documents: [], createdAt: new Date().toISOString() }
         ];
         
         setProjects(mockProjects);
@@ -45,6 +45,7 @@ export const useDashboardProjects = () => {
       const newProject: Project = {
         id: Date.now().toString(), // temporary ID 
         name,
+        documents: [],
         documentCount: 0,
         createdAt: new Date().toISOString()
       };

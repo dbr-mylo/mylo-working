@@ -96,7 +96,9 @@ export function usePaginatedDataFetch<T>(
   }
 ) {
   const queryKeyBase = Array.isArray(baseQueryKey) ? baseQueryKey : [baseQueryKey];
-  const queryKey = [...queryKeyBase, options.page, options.pageSize];
+  
+  // Convert page and pageSize to strings to ensure the entire array is string[]
+  const queryKey = [...queryKeyBase, options.page.toString(), options.pageSize.toString()];
   
   return useDataFetch(
     queryKey,

@@ -49,6 +49,7 @@ export interface Project {
   createdAt: string;
   updatedAt?: string;
   folders?: Folder[]; // Nested folders within the project
+  documentCount?: number; // For backwards compatibility with existing code
 }
 
 export interface Folder {

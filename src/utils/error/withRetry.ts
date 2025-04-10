@@ -1,46 +1,71 @@
 
-import { RetryConfig, DEFAULT_RETRY_CONFIG } from './types';
+type AsyncFunction<T, Args extends any[]> = (...args: Args) => Promise<T>;
+
+export interface RetryConfig {
+  maxAttempts?: number;
+  delayMs?: number;
+  backoffFactor?: number;
+  retryCondition?: (error: any) => boolean;
+  onRetry?: (attempt: number, error: any) => void;
+}
+
+const defaultRetryConfig: Required<RetryConfig> = {
+  maxAttempts: 3,
+  delayMs: 1000,
+  backoffFactor: 2,
+  retryCondition: () => true,
+  onRetry: () => {}
+};
 
 /**
- * Utility for retrying failed async operations
- * @param fn The function to retry
- * @param config Retry configuration
- * @returns A wrapped function that will retry on failure
+ * A utility that adds retry capability to any async function
+ * @param fn The async function to wrap with retry logic
+ * @param config Configuration options for retry behavior
+ * @returns A new function that will retry according to the config
  */
-export function withRetry<T extends (...args: any[]) => Promise<any>>(
-  fn: T,
-  config: RetryConfig = {}
-): T {
-  const { maxAttempts, delayMs, retryCondition } = {
-    ...DEFAULT_RETRY_CONFIG,
-    ...config
-  };
+export function withRetry<T, Args extends any[]>(
+  fn: AsyncFunction<T, Args>,
+  config?: RetryConfig
+): AsyncFunction<T, Args> {
+  // Merge provided config with defaults
+  const {
+    maxAttempts,
+    delayMs,
+    backoffFactor,
+    retryCondition,
+    onRetry
+  } = { ...defaultRetryConfig, ...config };
 
-  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
-    let lastError: unknown;
-    
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  // Return a new function with retry logic
+  return async function(...args: Args): Promise<T> {
+    let lastError: any;
+    let attempt = 0;
+
+    while (attempt < maxAttempts) {
       try {
+        // First attempt or retry
         return await fn(...args);
       } catch (error) {
-        console.info(`[Analytics] Retry attempt ${attempt}/${maxAttempts} failed`);
         lastError = error;
+        attempt++;
         
-        // Check if we should retry
+        // Stop retrying if we've hit max attempts or condition fails
         if (attempt >= maxAttempts || !retryCondition(error)) {
           break;
         }
         
+        // Calculate delay with exponential backoff
+        const delay = delayMs * Math.pow(backoffFactor, attempt - 1);
+        
+        // Notify about retry
+        onRetry(attempt, error);
+        
         // Wait before retrying
-        if (delayMs > 0) {
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-    
-    throw lastError;
-  }) as T;
-}
 
-// Re-export RetryConfig from types for backward compatibility
-export type { RetryConfig };
+    // If we got here, all retries failed
+    throw lastError;
+  };
+}

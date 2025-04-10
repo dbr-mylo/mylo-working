@@ -23,6 +23,7 @@ interface DocumentControlsProps {
   isSaving?: boolean;
   documentType?: string;
   currentRole?: string;
+  currentDocument?: Document | null;
 }
 
 export const DocumentControls = ({
@@ -33,7 +34,8 @@ export const DocumentControls = ({
   content,
   isSaving = false,
   documentType = "document",
-  currentRole = "editor"
+  currentRole = "editor",
+  currentDocument = null
 }: DocumentControlsProps) => {
   const { toast } = useToast();
   const { role } = useAuth();
@@ -88,22 +90,23 @@ export const DocumentControls = ({
   };
 
   // Create current document object from content
-  const currentDocument = content ? {
+  const documentObj = currentDocument || (content ? {
     id: "",
     title: documentType === "template" ? "My Template" : "My Document",
     content: content,
     updated_at: new Date().toISOString()
-  } : null;
+  } : null);
 
   return (
     <>
       {/* File Menu for import/export operations */}
       <FileMenu
-        currentDocument={currentDocument}
+        currentDocument={documentObj}
         documentType={documentType}
         currentRole={currentRole}
         onImport={handleLoadDocument}
         content={content || ""}
+        documentHistory={documents}
       />
       
       <DropdownMenu>

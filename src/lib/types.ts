@@ -19,8 +19,7 @@ export interface Document {
   title: string;
   content: string;
   updated_at: string;
-  template_id?: string;
-  meta?: DocumentMeta;
+  meta?: Record<string, any>;
 }
 
 export interface DocumentMeta {
@@ -30,31 +29,30 @@ export interface DocumentMeta {
 
 export interface UseDocumentReturn {
   content: string;
-  setContent: React.Dispatch<React.SetStateAction<string>>;
+  setContent: (content: string) => void;
   initialContent: string;
   documentTitle: string;
-  setDocumentTitle: React.Dispatch<React.SetStateAction<string>>;
+  setDocumentTitle: (title: string) => void;
   currentDocumentId: string | null;
   isLoading: boolean;
   saveDocument: () => Promise<void>;
   loadDocument: (doc: Document) => void;
-  documentMeta?: DocumentMeta;
 }
 
 export interface EditorNavProps {
   currentRole: string;
+  onSave?: () => Promise<void>;
   content?: string;
   documentTitle?: string;
-  onTitleChange?: (title: string) => Promise<void>;
-  onSave?: () => Promise<void>;
+  onTitleChange?: (title: string) => void;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
   templateId?: string;
-  onTemplateChange?: (templateId: string) => void;
   showRoleNavigation?: boolean;
+  currentDocument?: Document | null;
 }
 
-export type UserRole = 'writer' | 'designer' | 'admin' | 'editor';
+export type UserRole = "designer" | "editor" | "writer" | "admin" | null;
 
 export interface Template {
   id: string;
@@ -143,4 +141,11 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'offline';
 export interface AutosaveState {
   status: SaveStatus;
   lastSaved: Date | null;
+}
+
+export interface DocumentVersion {
+  content: string;
+  timestamp: Date;
+  title?: string;
+  id?: string;
 }

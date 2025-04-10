@@ -24,7 +24,8 @@ export const EditorNav = ({
   onLoadDocument,
   initialContent = "",
   templateId,
-  showRoleNavigation = true
+  showRoleNavigation = true,
+  currentDocument = null
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const [documents, setDocuments] = useState([]);
@@ -61,14 +62,21 @@ export const EditorNav = ({
     documentType
   });
   
-  // Autosave setup
-  const { saveStatus, lastSaved } = useAutosaveSetup({
+  // Enhanced autosave setup
+  const { 
+    saveStatus, 
+    lastSaved, 
+    triggerSave,
+    pendingChanges,
+    isAutosaveEnabled
+  } = useAutosaveSetup({
     content: content || '',
     initialContent: initialContent || '',
     documentTitle: title,
     onSave,
     debounceTime: 2000,
-    enabled: true
+    enabled: true,
+    maxRetries: 3
   });
 
   useEffect(() => {
@@ -111,9 +119,14 @@ export const EditorNav = ({
       </div>
       
       <div className="flex items-center space-x-2">
-        {/* Autosave Status Indicator */}
+        {/* Autosave Status Indicator with ability to trigger manual save */}
         <div className="mr-4">
-          <SaveStatusIndicator status={saveStatus} lastSaved={lastSaved} />
+          <SaveStatusIndicator 
+            status={saveStatus} 
+            lastSaved={lastSaved}
+            pendingChanges={pendingChanges}
+            onManualSave={isAutosaveEnabled ? triggerSave : undefined}
+          />
         </div>
         
         <DocumentControls
@@ -125,6 +138,7 @@ export const EditorNav = ({
           documentType={documentType}
           currentRole={currentRole}
           content={content}
+          currentDocument={currentDocument}
         />
         
         <ExternalActions 

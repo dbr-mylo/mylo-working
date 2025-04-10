@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,9 @@ import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation"
 import { useSmokeTest } from "@/hooks/useSmokeTest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProjectsProvider } from "@/contexts/ProjectsContext";
+import { SearchProvider } from "@/contexts/search/SearchContext";
+import { PreferencesProvider } from "@/contexts/preferences/PreferencesContext";
+import { NotificationsProvider } from "@/contexts/notifications/NotificationsContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -181,9 +183,15 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <ProjectsProvider>
-                <AppRoutes />
-              </ProjectsProvider>
+              <PreferencesProvider>
+                <NotificationsProvider>
+                  <ProjectsProvider>
+                    <SearchProvider>
+                      <AppRoutes />
+                    </SearchProvider>
+                  </ProjectsProvider>
+                </NotificationsProvider>
+              </PreferencesProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

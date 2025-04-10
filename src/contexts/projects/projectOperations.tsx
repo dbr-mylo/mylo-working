@@ -1,6 +1,8 @@
 
-import { toast } from "sonner";
 import { Project } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { handleError } from "@/utils/error/handleError";
 
 export function createProjectOperations(
   projects: Project[],
@@ -12,61 +14,76 @@ export function createProjectOperations(
   // Create a new project
   const createProject = async (name: string, description?: string): Promise<Project> => {
     try {
-      // In a real implementation, this would be an API call
+      // This would be an API call in a production environment
       const newProject: Project = {
         id: `project-${Date.now()}`,
         name,
         description,
         documents: [],
         createdAt: new Date().toISOString(),
-        documentCount: 0
+        updatedAt: new Date().toISOString(),
+        documentCount: 0,
       };
       
-      // Add to the local state
       setProjects(prevProjects => [...prevProjects, newProject]);
-      toast.success(`Project "${name}" created successfully`);
+      setSelectedProject(newProject);
       
+      toast.success(`Project "${name}" created`);
       return newProject;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to create project");
       setError(error);
-      toast.error(`Failed to create project: ${error.message}`);
+      handleError(error, "projectOperations.createProject");
       throw error;
     }
   };
-
+  
   // Update an existing project
   const updateProject = async (projectId: string, data: Partial<Project>): Promise<boolean> => {
     try {
+      // In a real implementation, this would be an API call
       setProjects(prevProjects => 
-        prevProjects.map(p => 
-          p.id === projectId 
-            ? { ...p, ...data, updatedAt: new Date().toISOString() } 
-            : p
-        )
+        prevProjects.map(p => {
+          if (p.id === projectId) {
+            return { 
+              ...p, 
+              ...data,
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return p;
+        })
       );
       
-      // If we're updating the currently selected project, update that too
+      // Update selected project if necessary
       if (selectedProject?.id === projectId) {
-        setSelectedProject(prev => prev ? { ...prev, ...data } : null);
+        setSelectedProject(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            ...data,
+            updatedAt: new Date().toISOString()
+          };
+        });
       }
       
-      toast.success("Project updated");
+      toast.success(`Project updated`);
       return true;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to update project");
       setError(error);
-      toast.error(`Failed to update project: ${error.message}`);
-      return false;
+      handleError(error, "projectOperations.updateProject");
+      throw error;
     }
   };
-
+  
   // Delete a project
   const deleteProject = async (projectId: string): Promise<boolean> => {
     try {
+      // In a real implementation, this would be an API call
       setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
       
-      // If the deleted project was selected, clear the selection
+      // Clear selected project if it's being deleted
       if (selectedProject?.id === projectId) {
         setSelectedProject(null);
       }
@@ -76,14 +93,10 @@ export function createProjectOperations(
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to delete project");
       setError(error);
-      toast.error(`Failed to delete project: ${error.message}`);
-      return false;
+      handleError(error, "projectOperations.deleteProject");
+      throw error;
     }
   };
-
-  return {
-    createProject,
-    updateProject,
-    deleteProject
-  };
+  
+  return { createProject, updateProject, deleteProject };
 }

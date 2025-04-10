@@ -1,22 +1,31 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
+  initialQuery?: string;
   placeholder?: string;
   className?: string;
+  autoFocus?: boolean;
 }
 
 export const SearchBar = ({ 
   onSearch, 
+  initialQuery = "",
   placeholder = "Search documents...", 
-  className = "" 
+  className = "",
+  autoFocus = false
 }: SearchBarProps) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const { navigateTo } = useNavigationHandlers();
+  
+  // Update local state when initialQuery changes
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +37,21 @@ export const SearchBar = ({
     }
   };
   
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    
+    // If debounced search is needed, handle here
+    if (onSearch) {
+      onSearch(newQuery);
+    }
+  };
+  
   const clearSearch = () => {
     setQuery("");
+    if (onSearch) {
+      onSearch("");
+    }
   };
   
   return (
@@ -39,8 +61,9 @@ export const SearchBar = ({
         type="text"
         placeholder={placeholder}
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={handleChange}
         className="pl-9 pr-10"
+        autoFocus={autoFocus}
       />
       {query && (
         <button 

@@ -1,42 +1,101 @@
 
 import { Editor } from "@tiptap/react";
 
-export interface DesignPanelProps {
-  content: string;
-  isEditable: boolean;
-  templateId?: string;
+// User types
+export type UserRole = "admin" | "designer" | "editor" | "writer" | null;
+
+export interface User {
+  id: string;
+  email?: string;
+  name?: string;
+  role?: UserRole;
+  preferences?: UserPreferences;
 }
 
-export interface EditorPanelProps {
-  content: string;
-  onContentChange: (content: string) => void;
-  isEditable: boolean;
-  templateId?: string;
-  editorInstance?: Editor | null;
+export interface UserPreferences {
+  theme?: string;
+  fontSize?: string;
+  viewMode?: string;
 }
 
+// Document types
 export interface Document {
   id: string;
   title: string;
   content: string;
-  updated_at: string;
   created_at?: string;
+  updated_at: string;
   owner_id?: string;
   status?: string;
   meta?: DocumentMeta;
+  userId?: string;
+  version?: number;
+  isTemplate?: boolean;
+  projectId?: string;
+  folderId?: string;
 }
 
 export interface DocumentMeta {
+  status?: string;
+  tags?: string[];
+  templateId?: string;
+  templateVersion?: number;
+  customFields?: Record<string, any>;
+  project_id?: string;
   template_id?: string;
   owner_id?: string;
   version?: number;
   category?: string;
-  project_id?: string;
   isTemplate?: boolean;
-  tags?: string[];
   [key: string]: any;
 }
 
+// Project and folder organization
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  documents: string[]; // Array of document IDs
+  createdAt: string;
+  updatedAt?: string;
+  folders?: Folder[]; // Nested folders within the project
+  documentCount?: number;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null; // null if it's a root folder
+  items: string[]; // Document IDs in this folder
+}
+
+// Search and filtering
+export interface SearchQuery {
+  term: string;
+  filters?: SearchFilters;
+  sort?: SortOption;
+}
+
+export interface SearchFilters {
+  dateRange?: DateRange;
+  documentType?: 'document' | 'template' | 'all';
+  status?: string[];
+  tags?: string[];
+  projectId?: string;
+  folderId?: string;
+}
+
+export interface DateRange {
+  from: string;
+  to: string;
+}
+
+export interface SortOption {
+  field: 'title' | 'createdAt' | 'updatedAt';
+  direction: 'asc' | 'desc';
+}
+
+// Editor types
 export interface UseDocumentReturn {
   content: string;
   setContent: (content: string) => void;
@@ -52,10 +111,10 @@ export interface UseDocumentReturn {
 
 export interface EditorNavProps {
   currentRole: string;
-  onSave?: () => Promise<void>;
   content?: string;
   documentTitle?: string;
   onTitleChange?: (title: string) => Promise<void>;
+  onSave?: () => Promise<void>;
   onLoadDocument?: (doc: Document) => void;
   initialContent?: string;
   templateId?: string;
@@ -64,8 +123,21 @@ export interface EditorNavProps {
   onTemplateChange?: (templateId: string) => void;
 }
 
-export type UserRole = "designer" | "editor" | "writer" | "admin" | null;
+export interface DesignPanelProps {
+  content: string;
+  isEditable: boolean;
+  templateId?: string;
+}
 
+export interface EditorPanelProps {
+  content: string;
+  onContentChange: (content: string) => void;
+  isEditable: boolean;
+  templateId?: string;
+  editorInstance?: Editor | null;
+}
+
+// Template types
 export interface Template {
   id: string;
   name: string;
@@ -78,24 +150,7 @@ export interface Template {
   updated_at?: string;
 }
 
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  documents: string[];
-  createdAt: string;
-  updatedAt?: string;
-  folders?: Folder[];
-  documentCount?: number;
-}
-
-export interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  items: string[];
-}
-
+// Typography and styling
 export interface TextStyle {
   id: string;
   name: string;
@@ -160,6 +215,7 @@ export interface TypographyStyles {
   textAlign: string;
 }
 
+// Auth and application state
 export interface AuthState {
   user: any | null;
   role: UserRole | null;

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import Index from "./pages/Index";
 import DocumentSelection from "./pages/DocumentSelection";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
 import RegressionTestRoute from "./routes/RegressionTestRoute";
 import SmokeTestRoute from "./routes/SmokeTestRoute";
 import { TemplateManager } from "@/components/design/TemplateManager";
@@ -20,24 +20,18 @@ import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors";
 import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
 
-// Create a query client with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      // Important: Use onError for logging but don't handle the error here
-      // Let the error propagate to the error boundary
     },
     mutations: {
       retry: 1,
-      // Important: Use onError for logging but don't handle the error here
-      // Let the error propagate to the error boundary
     },
   },
 });
 
-// RouteValidator component to check routes on navigation
 const RouteValidator = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,14 +40,12 @@ const RouteValidator = () => {
   useEffect(() => {
     const isValid = isValidRoute(location.pathname, role);
     
-    // Log all navigation regardless of validity
     logNavigation(
       location.state?.from || "unknown", 
       location.pathname, 
       isValid
     );
     
-    // If invalid and not already on the not-found page, redirect
     if (!isValid && location.pathname !== "/not-found") {
       console.warn(`Invalid route detected: ${location.pathname} for role: ${role || 'unauthenticated'}`);
       navigate("/not-found", { state: { from: location.pathname } });
@@ -63,7 +55,6 @@ const RouteValidator = () => {
   return null;
 };
 
-// Protected route wrapper for any authenticated user
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading, role } = useAuth();
   useSmokeTest("ProtectedRoute");
@@ -79,7 +70,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Admin route wrapper
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const isAdmin = useIsAdmin();
   const { user, isLoading } = useAuth();
@@ -100,7 +90,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Auth route wrapper (redirects to home if already authenticated)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   useSmokeTest("AuthRoute");
@@ -116,7 +105,6 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Designer-specific pages
 const DesignerPages = () => {
   useSmokeTest("DesignerPages");
   
@@ -130,7 +118,6 @@ const DesignerPages = () => {
   );
 };
 
-// Writer-specific pages
 const WriterPages = () => {
   useSmokeTest("WriterPages");
   
@@ -151,20 +138,20 @@ const AppRoutes = () => {
       <RouteValidator />
       <Routes>
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-        <Route path="/" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
+        <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
         <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         
-        {/* Role-specific routes */}
         <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
         <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
         
-        {/* Direct template management route */}
         <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
         
         <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
         
-        {/* Testing routes */}
         <Route path="/testing/regression" element={<RegressionTestRoute />} />
         <Route path="/testing/smoke" element={<SmokeTestRoute />} />
         

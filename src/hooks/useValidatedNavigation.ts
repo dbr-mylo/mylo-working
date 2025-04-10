@@ -1,32 +1,24 @@
 
-import { useNavigationAnalytics } from "./navigation/useNavigationAnalytics";
+import { useNavigate } from "react-router-dom";
 import { useRouteValidation } from "./navigation/useRouteValidation";
-import { useNavigationHandlers } from "./navigation/useNavigationHandlers";
 
 /**
- * A hook that provides validated navigation capabilities
- * Ensures routes are valid and user has permission before navigating
- * Also tracks navigation for analytics purposes
+ * Simple wrapper hook that combines useNavigate with route validation
  */
 export const useValidatedNavigation = () => {
-  const { validateRoute, isCurrentRouteValid, currentPath } = useRouteValidation();
-  const { trackNavigation, getNavigationHistory } = useNavigationAnalytics();
-  const { navigateTo, safeNavigateTo, goBack } = useNavigationHandlers();
+  const navigate = useNavigate();
+  const { validateRoute } = useRouteValidation();
+  
+  const navigateTo = (path: string) => {
+    if (validateRoute(path)) {
+      navigate(path);
+    } else {
+      console.warn(`Invalid navigation attempt to ${path}`);
+      navigate("/not-found");
+    }
+  };
   
   return {
-    // Navigation handlers
-    navigateTo,
-    safeNavigateTo,
-    goBack,
-    
-    // Route validation
-    isCurrentRouteValid,
-    currentPath,
-    
-    // Analytics
-    getNavigationHistory
+    navigateTo
   };
 };
-
-// Export the analytics interface for consumers
-export { type NavigationAnalytics } from "./navigation/useNavigationAnalytics";

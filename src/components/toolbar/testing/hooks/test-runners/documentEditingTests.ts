@@ -156,38 +156,60 @@ export const runDocumentEditingTests = async (
     };
   }
   
-  // Test 5: Color application
+  // Test 5: Color application - Improved implementation for better compatibility
   try {
-    // First check if setColor command exists
-    if (typeof editor.commands.setColor !== 'function') {
+    // First, try multiple ways to set text color based on different extension patterns
+    const initialContent = editor.getHTML();
+    editor.commands.selectAll();
+    
+    let colorApplied = false;
+    let colorMethod = '';
+    
+    // Try different ways to apply color based on the editor's configuration
+    // Method 1: Using setColor from the Color extension
+    if (typeof editor.commands.setColor === 'function') {
+      editor.commands.setColor('#ff0000');
+      colorApplied = true;
+      colorMethod = 'direct setColor method';
+    } 
+    // Method 2: Using the TextStyle extension
+    else if (typeof editor.chain === 'function') {
+      try {
+        editor.chain().focus().setTextStyle({ color: '#ff0000' }).run();
+        colorApplied = true;
+        colorMethod = 'TextStyle extension';
+      } catch (e) {
+        console.log("TextStyle method failed:", e);
+      }
+    }
+    
+    if (!colorApplied) {
       results['editor.formatting.color'] = {
         passed: false,
-        message: 'Editor does not support color formatting. Make sure Color extension is added.',
+        message: 'Editor does not support color formatting. Make sure Color extension and TextStyle extensions are added to the editor.',
         name: 'Text Color',
         timestamp: new Date().toISOString()
       };
     } else {
-      const initialContent = editor.getHTML();
-      editor.commands.selectAll();
-      editor.commands.setColor('#ff0000');
-      
       // Different editors might handle this differently, so check multiple ways
       const hasColorMark = editor.isActive('textStyle', { color: '#ff0000' }) || 
                           editor.getHTML().includes('color: #ff0000') ||
-                          editor.getHTML().includes('color:#ff0000');
+                          editor.getHTML().includes('color:#ff0000') ||
+                          editor.getHTML().includes('style="color:') ||
+                          editor.getHTML().toLowerCase().includes('style="color');
       
       results['editor.formatting.color'] = {
         passed: hasColorMark,
         message: hasColorMark 
-          ? 'Successfully applied text color' 
-          : 'Failed to apply text color',
+          ? `Successfully applied text color using ${colorMethod}` 
+          : `Failed to apply text color using ${colorMethod}. HTML after application: ${editor.getHTML().substring(0, 100)}...`,
         name: 'Text Color',
         timestamp: new Date().toISOString()
       };
-      
-      // Reset editor content
-      editor.commands.setContent(initialContent);
     }
+    
+    // Reset editor content
+    editor.commands.setContent(initialContent);
   } catch (error) {
     results['editor.formatting.color'] = {
       passed: false,

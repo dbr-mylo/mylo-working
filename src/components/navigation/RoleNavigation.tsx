@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { 
@@ -54,88 +55,86 @@ export const RoleNavigation = () => {
   };
   
   return (
-    <ErrorBoundary context="RoleNavigation">
-      <NavigationMenu className="max-w-none w-full justify-start p-2">
-        <NavigationMenuList className="space-x-2">
-          {/* Common navigation items for all roles */}
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              className={navigationMenuTriggerStyle() + (isActive("/") ? " bg-accent" : "")}
-              onClick={() => handleNavigation("/")}
-            >
-              Dashboard
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          
-          {/* Writer-specific navigation */}
-          {isWriter && (
-            <>
-              {writerNavItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
-                    onClick={() => handleNavigation(item.href)}
-                  >
-                    <span className="flex items-center">
-                      {item.icon}
-                      {item.label}
-                    </span>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </>
-          )}
-          
-          {/* Designer-specific navigation */}
-          {isDesigner && (
-            <>
-              {designerNavItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
-                    onClick={() => handleNavigation(item.href)}
-                  >
-                    <span className="flex items-center">
-                      {item.icon}
-                      {item.label}
-                    </span>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </>
-          )}
-          
-          {/* Admin-specific navigation */}
-          {isAdmin && (
-            <>
-              <NavigationMenuItem>
+    <NavigationMenu className="max-w-none w-full justify-start p-2">
+      <NavigationMenuList className="space-x-2">
+        {/* Common navigation items for all roles */}
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            className={navigationMenuTriggerStyle() + (isActive("/") ? " bg-accent" : "")}
+            onClick={() => handleNavigation("/")}
+          >
+            Dashboard
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        
+        {/* Writer-specific navigation */}
+        {isWriter && (
+          <>
+            {writerNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
                 <NavigationMenuLink
-                  className={navigationMenuTriggerStyle() + (isActive("/admin") ? " bg-accent" : "")}
-                  onClick={() => handleNavigation("/admin")}
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => handleNavigation(item.href)}
                 >
-                  Admin Panel
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-              
-              {/* Testing section for admins */}
-              {testingNavItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
-                    onClick={() => handleNavigation(item.href)}
-                  >
-                    <span className="flex items-center">
-                      {item.icon}
-                      {item.label}
-                    </span>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </>
-          )}
-        </NavigationMenuList>
-      </NavigationMenu>
-    </ErrorBoundary>
+            ))}
+          </>
+        )}
+        
+        {/* Designer-specific navigation */}
+        {isDesigner && (
+          <>
+            {designerNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => handleNavigation(item.href)}
+                >
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </>
+        )}
+        
+        {/* Admin-specific navigation */}
+        {isAdmin && (
+          <>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle() + (isActive("/admin") ? " bg-accent" : "")}
+                onClick={() => handleNavigation("/admin")}
+              >
+                Admin Panel
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            
+            {/* Testing section for admins */}
+            {testingNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => handleNavigation(item.href)}
+                >
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </>
+        )}
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 };
 

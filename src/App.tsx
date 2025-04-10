@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ import { TemplateManager } from "@/components/design/TemplateManager";
 import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors";
 import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,7 +140,13 @@ const AppRoutes = () => {
       <RouteValidator />
       <Routes>
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <SidebarProvider>
+              <Dashboard />
+            </SidebarProvider>
+          </ProtectedRoute>
+        } />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />

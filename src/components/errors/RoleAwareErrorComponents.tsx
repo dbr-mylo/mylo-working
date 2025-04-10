@@ -6,6 +6,7 @@ import { trackError } from "@/utils/error/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { RecoveryOptions } from './RecoveryOptions';
 
 /**
  * A component to display role-specific error messages
@@ -43,6 +44,7 @@ export function RoleAwareErrorFallback({
 }) {
   const { role } = useAuth();
   const errorMessage = getRoleSpecificErrorMessage(error, role, context);
+  const errorObj = error instanceof Error ? error : new Error(String(error));
   
   return (
     <div className="p-6 max-w-xl mx-auto my-8 bg-red-50 border border-red-200 rounded-lg shadow-sm">
@@ -53,20 +55,11 @@ export function RoleAwareErrorFallback({
         <AlertTitle>Something went wrong</AlertTitle>
         <AlertDescription>{errorMessage}</AlertDescription>
       </Alert>
-      <p className="text-gray-600 mt-4 mb-4">
-        Please try refreshing the page or contact support if the problem persists.
-      </p>
       
-      {onTryAgain && (
-        <Button 
-          variant="outline" 
-          onClick={onTryAgain}
-          className="mt-2"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
-        </Button>
-      )}
+      <RecoveryOptions 
+        error={errorObj} 
+        onRetry={onTryAgain} 
+      />
     </div>
   );
 }

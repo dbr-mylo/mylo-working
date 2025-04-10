@@ -22,7 +22,9 @@ export const EditorNav = ({
   documentTitle = "", 
   onTitleChange,
   onLoadDocument,
-  initialContent = "" 
+  initialContent = "",
+  templateId,
+  showRoleNavigation = true
 }: EditorNavProps) => {
   const { signOut, user } = useAuth();
   const [documents, setDocuments] = useState([]);

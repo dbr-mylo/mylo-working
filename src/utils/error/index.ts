@@ -22,3 +22,19 @@ export {
   withSyncErrorHandling
 } from './withErrorHandling';
 export { withRetry } from './withRetry';
+
+// Export our new error classifier system
+export { 
+  classifyError,
+  getUserFriendlyErrorMessage,
+  ErrorCategory,
+  type ClassifiedError
+} from './errorClassifier';
+
+// Export file validation utilities
+export {
+  validateFileForExport,
+  validateFileForImport,
+  FileErrorType,
+  type FileValidationResult
+} from './fileValidation';

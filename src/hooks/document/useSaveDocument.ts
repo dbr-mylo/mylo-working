@@ -7,6 +7,8 @@ import {
   saveDocumentToSupabase, 
   saveDocumentToLocalStorage 
 } from "@/utils/documentSaveUtils";
+import { backupDocument } from "@/utils/backup/documentBackupSystem";
+import { getUserFriendlyErrorMessage } from "@/utils/error/errorClassifier";
 
 interface UseSaveDocumentProps {
   content: string;
@@ -51,29 +53,42 @@ export function useSaveDocument({
         return;
       }
       
+      // Create a backup before saving (safety measure)
+      if (role) {
+        const backupCreated = backupDocument(
+          content,
+          currentDocumentId,
+          documentTitle,
+          role,
+          documentMeta
+        );
+        
+        console.log(`Document backup ${backupCreated ? 'created' : 'failed'}`);
+      }
+      
       let savedDocument: Document | null = null;
       
       if (user) {
         console.log(`Saving ${itemType} for authenticated user:`, user.id);
-        // Fix: Adjust the arguments to match the expected parameter count (5-6)
         savedDocument = await saveDocumentToSupabase(
           currentDocumentId, 
           content, 
           documentTitle, 
           user.id,
           toast,
-          isDesigner
+          isDesigner,
+          documentMeta
         );
         console.log(`Supabase save completed for ${itemType}`);
       } else if (role) {
         console.log(`Saving ${itemType} for ${role} user to localStorage`);
-        // Fix: Adjust the arguments to match the expected parameter count (5)
         savedDocument = saveDocumentToLocalStorage(
           currentDocumentId,
           content,
           documentTitle,
           role,
-          toast
+          toast,
+          documentMeta
         );
         console.log(`localStorage save completed for ${itemType}`);
       } else {
@@ -108,9 +123,17 @@ export function useSaveDocument({
       return;
     } catch (error) {
       console.error(`Error saving ${itemType}:`, error);
+      
+      // Use our enhanced error classifier for better messages
+      const errorMessage = getUserFriendlyErrorMessage(
+        error, 
+        `document.save.${itemType}`,
+        role
+      );
+      
       toast({
         title: `Error saving ${itemType}`,
-        description: `There was a problem saving your ${itemType}.`,
+        description: errorMessage,
         variant: "destructive",
       });
       return;

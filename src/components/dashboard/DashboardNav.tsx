@@ -3,28 +3,37 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
-import { PlusIcon, Bell, Settings, User, Search } from "lucide-react";
+import { PlusIcon, Bell, Settings, User } from "lucide-react";
 import { 
   Tooltip, 
   TooltipContent, 
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import { SearchBar } from "./SearchBar";
 
-export const DashboardNav = () => {
+interface DashboardNavProps {
+  onSearch?: (query: string) => void;
+}
+
+export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
   const { user } = useAuth();
   const { navigateTo } = useNavigationHandlers();
+  
+  const handleSearch = (query: string) => {
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
   
   return (
     <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4">
       <div className="flex items-center">
         <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
-        <div className="ml-6 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+        <div className="ml-6 relative w-64">
+          <SearchBar 
+            onSearch={handleSearch}
+            placeholder="Search documents..."
           />
         </div>
       </div>

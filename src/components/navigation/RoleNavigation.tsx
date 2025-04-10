@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WriterOnly, DesignerOnly, AdminOnly } from "@/utils/roles/RoleComponents";
 import { useIsWriter, useIsDesigner, useIsAdmin } from "@/utils/roles";
-import { FileText, Pencil, Layout, Settings, Box, TestTube2 } from "lucide-react";
+import { FileText, Pencil, Layout, Settings, Box, TestTube2, Home, Clock, Template, FolderOpen } from "lucide-react";
 import { useValidatedNavigation } from "@/hooks/useValidatedNavigation";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
@@ -29,16 +29,21 @@ export const RoleNavigation = () => {
   const isAdmin = useIsAdmin();
   
   // Define navigation items based on roles
+  const commonNavItems = [
+    { href: "/", label: "Dashboard", icon: <Home className="h-4 w-4 mr-2" /> },
+    { href: "/documents", label: "Documents", icon: <FileText className="h-4 w-4 mr-2" /> },
+  ];
+  
   const writerNavItems = [
     { href: "/editor", label: "Editor", icon: <Pencil className="h-4 w-4 mr-2" /> },
-    { href: "/content/documents", label: "Documents", icon: <FileText className="h-4 w-4 mr-2" /> },
-    { href: "/content/drafts", label: "Drafts", icon: <Box className="h-4 w-4 mr-2" /> }
+    { href: "/content/drafts", label: "Drafts", icon: <Box className="h-4 w-4 mr-2" /> },
+    { href: "/templates", label: "Templates", icon: <Template className="h-4 w-4 mr-2" /> }
   ];
   
   const designerNavItems = [
-    { href: "/templates", label: "Templates", icon: <FileText className="h-4 w-4 mr-2" /> },
+    { href: "/templates", label: "Templates", icon: <Template className="h-4 w-4 mr-2" /> },
     { href: "/design/layout", label: "Layout", icon: <Layout className="h-4 w-4 mr-2" /> },
-    { href: "/design/design-settings", label: "Settings", icon: <Settings className="h-4 w-4 mr-2" /> }
+    { href: "/design/design-settings", label: "Design Settings", icon: <Settings className="h-4 w-4 mr-2" /> }
   ];
   
   const testingNavItems = [
@@ -55,17 +60,22 @@ export const RoleNavigation = () => {
   };
   
   return (
-    <NavigationMenu className="max-w-none w-full justify-start p-2">
-      <NavigationMenuList className="space-x-2">
+    <NavigationMenu className="max-w-none w-full justify-start py-1">
+      <NavigationMenuList className="space-x-1">
         {/* Common navigation items for all roles */}
-        <NavigationMenuItem>
-          <NavigationMenuLink
-            className={navigationMenuTriggerStyle() + (isActive("/") ? " bg-accent" : "")}
-            onClick={() => handleNavigation("/")}
-          >
-            Dashboard
-          </NavigationMenuLink>
-        </NavigationMenuItem>
+        {commonNavItems.map((item) => (
+          <NavigationMenuItem key={item.href}>
+            <NavigationMenuLink
+              className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+              onClick={() => handleNavigation(item.href)}
+            >
+              <span className="flex items-center">
+                {item.icon}
+                {item.label}
+              </span>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
         
         {/* Writer-specific navigation */}
         {isWriter && (
@@ -113,7 +123,10 @@ export const RoleNavigation = () => {
                 className={navigationMenuTriggerStyle() + (isActive("/admin") ? " bg-accent" : "")}
                 onClick={() => handleNavigation("/admin")}
               >
-                Admin Panel
+                <span className="flex items-center">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Panel
+                </span>
               </NavigationMenuLink>
             </NavigationMenuItem>
             

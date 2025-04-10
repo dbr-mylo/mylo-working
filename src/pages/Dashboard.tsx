@@ -15,16 +15,27 @@ import { DashboardDocuments } from "@/components/dashboard/DashboardDocuments";
 import { DashboardTemplates } from "@/components/dashboard/DashboardTemplates";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { useDashboardData } from "@/hooks/dashboard/useDashboardData";
+import { RoleNavigationWrapper } from "@/components/navigation/RoleNavigationWrapper";
 
 const Dashboard = () => {
   const { role } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const { 
     recentDocuments, 
     recentTemplates, 
     isLoading, 
     stats 
   } = useDashboardData();
+  
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // If not on the documents tab, switch to it
+    if (activeTab !== "documents") {
+      setActiveTab("documents");
+    }
+  };
   
   return (
     <RoleAwareLayout role={role} showRoleNavigation={false}>
@@ -35,7 +46,14 @@ const Dashboard = () => {
         {/* Main Content Area */}
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Top Navigation */}
-          <DashboardNav />
+          <DashboardNav onSearch={handleSearch} />
+          
+          {/* Role-based Navigation */}
+          <div className="border-b border-gray-200 bg-white">
+            <div className="container mx-auto px-4">
+              <RoleNavigationWrapper />
+            </div>
+          </div>
           
           {/* Main Content */}
           <div className="flex-1 overflow-auto p-6">

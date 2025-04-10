@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { handleError } from "@/utils/errorHandling";
+import { FileMenu } from "./FileMenu";
 
 interface DocumentControlsProps {
   onSave: (() => Promise<void>) | undefined;
@@ -86,8 +87,25 @@ export const DocumentControls = ({
     }
   };
 
+  // Create current document object from content
+  const currentDocument = content ? {
+    id: "",
+    title: documentType === "template" ? "My Template" : "My Document",
+    content: content,
+    updated_at: new Date().toISOString()
+  } : null;
+
   return (
     <>
+      {/* File Menu for import/export operations */}
+      <FileMenu
+        currentDocument={currentDocument}
+        documentType={documentType}
+        currentRole={currentRole}
+        onImport={handleLoadDocument}
+        content={content || ""}
+      />
+      
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 

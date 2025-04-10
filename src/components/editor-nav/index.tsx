@@ -124,6 +124,7 @@ export const EditorNav = ({
           isLoadingDocs={isLoadingDocs}
           documentType={documentType}
           currentRole={currentRole}
+          content={content}
         />
         
         <ExternalActions 

@@ -56,7 +56,7 @@ export const SearchBar = ({
   
   return (
     <form onSubmit={handleSearch} className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
         placeholder={placeholder}
@@ -71,7 +71,7 @@ export const SearchBar = ({
           onClick={clearSearch}
           className="absolute right-3 top-1/2 -translate-y-1/2"
         >
-          <X className="h-4 w-4 text-gray-500" />
+          <X className="h-4 w-4 text-muted-foreground" />
         </button>
       )}
     </form>

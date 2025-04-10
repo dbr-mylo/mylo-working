@@ -41,12 +41,12 @@ const Dashboard = () => {
   
   return (
     <ProjectsProvider>
-      <div className="h-screen overflow-hidden bg-gray-50 flex flex-col">
+      <div className="h-screen overflow-hidden bg-muted flex flex-col">
         {/* Top Navigation */}
         <DashboardNav onSearch={handleSearch} />
         
         {/* Role-based Navigation */}
-        <div className="border-b border-gray-200 bg-white">
+        <div className="border-b border-border bg-background">
           <div className="container mx-auto px-4">
             <RoleNavigationWrapper />
           </div>

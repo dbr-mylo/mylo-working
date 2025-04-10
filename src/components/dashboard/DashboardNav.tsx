@@ -27,9 +27,9 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
   };
   
   return (
-    <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4">
+    <div className="flex items-center justify-between border-b border-border bg-background p-4">
       <div className="flex items-center">
-        <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
         <div className="ml-6 relative w-64">
           <SearchBar 
             onSearch={handleSearch}
@@ -46,7 +46,7 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
                 variant="outline" 
                 size="icon" 
                 onClick={() => navigateTo("/editor")}
-                className="border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+                className="text-primary hover:bg-accent hover:text-accent-foreground"
               >
                 <PlusIcon className="h-5 w-5" />
               </Button>
@@ -83,15 +83,15 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
           </Tooltip>
         </TooltipProvider>
         
-        <div className="w-px h-6 bg-gray-200 mx-2"></div>
+        <div className="w-px h-6 bg-border mx-2"></div>
         
         <div className="flex items-center">
           {user && (
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
                 {user.email?.charAt(0).toUpperCase() || <User className="h-4 w-4" />}
               </div>
-              <span className="text-sm font-medium hidden md:inline">
+              <span className="text-sm font-medium hidden md:inline text-foreground">
                 {user.email}
               </span>
             </div>

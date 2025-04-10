@@ -79,7 +79,7 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
   };
 
   return (
-    <div className="w-64 bg-editor-sidebar border-l border-editor-border p-4">
+    <div className="w-64 bg-secondary border-l border-border p-4">
       {children}
       
       <DesignerSidebarContainer 
@@ -154,7 +154,7 @@ export const DesignerSidebar = ({ children, editorInstance }: DesignerSidebarPro
       />
       
       <DesignerSidebarContainer title="Settings">
-        <p className="text-xs text-editor-text">No settings available yet</p>
+        <p className="text-xs text-foreground">No settings available yet</p>
       </DesignerSidebarContainer>
     </div>
   );

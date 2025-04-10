@@ -46,6 +46,11 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
     setActiveTab('all');
   };
 
+  // Wrapper for createFolder to match the expected function signature
+  const handleCreateFolder = async (projectId: string, folderName: string) => {
+    await createFolder(projectId, folderName);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {/* Projects sidebar */}
@@ -55,7 +60,7 @@ export const DashboardDocuments: React.FC<DashboardDocumentsProps> = ({ searchQu
           selectedProject={selectedProject}
           onSelectProject={selectProject}
           onCreateProject={handleCreateProject}
-          onCreateFolder={createFolder}
+          onCreateFolder={handleCreateFolder}
           projectsLoading={projectsLoading}
         />
       </div>

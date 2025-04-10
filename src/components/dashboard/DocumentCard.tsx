@@ -16,7 +16,7 @@ export const DocumentCard = ({
   isTemplate = false,
   onClick 
 }: DocumentCardProps) => {
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch(status) {
       case 'draft':
         return 'bg-amber-100 text-amber-800';
@@ -46,7 +46,7 @@ export const DocumentCard = ({
               )}
             </CardDescription>
           </div>
-          <Badge className={`${getStatusColor(document.status || 'draft')}`}>
+          <Badge className={`${getStatusColor(document.status)}`}>
             {document.status || 'Draft'}
           </Badge>
         </div>

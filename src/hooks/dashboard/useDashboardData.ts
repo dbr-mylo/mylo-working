@@ -50,8 +50,8 @@ export const useDashboardData = () => {
               id: "doc-2",
               title: "Project Proposal",
               content: "Content here...",
-              updated_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-              created_at: new Date(Date.now() - 86400000).toISOString(), 
+              updated_at: new Date(Date.now() - 86400000).toISOString(),
+              created_at: new Date(Date.now() - 86400000).toISOString(),
               owner_id: user.id,
               status: "completed",
               meta: { template_id: "temp-2" }
@@ -75,7 +75,7 @@ export const useDashboardData = () => {
                 id: "temp-2",
                 title: "Proposal Template",
                 content: "Template content...",
-                updated_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+                updated_at: new Date(Date.now() - 86400000).toISOString(),
                 created_at: new Date(Date.now() - 86400000).toISOString(),
                 owner_id: user.id,
                 status: "draft",

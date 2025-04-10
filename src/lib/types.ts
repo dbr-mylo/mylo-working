@@ -1,3 +1,4 @@
+
 import { Editor } from "@tiptap/react";
 
 export interface DesignPanelProps {
@@ -19,11 +20,17 @@ export interface Document {
   title: string;
   content: string;
   updated_at: string;
+  created_at?: string;
+  owner_id?: string;
+  status?: string;
   meta?: DocumentMeta;
 }
 
 export interface DocumentMeta {
   template_id?: string;
+  owner_id?: string;
+  version?: number;
+  category?: string;
   [key: string]: any;
 }
 

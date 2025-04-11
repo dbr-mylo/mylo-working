@@ -26,14 +26,17 @@ import {
   Activity,
   BarChart
 } from "lucide-react";
-import { useValidatedNavigation } from "@/hooks/useValidatedNavigation";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
 
-export const RoleNavigation = () => {
+// Add interface for component props
+interface RoleNavigationProps {
+  navigateTo: (path: string, options?: { replace?: boolean; state?: any }) => void;
+}
+
+export const RoleNavigation: React.FC<RoleNavigationProps> = ({ navigateTo }) => {
   const { role } = useAuth();
   const location = useLocation();
-  const { navigateTo } = useValidatedNavigation();
   useSmokeTest("RoleNavigation");
   
   // Use the role hooks for consistent role checking
@@ -197,7 +200,7 @@ export const RoleNavigationWithTooltips = () => {
             </Tooltip>
           )}
           
-          <RoleNavigation />
+          <RoleNavigation navigateTo={() => {}} />
         </div>
       </TooltipProvider>
     </ErrorBoundary>

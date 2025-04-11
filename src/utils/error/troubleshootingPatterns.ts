@@ -1,142 +1,264 @@
 
 /**
- * Troubleshooting patterns utility for error recovery and session management
+ * Troubleshooting Patterns
+ * 
+ * Provides pattern detection and resolution steps for known error scenarios.
+ * Used by the interactive troubleshooting wizards to guide users through
+ * resolution steps.
  */
+import { ErrorCategory } from './errorClassifier';
+import { getLocalStorage, setLocalStorage } from '@/utils/storage/localStorage';
 
-// Define session types
-interface TroubleshootingSession {
+// Define troubleshooting session storage key
+const TROUBLESHOOTING_SESSIONS_KEY = 'troubleshooting_sessions';
+
+// Pattern types
+export enum ErrorPattern {
+  NETWORK_CONNECTIVITY = 'network_connectivity',
+  AUTHENTICATION_EXPIRED = 'authentication_expired',
+  PERMISSION_DENIED = 'permission_denied',
+  CONCURRENT_EDIT = 'concurrent_edit',
+  STORAGE_FULL = 'storage_full',
+  RATE_LIMITED = 'rate_limited',
+  DOCUMENT_CORRUPTION = 'document_corruption',
+  RESOURCE_MISSING = 'resource_missing',
+  SERVER_OVERLOADED = 'server_overloaded',
+  UNKNOWN = 'unknown'
+}
+
+// Resolution step structure
+export interface ResolutionStep {
   id: string;
-  name: string;
-  notes?: string;
-  feature?: string;
-  status: 'in-progress' | 'resolved' | 'abandoned';
-  steps: TroubleshootingStep[];
-  createdAt: string;
-  updatedAt: string;
+  description: string;
+  instruction: string;
+  automatable: boolean;
+  completed: boolean;
+  succeeded?: boolean;
+  automatedAction?: () => Promise<boolean>;
 }
 
-interface TroubleshootingStep {
-  timestamp: string;
-  action: string;
-  result: 'success' | 'failure' | 'inconclusive';
+// Session structure
+export interface TroubleshootingSession {
+  id: string;
+  startedAt: number;
+  lastUpdatedAt: number;
+  errorCategory: ErrorCategory;
+  errorMessage: string;
+  context: string;
+  pattern: ErrorPattern;
+  currentStepIndex: number;
+  steps: ResolutionStep[];
+  resolved: boolean;
   notes?: string;
 }
-
-// Define pattern for known error recovery strategies
-const knownErrorPatterns: Record<string, string[]> = {
-  'network': [
-    'Reset your network connection',
-    'Clear browser cache and cookies',
-    'Try a different network'
-  ],
-  'auth': [
-    'Clear saved credentials',
-    'Log out and log back in',
-    'Reset your session cookies'
-  ],
-  'storage': [
-    'Clear browser local storage',
-    'Check for storage quota issues',
-    'Allow more storage permissions'
-  ]
-};
 
 /**
- * Identify patterns in an error that match known troubleshooting strategies
- * @param error The error object
- * @param context The context where the error occurred
- * @returns Array of suggested remediation steps
+ * Identify error pattern based on error details and context
  */
-export function identifyErrorPattern(error: unknown, context: string): string[] {
-  const patterns: string[] = [];
-  const errorMessage = error instanceof Error ? error.message : String(error);
+export function identifyErrorPattern(
+  error: Error | unknown, 
+  errorCategory: ErrorCategory,
+  context: string
+): ErrorPattern {
+  const message = error instanceof Error ? error.message : String(error);
   
-  // Look for network-related patterns
+  // Network connectivity pattern
   if (
-    errorMessage.includes('network') ||
-    errorMessage.includes('offline') ||
-    errorMessage.includes('connection') ||
-    errorMessage.includes('fetch') ||
-    context.includes('api') ||
-    context.includes('http')
+    errorCategory === ErrorCategory.NETWORK ||
+    message.includes('offline') ||
+    message.includes('network') ||
+    message.includes('connection')
   ) {
-    patterns.push(...knownErrorPatterns.network);
+    return ErrorPattern.NETWORK_CONNECTIVITY;
   }
   
-  // Look for auth-related patterns
+  // Authentication pattern
   if (
-    errorMessage.includes('auth') ||
-    errorMessage.includes('login') ||
-    errorMessage.includes('token') ||
-    errorMessage.includes('permission') ||
-    errorMessage.includes('401') ||
-    errorMessage.includes('403') ||
-    context.includes('auth') ||
-    context.includes('login')
+    errorCategory === ErrorCategory.AUTHENTICATION ||
+    errorCategory === ErrorCategory.AUTH ||
+    message.includes('auth') ||
+    message.includes('login') ||
+    message.includes('token') ||
+    message.includes('session')
   ) {
-    patterns.push(...knownErrorPatterns.auth);
+    return ErrorPattern.AUTHENTICATION_EXPIRED;
   }
   
-  // Look for storage-related patterns
+  // Permission pattern
   if (
-    errorMessage.includes('storage') ||
-    errorMessage.includes('quota') ||
-    errorMessage.includes('localStorage') ||
-    errorMessage.includes('database') ||
-    context.includes('storage') ||
-    context.includes('save')
+    errorCategory === ErrorCategory.PERMISSION ||
+    message.includes('permission') ||
+    message.includes('denied') ||
+    message.includes('forbidden')
   ) {
-    patterns.push(...knownErrorPatterns.storage);
+    return ErrorPattern.PERMISSION_DENIED;
   }
   
-  return patterns;
+  // Concurrent edit pattern
+  if (
+    context.includes('document') && 
+    context.includes('edit') &&
+    (message.includes('conflict') || message.includes('concurrent'))
+  ) {
+    return ErrorPattern.CONCURRENT_EDIT;
+  }
+  
+  // Storage full pattern
+  if (
+    errorCategory === ErrorCategory.STORAGE ||
+    message.includes('storage') ||
+    message.includes('quota') ||
+    message.includes('space')
+  ) {
+    return ErrorPattern.STORAGE_FULL;
+  }
+  
+  // Rate limited pattern
+  if (
+    errorCategory === ErrorCategory.RATE_LIMIT ||
+    message.includes('rate') ||
+    message.includes('limit') ||
+    message.includes('too many')
+  ) {
+    return ErrorPattern.RATE_LIMITED;
+  }
+  
+  // Document corruption pattern
+  if (
+    context.includes('document') &&
+    (message.includes('corrupt') || message.includes('invalid') || message.includes('malformed'))
+  ) {
+    return ErrorPattern.DOCUMENT_CORRUPTION;
+  }
+  
+  // Resource missing pattern
+  if (
+    errorCategory === ErrorCategory.RESOURCE_NOT_FOUND ||
+    message.includes('not found') ||
+    message.includes('missing') ||
+    message.includes('404')
+  ) {
+    return ErrorPattern.RESOURCE_MISSING;
+  }
+  
+  // Server overloaded pattern
+  if (
+    errorCategory === ErrorCategory.SERVER &&
+    (message.includes('overloaded') || message.includes('busy') || message.includes('later'))
+  ) {
+    return ErrorPattern.SERVER_OVERLOADED;
+  }
+  
+  // If no specific pattern is identified
+  return ErrorPattern.UNKNOWN;
+}
+
+/**
+ * Get resolution steps for a specific error pattern
+ */
+export function getResolutionSteps(pattern: ErrorPattern): ResolutionStep[] {
+  switch (pattern) {
+    case ErrorPattern.NETWORK_CONNECTIVITY:
+      return [
+        {
+          id: 'check_online',
+          description: 'Check internet connection',
+          instruction: 'Verify your device is connected to the internet',
+          automatable: true,
+          completed: false,
+          automatedAction: async () => navigator.onLine
+        },
+        {
+          id: 'refresh_page',
+          description: 'Refresh the page',
+          instruction: 'Try refreshing the browser page',
+          automatable: false,
+          completed: false
+        },
+        {
+          id: 'try_different_network',
+          description: 'Try a different network',
+          instruction: 'If possible, switch to a different network (e.g., from WiFi to mobile data)',
+          automatable: false,
+          completed: false
+        }
+      ];
+      
+    case ErrorPattern.AUTHENTICATION_EXPIRED:
+      return [
+        {
+          id: 'check_session',
+          description: 'Check session status',
+          instruction: 'Verifying your login session',
+          automatable: true,
+          completed: false
+        },
+        {
+          id: 'refresh_token',
+          description: 'Attempt to refresh authentication',
+          instruction: 'Trying to refresh your authentication',
+          automatable: true,
+          completed: false
+        },
+        {
+          id: 'relogin',
+          description: 'Log in again',
+          instruction: 'You may need to log in again to continue',
+          automatable: false,
+          completed: false
+        }
+      ];
+    
+    // Add more patterns with their resolution steps here
+    
+    default:
+      return [
+        {
+          id: 'generic_refresh',
+          description: 'Refresh the page',
+          instruction: 'Try refreshing the browser page',
+          automatable: false,
+          completed: false
+        },
+        {
+          id: 'clear_cache',
+          description: 'Clear browser cache',
+          instruction: 'Try clearing your browser cache and cookies',
+          automatable: false,
+          completed: false
+        }
+      ];
+  }
 }
 
 /**
  * Save a troubleshooting session
- * @param sessionId Unique identifier for the session
- * @param sessionData Data to save with the session
  */
-export function saveTroubleshootingSession(
-  sessionId: string,
-  sessionData: Partial<TroubleshootingSession>
-): boolean {
+export function saveTroubleshootingSession(session: TroubleshootingSession): void {
+  // Update last updated timestamp
+  session.lastUpdatedAt = Date.now();
+  
   try {
-    // Get existing session or create new one
-    const existingData = loadTroubleshootingSession(sessionId);
+    // Get existing sessions
+    const sessions = getLocalStorage<Record<string, TroubleshootingSession>>(TROUBLESHOOTING_SESSIONS_KEY) || {};
     
-    const session: TroubleshootingSession = {
-      id: sessionId,
-      name: sessionData.name || existingData?.name || 'Unnamed session',
-      notes: sessionData.notes || existingData?.notes || '',
-      feature: sessionData.feature || existingData?.feature,
-      status: sessionData.status || existingData?.status || 'in-progress',
-      steps: existingData?.steps || [],
-      createdAt: existingData?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    // Add/update this session
+    sessions[session.id] = session;
     
-    // Save to localStorage
-    localStorage.setItem(`troubleshooting_${sessionId}`, JSON.stringify(session));
-    return true;
+    // Save back to storage
+    setLocalStorage(TROUBLESHOOTING_SESSIONS_KEY, sessions);
   } catch (e) {
     console.error('Failed to save troubleshooting session:', e);
-    return false;
   }
 }
 
 /**
  * Load a troubleshooting session
- * @param sessionId Unique identifier for the session
  */
-export function loadTroubleshootingSession(
-  sessionId: string
-): TroubleshootingSession | null {
+export function loadTroubleshootingSession(sessionId: string): TroubleshootingSession | null {
   try {
-    const data = localStorage.getItem(`troubleshooting_${sessionId}`);
-    if (!data) return null;
-    
-    return JSON.parse(data) as TroubleshootingSession;
+    const sessions = getLocalStorage<Record<string, TroubleshootingSession>>(TROUBLESHOOTING_SESSIONS_KEY) || {};
+    return sessions[sessionId] || null;
   } catch (e) {
     console.error('Failed to load troubleshooting session:', e);
     return null;
@@ -145,67 +267,35 @@ export function loadTroubleshootingSession(
 
 /**
  * Add a step to a troubleshooting session
- * @param sessionId Unique identifier for the session
- * @param action Description of the action taken
- * @param result Result of the action (success, failure, inconclusive)
- * @param notes Optional notes about the step
  */
 export function addTroubleshootingStep(
-  sessionId: string,
-  action: string,
-  result: 'success' | 'failure' | 'inconclusive',
-  notes?: string
-): boolean {
+  sessionId: string, 
+  step: Omit<ResolutionStep, 'id'>
+): TroubleshootingSession | null {
   try {
-    const session = loadTroubleshootingSession(sessionId);
-    if (!session) return false;
+    const sessions = getLocalStorage<Record<string, TroubleshootingSession>>(TROUBLESHOOTING_SESSIONS_KEY) || {};
+    const session = sessions[sessionId];
     
-    // Add the new step
-    session.steps.push({
-      timestamp: new Date().toISOString(),
-      action,
-      result,
-      notes
-    });
-    
-    // Update session
-    session.updatedAt = new Date().toISOString();
-    
-    // Save the updated session
-    localStorage.setItem(`troubleshooting_${sessionId}`, JSON.stringify(session));
-    return true;
-  } catch (e) {
-    console.error('Failed to add troubleshooting step:', e);
-    return false;
-  }
-}
-
-/**
- * Get all troubleshooting sessions
- */
-export function getAllTroubleshootingSessions(): TroubleshootingSession[] {
-  try {
-    const sessions: TroubleshootingSession[] = [];
-    
-    // Look through localStorage for troubleshooting sessions
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('troubleshooting_')) {
-        try {
-          const data = localStorage.getItem(key);
-          if (data) {
-            const session = JSON.parse(data) as TroubleshootingSession;
-            sessions.push(session);
-          }
-        } catch (e) {
-          console.warn('Failed to parse troubleshooting session:', e);
-        }
-      }
+    if (!session) {
+      return null;
     }
     
-    return sessions;
+    // Add the step with a generated ID
+    const newStep: ResolutionStep = {
+      ...step,
+      id: `step_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+    };
+    
+    session.steps.push(newStep);
+    session.lastUpdatedAt = Date.now();
+    
+    // Save the updated session
+    sessions[sessionId] = session;
+    setLocalStorage(TROUBLESHOOTING_SESSIONS_KEY, sessions);
+    
+    return session;
   } catch (e) {
-    console.error('Failed to get troubleshooting sessions:', e);
-    return [];
+    console.error('Failed to add troubleshooting step:', e);
+    return null;
   }
 }

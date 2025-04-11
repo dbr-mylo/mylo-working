@@ -1,201 +1,170 @@
-
 /**
  * System Health Monitoring
  * 
- * This module provides utilities to assess the overall system health
- * and detect degraded states that might require feature disabling.
+ * Tracks application health metrics and provides a system health score
+ * used by the feature flags system to gracefully degrade functionality
+ * during system stress.
  */
 
-// Health check categories and their weights
-const healthCategories = {
-  network: 0.3,        // Network connectivity
-  storage: 0.2,        // Local storage availability
-  performance: 0.2,    // UI responsiveness
-  errorRate: 0.2,      // Recent error frequency
-  backend: 0.1         // Backend service availability
-};
+// Health score ranges from 0-100 
+// 100: Perfect health
+// 0: Critical failure
+let systemHealthScore = 100;
 
-// Store health scores (0-100) for each category
-const healthScores: Record<keyof typeof healthCategories, number> = {
-  network: 100,
-  storage: 100,
+// Recent health checks
+const healthChecks: { timestamp: number; score: number }[] = [];
+const MAX_HEALTH_CHECKS = 20;
+
+// Health aspect scores
+interface HealthAspects {
+  connectivity: number;  // 0-100
+  performance: number;   // 0-100
+  errors: number;        // 0-100
+  resources: number;     // 0-100
+  stability: number;     // 0-100
+}
+
+// Default to perfect health initially
+const healthAspects: HealthAspects = {
+  connectivity: 100,
   performance: 100,
-  errorRate: 100,
-  backend: 100
+  errors: 100,
+  resources: 100,
+  stability: 100
 };
-
-// Tracking for recent errors (sliding window)
-const recentErrors: Array<{
-  timestamp: number;
-  category: string;
-}> = [];
 
 /**
- * Get overall system health score (0-100)
- * Higher score = healthier system
+ * Get the current system health score
+ * @returns Number between 0-100 representing system health
  */
 export function getSystemHealth(): number {
-  let weightedScore = 0;
-  
-  // Calculate weighted score
-  for (const [category, weight] of Object.entries(healthCategories)) {
-    weightedScore += healthScores[category as keyof typeof healthCategories] * weight;
-  }
-  
-  return Math.round(weightedScore);
+  return systemHealthScore;
 }
 
 /**
- * Update health score for a specific category
- * @param category Health category to update
- * @param score New score (0-100)
+ * Update the system health score
+ * @param delta Change to apply to health score (-100 to +100)
  */
-export function updateHealthScore(
-  category: keyof typeof healthCategories, 
-  score: number
-): void {
-  // Ensure score is within valid range
-  const validScore = Math.max(0, Math.min(100, score));
-  healthScores[category] = validScore;
-}
-
-/**
- * Report a system error to be factored into health assessment
- * @param error The error that occurred
- * @param context The context where the error occurred
- */
-export function reportSystemError(error: unknown, context: string): void {
-  // Add to recent errors
-  recentErrors.push({
+export function updateSystemHealth(delta: number): void {
+  // Record the previous score for change tracking
+  const previousScore = systemHealthScore;
+  
+  // Apply delta, keeping within bounds
+  systemHealthScore = Math.min(100, Math.max(0, systemHealthScore + delta));
+  
+  // Record the health check
+  healthChecks.unshift({
     timestamp: Date.now(),
-    category: context
+    score: systemHealthScore
   });
   
-  // Remove errors older than 5 minutes
-  const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-  while (recentErrors.length > 0 && recentErrors[0].timestamp < fiveMinutesAgo) {
-    recentErrors.shift();
+  // Keep only the most recent checks
+  if (healthChecks.length > MAX_HEALTH_CHECKS) {
+    healthChecks.length = MAX_HEALTH_CHECKS;
   }
   
-  // Calculate error rate score based on number of recent errors
-  const errorRateScore = Math.max(0, 100 - (recentErrors.length * 5));
-  updateHealthScore('errorRate', errorRateScore);
-}
-
-/**
- * Update network health based on connectivity and performance
- * @param isOnline Whether the system is online
- * @param pingMs Optional ping latency in milliseconds
- */
-export function updateNetworkHealth(isOnline: boolean, pingMs?: number): void {
-  let score = isOnline ? 100 : 0;
-  
-  // Factor in latency if available
-  if (isOnline && pingMs !== undefined) {
-    // Reduce score as latency increases
-    // 0ms = 100, 1000ms = 0
-    const latencyFactor = Math.max(0, 100 - (pingMs / 10));
-    score = Math.min(score, latencyFactor);
-  }
-  
-  updateHealthScore('network', score);
-}
-
-/**
- * Update storage health based on available space
- */
-export function updateStorageHealth(): void {
-  try {
-    // Try to estimate available storage
-    if (navigator.storage && navigator.storage.estimate) {
-      navigator.storage.estimate().then(estimate => {
-        if (estimate.quota && estimate.usage) {
-          const availablePercentage = 100 * (1 - (estimate.usage / estimate.quota));
-          // Score drops as available storage decreases
-          const score = Math.max(0, Math.min(100, availablePercentage * 2)); // *2 because we want 50% free = 100 score
-          updateHealthScore('storage', score);
-        }
-      });
-    }
-  } catch (e) {
-    console.warn('Failed to check storage health:', e);
-  }
-}
-
-/**
- * Update overall system health directly
- * @param adjustment Positive or negative adjustment to make
- */
-export function updateSystemHealth(adjustment: number): void {
-  // Apply adjustment across categories
-  // For simplicity, we distribute the adjustment among all categories
-  const perCategoryAdjustment = adjustment / Object.keys(healthCategories).length;
-  
-  for (const category of Object.keys(healthCategories) as Array<keyof typeof healthCategories>) {
-    const newScore = Math.max(0, Math.min(100, healthScores[category] + perCategoryAdjustment));
-    healthScores[category] = newScore;
-  }
-}
-
-/**
- * Update performance health based on UI responsiveness
- */
-export function updatePerformanceHealth(): void {
-  try {
-    // Check for long task observer support
-    if ('PerformanceObserver' in window) {
-      // Calculate score based on long tasks frequency and duration
-      const longTaskScoreFactor = Math.max(0, 100 - (longTasksCount * 10) - (totalLongTaskTime / 50));
-      updateHealthScore('performance', longTaskScoreFactor);
-    }
-  } catch (e) {
-    console.warn('Failed to check performance health:', e);
-  }
-}
-
-// Track long tasks for performance monitoring
-let longTasksCount = 0;
-let totalLongTaskTime = 0;
-
-// Setup performance monitoring if available
-if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-  try {
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        longTasksCount++;
-        totalLongTaskTime += entry.duration;
-        
-        // Reset counts periodically to avoid penalizing forever
-        setTimeout(() => {
-          longTasksCount = Math.max(0, longTasksCount - 1);
-          totalLongTaskTime = Math.max(0, totalLongTaskTime - entry.duration);
-        }, 60000); // Reset after 1 minute
-      }
-      
-      // Update performance score
-      updatePerformanceHealth();
-    });
+  // Log significant changes
+  if (Math.abs(previousScore - systemHealthScore) > 10) {
+    console.info(
+      `System health changed from ${previousScore} to ${systemHealthScore} (${delta > 0 ? '+' : ''}${delta})`
+    );
     
-    observer.observe({ entryTypes: ['longtask'] });
-  } catch (e) {
-    console.warn('Performance monitoring not supported:', e);
+    // Log warning if health is deteriorating significantly
+    if (systemHealthScore < 50 && previousScore >= 50) {
+      console.warn('System health degraded below 50% - activating reduced functionality mode');
+    }
+    // Log when health improves significantly
+    else if (systemHealthScore >= 50 && previousScore < 50) {
+      console.info('System health improved above 50% - restoring normal functionality');
+    }
   }
 }
 
 /**
- * Check if system is in a degraded state
- * @returns boolean indicating if system is degraded
+ * Update a specific health aspect
+ * @param aspect The health aspect to update
+ * @param score New score for this aspect (0-100)
  */
-export function isSystemDegraded(): boolean {
-  return getSystemHealth() < 70; // Below 70% is considered degraded
+export function updateHealthAspect(
+  aspect: keyof HealthAspects, 
+  score: number
+): void {
+  // Store the previous score
+  const previousScore = healthAspects[aspect];
+  
+  // Update aspect score, keeping within bounds
+  healthAspects[aspect] = Math.min(100, Math.max(0, score));
+  
+  // Calculate overall health as weighted average of all aspects
+  recalculateOverallHealth();
+  
+  // Log significant changes
+  if (Math.abs(previousScore - healthAspects[aspect]) > 20) {
+    console.info(
+      `Health aspect '${aspect}' changed from ${previousScore} to ${healthAspects[aspect]}`
+    );
+  }
 }
 
 /**
- * Get system health status text
+ * Recalculate the overall system health score based on all aspects
  */
-export function getSystemHealthStatus(): 'healthy' | 'degraded' | 'critical' {
-  const health = getSystemHealth();
-  if (health >= 70) return 'healthy';
-  if (health >= 40) return 'degraded';
-  return 'critical';
+function recalculateOverallHealth(): void {
+  // Different weights could be applied to different aspects if needed
+  const weights = {
+    connectivity: 1.0,
+    performance: 0.8,
+    errors: 1.2,      // Errors weighted higher as they're more critical
+    resources: 0.7,
+    stability: 1.0
+  };
+  
+  // Calculate weighted average
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  for (const aspect of Object.keys(healthAspects) as Array<keyof HealthAspects>) {
+    const weight = weights[aspect];
+    totalWeight += weight;
+    weightedSum += healthAspects[aspect] * weight;
+  }
+  
+  // Update overall health score
+  const newScore = weightedSum / totalWeight;
+  updateSystemHealth(newScore - systemHealthScore); // Apply difference as delta
 }
+
+/**
+ * Get health trends over time
+ */
+export function getHealthTrends(): { timestamp: number; score: number }[] {
+  return [...healthChecks];
+}
+
+/**
+ * Get detailed health aspect scores
+ */
+export function getHealthAspects(): HealthAspects {
+  return { ...healthAspects };
+}
+
+/**
+ * Reset system health to default values
+ */
+export function resetSystemHealth(): void {
+  systemHealthScore = 100;
+  
+  Object.keys(healthAspects).forEach(key => {
+    healthAspects[key as keyof HealthAspects] = 100;
+  });
+  
+  healthChecks.length = 0;
+  
+  console.info('System health metrics have been reset to optimal values');
+}
+
+// Initialize with a health check
+healthChecks.push({
+  timestamp: Date.now(),
+  score: systemHealthScore
+});

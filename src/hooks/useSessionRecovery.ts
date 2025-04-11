@@ -3,7 +3,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   sessionRecoveryService, 
-  SessionRecoveryResult 
+  SessionRecoveryResult,
+  SessionRecoveryMetrics
 } from '@/services/recovery/SessionRecoveryService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -18,6 +19,8 @@ export interface UseSessionRecoveryOptions {
   showNotifications?: boolean;
   /** Redirect path for authentication failures */
   authRedirectPath?: string;
+  /** Enable persistence of recovery state */
+  enablePersistence?: boolean;
 }
 
 /**
@@ -27,13 +30,33 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
   const {
     autoHandleErrors = true,
     showNotifications = true,
-    authRedirectPath = '/auth'
+    authRedirectPath = '/auth',
+    enablePersistence = true
   } = options;
   
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [isRecovering, setIsRecovering] = useState(false);
   const [recoveryAttempts, setRecoveryAttempts] = useState(0);
+  const [metrics, setMetrics] = useState<SessionRecoveryMetrics>(
+    sessionRecoveryService.getRecoveryMetrics()
+  );
+  
+  // Periodically update metrics from the service
+  useEffect(() => {
+    const updateMetrics = () => {
+      setMetrics(sessionRecoveryService.getRecoveryMetrics());
+      setRecoveryAttempts(prev => sessionRecoveryService.getRecoveryMetrics().totalAttempts);
+    };
+    
+    // Update immediately
+    updateMetrics();
+    
+    // Then update periodically
+    const interval = setInterval(updateMetrics, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
   
   /**
    * Handle auth error with session recovery
@@ -43,7 +66,6 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
     context: string
   ): Promise<SessionRecoveryResult> => {
     setIsRecovering(true);
-    setRecoveryAttempts(prev => prev + 1);
     
     try {
       const result = await sessionRecoveryService.handleAuthError(error, context);
@@ -65,6 +87,8 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
       return result;
     } finally {
       setIsRecovering(false);
+      // Update metrics after recovery attempt
+      setMetrics(sessionRecoveryService.getRecoveryMetrics());
     }
   }, [navigate, authRedirectPath, showNotifications, signOut]);
   
@@ -73,7 +97,6 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
    */
   const recoverSession = useCallback(async (): Promise<SessionRecoveryResult> => {
     setIsRecovering(true);
-    setRecoveryAttempts(prev => prev + 1);
     
     try {
       const result = await sessionRecoveryService.recoverSession();
@@ -95,6 +118,8 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
       return result;
     } finally {
       setIsRecovering(false);
+      // Update metrics after recovery attempt
+      setMetrics(sessionRecoveryService.getRecoveryMetrics());
     }
   }, [navigate, authRedirectPath, showNotifications, signOut]);
   
@@ -102,8 +127,8 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
    * Reset recovery attempts counter
    */
   const resetRecoveryAttempts = useCallback(() => {
-    setRecoveryAttempts(0);
     sessionRecoveryService.resetRecoveryAttempts();
+    setMetrics(sessionRecoveryService.getRecoveryMetrics());
   }, []);
   
   /**
@@ -124,6 +149,7 @@ export function useSessionRecovery(options: UseSessionRecoveryOptions = {}) {
     resetRecoveryAttempts,
     getAuthServiceStatus,
     isRecovering,
-    recoveryAttempts
+    recoveryAttempts,
+    metrics
   };
 }

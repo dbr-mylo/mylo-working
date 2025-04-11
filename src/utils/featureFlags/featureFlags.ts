@@ -27,7 +27,7 @@ export type FeatureFlagKey =
   | 'commenting'
   | 'revision-history'
   | 'export-features'
-  | 'auto_recovery'; // Add auto_recovery flag
+  | 'auto_recovery';
 
 /**
  * Feature flag configuration interface
@@ -276,6 +276,33 @@ export function getNonCriticalFeatures(): FeatureFlagKey[] {
   return Object.entries(featureFlags)
     .filter(([_, config]) => !config.critical)
     .map(([key]) => key as FeatureFlagKey);
+}
+
+/**
+ * Get description for a feature flag
+ * @param feature The feature flag to get description for
+ * @returns Description string
+ */
+export function getFlagDescription(feature: FeatureFlagKey): string {
+  return featureFlags[feature]?.description || 'No description available';
+}
+
+/**
+ * Get the configuration for a specific feature flag
+ * @param feature The feature flag to get config for
+ * @returns The feature flag configuration or undefined
+ */
+export function getFeatureFlagConfig(feature: FeatureFlagKey): FeatureFlagConfig | undefined {
+  return featureFlags[feature];
+}
+
+/**
+ * Check if a feature flag exists
+ * @param feature The feature flag to check
+ * @returns Whether the feature flag exists
+ */
+export function featureFlagExists(feature: string): boolean {
+  return Object.keys(featureFlags).includes(feature);
 }
 
 /**

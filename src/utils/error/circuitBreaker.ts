@@ -1,5 +1,54 @@
 
 /**
+ * Circuit breaker pattern implementation
+ * 
+ * The circuit breaker prevents calling a service that is likely to fail,
+ * following the pattern:
+ * 
+ * - CLOSED: Service calls proceed normally
+ * - OPEN: Service calls are blocked (circuit is "tripped")
+ * - HALF-OPEN: Limited test calls are allowed to check if service has recovered
+ * 
+ * Usage examples:
+ * 
+ * 1. Basic usage with a function:
+ * ```typescript
+ * const protectedApiCall = createCircuitBreaker(fetchUserData);
+ * try {
+ *   const userData = await protectedApiCall(userId);
+ * } catch (error) {
+ *   // Handle error or circuit open state
+ * }
+ * ```
+ * 
+ * 2. With custom configuration:
+ * ```typescript
+ * const protectedApiCall = createCircuitBreaker(fetchUserData, {
+ *   failureThreshold: 3,     // Open after 3 failures
+ *   resetTimeout: 10000,     // Try again after 10 seconds
+ *   halfOpenCalls: 2         // Allow 2 test calls in half-open state
+ * });
+ * ```
+ * 
+ * 3. Direct circuit breaker instantiation:
+ * ```typescript
+ * const apiCircuitBreaker = new CircuitBreaker();
+ * 
+ * async function callProtectedApi() {
+ *   try {
+ *     return await apiCircuitBreaker.execute(() => api.getData());
+ *   } catch (error) {
+ *     if (error.message.includes('circuit breaker')) {
+ *       // Handle circuit open state
+ *     } else {
+ *       // Handle actual API error
+ *     }
+ *   }
+ * }
+ * ```
+ */
+
+/**
  * Circuit breaker state
  */
 interface CircuitBreakerState {
@@ -34,6 +83,7 @@ export class CircuitBreaker {
   private state: CircuitBreakerState;
   private config: Required<CircuitBreakerConfig>;
   private halfOpenCallsCount: number = 0;
+  private stateChangeListeners: Array<(newState: CircuitBreakerState['status'], oldState: CircuitBreakerState['status']) => void> = [];
   
   /**
    * Create a new circuit breaker
@@ -49,6 +99,18 @@ export class CircuitBreaker {
       failures: 0,
       lastFailure: null,
       status: 'CLOSED'
+    };
+  }
+  
+  /**
+   * Add a listener for state changes
+   * @param listener Function that receives the new and old state
+   * @returns Function to remove the listener
+   */
+  public onStateChange(listener: (newState: CircuitBreakerState['status'], oldState: CircuitBreakerState['status']) => void): () => void {
+    this.stateChangeListeners.push(listener);
+    return () => {
+      this.stateChangeListeners = this.stateChangeListeners.filter(l => l !== listener);
     };
   }
   
@@ -124,27 +186,46 @@ export class CircuitBreaker {
    * Open the circuit breaker
    */
   private open(): void {
-    console.info('[Analytics] Circuit breaker OPENED');
+    const oldStatus = this.state.status;
     this.state.status = 'OPEN';
+    console.info('[Analytics] Circuit breaker OPENED');
+    this.notifyStateChange('OPEN', oldStatus);
   }
   
   /**
    * Half-open the circuit breaker
    */
   private halfOpen(): void {
-    console.info('[Analytics] Circuit breaker HALF-OPEN');
+    const oldStatus = this.state.status;
     this.state.status = 'HALF_OPEN';
     this.halfOpenCallsCount = 0;
+    console.info('[Analytics] Circuit breaker HALF-OPEN');
+    this.notifyStateChange('HALF_OPEN', oldStatus);
   }
   
   /**
    * Close the circuit breaker
    */
   private close(): void {
-    console.info('[Analytics] Circuit breaker CLOSED');
+    const oldStatus = this.state.status;
     this.state.status = 'CLOSED';
     this.state.failures = 0;
     this.halfOpenCallsCount = 0;
+    console.info('[Analytics] Circuit breaker CLOSED');
+    this.notifyStateChange('CLOSED', oldStatus);
+  }
+
+  /**
+   * Notify all listeners about state changes
+   */
+  private notifyStateChange(newState: CircuitBreakerState['status'], oldState: CircuitBreakerState['status']): void {
+    this.stateChangeListeners.forEach(listener => {
+      try {
+        listener(newState, oldState);
+      } catch (error) {
+        console.error('Error in circuit breaker state change listener:', error);
+      }
+    });
   }
   
   /**
@@ -152,6 +233,33 @@ export class CircuitBreaker {
    */
   getStatus(): 'CLOSED' | 'OPEN' | 'HALF_OPEN' {
     return this.state.status;
+  }
+  
+  /**
+   * Get current failure count
+   */
+  getFailureCount(): number {
+    return this.state.failures;
+  }
+  
+  /**
+   * Get time since last failure in milliseconds
+   */
+  getTimeSinceLastFailure(): number | null {
+    if (!this.state.lastFailure) return null;
+    return Date.now() - this.state.lastFailure;
+  }
+  
+  /**
+   * Reset the circuit breaker to its initial closed state
+   */
+  reset(): void {
+    const oldStatus = this.state.status;
+    this.state.status = 'CLOSED';
+    this.state.failures = 0;
+    this.halfOpenCallsCount = 0;
+    this.state.lastFailure = null;
+    this.notifyStateChange('CLOSED', oldStatus);
   }
 }
 

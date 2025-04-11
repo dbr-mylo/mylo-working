@@ -7,16 +7,24 @@
  * Run system diagnostics to help identify and resolve errors
  * @returns Promise resolving when diagnostics have completed
  */
-export async function runDiagnostics(): Promise<void> {
+export async function runDiagnostics(): Promise<boolean> {
   console.info('Running system diagnostics...');
   
-  await Promise.all([
-    checkNetworkConnectivity(),
-    checkStorageAccess(),
-    checkPerformance()
-  ]);
-  
-  console.info('Diagnostics complete');
+  try {
+    const results = await Promise.all([
+      checkNetworkConnectivity(),
+      checkStorageAccess(),
+      checkPerformance()
+    ]);
+    
+    console.info('Diagnostics complete');
+    
+    // Return true if all diagnostics passed
+    return results.every(result => result === true);
+  } catch (e) {
+    console.error('Diagnostics failed:', e);
+    return false;
+  }
 }
 
 /**
@@ -116,7 +124,7 @@ async function checkStorageAccess(): Promise<boolean> {
 /**
  * Check system performance
  */
-async function checkPerformance(): Promise<void> {
+async function checkPerformance(): Promise<boolean> {
   try {
     console.info('Checking system performance...');
     
@@ -125,7 +133,8 @@ async function checkPerformance(): Promise<void> {
       try {
         const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
         if (navigationTiming) {
-          const loadTime = navigationTiming.loadEventEnd - navigationTiming.navigationStart;
+          // Fix: Use loadEventEnd and startTime instead of navigationStart which doesn't exist
+          const loadTime = navigationTiming.loadEventEnd - navigationTiming.startTime;
           console.info(`Page load time: ${Math.round(loadTime)}ms`);
         }
         
@@ -137,7 +146,10 @@ async function checkPerformance(): Promise<void> {
         console.warn('Performance metrics error:', e);
       }
     }
+    
+    return true;
   } catch (e) {
     console.warn('Performance diagnostics error:', e);
+    return false;
   }
 }

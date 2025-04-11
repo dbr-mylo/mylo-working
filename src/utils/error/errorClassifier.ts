@@ -19,29 +19,37 @@ export enum ErrorCategory {
   FORMAT = 'format',
   SYNTAX = 'syntax',
   RUNTIME = 'runtime',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
+  // Add the missing categories
+  AUTH = 'auth',
+  CRITICAL = 'critical',
+  SESSION = 'session',
+  FILE_SIZE = 'file_size'
 }
 
 export interface ClassifiedError {
   originalError: unknown;
   message: string;
   category: ErrorCategory;
-  isRecoverable: boolean;
+  isRecoverable: boolean; // Note: This was previously 'recoverable' in tests
   severity: 'low' | 'medium' | 'high' | 'critical';
   suggestedAction?: string;
+  technicalMessage?: string; // Add this for test expectations
 }
 
 /**
  * Classify an error based on its type and message
  * @param error The error to classify
+ * @param context Optional context where the error occurred
  * @returns A classified error object
  */
-export function classifyError(error: unknown): ClassifiedError {
+export function classifyError(error: unknown, context?: string): ClassifiedError {
   let message = 'An unknown error occurred';
   let category = ErrorCategory.UNKNOWN;
   let isRecoverable = false;
   let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
   let suggestedAction: string | undefined;
+  let technicalMessage = error instanceof Error ? error.message : String(error);
   
   // Extract error message
   if (error instanceof Error) {
@@ -59,6 +67,7 @@ export function classifyError(error: unknown): ClassifiedError {
       category = ErrorCategory.NETWORK;
       isRecoverable = true;
       suggestedAction = 'Check your internet connection and try again';
+      message = 'We\'re having trouble connecting to the server';
     }
     
     // Classify authentication errors
@@ -74,6 +83,7 @@ export function classifyError(error: unknown): ClassifiedError {
       category = ErrorCategory.AUTHENTICATION;
       isRecoverable = true;
       suggestedAction = 'Try logging in again';
+      message = 'Your session may have expired';
     }
     
     // Classify permission errors
@@ -89,45 +99,20 @@ export function classifyError(error: unknown): ClassifiedError {
       isRecoverable = false;
       severity = 'high';
       suggestedAction = 'Contact your administrator for access';
+      message = 'You don\'t have permission to perform this action';
     }
     
-    // Classify validation errors
-    else if (
-      error.name === 'ValidationError' ||
-      message.includes('validation') ||
-      message.includes('invalid') ||
-      message.includes('required') ||
-      message.includes('must be')
-    ) {
-      category = ErrorCategory.VALIDATION;
-      isRecoverable = true;
-      suggestedAction = 'Check your inputs and try again';
-    }
-    
-    // Classify storage errors
-    else if (
-      error.name === 'QuotaExceededError' ||
-      error.name === 'StorageError' ||
-      message.includes('storage') ||
-      message.includes('quota') ||
-      message.includes('localStorage') ||
-      message.includes('indexedDB')
-    ) {
-      category = ErrorCategory.STORAGE;
-      isRecoverable = true;
-      suggestedAction = 'Clear some browser data or try a different browser';
-    }
-    
-    // Classify timeout errors
-    else if (
-      error.name === 'TimeoutError' ||
-      message.includes('timeout') ||
-      message.includes('timed out')
-    ) {
-      category = ErrorCategory.TIMEOUT;
-      isRecoverable = true;
-      severity = 'medium';
-      suggestedAction = 'Try again later when the system is less busy';
+    // Use context to improve classification
+    if (context) {
+      if (context.includes('auth') || context.includes('login')) {
+        category = context.includes('session') ? ErrorCategory.SESSION : ErrorCategory.AUTH;
+        isRecoverable = true;
+      } else if (context.includes('document')) {
+        if (message.includes('size')) {
+          category = ErrorCategory.FILE_SIZE;
+          isRecoverable = true;
+        }
+      }
     }
     
     // Set severity based on error type
@@ -138,6 +123,7 @@ export function classifyError(error: unknown): ClassifiedError {
     }
   } else if (typeof error === 'string') {
     message = error;
+    technicalMessage = error;
     
     // Apply simple string-based classification
     if (error.includes('network') || error.includes('connection')) {
@@ -155,29 +141,37 @@ export function classifyError(error: unknown): ClassifiedError {
     category,
     isRecoverable,
     severity,
-    suggestedAction
+    suggestedAction,
+    technicalMessage
   };
 }
 
 /**
  * Get a user-friendly error message based on the classified error
- * @param error The classified error
+ * @param error The error to classify
+ * @param context Optional context where the error occurred
  * @param role Optional user role for customized messaging
  * @returns A user-friendly error message
  */
 export function getUserFriendlyErrorMessage(
-  error: ClassifiedError,
+  error: unknown, 
+  context?: string, 
   role?: string | null
 ): string {
+  // Classify the error first
+  const classified = classifyError(error, context);
+  
   // Default message based on category
   let message = 'Something went wrong. Please try again.';
   
-  switch (error.category) {
+  switch (classified.category) {
     case ErrorCategory.NETWORK:
       message = 'Connection issue. Please check your internet connection and try again.';
       break;
       
     case ErrorCategory.AUTHENTICATION:
+    case ErrorCategory.AUTH:
+    case ErrorCategory.SESSION:
       message = 'Your session has expired or you are not logged in. Please log in again.';
       break;
       
@@ -204,17 +198,36 @@ export function getUserFriendlyErrorMessage(
     case ErrorCategory.SERVER:
       message = 'There was a problem with the server. Please try again later.';
       break;
+      
+    case ErrorCategory.CRITICAL:
+      message = 'A critical error has occurred. Please refresh the application.';
+      break;
+      
+    case ErrorCategory.FILE_SIZE:
+      message = 'The file size exceeds the maximum allowed limit.';
+      break;
   }
   
   // Add a more specific message if available
-  if (error.suggestedAction) {
-    message += ` ${error.suggestedAction}`;
+  if (classified.suggestedAction) {
+    message += ` ${classified.suggestedAction}`;
   }
   
   // Add role-specific details for admin users
   if (role === 'admin') {
-    message += ` (Error category: ${error.category})`;
+    message += ` (Error category: ${classified.category})`;
   }
   
   return message;
 }
+
+/**
+ * Get technical error details for debugging purposes
+ */
+export function getTechnicalErrorDetails(error: unknown): string {
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}${error.stack ? `\n${error.stack}` : ''}`;
+  }
+  return String(error);
+}
+

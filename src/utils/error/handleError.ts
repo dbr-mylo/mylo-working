@@ -99,3 +99,6 @@ export function getErrorRecoverySteps(
   
   return steps;
 }
+
+// Export for index.ts
+export { handleError as default };

@@ -1,214 +1,211 @@
 
 /**
- * Error pattern recognition and troubleshooting
+ * Troubleshooting patterns utility for error recovery and session management
  */
 
-import { ErrorCategory, ClassifiedError, classifyError } from "./errorClassifier";
-
-// Interfaces for troubleshooting
-export interface TroubleshootingPattern {
+// Define session types
+interface TroubleshootingSession {
   id: string;
   name: string;
-  categoryMatches: ErrorCategory[];
-  messagePatterns: RegExp[];
-  steps: string[];
-  automatedChecks: AutomatedCheck[];
-  successRate: number;
-  lastUpdated: string;
+  notes?: string;
+  feature?: string;
+  status: 'in-progress' | 'resolved' | 'abandoned';
+  steps: TroubleshootingStep[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface AutomatedCheck {
-  id: string;
-  name: string;
-  description: string;
-  checkFn: () => Promise<boolean>;
-  remedyFn?: () => Promise<boolean>;
+interface TroubleshootingStep {
+  timestamp: string;
+  action: string;
+  result: 'success' | 'failure' | 'inconclusive';
+  notes?: string;
 }
 
-// Known troubleshooting patterns
-const troubleshootingPatterns: TroubleshootingPattern[] = [
-  {
-    id: 'network-connectivity',
-    name: 'Network Connectivity Issues',
-    categoryMatches: [ErrorCategory.NETWORK, ErrorCategory.TIMEOUT],
-    messagePatterns: [
-      /failed to fetch/i,
-      /network error/i,
-      /connection (failed|error|lost)/i,
-      /offline/i
-    ],
-    steps: [
-      'Check your internet connection',
-      'Verify that you can access other websites',
-      'Try disabling any VPN or proxy services',
-      'Clear your browser cache and cookies',
-      'If on a mobile device, try switching between Wi-Fi and cellular data'
-    ],
-    automatedChecks: [
-      {
-        id: 'online-status',
-        name: 'Online Status',
-        description: 'Checks if your device reports being online',
-        checkFn: async () => {
-          return navigator.onLine;
-        }
-      },
-      {
-        id: 'ping-service',
-        name: 'API Connectivity',
-        description: 'Checks if our API services are reachable',
-        checkFn: async () => {
-          try {
-            const response = await fetch('/api/health', { method: 'HEAD' });
-            return response.ok;
-          } catch (e) {
-            return false;
-          }
-        }
-      }
-    ],
-    successRate: 0.85,
-    lastUpdated: '2025-03-15'
-  },
-  {
-    id: 'authentication-issues',
-    name: 'Authentication Problems',
-    categoryMatches: [ErrorCategory.AUTHENTICATION, ErrorCategory.AUTHORIZATION],
-    messagePatterns: [
-      /unauthorized/i,
-      /not authenticated/i,
-      /invalid (token|credentials)/i,
-      /login (required|failed)/i,
-      /session (expired|invalid)/i
-    ],
-    steps: [
-      'Log out and log back in',
-      'Clear your browser cache and cookies',
-      'Check if you are using the correct credentials',
-      'Reset your password if you continue to have issues',
-      'Make sure your account has not been locked or disabled'
-    ],
-    automatedChecks: [
-      {
-        id: 'token-check',
-        name: 'Auth Token',
-        description: 'Checks if you have a valid authentication token',
-        checkFn: async () => {
-          return localStorage.getItem('auth_token') !== null;
-        },
-        remedyFn: async () => {
-          // In a real app, we'd redirect to login
-          console.log('Redirecting to login page...');
-          return true;
-        }
-      }
-    ],
-    successRate: 0.92,
-    lastUpdated: '2025-04-02'
-  },
-  {
-    id: 'storage-issues',
-    name: 'Storage Access Problems',
-    categoryMatches: [ErrorCategory.STORAGE],
-    messagePatterns: [
-      /quota exceeded/i,
-      /storage (error|full|unavailable)/i,
-      /indexeddb (error|failed)/i,
-      /local storage (error|failed|unavailable)/i
-    ],
-    steps: [
-      'Clear some browser storage space',
-      'Check your browser settings to ensure storage access is allowed',
-      'Try using a different browser',
-      'If using private/incognito mode, try regular browsing mode instead',
-      'Ensure you have sufficient disk space on your device'
-    ],
-    automatedChecks: [
-      {
-        id: 'storage-access',
-        name: 'Storage Access',
-        description: 'Checks if localStorage is accessible',
-        checkFn: async () => {
-          try {
-            const testKey = '___test_storage_access___';
-            localStorage.setItem(testKey, 'test');
-            const value = localStorage.getItem(testKey);
-            localStorage.removeItem(testKey);
-            return value === 'test';
-          } catch (e) {
-            return false;
-          }
-        }
-      }
-    ],
-    successRate: 0.78,
-    lastUpdated: '2025-03-28'
+// Define pattern for known error recovery strategies
+const knownErrorPatterns: Record<string, string[]> = {
+  'network': [
+    'Reset your network connection',
+    'Clear browser cache and cookies',
+    'Try a different network'
+  ],
+  'auth': [
+    'Clear saved credentials',
+    'Log out and log back in',
+    'Reset your session cookies'
+  ],
+  'storage': [
+    'Clear browser local storage',
+    'Check for storage quota issues',
+    'Allow more storage permissions'
+  ]
+};
+
+/**
+ * Identify patterns in an error that match known troubleshooting strategies
+ * @param error The error object
+ * @param context The context where the error occurred
+ * @returns Array of suggested remediation steps
+ */
+export function identifyErrorPattern(error: unknown, context: string): string[] {
+  const patterns: string[] = [];
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  
+  // Look for network-related patterns
+  if (
+    errorMessage.includes('network') ||
+    errorMessage.includes('offline') ||
+    errorMessage.includes('connection') ||
+    errorMessage.includes('fetch') ||
+    context.includes('api') ||
+    context.includes('http')
+  ) {
+    patterns.push(...knownErrorPatterns.network);
   }
-];
-
-/**
- * Find matching troubleshooting patterns for an error
- * @param error The error to match patterns for
- * @returns Matching troubleshooting patterns
- */
-export function findMatchingPatterns(error: unknown): TroubleshootingPattern[] {
-  const classified = classifyError(error);
-  const errorMessage = classified.message.toLowerCase();
   
-  // Find patterns that match the error category or message patterns
-  return troubleshootingPatterns.filter(pattern => {
-    // Check if category matches
-    const categoryMatch = pattern.categoryMatches.includes(classified.category as any);
-    
-    // Check if any message patterns match
-    const messageMatch = pattern.messagePatterns.some(regex => 
-      regex.test(errorMessage)
-    );
-    
-    return categoryMatch || messageMatch;
-  });
+  // Look for auth-related patterns
+  if (
+    errorMessage.includes('auth') ||
+    errorMessage.includes('login') ||
+    errorMessage.includes('token') ||
+    errorMessage.includes('permission') ||
+    errorMessage.includes('401') ||
+    errorMessage.includes('403') ||
+    context.includes('auth') ||
+    context.includes('login')
+  ) {
+    patterns.push(...knownErrorPatterns.auth);
+  }
+  
+  // Look for storage-related patterns
+  if (
+    errorMessage.includes('storage') ||
+    errorMessage.includes('quota') ||
+    errorMessage.includes('localStorage') ||
+    errorMessage.includes('database') ||
+    context.includes('storage') ||
+    context.includes('save')
+  ) {
+    patterns.push(...knownErrorPatterns.storage);
+  }
+  
+  return patterns;
 }
 
 /**
- * Run automated checks for a troubleshooting pattern
- * @param pattern The troubleshooting pattern
- * @returns Results of the automated checks
+ * Save a troubleshooting session
+ * @param sessionId Unique identifier for the session
+ * @param sessionData Data to save with the session
  */
-export async function runAutomatedChecks(pattern: TroubleshootingPattern): Promise<{
-  id: string;
-  name: string;
-  passed: boolean;
-  remedy?: () => Promise<boolean>;
-}[]> {
-  const results = [];
-  
-  for (const check of pattern.automatedChecks) {
-    try {
-      const passed = await check.checkFn();
-      
-      results.push({
-        id: check.id,
-        name: check.name,
-        passed,
-        remedy: !passed && check.remedyFn ? check.remedyFn : undefined
-      });
-    } catch (e) {
-      console.error(`Failed to run check ${check.id}:`, e);
-      results.push({
-        id: check.id,
-        name: check.name,
-        passed: false
-      });
+export function saveTroubleshootingSession(
+  sessionId: string,
+  sessionData: Partial<TroubleshootingSession>
+): boolean {
+  try {
+    // Get existing session or create new one
+    const existingData = loadTroubleshootingSession(sessionId);
+    
+    const session: TroubleshootingSession = {
+      id: sessionId,
+      name: sessionData.name || existingData?.name || 'Unnamed session',
+      notes: sessionData.notes || existingData?.notes || '',
+      feature: sessionData.feature || existingData?.feature,
+      status: sessionData.status || existingData?.status || 'in-progress',
+      steps: existingData?.steps || [],
+      createdAt: existingData?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    localStorage.setItem(`troubleshooting_${sessionId}`, JSON.stringify(session));
+    return true;
+  } catch (e) {
+    console.error('Failed to save troubleshooting session:', e);
+    return false;
+  }
+}
+
+/**
+ * Load a troubleshooting session
+ * @param sessionId Unique identifier for the session
+ */
+export function loadTroubleshootingSession(
+  sessionId: string
+): TroubleshootingSession | null {
+  try {
+    const data = localStorage.getItem(`troubleshooting_${sessionId}`);
+    if (!data) return null;
+    
+    return JSON.parse(data) as TroubleshootingSession;
+  } catch (e) {
+    console.error('Failed to load troubleshooting session:', e);
+    return null;
+  }
+}
+
+/**
+ * Add a step to a troubleshooting session
+ * @param sessionId Unique identifier for the session
+ * @param action Description of the action taken
+ * @param result Result of the action (success, failure, inconclusive)
+ * @param notes Optional notes about the step
+ */
+export function addTroubleshootingStep(
+  sessionId: string,
+  action: string,
+  result: 'success' | 'failure' | 'inconclusive',
+  notes?: string
+): boolean {
+  try {
+    const session = loadTroubleshootingSession(sessionId);
+    if (!session) return false;
+    
+    // Add the new step
+    session.steps.push({
+      timestamp: new Date().toISOString(),
+      action,
+      result,
+      notes
+    });
+    
+    // Update session
+    session.updatedAt = new Date().toISOString();
+    
+    // Save the updated session
+    localStorage.setItem(`troubleshooting_${sessionId}`, JSON.stringify(session));
+    return true;
+  } catch (e) {
+    console.error('Failed to add troubleshooting step:', e);
+    return false;
+  }
+}
+
+/**
+ * Get all troubleshooting sessions
+ */
+export function getAllTroubleshootingSessions(): TroubleshootingSession[] {
+  try {
+    const sessions: TroubleshootingSession[] = [];
+    
+    // Look through localStorage for troubleshooting sessions
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('troubleshooting_')) {
+        try {
+          const data = localStorage.getItem(key);
+          if (data) {
+            const session = JSON.parse(data) as TroubleshootingSession;
+            sessions.push(session);
+          }
+        } catch (e) {
+          console.warn('Failed to parse troubleshooting session:', e);
+        }
+      }
     }
+    
+    return sessions;
+  } catch (e) {
+    console.error('Failed to get troubleshooting sessions:', e);
+    return [];
   }
-  
-  return results;
-}
-
-/**
- * Get all known troubleshooting patterns
- * @returns Array of troubleshooting patterns
- */
-export function getAllPatterns(): TroubleshootingPattern[] {
-  return troubleshootingPatterns;
 }

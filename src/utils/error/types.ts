@@ -29,6 +29,7 @@ export interface RetryConfig {
   onRetry?: (attempt: number, error: unknown) => void;
 }
 
+// Update the ResolutionStep to be a ReactNode-compatible interface
 export interface ResolutionStep {
   id: string;
   description: string;
@@ -37,3 +38,6 @@ export interface ResolutionStep {
   successMessage?: string;
   failureMessage?: string;
 }
+
+// Also export string type as valid ResolutionStep for backwards compatibility
+export type LegacyResolutionStep = string;

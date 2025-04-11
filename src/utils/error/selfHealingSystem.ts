@@ -1,4 +1,3 @@
-
 /**
  * Self-healing system functions for error recovery
  */
@@ -10,6 +9,17 @@ import { runDiagnostics } from "./diagnostics";
 // Track error patterns for automatic recovery
 const errorPatterns: Map<string, number> = new Map();
 const recoveryAttempts: Map<string, { success: number; failure: number }> = new Map();
+
+// Track error history for analysis and reporting
+const errorHistory: Array<{
+  category: ErrorCategory;
+  message: string;
+  context: string;
+  timestamp: number;
+  recoveryAttempted: boolean;
+  recoverySucceeded: boolean;
+  stack?: string;
+}> = [];
 
 /**
  * Register an error and attempt automatic recovery
@@ -59,11 +69,59 @@ function trackErrorPattern(errorKey: string): void {
 }
 
 /**
+ * Track an error occurrence for analytics and reporting
+ */
+export function trackErrorOccurrence(
+  category: ErrorCategory,
+  message: string, 
+  context: string, 
+  recoveryAttempted: boolean,
+  recoverySucceeded: boolean,
+  stack?: string
+): void {
+  errorHistory.push({
+    category,
+    message,
+    context,
+    timestamp: Date.now(),
+    recoveryAttempted,
+    recoverySucceeded,
+    stack
+  });
+  
+  // Trim history if it gets too large
+  if (errorHistory.length > 1000) {
+    errorHistory.shift();
+  }
+}
+
+/**
+ * Track a recovery attempt
+ */
+export function trackRecoveryAttempt(
+  category: ErrorCategory, 
+  context: string, 
+  succeeded: boolean
+): void {
+  // Add to error history
+  trackErrorOccurrence(
+    category,
+    `Recovery ${succeeded ? 'succeeded' : 'failed'}`,
+    context,
+    true,
+    succeeded
+  );
+  
+  // Update system health
+  updateSystemHealth(succeeded ? 1 : -1);
+}
+
+/**
  * Determine if we should attempt automatic recovery
  */
 function shouldAttemptRecovery(error: unknown, context: string): boolean {
   // Classify the error to determine if it's recoverable
-  const classified = classifyError(error);
+  const classified = classifyError(error, context);
   
   // Only attempt recovery for certain types of errors
   switch (classified.category) {
@@ -73,9 +131,28 @@ function shouldAttemptRecovery(error: unknown, context: string): boolean {
       return true;
       
     case ErrorCategory.AUTHENTICATION:
+    case ErrorCategory.AUTH:
+    case ErrorCategory.SESSION:
       // Only attempt recovery for certain authentication errors
       return context.includes('session') || context.includes('token');
       
+    default:
+      return false;
+  }
+}
+
+/**
+ * Determine if an error category is likely recoverable
+ */
+export function isLikelyRecoverable(category: ErrorCategory): boolean {
+  switch (category) {
+    case ErrorCategory.NETWORK:
+    case ErrorCategory.STORAGE:
+    case ErrorCategory.TIMEOUT:
+    case ErrorCategory.AUTHENTICATION:
+    case ErrorCategory.AUTH:
+    case ErrorCategory.SESSION:
+      return true;
     default:
       return false;
   }
@@ -86,7 +163,7 @@ function shouldAttemptRecovery(error: unknown, context: string): boolean {
  */
 function attemptRecovery(error: unknown, context: string): boolean {
   const errorKey = createErrorKey(error, context);
-  const classified = classifyError(error);
+  const classified = classifyError(error, context);
   
   // Track recovery attempts
   const attempts = recoveryAttempts.get(errorKey) || { success: 0, failure: 0 };
@@ -105,6 +182,8 @@ function attemptRecovery(error: unknown, context: string): boolean {
         break;
         
       case ErrorCategory.AUTHENTICATION:
+      case ErrorCategory.AUTH:
+      case ErrorCategory.SESSION:
         recoverySuccess = handleAuthRecovery();
         break;
         
@@ -201,9 +280,93 @@ function handleTimeoutRecovery(): boolean {
 }
 
 /**
+ * Get information about all error categories
+ */
+export function getAllErrorCategoryInfo(): Array<{
+  category: string;
+  occurrences: number;
+  recoveryAttempted: number;
+  recoverySucceeded: number;
+  recoveryRate: number;
+}> {
+  // Create a map to aggregate stats by category
+  const categoryCounts = new Map<string, {
+    occurrences: number;
+    attempted: number;
+    succeeded: number;
+  }>();
+  
+  // Process error history
+  errorHistory.forEach(error => {
+    const category = error.category;
+    if (!categoryCounts.has(category)) {
+      categoryCounts.set(category, { occurrences: 0, attempted: 0, succeeded: 0 });
+    }
+    
+    const counts = categoryCounts.get(category)!;
+    counts.occurrences++;
+    
+    if (error.recoveryAttempted) {
+      counts.attempted++;
+      if (error.recoverySucceeded) {
+        counts.succeeded++;
+      }
+    }
+  });
+  
+  // Convert to array for return
+  return Array.from(categoryCounts).map(([category, counts]) => {
+    return {
+      category,
+      occurrences: counts.occurrences,
+      recoveryAttempted: counts.attempted,
+      recoverySucceeded: counts.succeeded,
+      recoveryRate: counts.attempted > 0 ? counts.succeeded / counts.attempted : 0
+    };
+  });
+}
+
+/**
+ * Get recent errors from the history
+ * @param category Optional category filter
+ * @param limit Maximum number of errors to return
+ */
+export function getRecentErrors(category?: ErrorCategory, limit = 20): Array<{
+  category: ErrorCategory;
+  message: string;
+  context: string;
+  timestamp: number;
+  recoveryAttempted: boolean;
+  recoverySucceeded: boolean;
+}> {
+  // Filter by category if specified
+  const filtered = category 
+    ? errorHistory.filter(err => err.category === category)
+    : errorHistory;
+  
+  // Sort by timestamp (newest first) and limit
+  return [...filtered]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, limit);
+}
+
+/**
+ * Reset error analytics data
+ */
+export function resetErrorAnalytics(): void {
+  errorPatterns.clear();
+  recoveryAttempts.clear();
+}
+
+/**
+ * Clear error history
+ */
+export function clearErrorHistory(): void {
+  errorHistory.length = 0;
+}
+
+/**
  * Get information about a specific error category
- * @param category The error category to get info for
- * @returns Information about errors in this category
  */
 export function getErrorCategoryInfo(category: ErrorCategory) {
   // Convert recovery attempts to array and filter by category

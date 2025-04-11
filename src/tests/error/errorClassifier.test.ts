@@ -1,3 +1,4 @@
+
 import { describe, it, expect } from 'vitest';
 import { 
   classifyError, 
@@ -14,7 +15,7 @@ describe('Error Classification System', () => {
       
       expect(result.category).toBe(ErrorCategory.NETWORK);
       expect(result.message).toContain('trouble connecting');
-      expect(result.recoverable).toBe(true);
+      expect(result.isRecoverable).toBe(true);
     });
     
     it('should classify authentication errors correctly', () => {
@@ -23,7 +24,7 @@ describe('Error Classification System', () => {
       
       expect(result.category).toBe(ErrorCategory.AUTHENTICATION);
       expect(result.message).toContain('session');
-      expect(result.recoverable).toBe(true);
+      expect(result.isRecoverable).toBe(true);
     });
     
     it('should classify permission errors correctly', () => {
@@ -32,7 +33,7 @@ describe('Error Classification System', () => {
       
       expect(result.category).toBe(ErrorCategory.PERMISSION);
       expect(result.message).toContain('permission');
-      expect(result.recoverable).toBe(false);
+      expect(result.isRecoverable).toBe(false);
     });
     
     it('should classify validation errors correctly', () => {
@@ -41,7 +42,7 @@ describe('Error Classification System', () => {
       
       expect(result.category).toBe(ErrorCategory.VALIDATION);
       expect(result.message).toContain('problem with the information');
-      expect(result.recoverable).toBe(true);
+      expect(result.isRecoverable).toBe(true);
     });
     
     it('should consider context in error classification', () => {

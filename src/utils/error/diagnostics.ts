@@ -133,7 +133,7 @@ async function checkPerformance(): Promise<boolean> {
       try {
         const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
         if (navigationTiming) {
-          // Fix: Use loadEventEnd and startTime instead of navigationStart which doesn't exist
+          // Use loadEventEnd and startTime instead of navigationStart which doesn't exist
           const loadTime = navigationTiming.loadEventEnd - navigationTiming.startTime;
           console.info(`Page load time: ${Math.round(loadTime)}ms`);
         }

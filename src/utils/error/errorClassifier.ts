@@ -31,10 +31,10 @@ export interface ClassifiedError {
   originalError: unknown;
   message: string;
   category: ErrorCategory;
-  isRecoverable: boolean; // Note: This was previously 'recoverable' in tests
+  isRecoverable: boolean;
   severity: 'low' | 'medium' | 'high' | 'critical';
   suggestedAction?: string;
-  technicalMessage?: string; // Add this for test expectations
+  technicalMessage?: string;
 }
 
 /**
@@ -206,6 +206,10 @@ export function getUserFriendlyErrorMessage(
     case ErrorCategory.FILE_SIZE:
       message = 'The file size exceeds the maximum allowed limit.';
       break;
+      
+    case ErrorCategory.RATE_LIMIT:
+      message = 'You have made too many requests. Please try again later.';
+      break;
   }
   
   // Add a more specific message if available
@@ -216,6 +220,11 @@ export function getUserFriendlyErrorMessage(
   // Add role-specific details for admin users
   if (role === 'admin') {
     message += ` (Error category: ${classified.category})`;
+    
+    // Admin users get more detailed technical information
+    if (role === 'admin' && classified.severity === 'critical') {
+      message += ' Please check server logs for more details.';
+    }
   }
   
   return message;
@@ -230,4 +239,3 @@ export function getTechnicalErrorDetails(error: unknown): string {
   }
   return String(error);
 }
-

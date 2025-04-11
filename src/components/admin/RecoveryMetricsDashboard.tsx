@@ -19,13 +19,13 @@ export function RecoveryMetricsDashboard() {
   const { getCategoryErrorInfo } = useRoleAwareErrorHandling();
   const [selectedTab, setSelectedTab] = useState('overview');
   const [errorCategories, setErrorCategories] = useState(getAllErrorCategoryInfo());
-  const [recentErrors, setRecentErrors] = useState(getRecentErrors(10));
+  const [recentErrors, setRecentErrors] = useState(getRecentErrors(undefined, 10));
   
   // Refresh data periodically
   useEffect(() => {
     const refreshData = () => {
       setErrorCategories(getAllErrorCategoryInfo());
-      setRecentErrors(getRecentErrors(10));
+      setRecentErrors(getRecentErrors(undefined, 10));
     };
     
     // Initial load
@@ -296,7 +296,7 @@ export function RecoveryMetricsDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {errorCategories.map((category) => (
+                    {Object.values(errorCategories).map((category) => (
                       <tr key={category.category} className="border-b">
                         <td className="p-4 align-middle font-medium">
                           {category.category}
@@ -305,7 +305,7 @@ export function RecoveryMetricsDashboard() {
                           {category.occurrences}
                         </td>
                         <td className="p-4 align-middle text-right">
-                          {category.recoveryAttempted}
+                          {category.recoveryAttempts}
                         </td>
                         <td className="p-4 align-middle text-right">
                           <span className={getRecoveryRateColor(category.recoveryRate)}>

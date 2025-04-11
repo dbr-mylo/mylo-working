@@ -4,157 +4,56 @@
  * 
  * This utility provides configuration settings and feature flags
  * based on user roles to maintain separation between writer and designer functions.
+ *
+ * @deprecated Import from @/utils/roles instead
  */
 
 import { UserRole } from "@/lib/types";
+import { 
+  getRoleFeatures as getRoleFeaturesInternal, 
+  isFeatureEnabled as isFeatureEnabledInternal,
+  getRoleUIConfig as getRoleUIConfigInternal,
+  RoleFeatureFlags,
+  isDesignerRole, 
+  isWriterRole,
+  isAdminRole,
+  isEditorRole
+} from './roles/FeatureFlags';
 
-type RoleFeatureFlags = {
-  // Page and content features
-  canModifyTemplate: boolean;
-  canEditLayout: boolean;
-  canCreateTemplate: boolean;
-  canPublishTemplate: boolean;
-  
-  // UI features
-  showToolbar: boolean;
-  showPreview: boolean;
-  
-  // Styling features
-  canApplyStyles: boolean;
-  canCreateStyles: boolean;
-  
-  // Document features
-  defaultDocumentWrapper: 'white-page' | 'none' | 'custom';
-  
-  // View features
-  defaultView: 'edit' | 'preview' | 'split';
-  
-  // Admin features
-  canManageUsers: boolean;
-  canManageAllTemplates: boolean;
-  canManageAllStyles: boolean;
-};
-
-const ROLE_FEATURE_CONFIG: Record<UserRole, RoleFeatureFlags> = {
-  designer: {
-    canModifyTemplate: true,
-    canEditLayout: true,
-    canCreateTemplate: true,
-    canPublishTemplate: true,
-    showToolbar: true,
-    showPreview: true,
-    canApplyStyles: true,
-    canCreateStyles: true,
-    defaultDocumentWrapper: 'none',
-    defaultView: 'edit',
-    canManageUsers: false,
-    canManageAllTemplates: false,
-    canManageAllStyles: false
-  },
-  writer: {
-    canModifyTemplate: false,
-    canEditLayout: false,
-    canCreateTemplate: false,
-    canPublishTemplate: false,
-    showToolbar: true,
-    showPreview: false,
-    canApplyStyles: true,
-    canCreateStyles: false,
-    defaultDocumentWrapper: 'white-page',
-    defaultView: 'split',
-    canManageUsers: false,
-    canManageAllTemplates: false,
-    canManageAllStyles: false
-  },
-  admin: {
-    canModifyTemplate: true,
-    canEditLayout: true,
-    canCreateTemplate: true,
-    canPublishTemplate: true,
-    showToolbar: true,
-    showPreview: true,
-    canApplyStyles: true, 
-    canCreateStyles: true,
-    defaultDocumentWrapper: 'none',
-    defaultView: 'edit',
-    canManageUsers: true,
-    canManageAllTemplates: true,
-    canManageAllStyles: true
-  },
-  // Add editor role for backward compatibility
-  editor: {
-    canModifyTemplate: false,
-    canEditLayout: false,
-    canCreateTemplate: false,
-    canPublishTemplate: false,
-    showToolbar: true,
-    showPreview: false,
-    canApplyStyles: true,
-    canCreateStyles: false,
-    defaultDocumentWrapper: 'white-page',
-    defaultView: 'split',
-    canManageUsers: false,
-    canManageAllTemplates: false,
-    canManageAllStyles: false
-  }
-};
+type RoleFeatureFlagsExport = RoleFeatureFlags;
+export type { RoleFeatureFlagsExport as RoleFeatureFlags };
 
 /**
  * Get feature configuration for a specific role
  */
-export const getRoleFeatures = (role: UserRole | null): RoleFeatureFlags => {
-  if (!role) {
-    // Default to writer if no role provided
-    return ROLE_FEATURE_CONFIG.writer;
-  }
-  return ROLE_FEATURE_CONFIG[role];
-};
+export const getRoleFeatures = getRoleFeaturesInternal;
 
 /**
  * Check if a specific feature is enabled for a role
  */
-export const isFeatureEnabled = (role: UserRole | null, feature: keyof RoleFeatureFlags): boolean => {
-  const features = getRoleFeatures(role);
-  // Need to explicitly check for boolean type to fix the type error
-  if (typeof features[feature] === 'boolean') {
-    return features[feature] as boolean;
-  }
-  // For non-boolean values, return false
-  return false;
-};
+export const isFeatureEnabled = isFeatureEnabledInternal;
 
 /**
  * Get role-specific UI configuration values
  */
-export const getRoleUIConfig = <T extends keyof RoleFeatureFlags>(role: UserRole | null, configKey: T): RoleFeatureFlags[T] => {
-  const features = getRoleFeatures(role);
-  return features[configKey];
-};
+export const getRoleUIConfig = getRoleUIConfigInternal;
 
 /**
  * Check if the current role is designer
  */
-export const isDesignerRole = (role: UserRole | null): boolean => {
-  return role === 'designer';
-};
+export const isDesignerRole = isDesignerRole;
 
 /**
  * Check if the current role is writer
  */
-export const isWriterRole = (role: UserRole | null): boolean => {
-  return role === 'writer' || role === 'editor'; // Support both for backward compatibility
-};
+export const isWriterRole = isWriterRole;
 
 /**
  * Check if the current role is admin
  */
-export const isAdminRole = (role: UserRole | null): boolean => {
-  return role === 'admin';
-};
+export const isAdminRole = isAdminRole;
 
 /**
  * @deprecated Use isWriterRole instead
  */
-export const isEditorRole = (role: UserRole | null): boolean => {
-  return isWriterRole(role);
-};
+export const isEditorRole = isEditorRole;

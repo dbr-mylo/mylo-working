@@ -1,35 +1,25 @@
 
-import React from 'react';
-import { useIsWriter } from './RoleHooks';
-import { RoleComponentProps } from './types';
-
 /**
- * Component that only renders its children when the current user has the 'writer' role.
- * Can optionally show fallback content for other roles.
+ * Standalone Legacy Components
  * 
- * This includes both 'writer' and legacy 'editor' roles for backward compatibility.
- * 
- * @example
- * ```tsx
- * <StandaloneWriterOnly fallback={<p>You need writer access to view this.</p>}>
- *   <WriterContent />
- * </StandaloneWriterOnly>
- * ```
+ * These are standalone versions of the deprecated components for use
+ * outside of the normal import path. This maintains backward compatibility
+ * with older code that imports these components directly.
  */
-export const StandaloneWriterOnly: React.FC<RoleComponentProps> = ({ 
-  children, 
-  fallback = null 
-}) => {
-  const isWriter = useIsWriter();
+
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { isWriterRole, isAdminRole } from './RoleFunctions';
+
+export const StandaloneEditorOnly: React.FC<{ 
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback = null }) => {
+  console.warn('StandaloneEditorOnly is deprecated, use WriterOnly from utils/roles instead');
+  const { role } = useAuth();
+  const allowed = isWriterRole(role) || isAdminRole(role);
   
-  if (!isWriter) {
-    console.log("Content hidden: User does not have writer role");
-  }
-  
-  return isWriter ? <>{children}</> : <>{fallback}</>;
+  return allowed ? <>{children}</> : <>{fallback}</>;
 };
 
-/**
- * @deprecated Use StandaloneWriterOnly instead
- */
-export const StandaloneEditorOnly = StandaloneWriterOnly;
+export const StandaloneWriterOnly = StandaloneEditorOnly;

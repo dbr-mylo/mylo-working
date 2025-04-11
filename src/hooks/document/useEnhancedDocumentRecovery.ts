@@ -101,7 +101,7 @@ export function useEnhancedDocumentRecovery({
         
         toast.success("Document recovered", {
           description: "Your unsaved work has been restored from a local backup.",
-          icon: <CheckCircle className="h-4 w-4" />,
+          icon: <CheckCircle className="h-4 w-4" />
         });
         
         return backup;
@@ -109,14 +109,14 @@ export function useEnhancedDocumentRecovery({
       
       toast.error("Recovery failed", {
         description: "Could not recover document from backup.",
-        icon: <AlertCircle className="h-4 w-4" />,
+        icon: <AlertCircle className="h-4 w-4" />
       });
       
       return null;
     } catch (error) {
       console.error("Error recovering from backup:", error);
       toast.error("Recovery failed", {
-        description: "Could not recover backup. Please try manual recovery.",
+        description: "Could not recover backup. Please try manual recovery."
       });
       return null;
     }

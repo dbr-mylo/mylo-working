@@ -2,23 +2,30 @@
 import { useNavigate } from "react-router-dom";
 import { useRouteValidation } from "./navigation/useRouteValidation";
 import { toast } from "sonner";
+import { logNavigation } from "@/utils/navigation/routeValidation";
 
 /**
  * Enhanced wrapper hook that combines useNavigate with route validation
- * and provides improved error handling
+ * and provides improved error handling and analytics
  */
 export const useValidatedNavigation = () => {
   const navigate = useNavigate();
   const { validateRoute } = useRouteValidation();
   
   /**
-   * Navigate to a route with validation and error handling
+   * Navigate to a route with validation, error handling, and analytics
    * @param path - The route to navigate to
    * @param options - Optional navigation options
    */
   const navigateTo = (path: string, options?: { replace?: boolean; state?: any }) => {
     try {
-      if (validateRoute(path)) {
+      const currentPath = window.location.pathname;
+      const isValid = validateRoute(path);
+      
+      // Log the navigation attempt for analytics
+      logNavigation(currentPath, path, isValid);
+      
+      if (isValid) {
         navigate(path, options);
       } else {
         toast.error(`Cannot navigate to ${path}`, {
@@ -47,3 +54,4 @@ export const useValidatedNavigation = () => {
     navigateTo
   };
 };
+

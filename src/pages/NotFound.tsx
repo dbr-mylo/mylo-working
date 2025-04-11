@@ -1,19 +1,28 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/errors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NotFound = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const { role } = useAuth();
+  
+  // Get information from state if available
+  const from = location.state?.from || "unknown";
+  const errorMessage = location.state?.message || "The page does not exist.";
+  
   useEffect(() => {
     // Log the 404 error to help with debugging
     console.error(
       "404 Error: User attempted to access non-existent route:",
-      location.pathname
+      location.pathname,
+      "From:", from,
+      "Role:", role || "unauthenticated"
     );
     
     // Show a toast notification
@@ -24,7 +33,20 @@ const NotFound = () => {
     
     // This would be where you could log to an analytics service
     // Example: analytics.logEvent('404_error', { path: location.pathname });
-  }, [location.pathname]);
+  }, [location.pathname, from, role]);
+
+  // Determine the best place to send the user back to
+  const getHomeRoute = () => {
+    switch (role) {
+      case "admin":
+        return "/admin";
+      case "writer":
+      case "designer":
+        return "/editor";
+      default:
+        return "/";
+    }
+  };
 
   return (
     <ErrorBoundary context="NotFoundPage">
@@ -33,8 +55,8 @@ const NotFound = () => {
           <div className="text-center">
             <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">Page Not Found</h2>
-            <p className="text-gray-600 mb-6">
-              The page you are looking for doesn't exist or has been moved.
+            <p className="text-gray-600 mb-3">
+              {errorMessage}
             </p>
             <p className="text-sm text-gray-500 mb-6">
               Attempted path: <span className="font-mono">{location.pathname}</span>
@@ -44,8 +66,9 @@ const NotFound = () => {
                 <ArrowLeft className="h-4 w-4" />
                 Go Back
               </Button>
-              <Button asChild>
-                <a href="/">Return Home</a>
+              <Button onClick={() => navigate(getHomeRoute())} className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Return Home
               </Button>
             </div>
           </div>
@@ -56,3 +79,4 @@ const NotFound = () => {
 };
 
 export default NotFound;
+

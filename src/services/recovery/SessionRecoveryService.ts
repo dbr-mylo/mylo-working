@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { CircuitBreaker } from '@/utils/error/circuitBreaker';
 import { classifyError, ErrorCategory } from '@/utils/error/errorClassifier';
@@ -175,7 +174,8 @@ export class SessionRecoveryService {
     const classifiedError = classifyError(error, context);
     
     // Only attempt recovery for auth-related errors
-    if (classifiedError.category !== ErrorCategory.AUTH) {
+    if (classifiedError.category !== ErrorCategory.AUTH && 
+        classifiedError.category !== ErrorCategory.AUTHENTICATION) {
       return { recovered: false, reason: 'not_auth_error' };
     }
     

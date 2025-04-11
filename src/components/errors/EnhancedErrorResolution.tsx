@@ -38,7 +38,8 @@ export function EnhancedErrorResolution({
   
   // Classify the error
   const classifiedError = classifyError(error, context);
-  const isAuthError = classifiedError.category === ErrorCategory.AUTH;
+  const isAuthError = classifiedError.category === ErrorCategory.AUTH || 
+                      classifiedError.category === ErrorCategory.AUTHENTICATION;
   const errorMessage = error instanceof Error ? error.message : String(error);
   
   // Check if automated troubleshooting is available based on error type
@@ -46,6 +47,7 @@ export function EnhancedErrorResolution({
     classifiedError.category === ErrorCategory.NETWORK ||
     classifiedError.category === ErrorCategory.STORAGE ||
     classifiedError.category === ErrorCategory.AUTH ||
+    classifiedError.category === ErrorCategory.AUTHENTICATION ||
     classifiedError.category === ErrorCategory.SERVER
   );
   
@@ -89,6 +91,7 @@ export function EnhancedErrorResolution({
       case ErrorCategory.STORAGE:
         return "Storage Access Error";
       case ErrorCategory.AUTH:
+      case ErrorCategory.AUTHENTICATION:
         return "Authentication Error";
       case ErrorCategory.SERVER:
         return "Server Error";

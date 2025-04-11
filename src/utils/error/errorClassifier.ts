@@ -22,6 +22,8 @@ export enum ErrorCategory {
   COMPATIBILITY = 'compatibility',
   SESSION = 'session',
   FILE_SIZE = 'file_size',
+  AUTH = 'auth',        // Add AUTH for backward compatibility
+  CRITICAL = 'critical', // Add CRITICAL for backward compatibility
   UNKNOWN = 'unknown'
 }
 

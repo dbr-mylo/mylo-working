@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -210,9 +209,11 @@ export function InteractiveTroubleshooter({
             </Alert>
             
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" category={classifiedError.category} />
-              {errorInfo.frequency > 0.5 && (
-                <Badge variant="secondary">Common Issue</Badge>
+              <ErrorBadge variant="outline" category={classifiedError.category} />
+              {errorInfo.recoveryRate > 0.5 && (
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                  Common Issue
+                </div>
               )}
             </div>
           </div>
@@ -339,7 +340,7 @@ export function InteractiveTroubleshooter({
 }
 
 // Helper components
-function Badge({ category, variant }: { category?: ErrorCategory, variant: "outline" | "secondary" }) {
+function ErrorBadge({ category, variant }: { category?: ErrorCategory, variant: "outline" | "secondary" }) {
   const getColorByCategory = () => {
     if (!category) return "bg-gray-100 text-gray-800 border-gray-200";
     
@@ -349,6 +350,7 @@ function Badge({ category, variant }: { category?: ErrorCategory, variant: "outl
       case ErrorCategory.STORAGE:
         return "bg-amber-50 text-amber-800 border-amber-200";
       case ErrorCategory.AUTH:
+      case ErrorCategory.AUTHENTICATION:
         return "bg-purple-50 text-purple-800 border-purple-200";
       case ErrorCategory.CRITICAL:
         return "bg-red-50 text-red-800 border-red-200";
@@ -580,7 +582,7 @@ function getStepsForErrorCategory(
   }
   
   // Auth error steps
-  if (category === ErrorCategory.AUTH) {
+  if (category === ErrorCategory.AUTH || category === ErrorCategory.AUTHENTICATION) {
     return {
       'start': {
         id: 'start',

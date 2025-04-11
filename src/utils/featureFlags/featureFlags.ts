@@ -26,7 +26,8 @@ export type FeatureFlagKey =
   | 'image-uploading'
   | 'commenting'
   | 'revision-history'
-  | 'export-features';
+  | 'export-features'
+  | 'auto_recovery'; // Add auto_recovery flag
 
 /**
  * Feature flag configuration interface
@@ -135,6 +136,13 @@ const featureFlags: Record<FeatureFlagKey, FeatureFlagConfig> = {
     requiresOnline: false,
     minSystemHealth: 30,
     description: 'Export documents to various formats'
+  },
+  'auto_recovery': {
+    critical: false,
+    defaultEnabled: true,
+    requiresOnline: false,
+    minSystemHealth: 30,
+    description: 'Automatic error recovery features'
   }
 };
 
@@ -211,6 +219,27 @@ export function setFeatureOverride(feature: FeatureFlagKey, enabled: boolean | n
   } else {
     // Set override
     manualOverrides[feature] = enabled;
+  }
+  
+  // Persist changes to localStorage
+  saveOverridesToStorage();
+}
+
+/**
+ * Clear feature override (alias for setFeatureOverride with null)
+ * @param feature The feature to clear override for
+ */
+export function clearFeatureOverride(feature: FeatureFlagKey): void {
+  setFeatureOverride(feature, null);
+}
+
+/**
+ * Reset all feature flag overrides
+ */
+export function resetAllOverrides(): void {
+  // Clear all overrides
+  for (const key of Object.keys(manualOverrides) as FeatureFlagKey[]) {
+    delete manualOverrides[key];
   }
   
   // Persist changes to localStorage

@@ -42,7 +42,14 @@ export function useDocumentBackupRecovery({
           title: "Backup recovered",
           description: "Your unsaved work has been restored from a local backup.",
         });
-        return backup;
+
+        // Make sure backup has updated_at property required by Document type
+        const documentWithRequiredProps: Document = {
+          ...backup,
+          updated_at: backup.updated_at || new Date().toISOString()
+        };
+        
+        return documentWithRequiredProps;
       }
       
       return null;

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,9 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminOverview } from "@/components/admin/pages/AdminOverview";
 import { SystemHealthPage } from "@/components/admin/pages/SystemHealthPage";
 import { RecoveryMetricsPage } from "@/components/admin/pages/RecoveryMetricsPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+import HelpSupportPage from "./pages/HelpSupportPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -164,12 +166,15 @@ const AppRoutes = () => {
         <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+        <Route path="/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+        
         <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
         <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
         
         <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
         
-        {/* Admin Routes */}
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route index element={<AdminOverview />} />
           <Route path="system-health" element={<SystemHealthPage />} />

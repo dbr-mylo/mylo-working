@@ -1,4 +1,3 @@
-
 /**
  * Document backup system
  * 
@@ -7,6 +6,7 @@
  */
 import { UserRole, Document } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
+import { generateDocumentChecksum, addChecksumToBackup } from './documentIntegrity';
 
 // Constants for backup storage
 const BACKUP_PREFIX = 'doc_backup_';
@@ -30,6 +30,11 @@ export interface DocumentBackup {
 
 interface DocumentMeta {
   [key: string]: any;
+  integrity?: {
+    checksum?: string;
+    algorithm?: string;
+    timestamp?: string;
+  };
 }
 
 interface BackupIndex {
@@ -49,6 +54,7 @@ interface BackupIndex {
  * @param title Document title
  * @param role User role
  * @param meta Optional document metadata
+ * @param withIntegrityCheck Add integrity check with checksum
  * @returns Boolean indicating if backup was created successfully
  */
 export function backupDocument(
@@ -56,7 +62,8 @@ export function backupDocument(
   documentId: string | null,
   title: string,
   role: UserRole,
-  meta?: DocumentMeta
+  meta?: DocumentMeta,
+  withIntegrityCheck: boolean = false
 ): boolean {
   try {
     if (!content || content.trim().length === 0) {
@@ -78,8 +85,11 @@ export function backupDocument(
       updatedAt: new Date(timestamp).toISOString()
     };
     
+    // Add integrity check if requested
+    const finalBackup = withIntegrityCheck ? addChecksumToBackup(backup) : backup;
+    
     // Store the backup
-    localStorage.setItem(`${BACKUP_PREFIX}${backupId}`, JSON.stringify(backup));
+    localStorage.setItem(`${BACKUP_PREFIX}${backupId}`, JSON.stringify(finalBackup));
     
     // Update the backup index
     updateBackupIndex(backupId, documentId, role, backup.timestamp);
@@ -87,7 +97,9 @@ export function backupDocument(
     // Clean up old backups to prevent storage overflow
     cleanupOldBackups();
     
-    console.log(`Document backup created for ${documentId || 'new document'}`);
+    console.log(`Document backup created for ${documentId || 'new document'}${
+      withIntegrityCheck ? ' with integrity check' : ''
+    }`);
     return true;
   } catch (error) {
     console.error('Error creating document backup:', error);
@@ -294,4 +306,84 @@ function cleanupOldBackups(): void {
   index.backups = index.backups.filter(b => b.timestamp >= retentionCutoff);
   
   localStorage.setItem(BACKUP_INDEX, JSON.stringify(index));
+}
+
+/**
+ * Verify all document backups and remove corrupted ones
+ * @returns Object with verification stats
+ */
+export function verifyAndCleanBackups(): {
+  total: number;
+  valid: number;
+  corrupted: number;
+  noChecksum: number;
+  removed: number;
+} {
+  try {
+    const stats = {
+      total: 0,
+      valid: 0,
+      corrupted: 0,
+      noChecksum: 0,
+      removed: 0
+    };
+    
+    const index = getBackupIndex();
+    stats.total = index.backups.length;
+    
+    // Check each backup
+    for (const backupRef of [...index.backups]) {
+      const backupKey = `${BACKUP_PREFIX}${backupRef.id}`;
+      const backupData = localStorage.getItem(backupKey);
+      
+      if (!backupData) {
+        // Backup reference exists but data is missing
+        stats.corrupted++;
+        stats.removed++;
+        removeBackupFromIndex(backupRef.id, index);
+        continue;
+      }
+      
+      try {
+        const backup = JSON.parse(backupData) as DocumentBackup;
+        
+        // Check if backup has integrity info
+        if (backup.meta?.integrity?.checksum) {
+          // Verify checksum
+          const currentChecksum = generateDocumentChecksum(backup.content);
+          if (currentChecksum === backup.meta.integrity.checksum) {
+            stats.valid++;
+          } else {
+            stats.corrupted++;
+            stats.removed++;
+            localStorage.removeItem(backupKey);
+            removeBackupFromIndex(backupRef.id, index);
+          }
+        } else {
+          stats.noChecksum++;
+        }
+      } catch (parseError) {
+        // Invalid JSON - corrupted backup
+        stats.corrupted++;
+        stats.removed++;
+        localStorage.removeItem(backupKey);
+        removeBackupFromIndex(backupRef.id, index);
+      }
+    }
+    
+    // Save updated index
+    localStorage.setItem(BACKUP_INDEX, JSON.stringify(index));
+    
+    return stats;
+  } catch (error) {
+    console.error('Error verifying backups:', error);
+    return { total: 0, valid: 0, corrupted: 0, noChecksum: 0, removed: 0 };
+  }
+}
+
+/**
+ * Remove a backup reference from the index
+ */
+function removeBackupFromIndex(backupId: string, index: BackupIndex): void {
+  index.backups = index.backups.filter(b => b.id !== backupId);
 }

@@ -4,6 +4,7 @@ import { ErrorCategory } from '@/utils/error/errorClassifier';
 import { DocumentRecoveryCore, DocumentBackupOptions, DEFAULT_BACKUP_OPTIONS } from './recovery/core/DocumentRecoveryCore';
 import { backupManager } from './recovery/backup/BackupManager';
 import { recoveryOperations } from './recovery/recovery/RecoveryOperations';
+import { addChecksumToBackup, verifyBackupIntegrity } from '@/utils/backup/documentIntegrity';
 
 /**
  * Main document recovery service that handles backup creation and restoration
@@ -30,6 +31,18 @@ export class DocumentRecoveryService extends DocumentRecoveryCore {
    * Manually create a backup
    */
   public createBackup(content: string, meta?: any): boolean {
+    // Don't backup empty content
+    if (!content || !content.trim()) {
+      return false;
+    }
+    
+    // Enhance meta with integrity checksum
+    const enhancedMeta = {
+      ...meta,
+      checksumVersion: 1,
+      timestamp: new Date().toISOString()
+    };
+    
     // Pass to the backup manager
     const result = backupManager.createBackup(
       content,
@@ -37,7 +50,7 @@ export class DocumentRecoveryService extends DocumentRecoveryCore {
       this.documentTitle,
       this.userRole,
       this.lastBackupContent,
-      meta
+      enhancedMeta
     );
     
     if (result) {

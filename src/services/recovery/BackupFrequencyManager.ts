@@ -1,67 +1,94 @@
 
 /**
- * Backup Frequency Manager
- * 
- * This module handles the intelligent adjustment of backup frequency
- * based on error rates and other factors.
+ * Manages intelligent backup frequency based on error rates and user activity
  */
-
 export class BackupFrequencyManager {
-  private backupFrequency = 60000; // Default: 1 minute
-  private lastBackupTime = 0;
-  
-  /**
-   * Get the current backup frequency in milliseconds
-   */
-  public getBackupFrequency(): number {
-    return this.backupFrequency;
-  }
-  
-  /**
-   * Get the timestamp of the last backup
-   */
-  public getLastBackupTime(): number {
-    return this.lastBackupTime;
-  }
-  
-  /**
-   * Set the timestamp of the last backup
-   */
-  public setLastBackupTime(time: number): void {
-    this.lastBackupTime = time;
-  }
-  
-  /**
-   * Determine if enough time has passed since the last backup
-   */
-  public shouldCreateBackup(totalErrors: number): boolean {
-    // Skip time-based checks if we have errors (force backup)
-    if (totalErrors > 0) {
-      return true;
-    }
-    
-    // If no previous backup or enough time has passed
-    return (
-      this.lastBackupTime === 0 || 
-      Date.now() - this.lastBackupTime >= this.backupFrequency
-    );
-  }
+  private lastBackupTime: number = 0;
+  private baseFrequency: number = 60000; // 1 minute default
+  private currentFrequency: number = 60000;
+  private minFrequency: number = 15000; // 15 seconds minimum
+  private maxFrequency: number = 300000; // 5 minutes maximum
+  private consecutiveFailures: number = 0;
+  private activityLevel: 'low' | 'medium' | 'high' = 'medium';
   
   /**
    * Adjust backup frequency based on error count
+   * @param errorCount Number of errors
    */
-  public adjustFrequency(totalErrors: number): void {
-    if (totalErrors > 3) {
-      // More frequent backups when errors are high
-      this.backupFrequency = 15000; // 15 seconds
-    } else if (totalErrors > 0) {
-      // Moderate frequency with some errors
-      this.backupFrequency = 30000; // 30 seconds
-    } else {
-      // Normal frequency when no errors
-      this.backupFrequency = 60000; // 1 minute
-    }
+  public adjustFrequency(errorCount: number): void {
+    this.consecutiveFailures = errorCount;
     
-    console.log(`Adjusted backup frequency to ${this.backupFrequency}ms based on error rate`);
+    if (errorCount > 3) {
+      // High error rate, increase backup frequency
+      this.currentFrequency = Math.max(
+        this.minFrequency, 
+        this.baseFrequency / Math.min(4, errorCount)
+      );
+    } else if (errorCount > 0) {
+      // Some errors, moderate increase in frequency
+      this.currentFrequency = Math.max(
+        this.minFrequency,
+        this.baseFrequency / 2
+      );
+    } else {
+      // No errors, adjust based on activity level
+      this.adjustFrequencyByActivity();
+    }
+  }
+  
+  /**
+   * Adjust frequency based on user activity level
+   */
+  private adjustFrequencyByActivity(): void {
+    switch (this.activityLevel) {
+      case 'high':
+        this.currentFrequency = this.baseFrequency / 2;
+        break;
+      case 'medium':
+        this.currentFrequency = this.baseFrequency;
+        break;
+      case 'low':
+        this.currentFrequency = Math.min(this.maxFrequency, this.baseFrequency * 2);
+        break;
+    }
+  }
+  
+  /**
+   * Set user activity level
+   * @param level Activity level
+   */
+  public setActivityLevel(level: 'low' | 'medium' | 'high'): void {
+    if (this.activityLevel !== level) {
+      this.activityLevel = level;
+      this.adjustFrequencyByActivity();
+    }
+  }
+  
+  /**
+   * Record when a backup was created
+   * @param timestamp Backup creation time
+   */
+  public setLastBackupTime(timestamp: number): void {
+    this.lastBackupTime = timestamp;
+  }
+  
+  /**
+   * Get current backup frequency
+   */
+  public getCurrentFrequency(): number {
+    return this.currentFrequency;
+  }
+  
+  /**
+   * Check if enough time has passed to create a new backup
+   * @param errorCount Optional error count to force backup
+   */
+  public shouldCreateBackup(errorCount: number = 0): boolean {
+    // Always backup when errors are present
+    if (errorCount > 0) return true;
+    
+    // Check if enough time has passed
+    const timeSinceLastBackup = Date.now() - this.lastBackupTime;
+    return timeSinceLastBackup >= this.currentFrequency;
   }
 }

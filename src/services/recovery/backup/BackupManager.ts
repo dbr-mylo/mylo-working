@@ -1,6 +1,7 @@
 
 import { UserRole } from '@/lib/types';
 import { backupDocument } from '@/utils/backup/documentBackupSystem';
+import { addChecksumToBackup } from '@/utils/backup/documentIntegrity';
 
 /**
  * Manages document backup creation and operations
@@ -32,16 +33,23 @@ export class BackupManager {
 
     // Create the backup
     if (documentId || userRole) {
+      // Add checksum to metadata for integrity verification
+      const enhancedMeta = {
+        ...meta,
+        backupTime: new Date().toISOString()
+      };
+      
       const result = backupDocument(
         content,
         documentId,
         documentTitle,
         userRole as UserRole,
-        meta
+        enhancedMeta,
+        true // Enable integrity check
       );
 
       if (result) {
-        console.log(`Created backup for document "${documentTitle}"`);
+        console.log(`Created backup with integrity check for document "${documentTitle}"`);
       }
 
       return result;

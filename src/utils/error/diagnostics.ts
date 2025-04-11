@@ -1,177 +1,143 @@
 
 /**
- * Utility functions for running diagnostics
+ * Error diagnostics utility functions
  */
-
-import { getSystemHealth, reportSystemError, updateNetworkHealth, updateStorageHealth } from '../featureFlags/systemHealth';
 
 /**
- * Run system diagnostics to check for common issues
- * @returns boolean indicating if diagnostics succeeded
+ * Run system diagnostics to help identify and resolve errors
+ * @returns Promise resolving when diagnostics have completed
  */
-export function runDiagnostics(): boolean {
-  try {
-    console.log('Running system diagnostics...');
-    
-    // Check localStorage access
-    const storageAvailable = checkLocalStorage();
-    console.log('  Storage check:', storageAvailable ? '✓' : '✗');
-    
-    // Check network connectivity
-    const networkAvailable = checkNetworkConnectivity();
-    console.log('  Network check:', networkAvailable ? '✓' : '✗');
-    
-    // Check browser compatibility
-    const browserCompatible = checkBrowserCompatibility();
-    console.log('  Browser compatibility check:', browserCompatible ? '✓' : '✗');
-    
-    // Check IndexedDB access
-    const indexedDBAvailable = checkIndexedDB();
-    console.log('  IndexedDB check:', indexedDBAvailable ? '✓' : '✗');
-    
-    // Check network latency
-    checkNetworkLatency().then(latencyMs => {
-      console.log(`  Network latency: ${latencyMs !== null ? `${latencyMs}ms` : 'Unknown'}`);
-      
-      // Update system health with network information
-      if (latencyMs !== null) {
-        updateNetworkHealth(networkAvailable, latencyMs);
-      } else {
-        updateNetworkHealth(networkAvailable);
-      }
-    });
-    
-    // Update storage health based on diagnostics
-    updateStorageHealth();
-    
-    // Display overall system health
-    const systemHealth = getSystemHealth();
-    console.log(`  System health score: ${systemHealth}/100`);
-    
-    return storageAvailable && networkAvailable && browserCompatible;
-  } catch (error) {
-    console.error('Error running diagnostics:', error);
-    reportSystemError(error, 'diagnostics');
-    return false;
-  }
-}
-
-/**
- * Check if localStorage is available
- */
-function checkLocalStorage(): boolean {
-  try {
-    const testKey = '___diagnostics_test___';
-    localStorage.setItem(testKey, 'test');
-    const testValue = localStorage.getItem(testKey);
-    localStorage.removeItem(testKey);
-    return testValue === 'test';
-  } catch (error) {
-    console.error('  LocalStorage check failed:', error);
-    return false;
-  }
+export async function runDiagnostics(): Promise<void> {
+  console.info('Running system diagnostics...');
+  
+  await Promise.all([
+    checkNetworkConnectivity(),
+    checkStorageAccess(),
+    checkPerformance()
+  ]);
+  
+  console.info('Diagnostics complete');
 }
 
 /**
  * Check network connectivity
  */
-function checkNetworkConnectivity(): boolean {
-  // This is a simple check, in a real app you might want to ping a server
-  return navigator.onLine;
-}
-
-/**
- * Check network latency by pinging a reliable endpoint
- * @returns Promise resolving to latency in ms or null if check failed
- */
-async function checkNetworkLatency(): Promise<number | null> {
+async function checkNetworkConnectivity(): Promise<boolean> {
   try {
-    const start = performance.now();
+    console.info('Checking network connectivity...');
     
-    // Use a reliable API that supports CORS
-    const response = await fetch('https://httpbin.org/get', { 
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        'Accept': 'application/json'
-      },
-    });
+    // First check navigator.onLine (basic check)
+    const isOnline = navigator.onLine;
+    console.info(`Device reports ${isOnline ? 'online' : 'offline'} status`);
     
-    if (response.ok) {
-      const end = performance.now();
-      return Math.round(end - start);
+    if (!isOnline) {
+      return false;
     }
     
-    return null;
-  } catch (error) {
-    console.warn('  Network latency check failed:', error);
-    return null;
-  }
-}
-
-/**
- * Check browser compatibility for modern features
- */
-function checkBrowserCompatibility(): boolean {
-  try {
-    // Check for some modern features
-    const hasLocalStorage = typeof localStorage !== 'undefined';
-    const hasSessionStorage = typeof sessionStorage !== 'undefined';
-    const hasPromises = typeof Promise !== 'undefined';
-    const hasAsync = (async () => {}).constructor.name === 'AsyncFunction';
-    const hasURLAPI = typeof URL !== 'undefined';
-    const hasIndexedDB = typeof indexedDB !== 'undefined';
-    const hasServiceWorker = 'serviceWorker' in navigator;
+    // Try a lightweight ping to verify actual connectivity
+    // We use a timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     
-    // Log individual checks
-    console.log('    Local Storage available:', hasLocalStorage ? '✓' : '✗');
-    console.log('    Session Storage available:', hasSessionStorage ? '✓' : '✗');
-    console.log('    Promises supported:', hasPromises ? '✓' : '✗');
-    console.log('    Async/await supported:', hasAsync ? '✓' : '✗');
-    console.log('    URL API supported:', hasURLAPI ? '✓' : '✗');
-    console.log('    IndexedDB supported:', hasIndexedDB ? '✓' : '✗');
-    console.log('    Service Worker supported:', hasServiceWorker ? '✓' : '✗');
-    
-    return hasLocalStorage && hasSessionStorage && hasPromises && hasAsync && hasURLAPI;
-  } catch (error) {
-    console.error('  Browser compatibility check failed:', error);
+    try {
+      // Try to fetch a tiny resource to verify connection
+      // In a real app, you'd use a dedicated endpoint
+      await fetch('/favicon.ico', { 
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+      
+      console.info('Network connectivity confirmed');
+      return true;
+    } catch (e) {
+      console.warn('Network connectivity test failed:', e);
+      return false;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (e) {
+    console.warn('Network diagnostics error:', e);
     return false;
   }
 }
 
 /**
- * Check IndexedDB access
+ * Check storage access
  */
-function checkIndexedDB(): boolean {
+async function checkStorageAccess(): Promise<boolean> {
   try {
-    const testDbName = '___diagnostics_test_db___';
+    console.info('Checking storage access...');
     
-    // Simple promise-based check
-    return new Promise((resolve) => {
-      if (!window.indexedDB) {
-        console.error('  IndexedDB not supported');
-        resolve(false);
-        return;
+    // Check localStorage
+    const testKey = '___diagnostics_test___';
+    try {
+      localStorage.setItem(testKey, Date.now().toString());
+      const retrieved = localStorage.getItem(testKey);
+      localStorage.removeItem(testKey);
+      
+      if (retrieved) {
+        console.info('localStorage is accessible');
+      } else {
+        console.warn('localStorage write/read test failed');
+        return false;
       }
-      
-      const request = window.indexedDB.open(testDbName, 1);
-      
-      request.onerror = () => {
-        console.error('  IndexedDB check failed:', request.error);
-        resolve(false);
-      };
-      
-      request.onsuccess = (event) => {
-        // Clean up by deleting the test database
-        const db = (event.target as IDBOpenDBRequest).result;
-        db.close();
-        window.indexedDB.deleteDatabase(testDbName);
-        resolve(true);
-      };
-    }) as unknown as boolean;
-  } catch (error) {
-    console.error('  IndexedDB check failed:', error);
+    } catch (e) {
+      console.warn('localStorage access error:', e);
+      return false;
+    }
+    
+    // Check IndexedDB if needed
+    // This is a basic test to see if IndexedDB is available
+    if ('indexedDB' in window) {
+      try {
+        const request = indexedDB.open('___diagnostic_test___', 1);
+        request.onsuccess = () => {
+          const db = request.result;
+          db.close();
+          indexedDB.deleteDatabase('___diagnostic_test___');
+          console.info('IndexedDB is accessible');
+        };
+        request.onerror = () => {
+          console.warn('IndexedDB test failed:', request.error);
+        };
+      } catch (e) {
+        console.warn('IndexedDB access error:', e);
+      }
+    }
+    
+    return true;
+  } catch (e) {
+    console.warn('Storage diagnostics error:', e);
     return false;
+  }
+}
+
+/**
+ * Check system performance
+ */
+async function checkPerformance(): Promise<void> {
+  try {
+    console.info('Checking system performance...');
+    
+    // Get basic performance metrics if available
+    if ('performance' in window) {
+      try {
+        const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        if (navigationTiming) {
+          const loadTime = navigationTiming.loadEventEnd - navigationTiming.navigationStart;
+          console.info(`Page load time: ${Math.round(loadTime)}ms`);
+        }
+        
+        // Check for long tasks if available
+        if ('PerformanceObserver' in window) {
+          console.info('Performance observer is available for monitoring long tasks');
+        }
+      } catch (e) {
+        console.warn('Performance metrics error:', e);
+      }
+    }
+  } catch (e) {
+    console.warn('Performance diagnostics error:', e);
   }
 }

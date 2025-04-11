@@ -123,6 +123,21 @@ export function updateStorageHealth(): void {
 }
 
 /**
+ * Update overall system health directly
+ * @param adjustment Positive or negative adjustment to make
+ */
+export function updateSystemHealth(adjustment: number): void {
+  // Apply adjustment across categories
+  // For simplicity, we distribute the adjustment among all categories
+  const perCategoryAdjustment = adjustment / Object.keys(healthCategories).length;
+  
+  for (const category of Object.keys(healthCategories) as Array<keyof typeof healthCategories>) {
+    const newScore = Math.max(0, Math.min(100, healthScores[category] + perCategoryAdjustment));
+    healthScores[category] = newScore;
+  }
+}
+
+/**
  * Update performance health based on UI responsiveness
  */
 export function updatePerformanceHealth(): void {
@@ -184,4 +199,3 @@ export function getSystemHealthStatus(): 'healthy' | 'degraded' | 'critical' {
   if (health >= 40) return 'degraded';
   return 'critical';
 }
-

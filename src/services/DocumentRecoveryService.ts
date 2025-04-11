@@ -43,9 +43,6 @@ export class DocumentRecoveryService {
     this.onBackupCreated = onBackupCreated;
     this.recoveryAttempts = 0;
 
-    // Clear any existing interval
-    this.stopAutoBackup();
-
     console.log(`Document recovery service initialized for document "${documentTitle}"`);
   }
 
@@ -134,7 +131,19 @@ export class DocumentRecoveryService {
 
       if (doc) {
         console.log(`Successfully recovered document from backup: "${doc.title}"`);
-        return doc;
+        // Adapt the retrieved document to match the Document interface
+        const recoveredDocument: Document = {
+          id: doc.id,
+          title: doc.title,
+          content: doc.content,
+          updated_at: doc.updatedAt || new Date().toISOString(),
+          created_at: doc.createdAt || doc.updated_at || new Date().toISOString(),
+          status: doc.meta?.status,
+          owner_id: doc.meta?.owner_id,
+          meta: doc.meta || {},
+          version: doc.meta?.version || 1
+        };
+        return recoveredDocument;
       }
 
       return null;

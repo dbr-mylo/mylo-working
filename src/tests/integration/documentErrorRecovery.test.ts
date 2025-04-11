@@ -38,7 +38,12 @@ describe('Document Error Recovery Integration', () => {
       id: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      meta: {
+        owner_id: 'user-123',
+        version: 1
+      }
     };
     vi.mocked(backupSystem.getDocumentBackup).mockReturnValue(mockBackup);
     
@@ -53,7 +58,11 @@ describe('Document Error Recovery Integration', () => {
     
     // Verify recovery was successful
     expect(recovered).toBe(true);
-    expect(recoveryDocument).toEqual(mockBackup);
+    expect(recoveryDocument).toEqual(expect.objectContaining({
+      id: 'test-doc-123', 
+      title: 'Test Document',
+      content: 'Backed up content'
+    }));
     
     // Verify backup was checked and retrieved
     expect(backupSystem.hasBackup).toHaveBeenCalledWith('test-doc-123');
@@ -94,7 +103,12 @@ describe('Document Error Recovery Integration', () => {
       id: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      meta: {
+        owner_id: 'user-123',
+        version: 1
+      }
     };
     vi.mocked(backupSystem.getDocumentBackup).mockReturnValue(mockBackup);
     

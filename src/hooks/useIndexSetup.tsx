@@ -32,7 +32,8 @@ export const useIndexSetup = () => {
     saveDocument,
     loadDocument,
     isLoading,
-    documentMeta
+    documentMeta,
+    currentDocumentId
   } = useDocument(documentId);
   
   // When document metadata is loaded, extract template ID
@@ -133,6 +134,7 @@ export const useIndexSetup = () => {
     templateId,
     setTemplateId,
     editorInstance,
-    editorSetup
+    editorSetup,
+    currentDocumentId
   };
 };

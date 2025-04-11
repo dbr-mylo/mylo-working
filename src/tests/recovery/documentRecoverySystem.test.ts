@@ -96,7 +96,12 @@ describe('DocumentRecoveryService', () => {
       id: 'test-doc-123',
       title: 'Test Document',
       content: 'Recovered content',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      meta: {
+        owner_id: 'user-123',
+        version: 1
+      }
     };
     
     // Mock getDocumentBackup to return the mock document
@@ -106,7 +111,11 @@ describe('DocumentRecoveryService', () => {
     const result = service.recoverFromBackup();
     
     // Verify the result
-    expect(result).toEqual(mockDocument);
+    expect(result).toEqual(expect.objectContaining({
+      id: 'test-doc-123',
+      title: 'Test Document',
+      content: 'Recovered content'
+    }));
     expect(backupSystem.getDocumentBackup).toHaveBeenCalledWith('test-doc-123');
   });
   

@@ -1,109 +1,64 @@
-
-import { toast } from "sonner";
-import { trackError } from "./analytics";
-import { getUserFriendlyErrorMessage, classifyError, ErrorCategory } from "./errorClassifier";
-import { getEnhancedErrorMessage, getEnhancedRecoverySteps } from "./getRoleAwareErrorMessage";
+// Replace with import for registerErrorAndAttemptRecovery
 import { registerErrorAndAttemptRecovery } from "./selfHealingSystem";
 
 /**
- * Handles an error with consistent logging and user notification
- * 
- * This function centralizes error handling by:
- * 1. Classifying the error for better reporting
- * 2. Logging the error with context
- * 3. Tracking the error for analytics
- * 4. Attempting self-healing when possible
- * 5. Displaying a user-friendly toast notification
- * 
- * @param error The error to handle
- * @param context Context information about where the error occurred
- * @param userMessage Optional custom message to show to the user
- * @param shouldToast Whether to show a toast notification (default: true)
+ * Utility functions for handling errors and providing recovery steps.
  */
-export const handleError = (
-  error: unknown,
-  context: string,
-  userMessage?: string,
-  shouldToast: boolean = true
-): void => {
-  // Classify the error for better reporting
-  const classifiedError = classifyError(error, context);
-  
-  // Extract error message
-  const errorMessage = userMessage || classifiedError.message;
-  
-  // Determine toast variant based on error category
-  const toastVariant = classifiedError.category === ErrorCategory.NETWORK 
-    ? "error" // Using "error" instead of "warning" for sonner
-    : "error";
-  
-  // Log error with context
-  console.error(`Error in ${context}:`, error);
-  console.info(`Classified as: ${classifiedError.category}`);
-  
-  // Add analytics tracking for errors
-  trackError(error, context);
-  
-  // Attempt self-healing
-  const recoveryAttempted = registerErrorAndAttemptRecovery(error, context);
-  
-  // If recovery was attempted, modify the message to indicate this
-  let finalMessage = errorMessage;
-  if (recoveryAttempted) {
-    finalMessage = `${errorMessage} (Automatic recovery attempted)`;
-  }
-  
-  // Show toast notification if requested
-  if (shouldToast) {
-    toast[toastVariant](finalMessage, {
-      description: classifiedError.suggestedAction || "See console for more details",
-      duration: 5000,
-    });
-  }
-};
 
 /**
- * Enhanced error handler with role-aware and feature-specific messaging
- * 
- * This function extends the basic error handler by providing
- * role-specific and feature-specific error messages
- * 
- * @param error The error to handle
- * @param context Context information about where the error occurred
- * @param role The user's role (admin, editor, designer, etc.)
- * @param feature Optional feature context (editor, template, auth, etc.)
- * @param userMessage Optional custom message to override the generated message
- * @param shouldToast Whether to show a toast notification (default: true)
+ * Get recovery steps based on the error type and user role.
+ * @param error The error object.
+ * @param context The context in which the error occurred.
+ * @param role The user's role.
+ * @param feature The feature that was being used when the error occurred.
+ * @returns An array of recovery steps.
  */
-export const handleRoleAwareError = (
-  error: unknown,
+export function getErrorRecoverySteps(
+  error: Error,
   context: string,
-  role: string | null,
-  feature?: string,
-  userMessage?: string,
-  shouldToast: boolean = true
-): void => {
-  // Get enhanced message
-  const enhancedMessage = getEnhancedErrorMessage(error, context, role, feature);
-  
-  // Use standard error handler with enhanced message
-  handleError(error, context, userMessage || enhancedMessage, shouldToast);
-};
-
-/**
- * Get recovery steps for an error based on classification, role, and feature
- * 
- * @param error The error to get recovery steps for
- * @param context Context information about where the error occurred
- * @param role The user's role
- * @param feature Optional feature context
- * @returns Array of recovery step strings
- */
-export const getErrorRecoverySteps = (
-  error: unknown, 
-  context: string, 
   role: string | null | undefined,
   feature?: string
-): string[] => {
-  return getEnhancedRecoverySteps(error, context, role, feature);
-};
+): string[] {
+  // Log the error for debugging purposes
+  console.error(`Error in ${context} for feature ${feature}:`, error);
+  
+  // Attempt to register the error and trigger automatic recovery
+  const recoveryAttempted = registerErrorAndAttemptRecovery(error, context);
+  
+  // Define recovery steps based on error type and context
+  const steps: string[] = [];
+  
+  // Common steps
+  steps.push("Check your internet connection.");
+  steps.push("Refresh the page.");
+  
+  if (context === 'authentication') {
+    steps.push("Clear your browser cookies and cache.");
+    steps.push("Reset your password.");
+  }
+  
+  if (context === 'storage') {
+    steps.push("Clear your browser's local storage.");
+    steps.push("Check if you have enough storage space.");
+  }
+  
+  if (feature === 'real-time-collaboration') {
+    steps.push("Ensure all collaborators have a stable internet connection.");
+    steps.push("Try disabling and re-enabling real-time collaboration.");
+  }
+  
+  if (role === 'admin') {
+    steps.push("Check the server logs for more details.");
+    steps.push("Restart the server.");
+  }
+  
+  // Add a generic step
+  steps.push("Contact support if the issue persists.");
+  
+  // If recovery was attempted, add a note about it
+  if (recoveryAttempted) {
+    steps.push("The system attempted an automatic recovery.");
+  }
+  
+  return steps;
+}

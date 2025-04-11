@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CirclePlus, Save, RefreshCw, Search, Info, BarChart } from "lucide-react";
+import { CirclePlus, Save, RefreshCw, Search, Info, BarChart, History, Clock, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { 
   FeatureFlagKey,
@@ -22,67 +23,11 @@ import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserRole } from "@/lib/types";
-
-/**
- * Flag usage statistics (typically would come from a backend)
- * This is a mock for demonstration
- */
-type FlagUsageStats = {
-  name: string;
-  impressions: number;
-  usageRate: number;
-  byRole: Record<string, number>;
-};
-
-// Mock data for feature flag usage
-const mockFlagUsage: Record<string, FlagUsageStats> = {
-  'core-editing': {
-    name: 'core-editing',
-    impressions: 14580,
-    usageRate: 0.98,
-    byRole: { 'admin': 350, 'writer': 12000, 'designer': 2230 }
-  },
-  'document-save': {
-    name: 'document-save',
-    impressions: 8920,
-    usageRate: 0.95,
-    byRole: { 'admin': 320, 'writer': 7500, 'designer': 1100 }
-  },
-  'auth-session': {
-    name: 'auth-session',
-    impressions: 22450,
-    usageRate: 1.0,
-    byRole: { 'admin': 4500, 'writer': 12000, 'designer': 5950 }
-  },
-  'real-time-collaboration': {
-    name: 'real-time-collaboration',
-    impressions: 6340,
-    usageRate: 0.72,
-    byRole: { 'admin': 1200, 'writer': 3800, 'designer': 1340 }
-  },
-  'template-marketplace': {
-    name: 'template-marketplace',
-    impressions: 5280,
-    usageRate: 0.62,
-    byRole: { 'admin': 480, 'writer': 1100, 'designer': 3700 }
-  },
-  'auto_recovery': {
-    name: 'auto_recovery',
-    impressions: 1850,
-    usageRate: 0.25,
-    byRole: { 'admin': 450, 'writer': 700, 'designer': 700 }
-  }
-};
-
-/**
- * Role visibility settings for feature flags
- */
-interface RoleVisibility {
-  admin: boolean;
-  writer: boolean;
-  designer: boolean;
-  guest: boolean;
-}
+import { DonutChart } from "@/components/ui/donut-chart";
+import { getSystemHealthStatus } from '@/utils/featureFlags/systemHealth';
+import { Highlight } from "@/components/ui/highlight";
+import { useFeatureFlagHistory } from '@/hooks/useFeatureFlagHistory';
+import { FeatureFlagHistoryEntry, FeatureFlagUsageStats } from '@/utils/featureFlags/types';
 
 /**
  * Admin panel for managing feature flags
@@ -90,6 +35,7 @@ interface RoleVisibility {
 export function FeatureFlagsAdminPanel() {
   const { flags, isEnabled, setOverride } = useFeatureFlags();
   const { role } = useAuth();
+  const { history, logFlagChange } = useFeatureFlagHistory();
   const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
   const [newFlagName, setNewFlagName] = useState('');
   const [isAddingFlag, setIsAddingFlag] = useState(false);
@@ -97,15 +43,41 @@ export function FeatureFlagsAdminPanel() {
   const [selectedTab, setSelectedTab] = useState('all-flags');
   const [roleVisibility, setRoleVisibility] = useState<Record<string, RoleVisibility>>({});
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
+  const [usageData, setUsageData] = useState<Record<string, FeatureFlagUsageStats>>({});
+  const systemHealthStatus = getSystemHealthStatus();
   
   useEffect(() => {
     loadFeatureFlags();
     initializeRoleVisibility();
+    fetchUsageStatistics();
   }, [role]);
   
   const loadFeatureFlags = () => {
     const allFlags = getAllFeatureFlags(role);
     setFeatureFlags(allFlags);
+  };
+  
+  const fetchUsageStatistics = () => {
+    // In a real app, this would fetch from an API
+    // For now, using mock data with some real flags
+    const mockUsageData: Record<string, FeatureFlagUsageStats> = {};
+    
+    Object.keys(getAllFeatureFlags()).forEach(flag => {
+      mockUsageData[flag] = {
+        name: flag,
+        impressions: Math.floor(Math.random() * 15000) + 1000,
+        usageRate: Math.random() * 0.9 + 0.1,
+        byRole: {
+          admin: Math.floor(Math.random() * 1000) + 100,
+          writer: Math.floor(Math.random() * 4000) + 500,
+          designer: Math.floor(Math.random() * 3000) + 500,
+          guest: Math.floor(Math.random() * 2000) + 100
+        },
+        healthImpact: Math.random() * 30
+      };
+    });
+    
+    setUsageData(mockUsageData);
   };
   
   const initializeRoleVisibility = () => {
@@ -140,6 +112,15 @@ export function FeatureFlagsAdminPanel() {
       [flag]: enabled
     }));
     
+    // Log the change to history
+    logFlagChange({
+      flagName: flag as FeatureFlagKey,
+      newValue: enabled,
+      timestamp: Date.now(),
+      changedBy: role || 'unknown',
+      previousValue: !enabled
+    });
+    
     toast.success(`Feature "${flag}" ${enabled ? 'enabled' : 'disabled'}`);
   };
   
@@ -148,11 +129,34 @@ export function FeatureFlagsAdminPanel() {
     
     loadFeatureFlags();
     
+    // Log the reset to history
+    logFlagChange({
+      flagName: flag as FeatureFlagKey,
+      newValue: null,
+      timestamp: Date.now(),
+      changedBy: role || 'unknown',
+      previousValue: featureFlags[flag],
+      action: 'reset'
+    });
+    
     toast.info(`Feature "${flag}" reset to default`);
   };
   
   const handleResetAllFlags = () => {
     resetAllOverrides();
+    
+    // Log all resets
+    Object.entries(featureFlags).forEach(([flag, value]) => {
+      logFlagChange({
+        flagName: flag as FeatureFlagKey,
+        newValue: null,
+        timestamp: Date.now(),
+        changedBy: role || 'unknown',
+        previousValue: value,
+        action: 'reset'
+      });
+    });
+    
     loadFeatureFlags();
     
     toast.info('All features reset to defaults');
@@ -190,6 +194,16 @@ export function FeatureFlagsAdminPanel() {
       [normalizedName]: false
     }));
     
+    // Log the addition to history
+    logFlagChange({
+      flagName: normalizedName as FeatureFlagKey,
+      newValue: false,
+      timestamp: Date.now(),
+      changedBy: role || 'unknown',
+      previousValue: null,
+      action: 'create'
+    });
+    
     setNewFlagName('');
     setIsAddingFlag(false);
     
@@ -204,6 +218,16 @@ export function FeatureFlagsAdminPanel() {
         [role]: visible
       }
     }));
+    
+    logFlagChange({
+      flagName: flag as FeatureFlagKey,
+      newValue: null,
+      timestamp: Date.now(),
+      changedBy: role || 'unknown',
+      previousValue: null,
+      action: 'visibility-change',
+      metadata: { role, visible }
+    });
     
     toast.success(`${role} ${visible ? 'can now see' : 'cannot see'} "${flag}"`);
   };
@@ -237,10 +261,66 @@ export function FeatureFlagsAdminPanel() {
     return result;
   }, [featureFlags, searchQuery, selectedTab, selectedRole, roleVisibility]);
 
+  const getUsageChartData = () => {
+    return Object.entries(usageData).slice(0, 5).map(([flag, data]) => ({
+      name: flag,
+      value: data.impressions,
+      color: getColorForUsageRate(data.usageRate)
+    }));
+  };
+  
+  const getRoleChartData = () => {
+    const roleData: Record<string, number> = { admin: 0, writer: 0, designer: 0, guest: 0 };
+    
+    Object.values(usageData).forEach(data => {
+      Object.entries(data.byRole).forEach(([role, count]) => {
+        roleData[role] = (roleData[role] || 0) + count;
+      });
+    });
+    
+    return Object.entries(roleData).map(([role, value]) => ({
+      name: role,
+      value,
+      color: getRoleColor(role)
+    }));
+  };
+  
+  const getColorForUsageRate = (rate: number): string => {
+    if (rate > 0.7) return '#3b82f6'; // blue
+    if (rate > 0.3) return '#10b981'; // green
+    return '#6b7280'; // gray
+  };
+  
+  const getRoleColor = (role: string): string => {
+    switch (role) {
+      case 'admin': return '#ef4444'; // red
+      case 'writer': return '#3b82f6'; // blue
+      case 'designer': return '#8b5cf6'; // purple
+      default: return '#6b7280'; // gray
+    }
+  };
+  
+  const getHealthStatusColor = () => {
+    switch (systemHealthStatus) {
+      case 'healthy': return 'bg-green-100 text-green-800';
+      case 'degraded': return 'bg-yellow-100 text-yellow-800';
+      case 'critical': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Feature Flags</h2>
+        <div>
+          <h2 className="text-2xl font-semibold">Feature Flags</h2>
+          <div className="flex items-center space-x-2 mt-1">
+            <span className="text-sm text-muted-foreground">System health:</span>
+            <Badge variant="outline" className={getHealthStatusColor()}>
+              {systemHealthStatus.charAt(0).toUpperCase() + systemHealthStatus.slice(1)}
+            </Badge>
+          </div>
+        </div>
         <div className="space-x-2">
           <Button 
             variant="outline" 
@@ -299,10 +379,11 @@ export function FeatureFlagsAdminPanel() {
       </div>
       
       <Tabs defaultValue="all-flags" value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="all-flags">All Flags</TabsTrigger>
           <TabsTrigger value="critical-flags">Critical</TabsTrigger>
           <TabsTrigger value="non-critical-flags">Non-Critical</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all-flags">
@@ -312,6 +393,7 @@ export function FeatureFlagsAdminPanel() {
             handleResetFlag={handleResetFlag}
             roleVisibility={roleVisibility}
             handleRoleVisibilityChange={handleRoleVisibilityChange}
+            searchQuery={searchQuery}
           />
         </TabsContent>
         
@@ -322,6 +404,7 @@ export function FeatureFlagsAdminPanel() {
             handleResetFlag={handleResetFlag}
             roleVisibility={roleVisibility}
             handleRoleVisibilityChange={handleRoleVisibilityChange}
+            searchQuery={searchQuery}
           />
         </TabsContent>
         
@@ -332,7 +415,22 @@ export function FeatureFlagsAdminPanel() {
             handleResetFlag={handleResetFlag}
             roleVisibility={roleVisibility}
             handleRoleVisibilityChange={handleRoleVisibilityChange}
+            searchQuery={searchQuery}
           />
+        </TabsContent>
+        
+        <TabsContent value="history" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Flag Change History</CardTitle>
+              <CardDescription>
+                Recent changes to feature flags and their configurations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FeatureFlagHistory history={history} />
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="usage-stats" className="space-y-4">
@@ -341,12 +439,12 @@ export function FeatureFlagsAdminPanel() {
               <CardHeader>
                 <CardTitle>Feature Usage</CardTitle>
                 <CardDescription>
-                  Usage statistics across all features
+                  Usage statistics across top features
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-2">
                 <div className="h-80">
-                  <FeatureUsageChart />
+                  <DonutChart data={getUsageChartData()} />
                 </div>
               </CardContent>
             </Card>
@@ -360,13 +458,13 @@ export function FeatureFlagsAdminPanel() {
               </CardHeader>
               <CardContent className="pt-2">
                 <div className="h-80">
-                  <RoleUsageChart />
+                  <DonutChart data={getRoleChartData()} />
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          <FeatureUsageTable />
+          <FeatureUsageTable usageData={usageData} />
         </TabsContent>
       </Tabs>
       
@@ -431,18 +529,30 @@ export function FeatureFlagsAdminPanel() {
   );
 }
 
+/**
+ * Role visibility settings for feature flags
+ */
+interface RoleVisibility {
+  admin: boolean;
+  writer: boolean;
+  designer: boolean;
+  guest: boolean;
+}
+
 function FlagsList({ 
   flags, 
   handleFlagToggle, 
   handleResetFlag,
   roleVisibility,
-  handleRoleVisibilityChange
+  handleRoleVisibilityChange,
+  searchQuery
 }: { 
   flags: [string, boolean][];
   handleFlagToggle: (flag: string, enabled: boolean) => void;
   handleResetFlag: (flag: string) => void;
   roleVisibility: Record<string, RoleVisibility>;
   handleRoleVisibilityChange: (flag: string, role: keyof RoleVisibility, visible: boolean) => void;
+  searchQuery: string;
 }) {
   const [expandedFlag, setExpandedFlag] = useState<string | null>(null);
   
@@ -465,9 +575,22 @@ function FlagsList({
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-lg">{flag}</CardTitle>
+                <CardTitle className="text-lg">
+                  {searchQuery ? (
+                    <Highlight text={flag} highlight={searchQuery} />
+                  ) : (
+                    flag
+                  )}
+                </CardTitle>
                 <CardDescription className="text-sm">
-                  {getFlagDescription(flag as FeatureFlagKey)}
+                  {searchQuery ? (
+                    <Highlight 
+                      text={getFlagDescription(flag as FeatureFlagKey)} 
+                      highlight={searchQuery} 
+                    />
+                  ) : (
+                    getFlagDescription(flag as FeatureFlagKey)
+                  )}
                 </CardDescription>
               </div>
               <Badge variant={enabled ? "default" : "secondary"}>
@@ -533,31 +656,63 @@ function FlagsList({
   );
 }
 
-function FeatureUsageChart() {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-center text-muted-foreground">
-        <BarChart className="w-12 h-12 mx-auto" />
-        <p className="mt-2">Usage chart would render here with real data.</p>
-        <p className="text-sm">Connect to your analytics service to view real data.</p>
+function FeatureFlagHistory({ history }: { history: FeatureFlagHistoryEntry[] }) {
+  if (history.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <History className="w-12 h-12 mx-auto text-muted-foreground" />
+        <h3 className="mt-2 text-lg font-medium">No history yet</h3>
+        <p className="text-muted-foreground">
+          Changes to feature flags will appear here
+        </p>
       </div>
+    );
+  }
+  
+  return (
+    <div className="rounded-md border">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b bg-muted/50">
+            <th className="h-10 px-4 text-left font-medium">Timestamp</th>
+            <th className="h-10 px-4 text-left font-medium">Flag</th>
+            <th className="h-10 px-4 text-left font-medium">Change</th>
+            <th className="h-10 px-4 text-left font-medium">By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history.map((entry, index) => (
+            <tr key={index} className="border-b">
+              <td className="p-4 align-middle">
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                  {new Date(entry.timestamp).toLocaleString()}
+                </div>
+              </td>
+              <td className="p-4 align-middle font-medium">{entry.flagName}</td>
+              <td className="p-4 align-middle">
+                {entry.action === 'create' ? (
+                  <Badge variant="outline" className="bg-green-50">Created</Badge>
+                ) : entry.action === 'reset' ? (
+                  <Badge variant="outline" className="bg-blue-50">Reset to default</Badge>
+                ) : entry.action === 'visibility-change' ? (
+                  <Badge variant="outline" className="bg-purple-50">Visibility changed</Badge>
+                ) : (
+                  <Badge variant={entry.newValue ? "default" : "secondary"}>
+                    {entry.previousValue?.toString() || 'Default'} → {entry.newValue?.toString() || 'Default'}
+                  </Badge>
+                )}
+              </td>
+              <td className="p-4 align-middle">{entry.changedBy}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function RoleUsageChart() {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-center text-muted-foreground">
-        <BarChart className="w-12 h-12 mx-auto" />
-        <p className="mt-2">Role usage breakdown would render here.</p>
-        <p className="text-sm">Connect to your user analytics to view role distribution.</p>
-      </div>
-    </div>
-  );
-}
-
-function FeatureUsageTable() {
+function FeatureUsageTable({ usageData }: { usageData: Record<string, FeatureFlagUsageStats> }) {
   return (
     <Card>
       <CardHeader>
@@ -574,15 +729,17 @@ function FeatureUsageTable() {
                 <th className="h-10 px-4 text-left font-medium">Feature Flag</th>
                 <th className="h-10 px-4 text-right font-medium">Impressions</th>
                 <th className="h-10 px-4 text-right font-medium">Usage Rate</th>
+                <th className="h-10 px-4 text-right font-medium">Health Impact</th>
                 <th className="h-10 px-4 text-right font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
-              {Object.entries(mockFlagUsage).map(([flag, data]) => (
+              {Object.entries(usageData).map(([flag, data]) => (
                 <tr key={flag} className="border-b">
                   <td className="p-4 align-middle font-medium">{flag}</td>
                   <td className="p-4 align-middle text-right">{data.impressions.toLocaleString()}</td>
                   <td className="p-4 align-middle text-right">{(data.usageRate * 100).toFixed(1)}%</td>
+                  <td className="p-4 align-middle text-right">{data.healthImpact.toFixed(1)}%</td>
                   <td className="p-4 align-middle text-right">
                     <Badge variant={data.usageRate > 0.7 ? "default" : data.usageRate > 0.3 ? "outline" : "secondary"}>
                       {data.usageRate > 0.7 ? "High" : data.usageRate > 0.3 ? "Medium" : "Low"}

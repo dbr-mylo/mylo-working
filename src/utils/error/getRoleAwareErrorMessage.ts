@@ -1,3 +1,4 @@
+
 import { ClassifiedError, classifyError } from "./errorClassifier";
 import { getRoleSpecificErrorMessage } from "./roleSpecificErrors";
 import { getFeatureSpecificErrorMessage } from "./featureSpecificErrors";
@@ -52,10 +53,10 @@ export function getEnhancedRecoverySteps(
   const classifiedError = classifyError(error, context);
   
   // If a specific feature is provided, get feature-specific recovery steps
-  if (feature && typeof getFeatureSpecificRecoverySteps === 'function') {
+  if (feature) {
     try {
-      const { getFeatureSpecificRecoverySteps } = require('./featureSpecificErrors');
-      return getFeatureSpecificRecoverySteps(classifiedError, feature, role);
+      const featureRecoverySteps = getFeatureSpecificRecoverySteps(classifiedError, feature, role);
+      return featureRecoverySteps;
     } catch (e) {
       console.error('Error loading feature-specific recovery steps', e);
     }
@@ -67,6 +68,33 @@ export function getEnhancedRecoverySteps(
     return getErrorResolutionSteps(error, context);
   } catch (e) {
     console.error('Error loading standard recovery steps', e);
+    return [
+      'Try refreshing the page',
+      'Check your internet connection',
+      'Contact support if the issue persists'
+    ];
+  }
+}
+
+/**
+ * Get feature-specific recovery steps
+ * 
+ * @param error The classified error
+ * @param feature The feature where the error occurred
+ * @param role The user's role
+ * @returns Array of recovery steps specific to the feature
+ */
+function getFeatureSpecificRecoverySteps(
+  error: ClassifiedError,
+  feature: string,
+  role: string | null | undefined
+): string[] {
+  try {
+    // Import and use the function from featureSpecificErrors
+    const { getFeatureSpecificRecoverySteps } = require('./featureSpecificErrors');
+    return getFeatureSpecificRecoverySteps(error, feature, role);
+  } catch (e) {
+    console.error('Feature-specific recovery steps not available', e);
     return [
       'Try refreshing the page',
       'Check your internet connection',

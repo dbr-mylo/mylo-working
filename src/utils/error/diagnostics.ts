@@ -34,15 +34,19 @@ export function runDiagnostics(): boolean {
     console.log('Online status:', online ? 'Connected' : 'Disconnected');
     
     // Check memory usage if available
-    if (window.performance && window.performance.memory) {
-      // @ts-expect-error - memory is non-standard but available in Chrome
-      const memory = window.performance.memory;
-      console.log('Memory usage:', {
-        // @ts-expect-error - memory is non-standard but available in Chrome
-        totalJSHeapSize: Math.round(memory.totalJSHeapSize / (1024 * 1024)) + 'MB',
-        // @ts-expect-error - memory is non-standard but available in Chrome
-        usedJSHeapSize: Math.round(memory.usedJSHeapSize / (1024 * 1024)) + 'MB',
-      });
+    if (window.performance) {
+      try {
+        // Using type assertion for Chrome's non-standard performance.memory
+        const memory = (window.performance as any).memory;
+        if (memory) {
+          console.log('Memory usage:', {
+            totalJSHeapSize: Math.round(memory.totalJSHeapSize / (1024 * 1024)) + 'MB',
+            usedJSHeapSize: Math.round(memory.usedJSHeapSize / (1024 * 1024)) + 'MB',
+          });
+        }
+      } catch (e) {
+        console.log('Memory usage information not available');
+      }
     }
     
     // Check for unhandled promise rejections

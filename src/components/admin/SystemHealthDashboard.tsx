@@ -53,8 +53,8 @@ export function SystemHealthDashboard() {
   const handleRefreshHealth = () => {
     setRefreshing(true);
     
-    // Update storage health
-    updateStorageHealth();
+    // Update storage health with a positive delta (10)
+    updateStorageHealth(10); 
     
     // Update health display
     setTimeout(() => {

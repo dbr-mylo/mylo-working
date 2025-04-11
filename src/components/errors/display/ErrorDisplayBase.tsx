@@ -4,6 +4,7 @@ import { AlertCircle, RefreshCw, ChevronDown, ChevronUp, HelpCircle } from 'luci
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleSpecificErrorMessage } from "@/utils/error/roleSpecificErrors";
+import { classifyError } from '@/utils/error/errorClassifier';
 import { getErrorResolutionSteps } from "@/utils/error/errorResolution";
 
 interface ErrorDisplayProps {
@@ -36,7 +37,9 @@ export function ErrorDisplay({
     ? getRoleSpecificErrorMessage(error, role, context) 
     : errorMessage;
     
-  const resolutionSteps = getErrorResolutionSteps(error, context);
+  // Classify the error to get its category and then get resolution steps
+  const classified = classifyError(error, context);
+  const resolutionSteps = getErrorResolutionSteps(classified.category);
 
   return (
     <div className={`p-4 border border-red-200 bg-red-50 rounded-md ${className}`}>

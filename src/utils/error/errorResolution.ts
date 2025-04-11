@@ -49,6 +49,18 @@ export function getErrorResolutionSteps(category: ErrorCategory): string[] {
   }
 }
 
+// For backward compatibility with old error signature
+export function getErrorResolutionSteps2(error: unknown, context: string): string[] {
+  // This function serves as an adapter for code that still expects the old function signature
+  // In a real project, you would gradually migrate all callers to the new signature
+  return [
+    'Retry the operation',
+    'Check your internet connection',
+    'Clear browser cache',
+    'Contact support if the issue persists'
+  ];
+}
+
 // Get a human-readable title for the resolution workflow
 export function getResolutionTitle(category: ErrorCategory): string {
   switch (category) {

@@ -1,76 +1,58 @@
 
 import { describe, it, expect } from 'vitest';
 import { getErrorResolutionSteps } from '@/utils/error/errorResolution';
+import { ErrorCategory } from '@/utils/error/errorClassifier';
 
 describe('getErrorResolutionSteps', () => {
   it('should return default steps for generic errors', () => {
-    const error = new Error('Generic error');
-    const context = 'unknown';
+    const steps = getErrorResolutionSteps(ErrorCategory.UNKNOWN);
     
-    const steps = getErrorResolutionSteps(error, context);
-    
-    expect(steps).toHaveLength(4);
-    expect(steps[0]).toContain('Refresh');
-    expect(steps[1]).toContain('internet connection');
-    expect(steps[2]).toContain('browser cache');
-    expect(steps[3]).toContain('contact support');
+    expect(steps).toHaveLength(3);
+    expect(steps[0]).toContain('Retry');
+    expect(steps[1]).toContain('Refresh');
+    expect(steps[2]).toContain('Restart');
   });
   
   it('should return permission-specific steps for access errors', () => {
-    const error = new Error('Permission denied');
-    const context = 'settings';
-    
-    const steps = getErrorResolutionSteps(error, context);
+    const steps = getErrorResolutionSteps(ErrorCategory.PERMISSION);
     
     expect(steps).toHaveLength(3);
-    expect(steps[0]).toContain('permissions');
-    expect(steps[1]).toContain('logging out');
-    expect(steps[2]).toContain('administrator');
+    expect(steps[0]).toContain('Verify your access level');
+    expect(steps[1]).toContain('Request access');
+    expect(steps[2]).toContain('Try a different resource');
   });
   
   it('should return network-specific steps for timeout errors', () => {
-    const error = new Error('Request timed out');
-    const context = 'api';
-    
-    const steps = getErrorResolutionSteps(error, context);
+    const steps = getErrorResolutionSteps(ErrorCategory.NETWORK);
     
     expect(steps).toHaveLength(3);
     expect(steps[0]).toContain('internet connection');
-    expect(steps[1]).toContain('Try again');
-    expect(steps[2]).toContain('VPN');
+    expect(steps[1]).toContain('Reload');
+    expect(steps[2]).toContain('server status');
   });
   
   it('should return auth-specific steps for login context', () => {
-    const error = new Error('Authentication failed');
-    const context = 'login';
-    
-    const steps = getErrorResolutionSteps(error, context);
+    const steps = getErrorResolutionSteps(ErrorCategory.AUTHENTICATION);
     
     expect(steps).toHaveLength(3);
-    expect(steps[0]).toContain('credentials');
-    expect(steps[1]).toContain('Reset your password');
-    expect(steps[2]).toContain('account is locked');
+    expect(steps[0]).toContain('Refresh your session');
+    expect(steps[1]).toContain('Log in again');
+    expect(steps[2]).toContain('Clear cookies and cache');
   });
   
-  it('should return document-specific steps for document context', () => {
-    const error = new Error('Failed to save document');
-    const context = 'document';
-    
-    const steps = getErrorResolutionSteps(error, context);
+  it('should return validation steps for form errors', () => {
+    const steps = getErrorResolutionSteps(ErrorCategory.VALIDATION);
     
     expect(steps).toHaveLength(3);
-    expect(steps[0]).toContain('unsaved changes');
-    expect(steps[1]).toContain('different name');
-    expect(steps[2]).toContain('permissions');
+    expect(steps[0]).toContain('Check your input');
+    expect(steps[1]).toContain('Format data correctly');
+    expect(steps[2]).toContain('Try example data');
   });
   
-  it('should handle non-Error objects', () => {
-    const stringError = 'Network disconnected';
-    const context = 'api';
-    
-    const steps = getErrorResolutionSteps(stringError, context);
+  it('should handle other error categories with default steps', () => {
+    const steps = getErrorResolutionSteps(ErrorCategory.DATABASE);
     
     expect(steps).toHaveLength(3);
-    expect(steps[0]).toContain('internet connection');
+    expect(steps[0]).toContain('Retry');
   });
 });

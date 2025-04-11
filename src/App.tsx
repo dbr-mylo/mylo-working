@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -143,8 +144,13 @@ const WriterPages = () => {
 const AppRoutes = () => {
   useSmokeTest("AppRoutes");
   
+  // Create a fallback function to match the required signature
+  const appErrorFallback = (error: Error, resetErrorBoundary: () => void) => (
+    <RoleAwareErrorFallback error={error} context="application" onTryAgain={resetErrorBoundary} />
+  );
+  
   return (
-    <ErrorBoundary context="AppRoutes" fallback={<RoleAwareErrorFallback error={new Error("Application failed to load")} context="application" />}>
+    <ErrorBoundary context="AppRoutes" fallback={appErrorFallback}>
       <RouteValidator />
       <Routes>
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
@@ -175,8 +181,22 @@ const AppRoutes = () => {
 function App() {
   useSmokeTest("App");
   
+  // Create a fallback function for the App error boundary
+  const appRootFallback = (error: Error, resetErrorBoundary: () => void) => (
+    <div className="p-6">
+      <h2 className="text-xl font-bold">Application Error</h2>
+      <p className="my-2">{error.message}</p>
+      <button 
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        Try to recover
+      </button>
+    </div>
+  );
+  
   return (
-    <ErrorBoundary context="App">
+    <ErrorBoundary context="App" fallback={appRootFallback}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

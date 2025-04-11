@@ -22,17 +22,20 @@ export const ErrorTestComponent: React.FC<{
 }> = ({ showErrorTest }) => {
   if (!showErrorTest) return null;
   
+  // Create a fallback function for the error boundary that matches the expected signature
+  const testErrorFallback = (_error: Error, _resetErrorBoundary: () => void) => (
+    <Alert variant="destructive" className="mb-4">
+      <AlertTitle>Test Error Caught</AlertTitle>
+      <AlertDescription>
+        The error boundary successfully caught a test error.
+      </AlertDescription>
+    </Alert>
+  );
+  
   return (
     <ErrorBoundary 
       context="ErrorTest" 
-      fallback={
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>Test Error Caught</AlertTitle>
-          <AlertDescription>
-            The error boundary successfully caught a test error.
-          </AlertDescription>
-        </Alert>
-      }
+      fallback={testErrorFallback}
     >
       <ErrorComponent />
     </ErrorBoundary>

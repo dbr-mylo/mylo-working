@@ -22,18 +22,24 @@ export const WithErrorBoundary: React.FC<WithErrorBoundaryProps> = ({
   onError,
   allowReset = true
 }) => {
-  // If a custom fallback is not provided, use the RoleAwareErrorFallback
-  const defaultFallback = (error: Error) => (
+  // Create a default fallback function that matches the expected signature
+  const defaultFallback = (error: Error, resetErrorBoundary: () => void) => (
     <RoleAwareErrorFallback 
       error={error} 
       context={context} 
+      onTryAgain={resetErrorBoundary}
     />
   );
+
+  // If a custom fallback is provided, wrap it in a function
+  const fallbackFn = fallback
+    ? (_error: Error, _reset: () => void) => fallback
+    : defaultFallback;
 
   return (
     <ErrorBoundary
       context={context}
-      fallback={fallback}
+      fallback={fallbackFn}
       onError={onError}
       allowReset={allowReset}
     >

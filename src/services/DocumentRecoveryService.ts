@@ -49,6 +49,13 @@ export class DocumentRecoveryService extends DocumentRecoveryCore {
     
     return result;
   }
+
+  /**
+   * Internal backup implementation, overrides the base class method
+   */
+  protected createBackupInternal(content: string, meta?: any): boolean {
+    return this.createBackup(content, meta);
+  }
   
   /**
    * Recover document from backup

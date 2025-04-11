@@ -23,7 +23,7 @@ export class DocumentRecoveryCore {
   protected documentId: string | null = null;
   protected documentTitle: string = '';
   protected userRole: UserRole | null = null;
-  private onBackupCreated?: (timestamp: Date) => void;
+  protected onBackupCreated?: (timestamp: Date) => void;
   
   constructor(options: DocumentBackupOptions = {}) {
     this.backupOptions = { ...DEFAULT_BACKUP_OPTIONS, ...options };
@@ -55,7 +55,7 @@ export class DocumentRecoveryCore {
 
     // Create initial backup if we have content
     if (initialContent && initialContent.trim().length > 0) {
-      this.createBackup(initialContent);
+      this.createBackupInternal(initialContent);
     }
 
     // Set up interval for periodic backups
@@ -64,6 +64,15 @@ export class DocumentRecoveryCore {
     }, this.backupOptions.autoBackupInterval);
 
     console.log(`Started auto-backup for document "${this.documentTitle}" with interval ${this.backupOptions.autoBackupInterval}ms`);
+  }
+
+  /**
+   * Internal method to create backup, to be implemented by child classes
+   */
+  protected createBackupInternal(content: string, meta?: any): boolean {
+    // No-op in base class, to be overridden by child classes
+    console.log(`Base class createBackupInternal called for "${this.documentTitle}"`);
+    return false;
   }
 
   /**

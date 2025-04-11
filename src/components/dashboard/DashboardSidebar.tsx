@@ -10,7 +10,9 @@ import {
   Settings, 
   LogOut,
   HelpCircle,
-  Users
+  Users,
+  Activity,
+  BarChart
 } from "lucide-react";
 import { isWriterRole, isDesignerRole, isAdminRole } from "@/utils/roles";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -77,15 +79,38 @@ export const DashboardSidebar = () => {
         </div>
         
         {isAdminRole(role) && (
-          <div className="px-3 py-1">
-            <button 
-              onClick={() => navigateTo("/admin")}
-              className="flex items-center w-full px-3 py-2 text-sidebar-foreground rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <Users className="h-5 w-5 mr-3" />
-              <span>Admin</span>
-            </button>
-          </div>
+          <>
+            <div className="mt-2 px-3">
+              <h3 className="text-xs font-medium text-muted-foreground px-3 py-1">Admin Tools</h3>
+            </div>
+            <div className="px-3 py-1">
+              <button 
+                onClick={() => navigateTo("/admin")}
+                className="flex items-center w-full px-3 py-2 text-sidebar-foreground rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <Users className="h-5 w-5 mr-3" />
+                <span>Admin Dashboard</span>
+              </button>
+            </div>
+            <div className="px-3 py-1">
+              <button 
+                onClick={() => navigateTo("/admin/system-health")}
+                className="flex items-center w-full px-3 py-2 text-sidebar-foreground rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <Activity className="h-5 w-5 mr-3" />
+                <span>System Health</span>
+              </button>
+            </div>
+            <div className="px-3 py-1">
+              <button 
+                onClick={() => navigateTo("/admin/recovery-metrics")}
+                className="flex items-center w-full px-3 py-2 text-sidebar-foreground rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <BarChart className="h-5 w-5 mr-3" />
+                <span>Recovery Metrics</span>
+              </button>
+            </div>
+          </>
         )}
         
         <div className="px-3 py-1">

@@ -27,6 +27,11 @@ const validRoutes: RouteConfig[] = [
   { path: "/content/drafts", requiredRole: ["writer", "admin"], description: "Draft documents" },
   { path: "/templates", requiredRole: ["designer", "admin"], description: "Template library" },
   { path: "/admin", requiredRole: ["admin"], description: "Admin panel" },
+  { path: "/admin/system-health", requiredRole: ["admin"], description: "System health monitoring", trackAdvancedMetrics: true },
+  { path: "/admin/recovery-metrics", requiredRole: ["admin"], description: "Error recovery metrics", trackAdvancedMetrics: true },
+  { path: "/admin/users", requiredRole: ["admin"], description: "User management" },
+  { path: "/admin/security", requiredRole: ["admin"], description: "Security settings" },
+  { path: "/admin/settings", requiredRole: ["admin"], description: "Admin settings" },
   { path: "/testing/regression", description: "Regression test suite" },
   { path: "/testing/smoke", requiredRole: ["admin"], description: "Smoke tests", trackAdvancedMetrics: true },
 ];

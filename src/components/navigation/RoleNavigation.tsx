@@ -12,7 +12,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WriterOnly, DesignerOnly, AdminOnly } from "@/utils/roles/RoleComponents";
 import { useIsWriter, useIsDesigner, useIsAdmin } from "@/utils/roles";
-import { FileText, Pencil, Layout, Settings, Box, TestTube2, Home, Clock, FileCode, FolderOpen } from "lucide-react";
+import { 
+  FileText, 
+  Pencil, 
+  Layout, 
+  Settings, 
+  Box, 
+  TestTube2, 
+  Home, 
+  Clock, 
+  FileCode, 
+  FolderOpen, 
+  Activity,
+  BarChart
+} from "lucide-react";
 import { useValidatedNavigation } from "@/hooks/useValidatedNavigation";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
@@ -44,6 +57,12 @@ export const RoleNavigation = () => {
     { href: "/templates", label: "Templates", icon: <FileCode className="h-4 w-4 mr-2" /> },
     { href: "/design/layout", label: "Layout", icon: <Layout className="h-4 w-4 mr-2" /> },
     { href: "/design/design-settings", label: "Design Settings", icon: <Settings className="h-4 w-4 mr-2" /> }
+  ];
+  
+  const adminNavItems = [
+    { href: "/admin", label: "Admin Dashboard", icon: <Settings className="h-4 w-4 mr-2" /> },
+    { href: "/admin/system-health", label: "System Health", icon: <Activity className="h-4 w-4 mr-2" /> },
+    { href: "/admin/recovery-metrics", label: "Recovery Metrics", icon: <BarChart className="h-4 w-4 mr-2" /> }
   ];
   
   const testingNavItems = [
@@ -118,17 +137,19 @@ export const RoleNavigation = () => {
         {/* Admin-specific navigation */}
         {isAdmin && (
           <>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle() + (isActive("/admin") ? " bg-accent" : "")}
-                onClick={() => handleNavigation("/admin")}
-              >
-                <span className="flex items-center">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Admin Panel
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
+            {adminNavItems.map((item) => (
+              <NavigationMenuItem key={item.href}>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle() + (isActive(item.href) ? " bg-accent" : "")}
+                  onClick={() => handleNavigation(item.href)}
+                >
+                  <span className="flex items-center">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
             
             {/* Testing section for admins */}
             {testingNavItems.map((item) => (

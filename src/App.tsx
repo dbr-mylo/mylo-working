@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,10 @@ import { ProjectsProvider } from "@/contexts/ProjectsContext";
 import { SearchProvider } from "@/contexts/search/SearchContext";
 import { PreferencesProvider } from "@/contexts/preferences/PreferencesContext";
 import { NotificationsProvider } from "@/contexts/notifications/NotificationsContext";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { AdminOverview } from "@/components/admin/pages/AdminOverview";
+import { SystemHealthPage } from "@/components/admin/pages/SystemHealthPage";
+import { RecoveryMetricsPage } from "@/components/admin/pages/RecoveryMetricsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -164,7 +169,15 @@ const AppRoutes = () => {
         
         <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
         
-        <Route path="/admin" element={<AdminRoute><div>Admin Panel Coming Soon</div></AdminRoute>} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route index element={<AdminOverview />} />
+          <Route path="system-health" element={<SystemHealthPage />} />
+          <Route path="recovery-metrics" element={<RecoveryMetricsPage />} />
+          <Route path="users" element={<div>User Management (Coming Soon)</div>} />
+          <Route path="security" element={<div>Security Management (Coming Soon)</div>} />
+          <Route path="settings" element={<div>Admin Settings (Coming Soon)</div>} />
+        </Route>
         
         <Route path="/testing/regression" element={<RegressionTestRoute />} />
         <Route path="/testing/smoke" element={<SmokeTestRoute />} />

@@ -1,9 +1,7 @@
-
 /**
  * Document integrity utilities for detecting corruption and ensuring data consistency
  */
 import { DocumentBackup } from './documentBackupSystem';
-import { createHash } from 'crypto-js';
 import SHA256 from 'crypto-js/sha256';
 import encHex from 'crypto-js/enc-hex';
 

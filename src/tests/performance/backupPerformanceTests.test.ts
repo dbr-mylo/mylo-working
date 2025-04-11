@@ -4,6 +4,7 @@ import { backupDocument, getDocumentBackup } from '@/utils/backup/documentBackup
 import { DocumentRecoveryService } from '@/services/DocumentRecoveryService';
 import { generateDocumentChecksum } from '@/utils/backup/documentIntegrity';
 import { UserRole } from '@/lib/types';
+import { recoveryOperations } from '@/services/recovery/recovery/RecoveryOperations';
 
 describe('Document Backup Performance', () => {
   let startTime: number;
@@ -66,7 +67,7 @@ describe('Document Backup Performance', () => {
       
       // Measure backup time
       startTime = performance.now();
-      backupDocument(`doc-${size}`, 'Test Document', 'writer' as UserRole, content, {}, true);
+      backupDocument(content, `doc-${size}`, 'Test Document', 'writer' as UserRole, {}, true);
       endTime = performance.now();
       
       const duration = endTime - startTime;
@@ -122,7 +123,7 @@ describe('Document Backup Performance', () => {
       
       // Measure recovery time
       startTime = performance.now();
-      await recoveryOperations.handleConcurrentRecovery(docId, 'writer');
+      await recoveryOperations.handleConcurrentRecovery(docId, 'writer' as UserRole);
       endTime = performance.now();
       
       const duration = endTime - startTime;
@@ -153,7 +154,7 @@ describe('Document Backup Performance', () => {
     
     await Promise.all(
       Array.from({ length: documentCount }).map((_, i) => 
-        recoveryOperations.handleConcurrentRecovery(`concurrent-doc-${i}`, 'writer')
+        recoveryOperations.handleConcurrentRecovery(`concurrent-doc-${i}`, 'writer' as UserRole)
       )
     );
     

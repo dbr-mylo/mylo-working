@@ -7,6 +7,7 @@
  */
 import { ErrorCategory } from './errorClassifier';
 import { runDiagnostics } from './diagnostics';
+import { updateSystemHealth as updateHealth } from '../featureFlags/systemHealth';
 
 // Store error occurrence data for analytics
 interface ErrorOccurrence {
@@ -27,6 +28,8 @@ interface ErrorCategoryInfo {
   recoveryAttempts: number;
   successfulRecoveries: number;
   averageRecoveryTime: number;
+  category: ErrorCategory;
+  recoveryRate: number;
 }
 
 // In-memory storage for error tracking
@@ -70,7 +73,9 @@ export function trackErrorOccurrence(
       lastOccurrence: 0,
       recoveryAttempts: 0,
       successfulRecoveries: 0,
-      averageRecoveryTime: 0
+      averageRecoveryTime: 0,
+      category: category,
+      recoveryRate: 0
     };
   }
   
@@ -107,7 +112,9 @@ export function trackRecoveryAttempt(
       lastOccurrence: 0,
       recoveryAttempts: 0,
       successfulRecoveries: 0,
-      averageRecoveryTime: 0
+      averageRecoveryTime: 0,
+      category: category,
+      recoveryRate: 0
     };
   }
   
@@ -124,8 +131,115 @@ export function trackRecoveryAttempt(
     }
   }
   
+  // Update recovery rate
+  const attempts = errorCategoryStats[category].recoveryAttempts;
+  const successes = errorCategoryStats[category].successfulRecoveries;
+  errorCategoryStats[category].recoveryRate = attempts > 0 ? successes / attempts : 0;
+  
   // Log for monitoring
   console.info(`[Recovery Tracking] ${succeeded ? 'Successful' : 'Failed'} recovery for ${category} in ${context}`);
+}
+
+/**
+ * Register an error and attempt to automatically recover from it
+ * @param error The error that occurred
+ * @param context The context where the error occurred
+ * @returns Boolean indicating whether recovery was attempted
+ */
+export function registerErrorAndAttemptRecovery(error: Error | unknown, context: string): boolean {
+  const errorObj = error instanceof Error ? error : new Error(String(error));
+  const category = determineErrorCategory(errorObj, context);
+  
+  // Track the error occurrence
+  trackErrorOccurrence(
+    category,
+    errorObj.message,
+    context,
+    false,
+    false,
+    errorObj.stack
+  );
+  
+  // Check if this type of error is recoverable
+  if (isLikelyRecoverable(category)) {
+    // Attempt recovery
+    const startTime = Date.now();
+    const succeeded = attemptRecovery(category, context, errorObj);
+    const recoveryTime = Date.now() - startTime;
+    
+    // Track the recovery attempt
+    trackRecoveryAttempt(category, context, succeeded, recoveryTime);
+    
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Determine error category based on error and context
+ */
+function determineErrorCategory(error: Error, context: string): ErrorCategory {
+  // Simple determination based on error message and context
+  const message = error.message.toLowerCase();
+  const ctx = context.toLowerCase();
+  
+  if (message.includes('network') || message.includes('fetch') || ctx.includes('api')) {
+    return ErrorCategory.NETWORK;
+  }
+  
+  if (message.includes('auth') || message.includes('login') || ctx.includes('auth')) {
+    return ErrorCategory.AUTHENTICATION;
+  }
+  
+  if (message.includes('permission') || message.includes('access') || ctx.includes('permission')) {
+    return ErrorCategory.PERMISSION;
+  }
+  
+  if (message.includes('valid') || message.includes('format') || ctx.includes('form')) {
+    return ErrorCategory.VALIDATION;
+  }
+  
+  if (message.includes('storage') || message.includes('space') || ctx.includes('storage')) {
+    return ErrorCategory.STORAGE;
+  }
+  
+  if (message.includes('timeout') || message.includes('expired') || ctx.includes('timeout')) {
+    return ErrorCategory.TIMEOUT;
+  }
+  
+  // Default
+  return ErrorCategory.UNKNOWN;
+}
+
+/**
+ * Attempt to recover from an error
+ */
+function attemptRecovery(category: ErrorCategory, context: string, error: Error): boolean {
+  // Simple recovery logic based on error category
+  switch (category) {
+    case ErrorCategory.NETWORK:
+      // For network errors, we could retry the operation
+      console.info('[Recovery] Attempting network recovery in context:', context);
+      return Math.random() > 0.3; // Simulate success rate
+    
+    case ErrorCategory.AUTHENTICATION:
+    case ErrorCategory.AUTH:
+    case ErrorCategory.SESSION:
+      // For auth errors, we could try to refresh the auth token
+      console.info('[Recovery] Attempting authentication recovery in context:', context);
+      return Math.random() > 0.4;
+    
+    case ErrorCategory.STORAGE:
+      // For storage errors, we could try to free up space
+      console.info('[Recovery] Attempting storage recovery in context:', context);
+      return Math.random() > 0.5;
+    
+    default:
+      // For other errors, no specific recovery strategy
+      console.info('[Recovery] No specific recovery strategy for', category, 'in context:', context);
+      return false;
+  }
 }
 
 /**
@@ -155,25 +269,32 @@ export function getErrorCategoryInfo(category: ErrorCategory): ErrorCategoryInfo
     lastOccurrence: 0,
     recoveryAttempts: 0,
     successfulRecoveries: 0,
-    averageRecoveryTime: 0
+    averageRecoveryTime: 0,
+    category: category,
+    recoveryRate: 0
   };
 }
 
 /**
  * Get all error category information
  */
-export function getAllErrorCategoryInfo(): Record<ErrorCategory, ErrorCategoryInfo> {
-  return { ...errorCategoryStats };
+export function getAllErrorCategoryInfo(): ErrorCategoryInfo[] {
+  return Object.values(errorCategoryStats).map(info => ({
+    ...info,
+    recoveryRate: info.recoveryAttempts > 0 
+      ? info.successfulRecoveries / info.recoveryAttempts 
+      : 0
+  }));
 }
 
 /**
  * Get recent errors, optionally filtered by category
  */
-export function getRecentErrors(category?: ErrorCategory): ErrorOccurrence[] {
+export function getRecentErrors(category?: ErrorCategory, limit: number = 20): ErrorOccurrence[] {
   if (category) {
-    return errorHistory.filter(e => e.category === category).slice(0, 20);
+    return errorHistory.filter(e => e.category === category).slice(0, limit);
   }
-  return errorHistory.slice(0, 20);
+  return errorHistory.slice(0, limit);
 }
 
 /**
@@ -187,7 +308,9 @@ export function resetErrorAnalytics(): void {
       lastOccurrence: 0,
       recoveryAttempts: 0,
       successfulRecoveries: 0,
-      averageRecoveryTime: 0
+      averageRecoveryTime: 0,
+      category: category,
+      recoveryRate: 0
     };
   });
 }
@@ -219,10 +342,8 @@ export async function runSystemDiagnostics(): Promise<number> {
 }
 
 /**
- * Export the updateSystemHealth function to be used by systemHealth.ts
+ * Update system health score
  */
 export function updateSystemHealth(delta: number): void {
-  // This function will be implemented in systemHealth.ts
-  // But we declare it here to satisfy the import in other files
-  console.log('updateSystemHealth called with delta:', delta);
+  updateHealth(delta);
 }

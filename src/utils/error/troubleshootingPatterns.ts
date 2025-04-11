@@ -50,48 +50,47 @@ export interface TroubleshootingSession {
   steps: ResolutionStep[];
   resolved: boolean;
   notes?: string;
+  feature?: string;
+  name?: string;
 }
 
 /**
  * Identify error pattern based on error details and context
+ * @returns Array of matching error patterns
  */
 export function identifyErrorPattern(
-  error: Error | unknown, 
-  errorCategory: ErrorCategory,
+  error: Error | unknown,
   context: string
-): ErrorPattern {
+): string[] {
   const message = error instanceof Error ? error.message : String(error);
+  const patterns: string[] = [];
   
   // Network connectivity pattern
   if (
-    errorCategory === ErrorCategory.NETWORK ||
     message.includes('offline') ||
     message.includes('network') ||
     message.includes('connection')
   ) {
-    return ErrorPattern.NETWORK_CONNECTIVITY;
+    patterns.push("Check internet connection and try again.");
   }
   
   // Authentication pattern
   if (
-    errorCategory === ErrorCategory.AUTHENTICATION ||
-    errorCategory === ErrorCategory.AUTH ||
     message.includes('auth') ||
     message.includes('login') ||
     message.includes('token') ||
     message.includes('session')
   ) {
-    return ErrorPattern.AUTHENTICATION_EXPIRED;
+    patterns.push("Refresh your authentication session.");
   }
   
   // Permission pattern
   if (
-    errorCategory === ErrorCategory.PERMISSION ||
     message.includes('permission') ||
     message.includes('denied') ||
     message.includes('forbidden')
   ) {
-    return ErrorPattern.PERMISSION_DENIED;
+    patterns.push("Verify you have the necessary permissions for this action.");
   }
   
   // Concurrent edit pattern
@@ -100,57 +99,24 @@ export function identifyErrorPattern(
     context.includes('edit') &&
     (message.includes('conflict') || message.includes('concurrent'))
   ) {
-    return ErrorPattern.CONCURRENT_EDIT;
+    patterns.push("Resolve editing conflicts by reloading the latest document version.");
   }
   
   // Storage full pattern
   if (
-    errorCategory === ErrorCategory.STORAGE ||
     message.includes('storage') ||
     message.includes('quota') ||
     message.includes('space')
   ) {
-    return ErrorPattern.STORAGE_FULL;
-  }
-  
-  // Rate limited pattern
-  if (
-    errorCategory === ErrorCategory.RATE_LIMIT ||
-    message.includes('rate') ||
-    message.includes('limit') ||
-    message.includes('too many')
-  ) {
-    return ErrorPattern.RATE_LIMITED;
-  }
-  
-  // Document corruption pattern
-  if (
-    context.includes('document') &&
-    (message.includes('corrupt') || message.includes('invalid') || message.includes('malformed'))
-  ) {
-    return ErrorPattern.DOCUMENT_CORRUPTION;
-  }
-  
-  // Resource missing pattern
-  if (
-    errorCategory === ErrorCategory.RESOURCE_NOT_FOUND ||
-    message.includes('not found') ||
-    message.includes('missing') ||
-    message.includes('404')
-  ) {
-    return ErrorPattern.RESOURCE_MISSING;
-  }
-  
-  // Server overloaded pattern
-  if (
-    errorCategory === ErrorCategory.SERVER &&
-    (message.includes('overloaded') || message.includes('busy') || message.includes('later'))
-  ) {
-    return ErrorPattern.SERVER_OVERLOADED;
+    patterns.push("Clear browser storage to free up space.");
   }
   
   // If no specific pattern is identified
-  return ErrorPattern.UNKNOWN;
+  if (patterns.length === 0) {
+    patterns.push("Try refreshing the page or restarting the application.");
+  }
+  
+  return patterns;
 }
 
 /**
@@ -234,18 +200,36 @@ export function getResolutionSteps(pattern: ErrorPattern): ResolutionStep[] {
 /**
  * Save a troubleshooting session
  */
-export function saveTroubleshootingSession(session: TroubleshootingSession): void {
-  // Update last updated timestamp
-  session.lastUpdatedAt = Date.now();
-  
+export function saveTroubleshootingSession(
+  sessionId: string,
+  sessionData: { name: string; notes: string; status: string }
+): void {
   try {
     // Get existing sessions
     const sessions = getLocalStorage<Record<string, TroubleshootingSession>>(TROUBLESHOOTING_SESSIONS_KEY) || {};
     
-    // Add/update this session
-    sessions[session.id] = session;
+    // Get existing or initialize new session
+    const existingSession = sessions[sessionId] || {
+      id: sessionId,
+      startedAt: Date.now(),
+      lastUpdatedAt: Date.now(),
+      errorCategory: ErrorCategory.UNKNOWN,
+      errorMessage: "Unknown error",
+      context: "unknown",
+      pattern: ErrorPattern.UNKNOWN,
+      currentStepIndex: 0,
+      steps: [],
+      resolved: false
+    };
+    
+    // Update session properties
+    existingSession.name = sessionData.name;
+    existingSession.notes = sessionData.notes;
+    existingSession.lastUpdatedAt = Date.now();
+    existingSession.resolved = sessionData.status === 'resolved';
     
     // Save back to storage
+    sessions[sessionId] = existingSession;
     setLocalStorage(TROUBLESHOOTING_SESSIONS_KEY, sessions);
   } catch (e) {
     console.error('Failed to save troubleshooting session:', e);
@@ -269,8 +253,10 @@ export function loadTroubleshootingSession(sessionId: string): TroubleshootingSe
  * Add a step to a troubleshooting session
  */
 export function addTroubleshootingStep(
-  sessionId: string, 
-  step: Omit<ResolutionStep, 'id'>
+  sessionId: string,
+  description: string,
+  status: "success" | "failure" | "inconclusive",
+  details?: string
 ): TroubleshootingSession | null {
   try {
     const sessions = getLocalStorage<Record<string, TroubleshootingSession>>(TROUBLESHOOTING_SESSIONS_KEY) || {};
@@ -282,8 +268,12 @@ export function addTroubleshootingStep(
     
     // Add the step with a generated ID
     const newStep: ResolutionStep = {
-      ...step,
-      id: `step_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      id: `step_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      description,
+      instruction: details || description,
+      automatable: false,
+      completed: true,
+      succeeded: status === "success"
     };
     
     session.steps.push(newStep);

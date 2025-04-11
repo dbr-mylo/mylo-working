@@ -53,7 +53,7 @@ export function handleError(
 export function getErrorRecoverySteps(
   error: Error,
   context: string,
-  role: string | null | undefined,
+  role?: string | null | undefined,
   feature?: string
 ): string[] {
   // Log the error for debugging purposes

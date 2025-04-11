@@ -1,3 +1,4 @@
+
 /**
  * System Health Monitoring
  * 
@@ -42,6 +43,20 @@ export function getSystemHealth(): number {
 }
 
 /**
+ * Get the current system health status label
+ * @returns String representing health status: 'healthy', 'degraded', or 'critical'
+ */
+export function getSystemHealthStatus(): string {
+  if (systemHealthScore >= 70) {
+    return 'healthy';
+  } else if (systemHealthScore >= 40) {
+    return 'degraded';
+  } else {
+    return 'critical';
+  }
+}
+
+/**
  * Update the system health score
  * @param delta Change to apply to health score (-100 to +100)
  */
@@ -78,6 +93,41 @@ export function updateSystemHealth(delta: number): void {
       console.info('System health improved above 50% - restoring normal functionality');
     }
   }
+}
+
+/**
+ * Report a system error to decrease health score
+ * @param error Error that occurred
+ * @param context Context where the error happened
+ */
+export function reportSystemError(error: Error, context: string): void {
+  console.warn(`System error reported in ${context}:`, error);
+  
+  // Decrease health score based on error type and context
+  let healthImpact = -5; // Default impact
+  
+  // Adjust impact based on error type
+  if (error.name === 'NetworkError' || context.includes('network')) {
+    healthImpact = -10;
+    updateHealthAspect('connectivity', Math.max(0, healthAspects.connectivity - 15));
+  } else if (context.includes('performance') || error.message.includes('timeout')) {
+    healthImpact = -8;
+    updateHealthAspect('performance', Math.max(0, healthAspects.performance - 12));
+  } else if (context.includes('storage') || context.includes('database')) {
+    healthImpact = -15;
+    updateHealthAspect('resources', Math.max(0, healthAspects.resources - 20));
+  }
+  
+  // Apply health impact
+  updateSystemHealth(healthImpact);
+}
+
+/**
+ * Update storage health aspect specifically
+ * @param delta Change to apply to storage health score
+ */
+export function updateStorageHealth(delta: number): void {
+  updateHealthAspect('resources', Math.max(0, Math.min(100, healthAspects.resources + delta)));
 }
 
 /**

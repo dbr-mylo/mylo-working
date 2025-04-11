@@ -5,136 +5,46 @@
  * Provides guidance and steps for resolving different types of errors.
  */
 import { ErrorCategory } from './errorClassifier';
-import { ErrorPattern, ResolutionStep } from './troubleshootingPatterns';
+import { ResolutionStep } from './types';
 
 // Define resolution steps for different error categories
-export function getErrorResolutionSteps(category: ErrorCategory): ResolutionStep[] {
+export function getErrorResolutionSteps(category: ErrorCategory): string[] {
   switch (category) {
     case ErrorCategory.NETWORK:
       return [
-        {
-          id: 'network_check_connection',
-          description: 'Check your internet connection',
-          instruction: 'Verify that your device is connected to the internet',
-          automatable: true,
-          completed: false
-        },
-        {
-          id: 'network_try_reload',
-          description: 'Reload the application',
-          instruction: 'Try refreshing the page or restarting the application',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'network_check_server',
-          description: 'Check server status',
-          instruction: 'Verify that the server is online and accessible',
-          automatable: true,
-          completed: false
-        }
+        'Check your internet connection',
+        'Reload the application',
+        'Check server status'
       ];
       
     case ErrorCategory.AUTHENTICATION:
     case ErrorCategory.AUTH:
     case ErrorCategory.SESSION:
       return [
-        {
-          id: 'auth_refresh_session',
-          description: 'Refresh your session',
-          instruction: 'Attempting to refresh your authentication session',
-          automatable: true,
-          completed: false
-        },
-        {
-          id: 'auth_login_again',
-          description: 'Log in again',
-          instruction: 'You may need to log in again to continue',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'auth_clear_cookies',
-          description: 'Clear cookies and cache',
-          instruction: 'Try clearing your browser cookies and cache',
-          automatable: false,
-          completed: false
-        }
+        'Refresh your session',
+        'Log in again',
+        'Clear cookies and cache'
       ];
       
     case ErrorCategory.PERMISSION:
       return [
-        {
-          id: 'permission_verify_access',
-          description: 'Verify your access level',
-          instruction: 'Check that you have the necessary permissions',
-          automatable: true,
-          completed: false
-        },
-        {
-          id: 'permission_request_access',
-          description: 'Request access',
-          instruction: 'Contact an administrator to request access',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'permission_try_different_resource',
-          description: 'Try a different resource',
-          instruction: 'Try accessing a different resource or feature',
-          automatable: false,
-          completed: false
-        }
+        'Verify your access level',
+        'Request access',
+        'Try a different resource'
       ];
       
     case ErrorCategory.VALIDATION:
       return [
-        {
-          id: 'validation_check_input',
-          description: 'Check your input',
-          instruction: 'Verify that all required fields are filled correctly',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'validation_format_data',
-          description: 'Format data correctly',
-          instruction: 'Ensure your data matches the required format',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'validation_try_example',
-          description: 'Try example data',
-          instruction: 'Try using example data to understand the required format',
-          automatable: false,
-          completed: false
-        }
+        'Check your input',
+        'Format data correctly',
+        'Try example data'
       ];
       
     default:
       return [
-        {
-          id: 'general_retry',
-          description: 'Retry the operation',
-          instruction: 'Try the operation again',
-          automatable: true,
-          completed: false
-        },
-        {
-          id: 'general_refresh_page',
-          description: 'Refresh the page',
-          instruction: 'Reload the application',
-          automatable: false,
-          completed: false
-        },
-        {
-          id: 'general_restart_browser',
-          description: 'Restart your browser',
-          instruction: 'Close and reopen your browser',
-          automatable: false,
-          completed: false
-        }
+        'Retry the operation',
+        'Refresh the page',
+        'Restart your browser'
       ];
   }
 }

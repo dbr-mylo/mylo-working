@@ -15,11 +15,11 @@ const DEFAULT_BACKUP_OPTIONS: DocumentBackupOptions = {
 
 export class DocumentRecoveryService {
   private autoBackupIntervalId: number | null = null;
-  private lastBackupContent: string = '';
+  protected lastBackupContent: string = ''; // Changed from private to protected
   private backupOptions: DocumentBackupOptions;
-  private documentId: string | null = null;
-  private documentTitle: string = '';
-  private userRole: UserRole | null = null;
+  protected documentId: string | null = null; // Changed from private to protected
+  protected documentTitle: string = ''; // Changed from private to protected for consistency
+  protected userRole: UserRole | null = null; // Changed from private to protected for consistency
   private onBackupCreated?: (timestamp: Date) => void;
   private recoveryAttempts: number = 0;
   private maxRecoveryAttempts: number = 3;

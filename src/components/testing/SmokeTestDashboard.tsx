@@ -62,7 +62,9 @@ export const SmokeTestDashboard: React.FC<SmokeTestDashboardProps> = ({ onTestRu
             <AccessAlert isAdmin={isAdmin} isDevelopment={isDevelopment} />
             <ErrorTestComponent showErrorTest={showErrorTest} />
             
-            <TestResultsTable results={results} />
+            <ErrorBoundary context="TestResultsTable">
+              <TestResultsTable results={results} />
+            </ErrorBoundary>
           </CardContent>
           <CardFooter>
             <DashboardFooter isDevelopment={isDevelopment} />

@@ -9,12 +9,24 @@ export {
   useRoleAwareErrorBoundary
 } from './RoleAwareErrorComponents';
 
+// Export context-aware error boundary
+export {
+  ContextAwareErrorBoundary,
+  withContextAwareErrorBoundary
+} from './ContextAwareErrorBoundary';
+
 // Export state restoration utilities
 export {
   StateRestoreProvider,
   StateRestoreContext,
   useStateRestore
 } from './StateRestoreProvider';
+
+// Export enhanced error boundary
+export { EnhancedErrorBoundary } from './EnhancedErrorBoundary';
+
+// Export standard error boundary HOC
+export { WithErrorBoundary, withErrorBoundary } from './WithErrorBoundary';
 
 // Export types
 export type { ErrorBoundaryAnalytics } from './types/ErrorTypes';

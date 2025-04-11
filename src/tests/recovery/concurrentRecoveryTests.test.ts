@@ -61,9 +61,9 @@ describe('Concurrent Recovery Operations', () => {
     
     // Attempt concurrent recoveries
     const recoveryPromises = [
-      recoveryOperations.handleConcurrentRecovery('doc1', 'writer'),
-      recoveryOperations.handleConcurrentRecovery('doc2', 'writer'),
-      recoveryOperations.handleConcurrentRecovery('doc1', 'writer')
+      recoveryOperations.handleConcurrentRecovery('doc1', 'writer' as UserRole),
+      recoveryOperations.handleConcurrentRecovery('doc2', 'writer' as UserRole),
+      recoveryOperations.handleConcurrentRecovery('doc1', 'writer' as UserRole)
     ];
     
     // Wait for all to complete
@@ -103,8 +103,8 @@ describe('Concurrent Recovery Operations', () => {
     
     // Attempt concurrent recoveries
     const [result1, result2] = await Promise.all([
-      recoveryOperations.handleConcurrentRecovery('doc1', 'writer'),
-      recoveryOperations.handleConcurrentRecovery('doc2', 'writer').catch(() => null)
+      recoveryOperations.handleConcurrentRecovery('doc1', 'writer' as UserRole),
+      recoveryOperations.handleConcurrentRecovery('doc2', 'writer' as UserRole).catch(() => null)
     ]);
     
     // First request should succeed
@@ -139,19 +139,19 @@ describe('Concurrent Recovery Operations', () => {
     
     // Start multiple recovery operations
     const recoveryPromises = [
-      recoveryOperations.handleConcurrentRecovery('doc1', 'writer').then(res => {
+      recoveryOperations.handleConcurrentRecovery('doc1', 'writer' as UserRole).then(res => {
         trackOperation();
         return res;
       }),
-      recoveryOperations.handleConcurrentRecovery('doc2', 'writer').then(res => {
+      recoveryOperations.handleConcurrentRecovery('doc2', 'writer' as UserRole).then(res => {
         trackOperation();
         return res;
       }),
-      recoveryOperations.handleConcurrentRecovery('doc3', 'writer').then(res => {
+      recoveryOperations.handleConcurrentRecovery('doc3', 'writer' as UserRole).then(res => {
         trackOperation();
         return res;
       }),
-      recoveryOperations.handleConcurrentRecovery('doc4', 'writer').then(res => {
+      recoveryOperations.handleConcurrentRecovery('doc4', 'writer' as UserRole).then(res => {
         trackOperation();
         return res;
       })
@@ -168,5 +168,47 @@ describe('Concurrent Recovery Operations', () => {
       expect(result).not.toBeNull();
       expect(result?.content).toContain('Content for document');
     });
+  });
+
+  it('should prioritize recovery operations for active documents', async () => {
+    // Setup tracking of recovery order
+    const recoveryOrder: string[] = [];
+    
+    // Mock getDocumentBackup to track order and add delays
+    vi.mocked(backupSystem.getDocumentBackup).mockImplementation((docId) => {
+      recoveryOrder.push(docId as string);
+      
+      return {
+        id: `backup-${docId}`,
+        documentId: docId as string,
+        title: `Document ${docId}`,
+        content: `Content for document ${docId}`,
+        role: 'writer' as UserRole,
+        timestamp: Date.now(),
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        meta: {
+          priority: docId === 'active-doc' ? 'high' : 'normal'
+        }
+      };
+    });
+    
+    // Mark one document as "active" (should be prioritized)
+    // @ts-ignore - accessing private method for testing
+    recoveryOperations.setPriorityDocument('active-doc');
+    
+    // Start multiple recovery operations including the active document last
+    const recoveryPromises = [
+      recoveryOperations.handleConcurrentRecovery('doc1', 'writer' as UserRole),
+      recoveryOperations.handleConcurrentRecovery('doc2', 'writer' as UserRole),
+      recoveryOperations.handleConcurrentRecovery('active-doc', 'writer' as UserRole)
+    ];
+    
+    // Wait for all to complete
+    await Promise.all(recoveryPromises);
+    
+    // We expect active-doc to be recovered before or immediately after the first doc
+    // (exact order depends on implementation, but should be early in the queue)
+    expect(recoveryOrder.indexOf('active-doc')).toBeLessThanOrEqual(1);
   });
 });

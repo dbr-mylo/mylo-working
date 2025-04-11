@@ -141,3 +141,114 @@ export function formatBytes(bytes: number): string {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
+
+/**
+ * Performance profile for a function
+ * @param fn Function to profile
+ * @param args Arguments for the function
+ * @returns Object with performance metrics
+ */
+export function profileFunction<T extends (...args: any[]) => any>(
+  fn: T, 
+  ...args: Parameters<T>
+): {
+  result: ReturnType<T>;
+  executionTime: number;
+  memoryUsage: number;
+} {
+  // Memory before
+  const beforeSnapshot = takeMemorySnapshot();
+  const startTime = performance.now();
+  
+  // Execute function
+  const result = fn(...args);
+  
+  // Memory after
+  const endTime = performance.now();
+  const afterSnapshot = takeMemorySnapshot();
+  
+  // Calculate metrics
+  const diff = compareSnapshots(beforeSnapshot, afterSnapshot);
+  
+  return {
+    result,
+    executionTime: endTime - startTime,
+    memoryUsage: diff.heapDelta
+  };
+}
+
+/**
+ * Record performance metrics over time
+ */
+export class PerformanceMetricsTracker {
+  private metrics: {
+    operation: string;
+    timestamp: number;
+    duration: number;
+    memoryDelta?: number;
+    objectSize?: number;
+    success: boolean;
+  }[] = [];
+  
+  /**
+   * Record a performance metric
+   * @param operation Operation name
+   * @param duration Duration in milliseconds
+   * @param success Whether operation was successful
+   * @param memoryDelta Memory change in bytes (optional)
+   * @param objectSize Size of resulting object (optional)
+   */
+  public recordMetric(
+    operation: string,
+    duration: number,
+    success: boolean,
+    memoryDelta?: number,
+    objectSize?: number
+  ): void {
+    this.metrics.push({
+      operation,
+      timestamp: Date.now(),
+      duration,
+      memoryDelta,
+      objectSize,
+      success
+    });
+  }
+  
+  /**
+   * Get all metrics
+   */
+  public getMetrics() {
+    return [...this.metrics];
+  }
+  
+  /**
+   * Get metrics for a specific operation
+   * @param operation Operation name
+   */
+  public getMetricsForOperation(operation: string) {
+    return this.metrics.filter(m => m.operation === operation);
+  }
+  
+  /**
+   * Get average duration for an operation
+   * @param operation Operation name
+   */
+  public getAverageDuration(operation: string): number {
+    const metrics = this.getMetricsForOperation(operation);
+    if (metrics.length === 0) return 0;
+    
+    const total = metrics.reduce((sum, m) => sum + m.duration, 0);
+    return total / metrics.length;
+  }
+  
+  /**
+   * Clear all metrics
+   */
+  public clearMetrics(): void {
+    this.metrics = [];
+  }
+}
+
+// Create a global instance for use across tests
+export const performanceTracker = new PerformanceMetricsTracker();

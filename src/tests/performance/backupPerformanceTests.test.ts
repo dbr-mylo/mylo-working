@@ -5,6 +5,7 @@ import { DocumentRecoveryService } from '@/services/DocumentRecoveryService';
 import { generateDocumentChecksum } from '@/utils/backup/documentIntegrity';
 import { UserRole } from '@/lib/types';
 import { recoveryOperations } from '@/services/recovery/recovery/RecoveryOperations';
+import { takeMemorySnapshot, compareSnapshots, formatBytes } from './backupMemoryUsageMonitor';
 
 describe('Document Backup Performance', () => {
   let startTime: number;
@@ -172,5 +173,78 @@ describe('Document Backup Performance', () => {
     // Total time should be significantly less than sequential execution would take
     // (i.e., we're getting some parallelization benefit)
     expect(totalDuration).toBeLessThan(documentCount * 500 * 0.7); // At least 30% better than sequential
+  });
+
+  it('should measure memory usage during backup operations', () => {
+    // Create test document
+    const content = generateDocumentContent(50000); // 50KB content
+    
+    // Memory snapshot before backup
+    const beforeSnapshot = takeMemorySnapshot();
+    
+    // Perform backup
+    backupDocument(content, 'memory-test-doc', 'Memory Test', 'writer' as UserRole, {}, true);
+    
+    // Memory snapshot after backup
+    const afterSnapshot = takeMemorySnapshot();
+    
+    // Compare snapshots
+    const memoryDiff = compareSnapshots(beforeSnapshot, afterSnapshot);
+    
+    // Log memory usage
+    console.log(`Memory usage for backup: ${formatBytes(memoryDiff.heapDelta)}`);
+    console.log(`Heap usage %: ${memoryDiff.heapUsagePercentageBefore.toFixed(2)}% → ${memoryDiff.heapUsagePercentageAfter.toFixed(2)}%`);
+    
+    // We don't make assertions about exact memory usage as it's environment dependent,
+    // but we log it for analysis
+  });
+
+  it('should benchmark performance for different document sizes', () => {
+    // Test with increasing sizes to identify potential performance cliffs
+    const sizes = [1000, 5000, 10000, 50000, 100000, 250000];
+    const results: {
+      size: number;
+      backupTime: number;
+      checksumTime: number;
+      totalTime: number;
+    }[] = [];
+    
+    for (const size of sizes) {
+      const content = generateDocumentContent(size);
+      
+      // Measure checksumming time
+      startTime = performance.now();
+      const checksum = generateDocumentChecksum(content);
+      const checksumEndTime = performance.now();
+      const checksumTime = checksumEndTime - startTime;
+      
+      // Measure backup time
+      startTime = checksumEndTime;
+      backupDocument(content, `benchmark-${size}`, `Benchmark ${size}`, 'writer' as UserRole, { checksum }, true);
+      endTime = performance.now();
+      const backupTime = endTime - startTime;
+      
+      // Total time
+      const totalTime = checksumTime + backupTime;
+      
+      results.push({
+        size,
+        checksumTime,
+        backupTime,
+        totalTime
+      });
+      
+      // Log individual result
+      console.log(`Document size: ${size} chars - Checksum: ${checksumTime.toFixed(2)}ms, Backup: ${backupTime.toFixed(2)}ms, Total: ${totalTime.toFixed(2)}ms`);
+    }
+    
+    // Check for any non-linear scaling issues
+    // (We expect some increase with size, but it should remain roughly proportional)
+    const smallSizeTime = results[0].totalTime / results[0].size;
+    const largeSizeTime = results[results.length - 1].totalTime / results[results.length - 1].size;
+    
+    // The time per character for large documents should not be dramatically higher
+    // than for small documents (allowing for some overhead)
+    expect(largeSizeTime).toBeLessThan(smallSizeTime * 5);
   });
 });

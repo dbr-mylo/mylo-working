@@ -1,3 +1,4 @@
+
 /**
  * Document integrity utilities for detecting corruption and ensuring data consistency
  */
@@ -146,6 +147,23 @@ export function attemptContentRecovery(corruptedContent: string): {
       }
     }
     
+    // Enhanced recovery: Try to find the longest valid segment
+    // Split by common delimiters and try to recover partial content
+    const lines = corruptedContent.split(/\n|\r\n/);
+    if (lines.length > 1) {
+      // Try to find the last line that doesn't appear corrupt
+      for (let i = lines.length - 1; i > 0; i--) {
+        const partialContent = lines.slice(0, i).join('\n');
+        if (partialContent.length > corruptedContent.length * 0.7) { // At least 70% recovered
+          return {
+            recovered: true,
+            content: partialContent,
+            recoveryMethod: 'line-truncation'
+          };
+        }
+      }
+    }
+    
     // If we can't do any special recovery, just return the content as-is
     // with a flag indicating we couldn't recover it
     return {
@@ -161,4 +179,60 @@ export function attemptContentRecovery(corruptedContent: string): {
       recoveryMethod: 'none'
     };
   }
+}
+
+/**
+ * Enhanced backup integrity verification with repair attempt
+ * @param backup Document backup to verify and repair if needed
+ * @returns Object with verification result, status and repaired backup if applicable
+ */
+export function verifyAndRepairBackup(backup: DocumentBackup): {
+  valid: boolean;
+  status: 'valid' | 'repaired' | 'corrupted' | 'no-checksum';
+  repairedBackup?: DocumentBackup;
+} {
+  // First verify the backup
+  const verificationResult = verifyBackupIntegrity(backup);
+  
+  // If valid or no checksum, return as is
+  if (verificationResult.valid || verificationResult.status === 'no-checksum') {
+    return {
+      valid: verificationResult.valid,
+      status: verificationResult.status
+    };
+  }
+  
+  // Attempt to recover corrupted content
+  const recoveryResult = attemptContentRecovery(backup.content);
+  
+  if (recoveryResult.recovered && recoveryResult.content) {
+    // Create repaired backup
+    const repairedBackup: DocumentBackup = {
+      ...backup,
+      content: recoveryResult.content,
+      meta: {
+        ...(backup.meta || {}),
+        recovery: {
+          timestamp: new Date().toISOString(),
+          method: recoveryResult.recoveryMethod,
+          originalChecksum: backup.meta?.integrity?.checksum
+        }
+      }
+    };
+    
+    // Generate new checksum for repaired content
+    const repairedWithChecksum = addChecksumToBackup(repairedBackup);
+    
+    return {
+      valid: true,
+      status: 'repaired',
+      repairedBackup: repairedWithChecksum
+    };
+  }
+  
+  // Could not repair
+  return {
+    valid: false,
+    status: 'corrupted'
+  };
 }

@@ -1,7 +1,8 @@
+
 import { Document, UserRole } from '@/lib/types';
 import { ErrorCategory, classifyError } from '@/utils/error/errorClassifier';
 import { getDocumentBackup, removeBackup } from '@/utils/backup/documentBackupSystem';
-import { verifyBackupIntegrity, attemptContentRecovery } from '@/utils/backup/documentIntegrity';
+import { verifyBackupIntegrity, attemptContentRecovery, verifyAndRepairBackup } from '@/utils/backup/documentIntegrity';
 
 /**
  * Handles recovery operations and error handling for document recovery
@@ -13,12 +14,38 @@ export class RecoveryOperations {
   private maxConcurrentRecoveries: number = 2;
   private recoveryLock: boolean = false;
   private recoveryQueue: Array<() => Promise<void>> = [];
+  private priorityDocuments: Set<string> = new Set();
   
   /**
    * Reset recovery attempt counter
    */
   public resetRecoveryAttempts(): void {
     this.recoveryAttempts = 0;
+  }
+  
+  /**
+   * Mark a document as high priority for recovery operations
+   * (Used for currently active document)
+   * @param documentId Document ID to prioritize
+   */
+  public setPriorityDocument(documentId: string): void {
+    this.priorityDocuments.add(documentId);
+  }
+  
+  /**
+   * Clear priority status for a document
+   * @param documentId Document ID
+   */
+  public clearPriorityDocument(documentId: string): void {
+    this.priorityDocuments.delete(documentId);
+  }
+  
+  /**
+   * Check if document is currently marked as priority
+   * @param documentId Document ID to check
+   */
+  private isPriorityDocument(documentId: string | null): boolean {
+    return documentId !== null && this.priorityDocuments.has(documentId);
   }
   
   /**
@@ -49,8 +76,14 @@ export class RecoveryOperations {
   /**
    * Add recovery operation to queue
    */
-  private addToRecoveryQueue(operation: () => Promise<void>): void {
-    this.recoveryQueue.push(operation);
+  private addToRecoveryQueue(operation: () => Promise<void>, isPriority: boolean = false): void {
+    if (isPriority) {
+      // Add to front of queue for priority operations
+      this.recoveryQueue.unshift(operation);
+    } else {
+      // Add to end of queue for normal operations
+      this.recoveryQueue.push(operation);
+    }
   }
   
   /**
@@ -99,37 +132,27 @@ export class RecoveryOperations {
       } else if (integrityCheck.status === 'corrupted') {
         console.warn(`Backup for "${backup.title}" failed integrity check: ${integrityCheck.details}`);
         
-        // Attempt content recovery for corrupted backup
-        const recoveryResult = attemptContentRecovery(backup.content);
+        // Attempt to repair corrupted backup
+        const repairResult = verifyAndRepairBackup(backup);
         
-        if (!recoveryResult.recovered) {
-          // If recovery failed and we haven't exceeded attempts, try alternative recovery
-          if (this.recoveryAttempts < this.maxRecoveryAttempts) {
-            console.log(`Integrity verification failed, attempt ${this.recoveryAttempts}. Trying alternative recovery...`);
-            return this.attemptAlternativeRecovery();
-          }
-          return null;
+        if (repairResult.status === 'repaired' && repairResult.repairedBackup) {
+          console.log(`Repaired corrupted backup for "${backup.title}" using ${repairResult.repairedBackup.meta?.recovery?.method} method`);
+          
+          // Use the repaired backup
+          const repairedDoc = this.convertBackupToDocument(repairResult.repairedBackup);
+          return repairedDoc;
         }
         
-        // Use recovered content
-        backup.content = recoveryResult.content || '';
-        console.log(`Recovered document content using ${recoveryResult.recoveryMethod} method`);
+        // If repair failed and we haven't exceeded attempts, try alternative recovery
+        if (this.recoveryAttempts < this.maxRecoveryAttempts) {
+          console.log(`Integrity verification failed, attempt ${this.recoveryAttempts}. Trying alternative recovery...`);
+          return this.attemptAlternativeRecovery();
+        }
+        return null;
       }
 
-      // Adapt the retrieved backup to match the Document interface
-      const recoveredDocument: Document = {
-        id: backup.documentId || backup.id,
-        title: backup.title,
-        content: backup.content,
-        updated_at: backup.updatedAt || new Date().toISOString(),
-        created_at: backup.createdAt || backup.updatedAt || new Date().toISOString(),
-        owner_id: backup.meta?.owner_id,
-        status: backup.meta?.status,
-        meta: backup.meta || {},
-        version: backup.meta?.version || 1
-      };
-      
-      return recoveredDocument;
+      // Convert backup to Document format
+      return this.convertBackupToDocument(backup);
     } catch (error) {
       console.error("Error recovering document from backup:", error);
       // If we haven't exceeded max attempts, we could try a different recovery strategy
@@ -139,6 +162,23 @@ export class RecoveryOperations {
       }
       return null;
     }
+  }
+
+  /**
+   * Convert a DocumentBackup to the Document format
+   */
+  private convertBackupToDocument(backup: DocumentBackup): Document {
+    return {
+      id: backup.documentId || backup.id,
+      title: backup.title,
+      content: backup.content,
+      updated_at: backup.updatedAt || new Date().toISOString(),
+      created_at: backup.createdAt || backup.updatedAt || new Date().toISOString(),
+      owner_id: backup.meta?.owner_id,
+      status: backup.meta?.status,
+      meta: backup.meta || {},
+      version: backup.meta?.version || 1
+    };
   }
 
   /**
@@ -170,6 +210,9 @@ export class RecoveryOperations {
     documentId: string | null,
     userRole: UserRole | null
   ): Promise<Document | null> {
+    // Check if this is a priority document
+    const isPriority = documentId !== null && this.isPriorityDocument(documentId);
+    
     // If we can acquire the lock, process immediately
     if (this.acquireRecoveryLock()) {
       try {
@@ -183,7 +226,7 @@ export class RecoveryOperations {
         this.addToRecoveryQueue(async () => {
           const result = this.recoverFromBackup(documentId, userRole);
           resolve(result);
-        });
+        }, isPriority);
         
         // Attempt to process the queue
         this.processRecoveryQueue();

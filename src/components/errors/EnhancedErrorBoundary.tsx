@@ -87,7 +87,7 @@ export const EnhancedErrorBoundary: React.FC<EnhancedErrorBoundaryProps> = ({
       context={context}
       onError={onError}
       allowReset={allowReset}
-      fallback={(error, resetFn) => enhancedFallback(error, resetFn)}
+      fallbackRender={({ error, resetErrorBoundary }) => enhancedFallback(error, resetErrorBoundary)}
     >
       {children}
     </ErrorBoundary>

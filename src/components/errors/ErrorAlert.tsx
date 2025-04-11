@@ -45,11 +45,11 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
     }
   };
   
-  // Set variant based on severity
+  // Set variant based on severity, but ensure it's compatible with Alert component variants
   const getVariant = () => {
     switch (severity) {
       case "warning":
-        return "warning" as const; // Adding as const to ensure TypeScript understands this as a literal
+        return "destructive" as const; // Using destructive for warning since "warning" isn't a valid variant
       case "info":
         return "default" as const;
       case "error":

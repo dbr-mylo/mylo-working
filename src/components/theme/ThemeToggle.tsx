@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Moon, Sun, Laptop } from "lucide-react";
 import { usePreferences } from "@/contexts/preferences/PreferencesContext";
@@ -55,7 +56,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         return (
           <RadioGroup
             value={preferences.theme}
-            onValueChange={(value) => updatePreference("theme", value)}
+            onValueChange={(value: "light" | "dark" | "system") => updatePreference("theme", value)}
             className="flex flex-col space-y-1"
           >
             <div className="flex items-center space-x-2">

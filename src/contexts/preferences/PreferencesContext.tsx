@@ -39,6 +39,7 @@ interface PreferencesContextType {
   ) => void;
   resetPreferences: () => void;
   isDarkMode: boolean;
+  isSystemTheme: boolean;
 }
 
 const PreferencesContext = createContext<PreferencesContextType>({
@@ -46,6 +47,7 @@ const PreferencesContext = createContext<PreferencesContextType>({
   updatePreference: () => {},
   resetPreferences: () => {},
   isDarkMode: false,
+  isSystemTheme: false,
 });
 
 export const usePreferences = () => useContext(PreferencesContext);
@@ -64,6 +66,9 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
   
   const [preferences, setPreferences] = useState<UserPreferences>(storedPreferences);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  
+  // Determine if using system theme
+  const isSystemTheme = preferences.theme === 'system';
 
   // Update the preferences when the user changes
   useEffect(() => {
@@ -128,6 +133,7 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
     updatePreference,
     resetPreferences,
     isDarkMode,
+    isSystemTheme,
   };
 
   return (

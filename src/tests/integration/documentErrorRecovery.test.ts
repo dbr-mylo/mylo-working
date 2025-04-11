@@ -35,11 +35,14 @@ describe('Document Error Recovery Integration', () => {
     
     // Mock backup retrieval
     const mockBackup = {
-      id: 'test-doc-123',
+      id: 'backup-123',
+      documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      role: 'writer',
+      timestamp: Date.now(),
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       meta: {
         owner_id: 'user-123',
         version: 1
@@ -100,11 +103,14 @@ describe('Document Error Recovery Integration', () => {
     
     // Mock backup retrieval
     const mockBackup = {
-      id: 'test-doc-123',
+      id: 'backup-123',
+      documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      role: 'writer',
+      timestamp: Date.now(),
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       meta: {
         owner_id: 'user-123',
         version: 1

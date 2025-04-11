@@ -91,21 +91,24 @@ describe('DocumentRecoveryService', () => {
   });
   
   it('should recover a document from backup', () => {
-    // Create a mock document
-    const mockDocument = {
-      id: 'test-doc-123',
+    // Create a mock backup
+    const mockBackup = {
+      id: 'backup-123',
+      documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Recovered content',
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      role: 'writer',
+      timestamp: Date.now(),
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       meta: {
         owner_id: 'user-123',
         version: 1
       }
     };
     
-    // Mock getDocumentBackup to return the mock document
-    vi.mocked(backupSystem.getDocumentBackup).mockReturnValue(mockDocument);
+    // Mock getDocumentBackup to return the mock backup
+    vi.mocked(backupSystem.getDocumentBackup).mockReturnValue(mockBackup);
     
     // Recover the document
     const result = service.recoverFromBackup();

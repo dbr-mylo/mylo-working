@@ -125,23 +125,23 @@ export class DocumentRecoveryService {
   public recoverFromBackup(): Document | null {
     try {
       this.recoveryAttempts++;
-      const doc = this.documentId ?
+      const backup = this.documentId ?
         getDocumentBackup(this.documentId) :
         this.userRole ? getDocumentBackup(null, this.userRole) : null;
 
-      if (doc) {
-        console.log(`Successfully recovered document from backup: "${doc.title}"`);
-        // Adapt the retrieved document to match the Document interface
+      if (backup) {
+        console.log(`Successfully recovered document from backup: "${backup.title}"`);
+        // Adapt the retrieved backup to match the Document interface
         const recoveredDocument: Document = {
-          id: doc.id,
-          title: doc.title,
-          content: doc.content,
-          updated_at: doc.updatedAt || new Date().toISOString(),
-          created_at: doc.createdAt || doc.updated_at || new Date().toISOString(),
-          status: doc.meta?.status,
-          owner_id: doc.meta?.owner_id,
-          meta: doc.meta || {},
-          version: doc.meta?.version || 1
+          id: backup.documentId || backup.id,
+          title: backup.title,
+          content: backup.content,
+          updated_at: backup.updatedAt || new Date().toISOString(),
+          created_at: backup.createdAt || backup.updatedAt || new Date().toISOString(),
+          owner_id: backup.meta?.owner_id,
+          status: backup.meta?.status,
+          meta: backup.meta || {},
+          version: backup.meta?.version || 1
         };
         return recoveredDocument;
       }

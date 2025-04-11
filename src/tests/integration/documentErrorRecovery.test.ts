@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DocumentRecoveryService } from '@/services/DocumentRecoveryService';
 import { classifyError, ErrorCategory } from '@/utils/error/errorClassifier';
 import * as backupSystem from '@/utils/backup/documentBackupSystem';
+import { UserRole } from '@/lib/types';
 
 // Mock the document backup system
 vi.mock('@/utils/backup/documentBackupSystem', () => ({
@@ -39,7 +40,7 @@ describe('Document Error Recovery Integration', () => {
       documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      role: 'writer',
+      role: 'writer' as UserRole,
       timestamp: Date.now(),
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
@@ -107,7 +108,7 @@ describe('Document Error Recovery Integration', () => {
       documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Backed up content',
-      role: 'writer',
+      role: 'writer' as UserRole,
       timestamp: Date.now(),
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),

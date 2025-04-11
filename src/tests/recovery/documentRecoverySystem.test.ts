@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DocumentRecoveryService } from '@/services/DocumentRecoveryService';
 import * as backupSystem from '@/utils/backup/documentBackupSystem';
+import { UserRole } from '@/lib/types';
 
 // Mock the document backup system
 vi.mock('@/utils/backup/documentBackupSystem', () => ({
@@ -97,7 +98,7 @@ describe('DocumentRecoveryService', () => {
       documentId: 'test-doc-123',
       title: 'Test Document',
       content: 'Recovered content',
-      role: 'writer',
+      role: 'writer' as UserRole,
       timestamp: Date.now(),
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),

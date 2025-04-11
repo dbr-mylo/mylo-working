@@ -1,3 +1,4 @@
+
 /**
  * Document backup system
  * 
@@ -15,7 +16,7 @@ const MAX_BACKUPS_TOTAL = 20;
 const BACKUP_RETENTION_DAYS = 7;
 
 // Interface for document backup
-interface DocumentBackup {
+export interface DocumentBackup {
   id: string;
   documentId: string | null;
   content: string;

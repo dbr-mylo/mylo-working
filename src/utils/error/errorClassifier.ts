@@ -1,4 +1,3 @@
-
 /**
  * Error classification system
  * 
@@ -12,7 +11,7 @@
 export enum ErrorCategory {
   NETWORK = 'network',
   AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization', // Added this missing enum value
+  AUTHORIZATION = 'authorization',
   PERMISSION = 'permission',
   VALIDATION = 'validation',
   STORAGE = 'storage',
@@ -21,6 +20,9 @@ export enum ErrorCategory {
   RATE_LIMIT = 'rate_limit',
   SERVER = 'server',
   RESOURCE_NOT_FOUND = 'resource_not_found',
+  COMPATIBILITY = 'compatibility',
+  SESSION = 'session',
+  FILE_SIZE = 'file_size',
   UNKNOWN = 'unknown'
 }
 
@@ -33,6 +35,7 @@ export interface ClassifiedError {
   suggestedAction?: string;
   recoverable: boolean;
   code?: string;
+  technicalMessage?: string; // Add this missing property for tests
 }
 
 /**
@@ -270,4 +273,28 @@ function getErrorMessage(error: unknown): string {
   }
   
   return 'Unknown error occurred';
+}
+
+/**
+ * Extract technical details from an error object
+ * Used for debugging and detailed logging
+ */
+export function getTechnicalErrorDetails(error: unknown): string {
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}${error.stack ? `\n${error.stack}` : ''}`;
+  }
+  
+  if (typeof error === 'object' && error !== null) {
+    try {
+      return JSON.stringify(error, null, 2);
+    } catch (e) {
+      return `Object: ${Object.prototype.toString.call(error)}`;
+    }
+  }
+  
+  return String(error);
 }

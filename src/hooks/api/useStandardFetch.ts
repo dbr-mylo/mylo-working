@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient, QueryKey } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { handleError } from "@/utils/error/handleError";
@@ -69,7 +68,7 @@ export function useStandardQuery<TData>(
         handleRoleAwareError(error, options.context, options.errorMessage);
         
         // Classify the error to determine if it's a network issue
-        const classifiedError = classifyError(error);
+        const classifiedError = classifyError(error, options.context);
         
         // Log additional debug information
         console.debug(`[QueryError] ${options.context}:`, { 
@@ -86,7 +85,7 @@ export function useStandardQuery<TData>(
     refetchOnReconnect: options.refetchOnReconnect ?? true,
     retry: options.retry ?? ((_, error) => {
       // Only retry network errors by default
-      const classifiedError = classifyError(error);
+      const classifiedError = classifyError(error, options.context);
       return classifiedError.category === ErrorCategory.NETWORK;
     }),
     retryDelay: options.retryDelay ?? defaultRetryDelay,

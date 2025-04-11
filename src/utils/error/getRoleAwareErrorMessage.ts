@@ -89,12 +89,29 @@ function getFeatureSpecificRecoverySteps(
   feature: string,
   role: string | null | undefined
 ): string[] {
+  // Try importing directly instead of using require
   try {
-    // Import and use the function from featureSpecificErrors
+    // Import from featureSpecificErrors
     const { getFeatureSpecificRecoverySteps } = require('./featureSpecificErrors');
     return getFeatureSpecificRecoverySteps(error, feature, role);
   } catch (e) {
     console.error('Feature-specific recovery steps not available', e);
+    
+    // Default recovery steps based on feature
+    if (feature === 'editor' || feature === 'document') {
+      return [
+        'Save your work locally if possible',
+        'Try reopening the document',
+        'Contact support if the issue persists'
+      ];
+    } else if (feature === 'auth') {
+      return [
+        'Try signing out and back in',
+        'Clear your browser cookies',
+        'Reset your password if needed'
+      ];
+    }
+    
     return [
       'Try refreshing the page',
       'Check your internet connection',
@@ -102,3 +119,5 @@ function getFeatureSpecificRecoverySteps(
     ];
   }
 }
+
+export { getFeatureSpecificRecoverySteps };

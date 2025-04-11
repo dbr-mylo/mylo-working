@@ -8,6 +8,13 @@ import { classifyError, ErrorCategory } from "@/utils/error/errorClassifier";
 import { runDiagnostics } from "@/utils/error/diagnostics";
 import { NetworkStatusIndicator } from "@/components/status/NetworkStatusIndicator";
 
+interface ResolutionStep {
+  title: string;
+  description: string;
+  actionComponent?: string;
+  tips: string;
+}
+
 interface GuidedResolutionProps {
   error: unknown;
   context: string;
@@ -146,7 +153,7 @@ export function GuidedResolution({
             <div className="flex items-center space-x-2">
               <NetworkStatusIndicator showLabel size="lg" variant="prominent" />
               {!navigator.onLine && (
-                <Alert variant="warning" className="mt-2">
+                <Alert variant="info" className="mt-2">
                   <AlertTitle>You're offline</AlertTitle>
                   <AlertDescription>
                     This feature requires an internet connection.
@@ -158,7 +165,7 @@ export function GuidedResolution({
           
           {/* Tips */}
           {currentResolutionStep.tips && (
-            <Alert variant="default" className="bg-muted/50">
+            <Alert variant="info" className="bg-muted/50">
               <Info className="h-4 w-4" />
               <AlertTitle>Tip</AlertTitle>
               <AlertDescription className="text-xs">
@@ -198,8 +205,8 @@ export function GuidedResolution({
 }
 
 // Helper function to generate resolution steps based on error category
-function getResolutionSteps(errorCategory: ErrorCategory, feature?: string) {
-  const commonSteps = [
+function getResolutionSteps(errorCategory: ErrorCategory, feature?: string): ResolutionStep[] {
+  const commonSteps: ResolutionStep[] = [
     {
       title: "Check your connection",
       description: "First, let's verify that your device is connected to the internet.",

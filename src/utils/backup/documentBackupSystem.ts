@@ -1,10 +1,11 @@
+
 /**
  * Document backup system
  * 
  * This module provides utilities for creating, managing, and recovering
  * document backups to prevent data loss during errors or connectivity issues.
  */
-import { Document, DocumentMeta, UserRole } from '@/lib/types';
+import { UserRole } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Constants for backup storage
@@ -13,6 +14,22 @@ const BACKUP_INDEX = 'doc_backup_index';
 const MAX_BACKUPS_PER_DOCUMENT = 3;
 const MAX_BACKUPS_TOTAL = 20;
 const BACKUP_RETENTION_DAYS = 7;
+
+// Define Document type if not already available
+interface Document {
+  id: string;
+  content: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  isPublished: boolean;
+  meta?: DocumentMeta;
+  backupId?: string;
+}
+
+interface DocumentMeta {
+  [key: string]: any;
+}
 
 interface DocumentBackup {
   id: string;
@@ -149,7 +166,6 @@ export function getDocumentBackup(documentId: string | null, role?: UserRole): D
       id: backup.documentId || '',
       content: backup.content,
       title: backup.title,
-      owner: '',
       createdAt: new Date(backup.timestamp).toISOString(),
       updatedAt: new Date(backup.timestamp).toISOString(),
       isPublished: false,

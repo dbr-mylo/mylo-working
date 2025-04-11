@@ -1,96 +1,61 @@
 
 import React from 'react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { Wifi, WifiOff, RefreshCcw } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { Wifi, WifiOff } from 'lucide-react';
 
 interface NetworkStatusIndicatorProps {
   showLabel?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'prominent';
   className?: string;
-  size?: "sm" | "md" | "lg";
-  variant?: "subtle" | "prominent";
 }
 
-export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
+export function NetworkStatusIndicator({
   showLabel = false,
-  className = "",
-  size = "md",
-  variant = "subtle",
-}) => {
-  const { isOnline, isChecking, checkConnection } = useOnlineStatus({
-    pollingInterval: 60000, // Check every minute
-  });
+  size = 'md',
+  variant = 'default',
+  className = '',
+}: NetworkStatusIndicatorProps) {
+  const { isOnline } = useOnlineStatus();
   
-  const iconSizes = {
-    sm: "h-3 w-3",
-    md: "h-4 w-4",
-    lg: "h-5 w-5",
+  // Define sizes
+  const sizeClasses = {
+    sm: {
+      container: 'text-xs',
+      icon: 'h-3 w-3 mr-1',
+    },
+    md: {
+      container: 'text-sm',
+      icon: 'h-4 w-4 mr-1.5',
+    },
+    lg: {
+      container: 'text-base',
+      icon: 'h-5 w-5 mr-2',
+    },
   };
   
-  const containerClasses = {
-    subtle: "text-muted-foreground hover:text-foreground transition-colors",
-    prominent: isOnline 
-      ? "text-green-500 dark:text-green-400" 
-      : "text-red-500 dark:text-red-400",
+  // Define variants
+  const variantClasses = {
+    default: isOnline 
+      ? 'text-green-600' 
+      : 'text-amber-600',
+    prominent: isOnline
+      ? 'bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full'
+      : 'bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full',
   };
   
-  const handleManualCheck = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    checkConnection();
-  };
-  
-  const renderContent = () => (
+  return (
     <div 
-      className={cn(
-        "flex items-center gap-1.5 cursor-pointer",
-        containerClasses[variant],
-        className
-      )}
-      onClick={handleManualCheck}
-      role="status"
-      aria-live="polite"
+      className={`flex items-center ${sizeClasses[size].container} ${variantClasses[variant]} ${className}`}
     >
       {isOnline ? (
-        <Wifi className={iconSizes[size]} />
+        <Wifi className={sizeClasses[size].icon} />
       ) : (
-        <WifiOff className={iconSizes[size]} />
+        <WifiOff className={sizeClasses[size].icon} />
       )}
-      
-      {isChecking && (
-        <RefreshCcw className={cn(iconSizes[size], "animate-spin")} />
-      )}
-      
       {showLabel && (
-        <span className={size === "sm" ? "text-xs" : "text-sm"}>
-          {isOnline ? "Online" : "Offline"}
-        </span>
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
       )}
     </div>
   );
-  
-  if (!showLabel) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {renderContent()}
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              {isOnline 
-                ? "You're online" 
-                : "You're currently offline"
-              }
-              {isChecking && " - Checking connection..."}
-            </p>
-            <p className="text-xs text-muted-foreground">Click to check status</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-  
-  return renderContent();
-};
+}

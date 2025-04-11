@@ -5,13 +5,15 @@ import { GuidedResolution } from './GuidedResolution';
 /**
  * Create a guided error resolution component
  * @param error The error to resolve
- * @param resolutionSteps Steps to resolve the error
+ * @param context The context where the error occurred
+ * @param feature Optional feature context
  */
 export function createGuidedResolution(
   error: unknown, 
-  resolutionSteps: string[]
+  context: string,
+  feature?: string
 ): React.ReactElement {
-  return <GuidedResolution error={error} resolutionSteps={resolutionSteps} />;
+  return <GuidedResolution error={error} context={context} feature={feature} />;
 }
 
 // Import the getErrorResolutionSteps function from utils

@@ -15,6 +15,9 @@ export enum ErrorCategory {
   CLIENT = 'client',
   RESOURCE_NOT_FOUND = 'resource_not_found',
   RATE_LIMIT = 'rate_limit',
+  COMPATIBILITY = 'compatibility',
+  SESSION = 'session',
+  FILE_SIZE = 'file_size',
   UNKNOWN = 'unknown'
 }
 

@@ -6,7 +6,7 @@
  * - Browser compatibility
  * - LocalStorage availability
  * - Network connectivity
- * - Memory usage
+ * - Memory usage (when available)
  * 
  * @returns Boolean indicating if diagnostics completed successfully
  */
@@ -36,12 +36,12 @@ export function runDiagnostics(): boolean {
     // Check memory usage if available
     if (window.performance) {
       try {
-        // Using type assertion for Chrome's non-standard performance.memory
-        const memory = (window.performance as any).memory;
-        if (memory) {
+        // Some browsers (Chrome) expose memory info via performance
+        const performance = window.performance as any;
+        if (performance.memory) {
           console.log('Memory usage:', {
-            totalJSHeapSize: Math.round(memory.totalJSHeapSize / (1024 * 1024)) + 'MB',
-            usedJSHeapSize: Math.round(memory.usedJSHeapSize / (1024 * 1024)) + 'MB',
+            totalJSHeapSize: Math.round(performance.memory.totalJSHeapSize / (1024 * 1024)) + 'MB',
+            usedJSHeapSize: Math.round(performance.memory.usedJSHeapSize / (1024 * 1024)) + 'MB',
           });
         }
       } catch (e) {

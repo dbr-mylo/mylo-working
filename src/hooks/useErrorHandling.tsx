@@ -2,7 +2,7 @@
 import React, { useCallback } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { getRoleSpecificErrorMessage } from "@/utils/error/roleSpecificErrors";
-import { handleError, handleRoleAwareError } from "@/utils/error/handleError";
+import { handleError } from "@/utils/error/handleError";
 import { toast } from "sonner"; 
 import { classifyError, ErrorCategory } from '@/utils/error/errorClassifier';
 import { useOnlineStatus } from './useOnlineStatus';
@@ -22,8 +22,11 @@ export function useRoleAwareErrorHandling() {
     context: string,
     userMessage?: string
   ) => {
-    // Use the enhanced role-aware error handler
-    handleRoleAwareError(error, context, role, undefined, userMessage);
+    // Get role-specific message
+    const roleAwareMessage = getRoleSpecificErrorMessage(error, context, role);
+    
+    // Use standard error handler with role-aware message
+    handleError(error, context, userMessage || roleAwareMessage);
   }, [role]);
   
   /**

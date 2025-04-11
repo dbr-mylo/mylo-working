@@ -1,308 +1,273 @@
 
 /**
- * Error categories for better user feedback
+ * Error classification system
+ * 
+ * This module provides utilities to classify errors into categories
+ * based on error message patterns and context.
+ */
+
+/**
+ * Error categories for consistent handling
  */
 export enum ErrorCategory {
   NETWORK = 'network',
   AUTHENTICATION = 'authentication',
+  AUTHORIZATION = 'authorization', // Added this missing enum value
   PERMISSION = 'permission',
   VALIDATION = 'validation',
   STORAGE = 'storage',
   FORMAT = 'format',
   TIMEOUT = 'timeout',
-  DATABASE = 'database',
-  SERVER = 'server',
-  CLIENT = 'client',
-  RESOURCE_NOT_FOUND = 'resource_not_found',
   RATE_LIMIT = 'rate_limit',
-  COMPATIBILITY = 'compatibility',
-  SESSION = 'session',
-  FILE_SIZE = 'file_size',
+  SERVER = 'server',
+  RESOURCE_NOT_FOUND = 'resource_not_found',
   UNKNOWN = 'unknown'
 }
 
 /**
- * Interface for classified error information
+ * Classified error with additional metadata
  */
 export interface ClassifiedError {
   category: ErrorCategory;
   message: string;
-  technicalMessage: string;
-  recoverable: boolean;
   suggestedAction?: string;
+  recoverable: boolean;
+  code?: string;
 }
 
 /**
- * Helper function to check if the error contains specific keywords
+ * Classify an error based on its properties and context
+ * 
+ * @param error The original error
+ * @param context Where the error occurred (component/function name)
+ * @returns ClassifiedError with metadata
  */
-function containsAny(text: string, keywords: string[]): boolean {
-  const lowerText = text.toLowerCase();
-  return keywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
-}
-
-/**
- * Check HTTP status code ranges
- */
-function getErrorCategoryFromStatus(status: number): ErrorCategory | null {
-  if (status >= 400 && status < 500) {
-    if (status === 401 || status === 403) {
-      return ErrorCategory.AUTHENTICATION;
-    }
-    if (status === 404) {
-      return ErrorCategory.RESOURCE_NOT_FOUND;
-    }
-    if (status === 422) {
-      return ErrorCategory.VALIDATION;
-    }
-    if (status === 429) {
-      return ErrorCategory.RATE_LIMIT;
-    }
-    return ErrorCategory.CLIENT;
-  }
-  if (status >= 500) {
-    return ErrorCategory.SERVER;
-  }
-  return null;
-}
-
-/**
- * Classifies an error into a specific category with helpful user messages
- */
-export function classifyError(error: unknown, context?: string): ClassifiedError {
-  const errorMessage = error instanceof Error 
-    ? error.message 
-    : typeof error === 'string' 
-      ? error 
-      : 'An unknown error occurred';
+export function classifyError(error: unknown, context: string): ClassifiedError {
+  // Extract message from various error types
+  const errorMessage = getErrorMessage(error);
   
-  const technicalMessage = error instanceof Error 
-    ? `${error.name}: ${error.message}` 
-    : String(error);
-  
-  // Extract HTTP status code if available
-  let statusCode: number | undefined;
-  if (error && typeof error === 'object' && 'status' in error) {
-    statusCode = Number(error.status);
-  }
-  
-  // Check for HTTP status-based categorization
-  if (statusCode) {
-    const statusCategory = getErrorCategoryFromStatus(statusCode);
-    if (statusCategory) {
-      switch (statusCategory) {
-        case ErrorCategory.AUTHENTICATION:
-          return {
-            category: ErrorCategory.AUTHENTICATION,
-            message: "You need to sign in to access this feature.",
-            technicalMessage,
-            recoverable: true,
-            suggestedAction: "Please try logging in again."
-          };
-        case ErrorCategory.RESOURCE_NOT_FOUND:
-          return {
-            category: ErrorCategory.RESOURCE_NOT_FOUND,
-            message: "The requested resource wasn't found.",
-            technicalMessage,
-            recoverable: false,
-            suggestedAction: "Please check the URL or go back to the previous page."
-          };
-        case ErrorCategory.VALIDATION:
-          return {
-            category: ErrorCategory.VALIDATION,
-            message: "There was a problem with the information provided.",
-            technicalMessage,
-            recoverable: true,
-            suggestedAction: "Please review and correct the information."
-          };
-        case ErrorCategory.RATE_LIMIT:
-          return {
-            category: ErrorCategory.RATE_LIMIT,
-            message: "You've made too many requests.",
-            technicalMessage,
-            recoverable: true,
-            suggestedAction: "Please wait a moment before trying again."
-          };
-        case ErrorCategory.SERVER:
-          return {
-            category: ErrorCategory.SERVER,
-            message: "There was a problem with our server.",
-            technicalMessage,
-            recoverable: false,
-            suggestedAction: "Please try again later."
-          };
-        case ErrorCategory.CLIENT:
-          return {
-            category: ErrorCategory.CLIENT,
-            message: "There was a problem with your request.",
-            technicalMessage,
-            recoverable: true,
-            suggestedAction: "Please try again or contact support."
-          };
-      }
-    }
-  }
-  
-  // Network errors
+  // Check for network-related errors
   if (
-    containsAny(errorMessage, ['network', 'offline', 'internet', 'connection', 'fetch', 'http', 'request']) ||
-    error instanceof TypeError && containsAny(errorMessage, ['failed to fetch'])
+    errorMessage.includes('network') ||
+    errorMessage.includes('fetch') ||
+    errorMessage.includes('ECONNREFUSED') ||
+    errorMessage.includes('Failed to fetch')
   ) {
     return {
       category: ErrorCategory.NETWORK,
-      message: "We're having trouble connecting to the server.",
-      technicalMessage,
+      message: 'Network connection issue detected.',
+      suggestedAction: 'Please check your internet connection and try again.',
       recoverable: true,
-      suggestedAction: "Check your internet connection and try again."
     };
   }
   
-  // Authentication errors
+  // Check for authentication errors
   if (
-    containsAny(errorMessage, ['auth', 'login', 'credential', 'token', 'session', 'expired', 'unauthorized', 'unauthenticated']) ||
-    context?.includes('auth') ||
-    context?.includes('login')
+    errorMessage.includes('auth') ||
+    errorMessage.includes('login') ||
+    errorMessage.includes('sign in') ||
+    errorMessage.includes('token') ||
+    errorMessage.includes('credential') ||
+    errorMessage.includes('expired')
   ) {
     return {
       category: ErrorCategory.AUTHENTICATION,
-      message: "Your session may have expired.",
-      technicalMessage,
+      message: 'Authentication error occurred.',
+      suggestedAction: 'Please sign in again to continue.',
       recoverable: true,
-      suggestedAction: "Please try logging in again."
     };
   }
   
-  // Permission errors
-  if (containsAny(errorMessage, ['permission', 'access', 'denied', 'unauthorized', 'forbidden'])) {
+  // Check for permission errors
+  if (
+    errorMessage.includes('permission') ||
+    errorMessage.includes('access denied') ||
+    errorMessage.includes('forbidden') ||
+    errorMessage.includes('not authorized')
+  ) {
     return {
       category: ErrorCategory.PERMISSION,
-      message: "You don't have permission to perform this action.",
-      technicalMessage,
+      message: 'You do not have permission for this action.',
+      suggestedAction: 'Contact your administrator if you need access.',
       recoverable: false,
-      suggestedAction: "Contact an administrator if you need access."
     };
   }
   
-  // Validation errors
-  if (containsAny(errorMessage, ['valid', 'format', 'required', 'missing', 'invalid', 'constraint'])) {
+  // Check for validation errors
+  if (
+    errorMessage.includes('valid') ||
+    errorMessage.includes('required') ||
+    errorMessage.includes('must be') ||
+    errorMessage.includes('expected') ||
+    errorMessage.includes('format')
+  ) {
     return {
       category: ErrorCategory.VALIDATION,
-      message: "There's a problem with the information provided.",
-      technicalMessage,
+      message: 'There was a problem with the provided data.',
+      suggestedAction: 'Please check your input and try again.',
       recoverable: true,
-      suggestedAction: "Check the input and try again."
     };
   }
   
-  // Storage errors
-  if (containsAny(errorMessage, ['storage', 'quota', 'capacity', 'full', 'space'])) {
+  // Check for storage errors
+  if (
+    errorMessage.includes('storage') ||
+    errorMessage.includes('disk') ||
+    errorMessage.includes('save') ||
+    errorMessage.includes('quota') ||
+    context.includes('storage') ||
+    context.includes('save')
+  ) {
     return {
       category: ErrorCategory.STORAGE,
-      message: "There's not enough storage space.",
-      technicalMessage,
+      message: 'Storage error occurred.',
+      suggestedAction: 'Please check available space and permissions.',
       recoverable: true,
-      suggestedAction: "Try freeing up some space by deleting unnecessary files."
     };
   }
   
-  // Format errors
-  if (containsAny(errorMessage, ['parse', 'JSON', 'syntax', 'malformed', 'corrupt', 'format'])) {
-    return {
-      category: ErrorCategory.FORMAT,
-      message: "The file or data is in an incorrect format.",
-      technicalMessage,
-      recoverable: false,
-      suggestedAction: "Try using a different file."
-    };
-  }
-  
-  // Timeout errors
-  if (containsAny(errorMessage, ['timeout', 'timed out', 'took too long', 'deadline', 'exceeded'])) {
+  // Check for timeouts
+  if (
+    errorMessage.includes('timeout') ||
+    errorMessage.includes('timed out') ||
+    errorMessage.includes('took too long')
+  ) {
     return {
       category: ErrorCategory.TIMEOUT,
-      message: "The operation took too long to complete.",
-      technicalMessage,
+      message: 'The operation took too long to complete.',
+      suggestedAction: 'Please try again. If the problem persists, try a smaller action.',
       recoverable: true,
-      suggestedAction: "Try again or perform the operation with a smaller file."
     };
   }
   
-  // Database errors
-  if (containsAny(errorMessage, ['database', 'db', 'query', 'sql', 'table', 'column', 'record', 'schema'])) {
-    return {
-      category: ErrorCategory.DATABASE,
-      message: "There was a database error.",
-      technicalMessage,
-      recoverable: false,
-      suggestedAction: "Please try again later. If the problem persists, contact support."
-    };
-  }
-  
-  // Not found errors
-  if (containsAny(errorMessage, ['not found', '404', 'doesn\'t exist', 'does not exist', 'missing'])) {
-    return {
-      category: ErrorCategory.RESOURCE_NOT_FOUND,
-      message: "The requested resource wasn't found.",
-      technicalMessage,
-      recoverable: false,
-      suggestedAction: "Check that the resource exists."
-    };
-  }
-  
-  // Rate limit errors
-  if (containsAny(errorMessage, ['rate limit', 'too many requests', 'throttle', '429'])) {
+  // Check for rate limiting
+  if (
+    errorMessage.includes('rate limit') ||
+    errorMessage.includes('too many requests') ||
+    errorMessage.includes('try again later')
+  ) {
     return {
       category: ErrorCategory.RATE_LIMIT,
-      message: "You've made too many requests.",
-      technicalMessage,
+      message: 'Rate limit reached.',
+      suggestedAction: 'Please wait a moment before trying again.',
       recoverable: true,
-      suggestedAction: "Please wait a moment before trying again."
     };
   }
   
-  // Unknown/default error
+  // Check for server errors
+  if (
+    errorMessage.includes('server') ||
+    errorMessage.includes('500') ||
+    errorMessage.includes('503') ||
+    errorMessage.includes('internal')
+  ) {
+    return {
+      category: ErrorCategory.SERVER,
+      message: 'Server error occurred.',
+      suggestedAction: 'Please try again later.',
+      recoverable: false,
+    };
+  }
+  
+  // Check for not found errors
+  if (
+    errorMessage.includes('not found') ||
+    errorMessage.includes('404') ||
+    errorMessage.includes('missing') ||
+    errorMessage.includes('does not exist')
+  ) {
+    return {
+      category: ErrorCategory.RESOURCE_NOT_FOUND,
+      message: 'The requested resource was not found.',
+      suggestedAction: 'Please check if the item exists or has been moved.',
+      recoverable: false,
+    };
+  }
+  
+  // Default case for unknown errors
   return {
     category: ErrorCategory.UNKNOWN,
-    message: "Something unexpected happened.",
-    technicalMessage,
-    recoverable: true,
-    suggestedAction: "Try again or contact support if the problem persists."
+    message: 'An unexpected error occurred.',
+    suggestedAction: 'Please try again or contact support if the problem persists.',
+    recoverable: false,
   };
 }
 
 /**
- * Gets a user-friendly message based on error classification and role
+ * Get a user-friendly error message based on classification
+ * 
+ * @param error The original error
+ * @param context Where the error occurred
+ * @param role Optional user role for customized messages
+ * @returns User-friendly error message
  */
 export function getUserFriendlyErrorMessage(
   error: unknown,
-  context?: string,
+  context: string,
   role?: string | null
 ): string {
   const classified = classifyError(error, context);
   
-  // Add role-specific details if available
-  if (role) {
-    if (role === 'designer' && classified.category === ErrorCategory.PERMISSION) {
-      return `${classified.message} Designers have different permissions than editors.`;
-    }
-    
-    if (role === 'editor' && classified.category === ErrorCategory.FORMAT) {
-      return `${classified.message} This template may not be compatible with the editor.`;
-    }
-    
-    if (role === 'admin' && classified.category === ErrorCategory.SERVER) {
-      return `${classified.message} As an admin, you can check the server logs for more information.`;
-    }
+  // Create friendly message based on classification
+  switch (classified.category) {
+    case ErrorCategory.NETWORK:
+      return 'Connection issue detected. Please check your internet and try again.';
+      
+    case ErrorCategory.AUTHENTICATION:
+      return 'Your session may have expired. Please sign in again to continue.';
+      
+    case ErrorCategory.PERMISSION:
+      return 'You don\'t have permission to perform this action.';
+      
+    case ErrorCategory.VALIDATION:
+      return 'Please check your input - some fields may not be in the correct format.';
+      
+    case ErrorCategory.STORAGE:
+      return 'Unable to save your data. Please check your storage space.';
+      
+    case ErrorCategory.TIMEOUT:
+      return 'The operation took too long. Please try again or try with a smaller amount of data.';
+      
+    case ErrorCategory.RATE_LIMIT:
+      return 'You\'ve reached a rate limit. Please wait a moment before trying again.';
+      
+    case ErrorCategory.SERVER:
+      return 'Our server is experiencing issues. Please try again later.';
+      
+    case ErrorCategory.RESOURCE_NOT_FOUND:
+      return 'The item you requested could not be found. It may have been deleted or moved.';
+      
+    default:
+      // If we have the original error message, use it; otherwise fallback
+      return getErrorMessage(error) || 'An unexpected error occurred.';
   }
-  
-  return classified.message + (classified.suggestedAction ? ` ${classified.suggestedAction}` : '');
 }
 
 /**
- * Get technical error details - useful for developers
+ * Extract a string message from various error types
  */
-export function getTechnicalErrorDetails(error: unknown): string {
-  if (error instanceof Error) {
-    return `${error.name}: ${error.message}\n${error.stack || ''}`;
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'string') {
+    return error;
   }
-  return String(error);
+  
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  if (typeof error === 'object' && error !== null) {
+    if ('message' in error && typeof error.message === 'string') {
+      return error.message;
+    }
+    
+    if ('error' in error && typeof error.error === 'string') {
+      return error.error;
+    }
+    
+    if ('statusText' in error && typeof error.statusText === 'string') {
+      return error.statusText;
+    }
+  }
+  
+  return 'Unknown error occurred';
 }

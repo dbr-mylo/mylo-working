@@ -27,7 +27,7 @@ export const useDocumentSave = ({
       toast({
         title: "Saving temporarily disabled",
         description: "Document saving is currently unavailable. Using local backup instead.",
-        variant: "warning",
+        variant: "destructive", // Changed from "warning" to "destructive"
       });
       
       // Save to local backup instead as fallback

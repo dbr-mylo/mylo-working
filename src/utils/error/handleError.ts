@@ -34,7 +34,7 @@ export const handleError = (
   
   // Determine toast variant based on error category
   const toastVariant = classifiedError.category === ErrorCategory.NETWORK 
-    ? "warning" 
+    ? "error" // Using "error" instead of "warning" for sonner
     : "error";
   
   // Log error with context

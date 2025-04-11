@@ -1,9 +1,46 @@
-// Replace with import for registerErrorAndAttemptRecovery
+
+// Import for registerErrorAndAttemptRecovery
 import { registerErrorAndAttemptRecovery } from "./selfHealingSystem";
+import { toast } from "sonner";
+import { trackError } from "./analytics";
 
 /**
  * Utility functions for handling errors and providing recovery steps.
  */
+
+/**
+ * Centralized error handling function.
+ * @param error The error object.
+ * @param context The context in which the error occurred.
+ * @param userMessage Optional custom message to show to the user on error.
+ * @param shouldToast Whether to show a toast notification, defaults to true.
+ */
+export function handleError(
+  error: unknown,
+  context: string,
+  userMessage?: string,
+  shouldToast: boolean = true
+): void {
+  // Log to console
+  console.error(`Error in ${context}:`, error);
+
+  // Track for analytics
+  trackError(error, context);
+
+  // Show toast to user if requested
+  if (shouldToast) {
+    const message = userMessage || 
+      (error instanceof Error ? error.message : 'An unexpected error occurred');
+    
+    toast.error(message, {
+      description: `Error context: ${context}`,
+      duration: 5000,
+    });
+  }
+
+  // Attempt automatic recovery
+  registerErrorAndAttemptRecovery(error, context);
+}
 
 /**
  * Get recovery steps based on the error type and user role.

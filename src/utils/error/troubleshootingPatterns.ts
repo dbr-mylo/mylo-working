@@ -1,249 +1,214 @@
 
-import { ErrorPattern, TroubleshootingSession, TroubleshootingStep } from '../featureFlags/types';
-import { ErrorCategory, classifyError } from './errorClassifier';
+/**
+ * Error pattern recognition and troubleshooting
+ */
 
-// Sample error patterns for common issues
-const ERROR_PATTERNS: ErrorPattern[] = [
+import { ErrorCategory, ClassifiedError, classifyError } from "./errorClassifier";
+
+// Interfaces for troubleshooting
+export interface TroubleshootingPattern {
+  id: string;
+  name: string;
+  categoryMatches: ErrorCategory[];
+  messagePatterns: RegExp[];
+  steps: string[];
+  automatedChecks: AutomatedCheck[];
+  successRate: number;
+  lastUpdated: string;
+}
+
+export interface AutomatedCheck {
+  id: string;
+  name: string;
+  description: string;
+  checkFn: () => Promise<boolean>;
+  remedyFn?: () => Promise<boolean>;
+}
+
+// Known troubleshooting patterns
+const troubleshootingPatterns: TroubleshootingPattern[] = [
   {
-    pattern: "Network Error",
-    category: "network",
-    frequency: 120,
-    remediation: "Check your internet connection and retry the operation.",
-    autoRecoverable: true,
-    successRate: 0.85
+    id: 'network-connectivity',
+    name: 'Network Connectivity Issues',
+    categoryMatches: [ErrorCategory.NETWORK, ErrorCategory.TIMEOUT],
+    messagePatterns: [
+      /failed to fetch/i,
+      /network error/i,
+      /connection (failed|error|lost)/i,
+      /offline/i
+    ],
+    steps: [
+      'Check your internet connection',
+      'Verify that you can access other websites',
+      'Try disabling any VPN or proxy services',
+      'Clear your browser cache and cookies',
+      'If on a mobile device, try switching between Wi-Fi and cellular data'
+    ],
+    automatedChecks: [
+      {
+        id: 'online-status',
+        name: 'Online Status',
+        description: 'Checks if your device reports being online',
+        checkFn: async () => {
+          return navigator.onLine;
+        }
+      },
+      {
+        id: 'ping-service',
+        name: 'API Connectivity',
+        description: 'Checks if our API services are reachable',
+        checkFn: async () => {
+          try {
+            const response = await fetch('/api/health', { method: 'HEAD' });
+            return response.ok;
+          } catch (e) {
+            return false;
+          }
+        }
+      }
+    ],
+    successRate: 0.85,
+    lastUpdated: '2025-03-15'
   },
   {
-    pattern: "Failed to fetch",
-    category: "network",
-    frequency: 95,
-    remediation: "Connection to the server was interrupted. Refresh the application to reconnect.",
-    autoRecoverable: true,
-    successRate: 0.75
+    id: 'authentication-issues',
+    name: 'Authentication Problems',
+    categoryMatches: [ErrorCategory.AUTHENTICATION, ErrorCategory.AUTHORIZATION],
+    messagePatterns: [
+      /unauthorized/i,
+      /not authenticated/i,
+      /invalid (token|credentials)/i,
+      /login (required|failed)/i,
+      /session (expired|invalid)/i
+    ],
+    steps: [
+      'Log out and log back in',
+      'Clear your browser cache and cookies',
+      'Check if you are using the correct credentials',
+      'Reset your password if you continue to have issues',
+      'Make sure your account has not been locked or disabled'
+    ],
+    automatedChecks: [
+      {
+        id: 'token-check',
+        name: 'Auth Token',
+        description: 'Checks if you have a valid authentication token',
+        checkFn: async () => {
+          return localStorage.getItem('auth_token') !== null;
+        },
+        remedyFn: async () => {
+          // In a real app, we'd redirect to login
+          console.log('Redirecting to login page...');
+          return true;
+        }
+      }
+    ],
+    successRate: 0.92,
+    lastUpdated: '2025-04-02'
   },
   {
-    pattern: "Unauthorized",
-    category: "auth",
-    frequency: 78,
-    remediation: "Your session has expired. Please log in again.",
-    autoRecoverable: true,
-    successRate: 0.95
-  },
-  {
-    pattern: "Permission denied",
-    category: "auth",
-    frequency: 45,
-    remediation: "You don't have permission to access this resource. Contact your administrator.",
-    autoRecoverable: false,
-    successRate: 0.2
-  },
-  {
-    pattern: "QuotaExceededError",
-    category: "storage",
-    frequency: 32,
-    remediation: "Storage quota exceeded. Clear some space in your browser storage.",
-    autoRecoverable: true,
-    successRate: 0.6
-  },
-  {
-    pattern: "TypeError: Cannot read property",
-    category: "data",
-    frequency: 120,
-    remediation: "Data integrity issue. Clear application cache and reload.",
-    autoRecoverable: true,
-    successRate: 0.7
-  },
-  {
-    pattern: "Loading chunk",
-    category: "resource",
-    frequency: 85,
-    remediation: "Failed to load resource. Clear cache and reload the application.",
-    autoRecoverable: true,
-    successRate: 0.9
+    id: 'storage-issues',
+    name: 'Storage Access Problems',
+    categoryMatches: [ErrorCategory.STORAGE],
+    messagePatterns: [
+      /quota exceeded/i,
+      /storage (error|full|unavailable)/i,
+      /indexeddb (error|failed)/i,
+      /local storage (error|failed|unavailable)/i
+    ],
+    steps: [
+      'Clear some browser storage space',
+      'Check your browser settings to ensure storage access is allowed',
+      'Try using a different browser',
+      'If using private/incognito mode, try regular browsing mode instead',
+      'Ensure you have sufficient disk space on your device'
+    ],
+    automatedChecks: [
+      {
+        id: 'storage-access',
+        name: 'Storage Access',
+        description: 'Checks if localStorage is accessible',
+        checkFn: async () => {
+          try {
+            const testKey = '___test_storage_access___';
+            localStorage.setItem(testKey, 'test');
+            const value = localStorage.getItem(testKey);
+            localStorage.removeItem(testKey);
+            return value === 'test';
+          } catch (e) {
+            return false;
+          }
+        }
+      }
+    ],
+    successRate: 0.78,
+    lastUpdated: '2025-03-28'
   }
 ];
 
-const SESSIONS_STORAGE_KEY = 'error_troubleshooting_sessions';
-
 /**
- * Identify matching error patterns for an error
- * @param error The error to analyze
- * @param context The context where the error occurred
- * @returns Array of remediation suggestions
+ * Find matching troubleshooting patterns for an error
+ * @param error The error to match patterns for
+ * @returns Matching troubleshooting patterns
  */
-export function identifyErrorPattern(error: Error, context: string): string[] {
-  const errorMessage = error.message;
-  const errorStack = error.stack || '';
-  const errorCategory = classifyError(error, context).category;
+export function findMatchingPatterns(error: unknown): TroubleshootingPattern[] {
+  const classified = classifyError(error);
+  const errorMessage = classified.message.toLowerCase();
   
-  // Find matching patterns
-  const matches = ERROR_PATTERNS.filter(pattern => {
-    // Check if pattern string appears in error message or stack
-    const matchesPattern = 
-      errorMessage.includes(pattern.pattern) || 
-      errorStack.includes(pattern.pattern);
-    
+  // Find patterns that match the error category or message patterns
+  return troubleshootingPatterns.filter(pattern => {
     // Check if category matches
-    const matchesCategory = 
-      pattern.category === errorCategory || 
-      pattern.category === ErrorCategory[errorCategory as keyof typeof ErrorCategory]?.toLowerCase();
+    const categoryMatch = pattern.categoryMatches.includes(classified.category as any);
     
-    return matchesPattern || matchesCategory;
+    // Check if any message patterns match
+    const messageMatch = pattern.messagePatterns.some(regex => 
+      regex.test(errorMessage)
+    );
+    
+    return categoryMatch || messageMatch;
   });
+}
+
+/**
+ * Run automated checks for a troubleshooting pattern
+ * @param pattern The troubleshooting pattern
+ * @returns Results of the automated checks
+ */
+export async function runAutomatedChecks(pattern: TroubleshootingPattern): Promise<{
+  id: string;
+  name: string;
+  passed: boolean;
+  remedy?: () => Promise<boolean>;
+}[]> {
+  const results = [];
   
-  // Return remediation suggestions
-  return matches.map(pattern => pattern.remediation);
-}
-
-/**
- * Save a troubleshooting session
- * @param sessionId The ID of the session to save
- * @param data The session data to save
- */
-export function saveTroubleshootingSession(
-  sessionId: string, 
-  data: { name: string; notes: string; status: string }
-): void {
-  try {
-    // Get existing sessions
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    const sessions: Record<string, any> = sessionsJson ? JSON.parse(sessionsJson) : {};
-    
-    // Update or create the session
-    sessions[sessionId] = {
-      ...sessions[sessionId],
-      ...data,
-      updatedAt: Date.now()
-    };
-    
-    // Save back to localStorage
-    localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-  } catch (error) {
-    console.error('Failed to save troubleshooting session:', error);
-  }
-}
-
-/**
- * Load a troubleshooting session
- * @param sessionId The ID of the session to load
- * @returns The session data or null if not found
- */
-export function loadTroubleshootingSession(sessionId: string): { name: string; notes: string } | null {
-  try {
-    // Get existing sessions
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!sessionsJson) return null;
-    
-    const sessions = JSON.parse(sessionsJson);
-    return sessions[sessionId] || null;
-  } catch (error) {
-    console.error('Failed to load troubleshooting session:', error);
-    return null;
-  }
-}
-
-/**
- * Add a step to a troubleshooting session
- * @param sessionId The ID of the session
- * @param action The action taken
- * @param result The result of the action
- * @param notes Optional notes about the step
- */
-export function addTroubleshootingStep(
-  sessionId: string,
-  action: string,
-  result: 'success' | 'failure' | 'inconclusive',
-  notes?: string
-): void {
-  try {
-    // Get existing sessions
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    const sessions: Record<string, any> = sessionsJson ? JSON.parse(sessionsJson) : {};
-    
-    // Create or get the session
-    if (!sessions[sessionId]) {
-      sessions[sessionId] = {
-        id: sessionId,
-        steps: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        status: 'in-progress'
-      };
+  for (const check of pattern.automatedChecks) {
+    try {
+      const passed = await check.checkFn();
+      
+      results.push({
+        id: check.id,
+        name: check.name,
+        passed,
+        remedy: !passed && check.remedyFn ? check.remedyFn : undefined
+      });
+    } catch (e) {
+      console.error(`Failed to run check ${check.id}:`, e);
+      results.push({
+        id: check.id,
+        name: check.name,
+        passed: false
+      });
     }
-    
-    // Add the step
-    const step: TroubleshootingStep = {
-      id: Math.random().toString(36).substring(2, 9),
-      action,
-      result,
-      timestamp: Date.now(),
-      notes
-    };
-    
-    if (!sessions[sessionId].steps) {
-      sessions[sessionId].steps = [];
-    }
-    
-    sessions[sessionId].steps.push(step);
-    sessions[sessionId].updatedAt = Date.now();
-    
-    // Save back to localStorage
-    localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-  } catch (error) {
-    console.error('Failed to add troubleshooting step:', error);
   }
+  
+  return results;
 }
 
 /**
- * Get all troubleshooting sessions
- * @returns Array of sessions
+ * Get all known troubleshooting patterns
+ * @returns Array of troubleshooting patterns
  */
-export function getAllTroubleshootingSessions(): TroubleshootingSession[] {
-  try {
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!sessionsJson) return [];
-    
-    const sessions = JSON.parse(sessionsJson);
-    return Object.values(sessions);
-  } catch (error) {
-    console.error('Failed to get troubleshooting sessions:', error);
-    return [];
-  }
-}
-
-/**
- * Clear a troubleshooting session
- * @param sessionId The ID of the session to clear
- */
-export function clearTroubleshootingSession(sessionId: string): void {
-  try {
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!sessionsJson) return;
-    
-    const sessions = JSON.parse(sessionsJson);
-    delete sessions[sessionId];
-    
-    localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-  } catch (error) {
-    console.error('Failed to clear troubleshooting session:', error);
-  }
-}
-
-/**
- * Mark a troubleshooting session as resolved
- * @param sessionId The ID of the session to mark as resolved
- */
-export function markSessionResolved(sessionId: string): void {
-  try {
-    const sessionsJson = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!sessionsJson) return;
-    
-    const sessions = JSON.parse(sessionsJson);
-    if (sessions[sessionId]) {
-      sessions[sessionId].status = 'resolved';
-      sessions[sessionId].resolvedAt = Date.now();
-      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-    }
-  } catch (error) {
-    console.error('Failed to mark troubleshooting session as resolved:', error);
-  }
+export function getAllPatterns(): TroubleshootingPattern[] {
+  return troubleshootingPatterns;
 }

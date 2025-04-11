@@ -1,11 +1,10 @@
-
 /**
  * Document backup system
  * 
  * This module provides utilities for creating, managing, and recovering
  * document backups to prevent data loss during errors or connectivity issues.
  */
-import { UserRole } from '@/lib/types';
+import { UserRole, Document } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Constants for backup storage
@@ -15,22 +14,7 @@ const MAX_BACKUPS_PER_DOCUMENT = 3;
 const MAX_BACKUPS_TOTAL = 20;
 const BACKUP_RETENTION_DAYS = 7;
 
-// Define Document type if not already available
-interface Document {
-  id: string;
-  content: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  isPublished: boolean;
-  meta?: DocumentMeta;
-  backupId?: string;
-}
-
-interface DocumentMeta {
-  [key: string]: any;
-}
-
+// Interface for document backup
 interface DocumentBackup {
   id: string;
   documentId: string | null;
@@ -39,6 +23,12 @@ interface DocumentBackup {
   role: UserRole;
   timestamp: number;
   meta?: DocumentMeta;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface DocumentMeta {
+  [key: string]: any;
 }
 
 interface BackupIndex {
@@ -74,14 +64,17 @@ export function backupDocument(
     
     // Create a new backup record
     const backupId = uuidv4();
+    const timestamp = Date.now();
     const backup: DocumentBackup = {
       id: backupId,
       documentId,
       content,
       title: title || 'Untitled Document',
       role,
-      timestamp: Date.now(),
-      meta
+      timestamp,
+      meta,
+      createdAt: new Date(timestamp).toISOString(),
+      updatedAt: new Date(timestamp).toISOString()
     };
     
     // Store the backup
@@ -134,7 +127,7 @@ export function hasBackup(documentId: string | null, role?: UserRole): boolean {
  * @param role User role (used for new documents)
  * @returns Document object or null if no backup exists
  */
-export function getDocumentBackup(documentId: string | null, role?: UserRole): Document | null {
+export function getDocumentBackup(documentId: string | null, role?: UserRole): DocumentBackup | null {
   try {
     const index = getBackupIndex();
     let targetBackup;
@@ -159,19 +152,7 @@ export function getDocumentBackup(documentId: string | null, role?: UserRole): D
     const backupData = localStorage.getItem(`${BACKUP_PREFIX}${targetBackup.id}`);
     if (!backupData) return null;
     
-    const backup: DocumentBackup = JSON.parse(backupData);
-    
-    // Convert backup to Document format
-    return {
-      id: backup.documentId || '',
-      content: backup.content,
-      title: backup.title,
-      createdAt: new Date(backup.timestamp).toISOString(),
-      updatedAt: new Date(backup.timestamp).toISOString(),
-      isPublished: false,
-      meta: backup.meta,
-      backupId: backup.id // Add backup ID for tracking
-    };
+    return JSON.parse(backupData) as DocumentBackup;
   } catch (error) {
     console.error('Error retrieving document backup:', error);
     return null;

@@ -4,6 +4,7 @@ import { NavigationMenuItem, NavigationMenuLink, navigationMenuTriggerStyle } fr
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouteValidation } from "@/hooks/navigation/useRouteValidation";
 import { useAuth } from "@/contexts/AuthContext";
+import { doesRouteExist } from "@/utils/navigation/routeValidator";
 
 interface NavigationItemProps {
   href: string;
@@ -25,15 +26,30 @@ export const NavigationItem: React.FC<NavigationItemProps> = ({
   const { validateRoute } = useRouteValidation();
   const { role } = useAuth();
   
+  // Check if route exists in configuration and is valid for role
+  const routeExists = doesRouteExist(href);
   const isValidForRole = validateRoute(href);
+  
+  // Determine if this is a missing route vs. a permission issue
+  const isMissingRoute = !routeExists;
+  const isPermissionIssue = routeExists && !isValidForRole;
   
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    if (isMissingRoute) {
+      console.warn(`Navigation attempted to undefined route: ${href}`);
+    }
+    
     onClick(href);
   };
   
-  // If the route is invalid and tooltips are enabled, show a tooltip
-  if (!isValidForRole && showTooltipIfInvalid) {
+  // If the route doesn't exist or is invalid and tooltips are enabled
+  if ((isMissingRoute || isPermissionIssue) && showTooltipIfInvalid) {
+    const tooltipMessage = isMissingRoute 
+      ? "This route is not defined in the application"
+      : "This feature requires additional permissions";
+      
     return (
       <TooltipProvider>
         <NavigationMenuItem>
@@ -50,7 +66,7 @@ export const NavigationItem: React.FC<NavigationItemProps> = ({
               </NavigationMenuLink>
             </TooltipTrigger>
             <TooltipContent>
-              <p>This feature requires additional permissions</p>
+              <p>{tooltipMessage}</p>
             </TooltipContent>
           </Tooltip>
         </NavigationMenuItem>

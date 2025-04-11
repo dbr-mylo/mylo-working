@@ -1,51 +1,61 @@
 
+/**
+ * Enhanced navigation hook that ensures all navigation is properly validated
+ * with role-based access control and error handling
+ */
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { toast } from "sonner";
 import { getSafeFallbackRoute } from "@/utils/navigation/NavigationUtils";
 
-/**
- * Hook to provide consistent navigation handlers across the application
- * with improved error handling and analytics
- */
-export const useNavigationHandlers = () => {
+export const useValidatedNavigation = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   
   /**
-   * Navigate to a route with validation, error handling, and analytics
-   * @param path Route to navigate to
-   * @param options Navigation options
+   * Safely navigate to a route with validation, error handling and analytics
    */
   const navigateTo = (path: string, options?: { replace?: boolean; state?: any }) => {
     try {
       const currentPath = window.location.pathname;
       const isValid = isValidRoute(path, role);
       
-      // Log the navigation attempt for analytics
-      logNavigation(currentPath, path, isValid, role);
+      // Log the navigation attempt
+      logNavigation(
+        currentPath, 
+        path, 
+        isValid, 
+        role
+      );
       
       if (isValid) {
+        // Navigate to the valid route
         navigate(path, options);
         return true;
       } else {
-        toast.error(`Cannot navigate to ${path}`, {
-          description: "This route is not available for your role",
+        // Handle invalid navigation
+        console.warn(`Invalid route access attempt: ${path} for role: ${role || 'unauthenticated'}`);
+        
+        toast.error("Cannot access this page", {
+          description: "You don't have permission to access this page.",
           duration: 3000,
         });
-        console.warn(`Invalid navigation attempt to ${path} by role: ${role || 'unauthenticated'}`);
+        
+        // Redirect to not-found with state information
         navigate("/not-found", { 
           replace: true, 
           state: { 
             from: path,
-            message: "Route not available for your role" 
+            message: "This page is not available for your role" 
           } 
         });
         return false;
       }
     } catch (error) {
       console.error("Navigation error:", error);
+      
+      // System error handling
       toast.error("Navigation error", {
         description: "There was a problem navigating to the requested page",
         duration: 3000,

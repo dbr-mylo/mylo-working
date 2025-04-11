@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { trackError } from "./analytics";
 import { getUserFriendlyErrorMessage, classifyError, ErrorCategory } from "./errorClassifier";
 import { getEnhancedErrorMessage, getEnhancedRecoverySteps } from "./getRoleAwareErrorMessage";
+import { registerErrorAndAttemptRecovery } from "./selfHealingSystem";
 
 /**
  * Handles an error with consistent logging and user notification
@@ -11,7 +12,8 @@ import { getEnhancedErrorMessage, getEnhancedRecoverySteps } from "./getRoleAwar
  * 1. Classifying the error for better reporting
  * 2. Logging the error with context
  * 3. Tracking the error for analytics
- * 4. Displaying a user-friendly toast notification
+ * 4. Attempting self-healing when possible
+ * 5. Displaying a user-friendly toast notification
  * 
  * @param error The error to handle
  * @param context Context information about where the error occurred
@@ -42,9 +44,18 @@ export const handleError = (
   // Add analytics tracking for errors
   trackError(error, context);
   
+  // Attempt self-healing
+  const recoveryAttempted = registerErrorAndAttemptRecovery(error, context);
+  
+  // If recovery was attempted, modify the message to indicate this
+  let finalMessage = errorMessage;
+  if (recoveryAttempted) {
+    finalMessage = `${errorMessage} (Automatic recovery attempted)`;
+  }
+  
   // Show toast notification if requested
   if (shouldToast) {
-    toast.error(errorMessage, {
+    toast.error(finalMessage, {
       description: classifiedError.suggestedAction || "See console for more details",
       duration: 5000,
     });

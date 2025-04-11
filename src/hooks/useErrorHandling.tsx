@@ -6,6 +6,7 @@ import { handleError } from "@/utils/error/handleError";
 import { toast } from "sonner"; 
 import { classifyError, ErrorCategory } from '@/utils/error/errorClassifier';
 import { useOnlineStatus } from './useOnlineStatus';
+import { useFeatureFlags } from './useFeatureFlags';
 
 /**
  * A hook to handle errors with role-specific messaging
@@ -13,6 +14,7 @@ import { useOnlineStatus } from './useOnlineStatus';
 export function useRoleAwareErrorHandling() {
   const { role } = useAuth();
   const { isOnline } = useOnlineStatus();
+  const { isEnabled } = useFeatureFlags();
   
   const handleRoleAwareError = useCallback((
     error: unknown,
@@ -32,8 +34,26 @@ export function useRoleAwareErrorHandling() {
       return;
     }
     
+    // Check feature availability based on error context
+    if (context.includes('collaboration') && !isEnabled('real-time-collaboration')) {
+      toast.error('Collaboration unavailable', {
+        description: "Real-time collaboration is currently disabled. Changes will be saved locally only.",
+        duration: 5000,
+      });
+      return;
+    }
+
+    if (context.includes('template') && !isEnabled('template-marketplace')) {
+      toast.error('Template features unavailable', {
+        description: "Template marketplace is currently disabled due to system issues.",
+        duration: 5000,
+      });
+      return;
+    }
+    
+    // Fall back to standard error handling
     handleError(error, context, userMessage || roleMessage);
-  }, [role, isOnline]);
+  }, [role, isOnline, isEnabled]);
   
   /**
    * Get role-specific error message without showing a toast
@@ -75,13 +95,25 @@ export function useRoleAwareErrorHandling() {
  */
 export function RoleAwareError({ 
   error, 
-  context 
+  context,
+  feature
 }: { 
   error: unknown; 
   context: string;
+  feature?: string;
 }) {
   const { getRoleAwareErrorMessage } = useRoleAwareErrorHandling();
   const errorMessage = getRoleAwareErrorMessage(error, context);
+  const { isEnabled } = useFeatureFlags();
+  
+  // Handle feature-specific rendering based on feature flags
+  if (feature && !isEnabled(feature as any)) {
+    return (
+      <div className="text-amber-600 text-sm mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+        This feature is currently unavailable due to system constraints.
+      </div>
+    );
+  }
   
   return (
     <div className="text-destructive text-sm mt-2">

@@ -1,35 +1,20 @@
 
-import { backupDocument, hasBackup, getDocumentBackup, removeBackup } from '@/utils/backup/documentBackupSystem';
-import { UserRole, Document } from '@/lib/types';
-import { ErrorCategory, classifyError } from '@/utils/error/errorClassifier';
+import { Document, UserRole } from '@/lib/types';
+import { ErrorCategory } from '@/utils/error/errorClassifier';
+import { DocumentRecoveryCore, DocumentBackupOptions, DEFAULT_BACKUP_OPTIONS } from './recovery/core/DocumentRecoveryCore';
+import { backupManager } from './recovery/backup/BackupManager';
+import { recoveryOperations } from './recovery/recovery/RecoveryOperations';
 
-export interface DocumentBackupOptions {
-  autoBackupInterval?: number; // in milliseconds
-  maxDocumentRevisions?: number;
-}
-
-const DEFAULT_BACKUP_OPTIONS: DocumentBackupOptions = {
-  autoBackupInterval: 60000, // 1 minute
-  maxDocumentRevisions: 5,
-};
-
-export class DocumentRecoveryService {
-  private autoBackupIntervalId: number | null = null;
-  protected lastBackupContent: string = ''; // Changed from private to protected
-  private backupOptions: DocumentBackupOptions;
-  protected documentId: string | null = null; // Changed from private to protected
-  protected documentTitle: string = ''; // Changed from private to protected for consistency
-  protected userRole: UserRole | null = null; // Changed from private to protected for consistency
-  private onBackupCreated?: (timestamp: Date) => void;
-  private recoveryAttempts: number = 0;
-  private maxRecoveryAttempts: number = 3;
-
+/**
+ * Main document recovery service that handles backup creation and restoration
+ */
+export class DocumentRecoveryService extends DocumentRecoveryCore {
   constructor(options: DocumentBackupOptions = {}) {
-    this.backupOptions = { ...DEFAULT_BACKUP_OPTIONS, ...options };
+    super(options);
   }
-
+  
   /**
-   * Initialize the recovery service for a specific document
+   * Initialize the recovery service 
    */
   public initialize(
     documentId: string | null,
@@ -37,149 +22,48 @@ export class DocumentRecoveryService {
     userRole: UserRole | null,
     onBackupCreated?: (timestamp: Date) => void
   ): void {
-    this.documentId = documentId;
-    this.documentTitle = documentTitle;
-    this.userRole = userRole;
-    this.onBackupCreated = onBackupCreated;
-    this.recoveryAttempts = 0;
-
-    console.log(`Document recovery service initialized for document "${documentTitle}"`);
+    recoveryOperations.resetRecoveryAttempts();
+    super.initialize(documentId, documentTitle, userRole, onBackupCreated);
   }
-
-  /**
-   * Start automatic periodic backups
-   */
-  public startAutoBackup(initialContent: string = ''): void {
-    // Store initial content
-    this.lastBackupContent = initialContent;
-
-    // Create initial backup if we have content
-    if (initialContent && initialContent.trim().length > 0) {
-      this.createBackup(initialContent);
-    }
-
-    // Set up interval for periodic backups
-    this.autoBackupIntervalId = window.setInterval(() => {
-      console.log(`Auto backup check for "${this.documentTitle}"`);
-    }, this.backupOptions.autoBackupInterval);
-
-    console.log(`Started auto-backup for document "${this.documentTitle}" with interval ${this.backupOptions.autoBackupInterval}ms`);
-  }
-
-  /**
-   * Stop automatic backups
-   */
-  public stopAutoBackup(): void {
-    if (this.autoBackupIntervalId !== null) {
-      window.clearInterval(this.autoBackupIntervalId);
-      this.autoBackupIntervalId = null;
-      console.log(`Stopped auto-backup for document "${this.documentTitle}"`);
-    }
-  }
-
+  
   /**
    * Manually create a backup
    */
   public createBackup(content: string, meta?: any): boolean {
-    // Don't backup if content is the same as last backup
-    if (content === this.lastBackupContent) {
-      return false;
-    }
-
-    // Create the backup
-    if (this.documentId || this.userRole) {
-      const result = backupDocument(
-        content,
-        this.documentId,
-        this.documentTitle,
-        this.userRole as UserRole,
-        meta
-      );
-
-      if (result) {
-        this.lastBackupContent = content;
-        if (this.onBackupCreated) {
-          this.onBackupCreated(new Date());
-        }
-        console.log(`Created backup for document "${this.documentTitle}"`);
+    // Pass to the backup manager
+    const result = backupManager.createBackup(
+      content,
+      this.documentId,
+      this.documentTitle,
+      this.userRole,
+      this.lastBackupContent,
+      meta
+    );
+    
+    if (result) {
+      this.lastBackupContent = content;
+      if (this.onBackupCreated) {
+        this.onBackupCreated(new Date());
       }
-
-      return result;
     }
-
-    return false;
+    
+    return result;
   }
-
-  /**
-   * Check if a backup exists for the current document
-   */
-  public hasBackup(): boolean {
-    return this.documentId ? 
-      hasBackup(this.documentId) : 
-      this.userRole ? hasBackup(null, this.userRole) : false;
-  }
-
+  
   /**
    * Recover document from backup
    */
   public recoverFromBackup(): Document | null {
-    try {
-      this.recoveryAttempts++;
-      const backup = this.documentId ?
-        getDocumentBackup(this.documentId) :
-        this.userRole ? getDocumentBackup(null, this.userRole) : null;
-
-      if (backup) {
-        console.log(`Successfully recovered document from backup: "${backup.title}"`);
-        // Adapt the retrieved backup to match the Document interface
-        const recoveredDocument: Document = {
-          id: backup.documentId || backup.id,
-          title: backup.title,
-          content: backup.content,
-          updated_at: backup.updatedAt || new Date().toISOString(),
-          created_at: backup.createdAt || backup.updatedAt || new Date().toISOString(),
-          owner_id: backup.meta?.owner_id,
-          status: backup.meta?.status,
-          meta: backup.meta || {},
-          version: backup.meta?.version || 1
-        };
-        return recoveredDocument;
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Error recovering document from backup:", error);
-      // If we haven't exceeded max attempts, we could try a different recovery strategy
-      if (this.recoveryAttempts < this.maxRecoveryAttempts) {
-        console.log(`Recovery attempt ${this.recoveryAttempts} failed, trying different strategy...`);
-        return this.attemptAlternativeRecovery();
-      }
-      return null;
-    }
+    return recoveryOperations.recoverFromBackup(this.documentId, this.userRole);
   }
-
-  /**
-   * Try alternative recovery methods if primary fails
-   */
-  private attemptAlternativeRecovery(): Document | null {
-    // This could implement fallback strategies like:
-    // 1. Looking in different storage locations
-    // 2. Trying to parse partially corrupted backups
-    // 3. Recovering from session storage instead of local storage
-    console.log("Attempting alternative recovery methods...");
-    return null;
-  }
-
+  
   /**
    * Clear backup after successful save
    */
   public clearBackup(): boolean {
-    if (this.documentId) {
-      return removeBackup(this.documentId);
-    }
-    return false;
+    return recoveryOperations.clearBackup(this.documentId);
   }
-
+  
   /**
    * Handle recovery for specific error types
    */
@@ -187,32 +71,14 @@ export class DocumentRecoveryService {
     recovered: boolean;
     recoveryDocument?: Document | null;
   } {
-    const classifiedError = classifyError(error, context);
-    
-    // Determine if this is an error where document recovery makes sense
-    if (
-      classifiedError.category === ErrorCategory.NETWORK ||
-      classifiedError.category === ErrorCategory.STORAGE ||
-      classifiedError.category === ErrorCategory.SERVER ||
-      classifiedError.category === ErrorCategory.TIMEOUT
-    ) {
-      if (this.hasBackup()) {
-        const recoveredDocument = this.recoverFromBackup();
-        if (recoveredDocument) {
-          return { recovered: true, recoveryDocument: recoveredDocument };
-        }
-      }
-    }
-    
-    return { recovered: false };
-  }
-
-  /**
-   * Cleanup and dispose of the service
-   */
-  public dispose(): void {
-    this.stopAutoBackup();
-    console.log(`Document recovery service disposed for "${this.documentTitle}"`);
+    return recoveryOperations.handleErrorWithRecovery(
+      error, 
+      context, 
+      this.documentId, 
+      this.userRole,
+      () => this.hasBackup(),
+      () => this.recoverFromBackup()
+    );
   }
 }
 

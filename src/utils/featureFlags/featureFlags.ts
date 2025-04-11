@@ -7,7 +7,6 @@
  */
 
 import { UserRole } from "@/lib/types";
-import { isOnline } from "@/hooks/useOnlineStatus";
 import { getSystemHealth } from "./systemHealth";
 
 /**
@@ -141,6 +140,16 @@ const featureFlags: Record<FeatureFlagKey, FeatureFlagConfig> = {
 
 // Store for manual overrides (can be persisted to localStorage)
 const manualOverrides: Partial<Record<FeatureFlagKey, boolean>> = {};
+
+// Utility to check if online - using a function instead of direct import
+// This avoids React hook rules violations since useOnlineStatus is a hook
+function isOnline(): boolean {
+  // Default to navigator.onLine if in browser environment
+  if (typeof navigator !== 'undefined') {
+    return navigator.onLine;
+  }
+  return true; // Default to online in non-browser environments
+}
 
 /**
  * Check if a feature is enabled based on current conditions
@@ -276,4 +285,3 @@ export function loadOverridesFromStorage(): void {
 if (typeof window !== 'undefined') {
   loadOverridesFromStorage();
 }
-

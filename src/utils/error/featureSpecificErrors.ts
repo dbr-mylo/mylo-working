@@ -1,157 +1,171 @@
 
+/**
+ * Feature-specific error handling functions
+ */
 import { ClassifiedError, ErrorCategory } from './errorClassifier';
 
 /**
- * Get feature-specific error messages based on the feature and error type
- * This enhances our error messaging by providing more context-aware messages
+ * Get feature-specific error message based on error classification 
+ * and user role
  * 
- * @param error The classified error object
- * @param feature The feature where the error occurred
- * @param role The user's role
- * @returns A feature-specific error message
+ * @param error The classified error
+ * @param feature The feature context (e.g., 'editor', 'dashboard', etc.)
+ * @param role The user's role (optional)
+ * @returns A user-friendly error message
  */
 export function getFeatureSpecificErrorMessage(
   error: ClassifiedError,
   feature: string,
-  role: string | null | undefined
+  role?: string | null
 ): string {
-  // Editor-specific error messages
-  if (feature.includes('editor') || feature.includes('document')) {
-    switch (error.category) {
-      case ErrorCategory.STORAGE:
-        return `We couldn't save your document. ${role === 'writer' ? 'Your work has been backed up locally.' : 'Please try again.'}`;
-      
-      case ErrorCategory.NETWORK:
-        return `The editor is having trouble connecting to the server. ${role === 'writer' ? 'You can continue working, and we\'ll save your changes when the connection is restored.' : 'Please check your connection.'}`;
-        
-      case ErrorCategory.VALIDATION:
-        return `There's a problem with the document format. ${role === 'designer' ? 'This may be due to template constraints.' : 'The document may contain invalid formatting.'}`;
-        
-      case ErrorCategory.FORMAT:
-        return `The document contains formatting that isn't supported. ${role === 'designer' ? 'Please check the template settings.' : 'Try simplifying the document formatting.'}`;
-        
-      default:
-        return error.message;
+  // Default to the classified message
+  let message = error.message;
+  
+  // Document Editor Errors
+  if (feature === 'editor' || feature === 'document') {
+    if (error.category === ErrorCategory.NETWORK) {
+      return "Can't save your document right now. We've stored your changes locally and will automatically save when you're back online.";
+    }
+    
+    if (error.category === ErrorCategory.PERMISSION) {
+      return "You don't have permission to edit this document. Changes won't be saved.";
+    }
+    
+    if (error.category === ErrorCategory.VALIDATION && role === 'writer') {
+      return "This document contains elements that can't be modified in the writer view.";
+    }
+    
+    if (error.category === ErrorCategory.SERVER) {
+      return "The document server is currently unavailable. Your work is being saved locally.";
     }
   }
   
-  // Template-specific error messages
-  if (feature.includes('template') || feature.includes('design')) {
-    switch (error.category) {
-      case ErrorCategory.VALIDATION:
-        return `The template contains invalid settings. ${role === 'designer' ? 'Please check the template configuration.' : 'Please contact a designer.'}`;
-        
-      case ErrorCategory.PERMISSION:
-        return `You don't have permission to modify this template. ${role === 'admin' ? 'You can grant permissions in the admin panel.' : 'Please request access from an administrator.'}`;
-        
-      case ErrorCategory.FORMAT:
-        return `The template format is invalid. ${role === 'designer' ? 'Check for missing required fields or invalid settings.' : 'Please use a different template.'}`;
-        
-      default:
-        return error.message;
+  // Template Designer Errors
+  else if (feature === 'template' || feature === 'designer') {
+    if (error.category === ErrorCategory.NETWORK) {
+      return "Unable to update template. Changes are stored locally and will sync when you're back online.";
+    }
+    
+    if (error.category === ErrorCategory.COMPATIBILITY) {
+      return "This template includes features that aren't compatible with your current permissions.";
+    }
+    
+    if (error.category === ErrorCategory.VALIDATION) {
+      return "The template structure is invalid. Please check your style definitions.";
     }
   }
   
-  // Authentication-specific error messages
-  if (feature.includes('auth') || feature.includes('login')) {
-    switch (error.category) {
-      case ErrorCategory.AUTHENTICATION:
-        return `Your session has expired. Please sign in again.`;
-        
-      case ErrorCategory.NETWORK:
-        return `We couldn't connect to the authentication service. Please check your internet connection.`;
-        
-      case ErrorCategory.PERMISSION:
-        return `You don't have permission to access this feature. ${role === 'admin' ? 'You can manage permissions in the admin panel.' : 'Please contact an administrator for access.'}`;
-        
-      default:
-        return error.message;
+  // Auth-related Errors
+  else if (feature === 'auth') {
+    if (error.category === ErrorCategory.NETWORK) {
+      return "Authentication service is unavailable. You can continue working in offline mode.";
+    }
+    
+    if (error.category === ErrorCategory.SESSION) {
+      return "Your session has expired. We've saved your work locally.";
     }
   }
   
-  // Export/Import error messages
-  if (feature.includes('export') || feature.includes('import')) {
-    switch (error.category) {
-      case ErrorCategory.FORMAT:
-        return `The file format is invalid. Please check that you're using a supported format.`;
-        
-      case ErrorCategory.STORAGE:
-        return `There was a problem with the file storage. The file may be too large or corrupted.`;
-        
-      case ErrorCategory.PERMISSION:
-        return `You don't have permission to ${feature.includes('export') ? 'export' : 'import'} files. ${role === 'admin' ? 'You can manage permissions in the admin panel.' : 'Please contact an administrator.'}`;
-        
-      default:
-        return error.message;
+  // Export/Import Errors
+  else if (feature === 'export' || feature === 'import') {
+    if (error.category === ErrorCategory.FILE_SIZE) {
+      return "This file exceeds the maximum size limit. Please compress or split it.";
+    }
+    
+    if (error.category === ErrorCategory.VALIDATION) {
+      return "The file format is invalid or corrupted. Check our documentation for supported formats.";
     }
   }
   
-  // Dashboard-specific error messages
-  if (feature.includes('dashboard')) {
-    switch (error.category) {
-      case ErrorCategory.NETWORK:
-        return `We're having trouble loading your dashboard data. Please check your connection.`;
-        
-      case ErrorCategory.RESOURCE_NOT_FOUND:
-        return `Some dashboard resources couldn't be found. ${role === 'admin' ? 'Check the resource configuration.' : 'The resources may have been moved or deleted.'}`;
-        
-      default:
-        return error.message;
-    }
-  }
-  
-  // Default to the basic error message
-  return error.message;
+  return message;
 }
 
 /**
- * Get feature-specific recovery steps
+ * Get feature-specific recovery steps for a given error
  * 
  * @param error The classified error
- * @param feature The feature where the error occurred
- * @param role The user's role
- * @returns Array of recovery steps specific to the feature
+ * @param feature The feature context
+ * @param role The user's role (optional)
+ * @returns Array of recovery steps
  */
 export function getFeatureSpecificRecoverySteps(
   error: ClassifiedError,
   feature: string,
-  role: string | null | undefined
+  role?: string | null
 ): string[] {
-  // Editor-specific recovery steps
-  if (feature.includes('editor') || feature.includes('document')) {
-    switch (error.category) {
-      case ErrorCategory.STORAGE:
-        return [
-          'Try saving with a different document name',
-          'Check that you have sufficient storage space',
-          'Try exporting the document and re-importing it'
-        ];
-      
-      case ErrorCategory.NETWORK:
-        return [
-          'Check your internet connection',
-          'Wait a few moments and try again',
-          'Try working in offline mode until your connection is restored'
-        ];
-        
-      case ErrorCategory.VALIDATION:
-        return [
-          'Remove any complex formatting',
-          'Check for invalid characters or symbols',
-          'Try creating a new document with simpler content'
-        ];
-        
-      default:
-        return ['Try refreshing the page', 'Contact support if the issue persists'];
+  const commonSteps = [
+    'Refresh the page and try again',
+    'Check your internet connection',
+    'Try clearing your browser cache'
+  ];
+  
+  // Document Editor Recovery Steps
+  if (feature === 'editor' || feature === 'document') {
+    if (error.category === ErrorCategory.NETWORK) {
+      return [
+        'Continue working - your changes are saved locally',
+        'Reconnect to the internet to sync changes',
+        'Check if you can access other websites'
+      ];
+    }
+    
+    if (error.category === ErrorCategory.PERMISSION) {
+      return [
+        'Request edit access from the document owner',
+        'Make a copy of the document to edit it',
+        'Check if you\'re signed in with the correct account'
+      ];
     }
   }
   
-  // Handle other feature types...
+  // Template Designer Recovery Steps
+  else if (feature === 'template' || feature === 'designer') {
+    if (error.category === ErrorCategory.VALIDATION) {
+      return [
+        'Check for invalid style definitions',
+        'Remove recently added custom styles',
+        'Try resetting to the default template'
+      ];
+    }
+    
+    if (error.category === ErrorCategory.COMPATIBILITY) {
+      return [
+        'Update to the latest version',
+        'Remove advanced features not supported in this mode',
+        'Contact support for compatibility assistance'
+      ];
+    }
+  }
   
-  // Default recovery steps
-  return [
-    'Try refreshing the page',
-    'Check your internet connection',
-    'Contact support if the issue persists'
-  ];
+  // Auth-related Recovery Steps
+  else if (feature === 'auth') {
+    if (error.category === ErrorCategory.SESSION) {
+      return [
+        'Sign in again to restore your session',
+        'Your work is automatically saved locally',
+        'Check if your account requires reverification'
+      ];
+    }
+  }
+  
+  // Export/Import Recovery Steps
+  else if (feature === 'export' || feature === 'import') {
+    if (error.category === ErrorCategory.FILE_SIZE) {
+      return [
+        'Compress the file before uploading',
+        'Split the document into smaller parts',
+        'Remove unnecessary elements to reduce size'
+      ];
+    }
+    
+    if (error.category === ErrorCategory.VALIDATION) {
+      return [
+        'Verify the file is in the correct format',
+        'Check if the file is corrupted',
+        'Try exporting again with default settings'
+      ];
+    }
+  }
+  
+  return commonSteps;
 }

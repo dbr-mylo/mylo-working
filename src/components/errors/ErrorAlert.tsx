@@ -1,109 +1,71 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { X, AlertCircle, Info, AlertTriangle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { getUserFriendlyErrorMessage } from "@/utils/error/errorClassifier";
-import { useAuth } from "@/contexts/AuthContext";
-
-export type ErrorSeverity = "error" | "warning" | "info";
+import { RefreshCw } from "lucide-react";
+import { classifyError, ErrorCategory } from "@/utils/error/errorClassifier";
+import { RecoveryOptions } from './RecoveryOptions';
 
 interface ErrorAlertProps {
   error: unknown;
   context: string;
   title?: string;
-  onDismiss?: () => void;
   onRetry?: () => void;
-  severity?: ErrorSeverity;
+  severity?: "default" | "destructive" | "info";
+  feature?: string;
+  showRecoveryOptions?: boolean;
   className?: string;
-  showDetails?: boolean;
 }
 
-export const ErrorAlert: React.FC<ErrorAlertProps> = ({
+export function ErrorAlert({
   error,
   context,
-  title,
-  onDismiss,
+  title = "An error occurred",
   onRetry,
-  severity = "error",
+  severity = "destructive",
+  feature,
+  showRecoveryOptions = false,
   className = "",
-  showDetails = false,
-}) => {
-  const { role } = useAuth();
-  const errorMessage = getUserFriendlyErrorMessage(error, context, role);
+}: ErrorAlertProps) {
+  // Classify error to determine UI presentation
+  const classifiedError = classifyError(error, context);
+  const errorMessage = classifiedError.message;
   
-  // Set icon based on severity
-  const getIcon = () => {
-    switch (severity) {
-      case "warning":
-        return <AlertTriangle className="h-4 w-4" />;
-      case "info":
-        return <Info className="h-4 w-4" />;
-      case "error":
-      default:
-        return <AlertCircle className="h-4 w-4" />;
-    }
-  };
-  
-  // Set variant based on severity, but ensure it's compatible with Alert component variants
-  const getVariant = () => {
-    switch (severity) {
-      case "warning":
-        return "destructive" as const; // Using destructive for warning since "warning" isn't a valid variant
-      case "info":
-        return "default" as const;
-      case "error":
-      default:
-        return "destructive" as const;
-    }
-  };
-  
-  // Get the error title
-  const alertTitle = title || (severity === "error" 
-    ? "An error occurred" 
-    : severity === "warning" 
-      ? "Warning" 
-      : "Information");
+  // Determine if we should adjust the severity based on error category
+  const alertSeverity = severity === "default" && classifiedError.category === ErrorCategory.NETWORK
+    ? "info"
+    : severity;
   
   return (
-    <Alert variant={getVariant()} className={`relative ${className}`}>
-      {onDismiss && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute top-2 right-2 h-6 w-6" 
-          onClick={onDismiss}
-        >
-          <X className="h-3 w-3" />
-          <span className="sr-only">Dismiss</span>
-        </Button>
-      )}
+    <div className={className}>
+      <Alert variant={alertSeverity}>
+        <AlertTitle>{title}</AlertTitle>
+        <AlertDescription className="flex flex-col">
+          <span className="mb-2">{errorMessage}</span>
+          {onRetry && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onRetry}
+              className="self-start mt-2"
+            >
+              <RefreshCw className="h-3 w-3 mr-2" />
+              Try again
+            </Button>
+          )}
+        </AlertDescription>
+      </Alert>
       
-      <div className="flex items-center gap-2">
-        {getIcon()}
-        <AlertTitle>{alertTitle}</AlertTitle>
-      </div>
-      
-      <AlertDescription className="mt-2">
-        {errorMessage}
-      </AlertDescription>
-      
-      {showDetails && error instanceof Error && error.stack && (
-        <details className="mt-2">
-          <summary className="text-xs cursor-pointer">Technical details</summary>
-          <pre className="mt-2 text-xs overflow-auto p-2 bg-secondary rounded-md">
-            {error.stack}
-          </pre>
-        </details>
-      )}
-      
-      {onRetry && (
-        <div className="mt-3">
-          <Button variant="outline" size="sm" onClick={onRetry}>
-            Try again
-          </Button>
+      {showRecoveryOptions && (
+        <div className="mt-4">
+          <RecoveryOptions
+            error={error instanceof Error ? error : new Error(String(error))}
+            onRetry={onRetry}
+            context={context}
+            feature={feature}
+          />
         </div>
       )}
-    </Alert>
+    </div>
   );
-};
+}

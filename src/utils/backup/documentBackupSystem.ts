@@ -1,69 +1,82 @@
+/**
+ * Document backup system
+ * 
+ * This module provides utilities for creating, managing, and recovering
+ * document backups to prevent data loss during errors or connectivity issues.
+ */
+import { Document, DocumentMeta, UserRole } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Document, DocumentMeta } from "@/lib/types";
+// Constants for backup storage
+const BACKUP_PREFIX = 'doc_backup_';
+const BACKUP_INDEX = 'doc_backup_index';
+const MAX_BACKUPS_PER_DOCUMENT = 3;
+const MAX_BACKUPS_TOTAL = 20;
+const BACKUP_RETENTION_DAYS = 7;
 
-interface BackupDocument {
-  id: string | null;
+interface DocumentBackup {
+  id: string;
+  documentId: string | null;
   content: string;
   title: string;
-  role: string;
-  timestamp: string;
+  role: UserRole;
+  timestamp: number;
   meta?: DocumentMeta;
 }
 
-const BACKUP_KEY = 'mylo-document-backups';
-const MAX_BACKUPS = 10;
+interface BackupIndex {
+  backups: {
+    id: string;
+    documentId: string | null;
+    role: UserRole;
+    timestamp: number;
+  }[];
+}
 
 /**
- * Creates a backup of the current document in local storage
+ * Create a backup of the current document
+ * 
+ * @param content Document content
+ * @param documentId Document ID (or null for new documents)
+ * @param title Document title
+ * @param role User role
+ * @param meta Optional document metadata
+ * @returns Boolean indicating if backup was created successfully
  */
 export function backupDocument(
-  content: string, 
-  documentId: string | null, 
-  documentTitle: string,
-  role: string,
+  content: string,
+  documentId: string | null,
+  title: string,
+  role: UserRole,
   meta?: DocumentMeta
 ): boolean {
   try {
-    if (!content || content.trim() === '') {
+    if (!content || content.trim().length === 0) {
       return false;
     }
     
-    // Get existing backups
-    const existingBackupsStr = localStorage.getItem(BACKUP_KEY);
-    const backups: BackupDocument[] = existingBackupsStr 
-      ? JSON.parse(existingBackupsStr) 
-      : [];
-      
-    // Create new backup
-    const newBackup: BackupDocument = {
-      id: documentId,
+    // Create a new backup record
+    const backupId = uuidv4();
+    const backup: DocumentBackup = {
+      id: backupId,
+      documentId,
       content,
-      title: documentTitle || 'Untitled Document',
+      title: title || 'Untitled Document',
       role,
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       meta
     };
     
-    // Check if we already have a backup for this document
-    const documentIndex = backups.findIndex(backup => 
-      backup.id === documentId || 
-      (backup.title === documentTitle && backup.role === role)
-    );
+    // Store the backup
+    localStorage.setItem(`${BACKUP_PREFIX}${backupId}`, JSON.stringify(backup));
     
-    // Update existing backup or add new one
-    if (documentIndex !== -1) {
-      backups[documentIndex] = newBackup;
-    } else {
-      // Add new backup and limit the total number
-      backups.push(newBackup);
-      if (backups.length > MAX_BACKUPS) {
-        backups.shift(); // Remove oldest backup
-      }
-    }
+    // Update the backup index
+    updateBackupIndex(backupId, documentId, role, backup.timestamp);
     
-    // Save back to localStorage
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
+    // Clean up old backups to prevent storage overflow
+    cleanupOldBackups();
     
+    console.log(`Document backup created for ${documentId || 'new document'}`);
     return true;
   } catch (error) {
     console.error('Error creating document backup:', error);
@@ -72,69 +85,77 @@ export function backupDocument(
 }
 
 /**
- * Check if backups exist for a document
+ * Check if a backup exists for a document
+ * 
+ * @param documentId Document ID (optional)
+ * @param role User role (used for new documents)
+ * @returns Boolean indicating if a backup exists
  */
-export function hasBackup(documentId?: string | null, role?: string | null): boolean {
+export function hasBackup(documentId: string | null, role?: UserRole): boolean {
   try {
-    const existingBackupsStr = localStorage.getItem(BACKUP_KEY);
-    if (!existingBackupsStr) return false;
-    
-    const backups: BackupDocument[] = JSON.parse(existingBackupsStr);
+    const index = getBackupIndex();
     
     if (documentId) {
-      return backups.some(backup => backup.id === documentId);
+      // Check for backup by document ID
+      return index.backups.some(b => b.documentId === documentId);
     } else if (role) {
-      return backups.some(backup => backup.role === role);
+      // Check for role-specific backups (useful for new documents)
+      return index.backups.some(b => b.documentId === null && b.role === role);
     }
     
-    return backups.length > 0;
+    return false;
   } catch (error) {
-    console.error('Error checking document backups:', error);
+    console.error('Error checking for document backups:', error);
     return false;
   }
 }
 
 /**
- * Retrieve document backup by document ID or role
+ * Retrieve the most recent document backup
+ * 
+ * @param documentId Document ID (optional)
+ * @param role User role (used for new documents)
+ * @returns Document object or null if no backup exists
  */
-export function getDocumentBackup(
-  documentId?: string | null, 
-  role?: string | null
-): Document | null {
+export function getDocumentBackup(documentId: string | null, role?: UserRole): Document | null {
   try {
-    const existingBackupsStr = localStorage.getItem(BACKUP_KEY);
-    if (!existingBackupsStr) return null;
-    
-    const backups: BackupDocument[] = JSON.parse(existingBackupsStr);
-    
-    // Find specific backup
-    let backup: BackupDocument | undefined;
+    const index = getBackupIndex();
+    let targetBackup;
     
     if (documentId) {
-      backup = backups.find(b => b.id === documentId);
+      // Find the most recent backup for this document ID
+      targetBackup = [...index.backups]
+        .filter(b => b.documentId === documentId)
+        .sort((a, b) => b.timestamp - a.timestamp)[0];
     } else if (role) {
-      // Get the most recent backup for this role
-      backup = [...backups]
-        .filter(b => b.role === role)
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      // Find the most recent backup for this role (new documents)
+      targetBackup = [...index.backups]
+        .filter(b => b.documentId === null && b.role === role)
+        .sort((a, b) => b.timestamp - a.timestamp)[0];
     }
     
-    if (!backup) return null;
+    if (!targetBackup) {
+      return null;
+    }
     
-    // Convert to Document format
-    const document: Document = {
-      id: backup.id || crypto.randomUUID(),
-      title: backup.title,
+    // Retrieve the full backup data
+    const backupData = localStorage.getItem(`${BACKUP_PREFIX}${targetBackup.id}`);
+    if (!backupData) return null;
+    
+    const backup: DocumentBackup = JSON.parse(backupData);
+    
+    // Convert backup to Document format
+    return {
+      id: backup.documentId || '',
       content: backup.content,
-      updated_at: backup.timestamp
+      title: backup.title,
+      owner: '',
+      createdAt: new Date(backup.timestamp).toISOString(),
+      updatedAt: new Date(backup.timestamp).toISOString(),
+      isPublished: false,
+      meta: backup.meta,
+      backupId: backup.id // Add backup ID for tracking
     };
-    
-    // Add meta if available
-    if (backup.meta) {
-      document.meta = backup.meta;
-    }
-    
-    return document;
   } catch (error) {
     console.error('Error retrieving document backup:', error);
     return null;
@@ -142,26 +163,137 @@ export function getDocumentBackup(
 }
 
 /**
- * Removes a backup from storage
+ * Remove a backup after successful save
+ * 
+ * @param documentId Document ID
+ * @returns Boolean indicating if the backup was removed
  */
-export function removeBackup(documentId: string | null): boolean {
+export function removeBackup(documentId: string): boolean {
   try {
-    if (!documentId) return false;
+    const index = getBackupIndex();
     
-    const existingBackupsStr = localStorage.getItem(BACKUP_KEY);
-    if (!existingBackupsStr) return false;
+    // Find backups for this document
+    const documentBackups = index.backups.filter(b => b.documentId === documentId);
     
-    const backups: BackupDocument[] = JSON.parse(existingBackupsStr);
-    const filteredBackups = backups.filter(backup => backup.id !== documentId);
-    
-    if (filteredBackups.length === backups.length) {
-      return false; // Nothing was removed
+    if (documentBackups.length === 0) {
+      return false;
     }
     
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(filteredBackups));
+    // Remove backups from localStorage
+    documentBackups.forEach(backup => {
+      localStorage.removeItem(`${BACKUP_PREFIX}${backup.id}`);
+    });
+    
+    // Update index
+    index.backups = index.backups.filter(b => b.documentId !== documentId);
+    localStorage.setItem(BACKUP_INDEX, JSON.stringify(index));
+    
+    console.log(`Removed ${documentBackups.length} backups for document ${documentId}`);
     return true;
   } catch (error) {
     console.error('Error removing document backup:', error);
     return false;
   }
+}
+
+/**
+ * Get the backup index from localStorage
+ */
+function getBackupIndex(): BackupIndex {
+  const indexData = localStorage.getItem(BACKUP_INDEX);
+  if (!indexData) {
+    return { backups: [] };
+  }
+  
+  return JSON.parse(indexData);
+}
+
+/**
+ * Update the backup index with a new backup entry
+ */
+function updateBackupIndex(
+  backupId: string, 
+  documentId: string | null,
+  role: UserRole,
+  timestamp: number
+): void {
+  const index = getBackupIndex();
+  
+  // Add new backup to index
+  index.backups.push({
+    id: backupId,
+    documentId,
+    role,
+    timestamp
+  });
+  
+  // Sort by timestamp (newest first)
+  index.backups.sort((a, b) => b.timestamp - a.timestamp);
+  
+  localStorage.setItem(BACKUP_INDEX, JSON.stringify(index));
+}
+
+/**
+ * Clean up old backups to prevent storage overflow
+ */
+function cleanupOldBackups(): void {
+  const index = getBackupIndex();
+  
+  // Group backups by document ID
+  const backupsByDocument: Record<string, typeof index.backups> = {};
+  
+  index.backups.forEach(backup => {
+    const key = backup.documentId || 'null';
+    if (!backupsByDocument[key]) {
+      backupsByDocument[key] = [];
+    }
+    backupsByDocument[key].push(backup);
+  });
+  
+  // Keep only MAX_BACKUPS_PER_DOCUMENT most recent backups for each document
+  const updatedBackups: typeof index.backups = [];
+  
+  Object.values(backupsByDocument).forEach(documentBackups => {
+    // Sort by timestamp (newest first)
+    documentBackups.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Keep only the most recent backups
+    const keepBackups = documentBackups.slice(0, MAX_BACKUPS_PER_DOCUMENT);
+    updatedBackups.push(...keepBackups);
+    
+    // Remove excess backups from storage
+    documentBackups.slice(MAX_BACKUPS_PER_DOCUMENT).forEach(backup => {
+      localStorage.removeItem(`${BACKUP_PREFIX}${backup.id}`);
+    });
+  });
+  
+  // Ensure we don't exceed total backup limit
+  if (updatedBackups.length > MAX_BACKUPS_TOTAL) {
+    // Sort by timestamp (newest first)
+    updatedBackups.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Remove oldest backups exceeding the limit
+    updatedBackups
+      .slice(MAX_BACKUPS_TOTAL)
+      .forEach(backup => {
+        localStorage.removeItem(`${BACKUP_PREFIX}${backup.id}`);
+      });
+    
+    // Update the index to only include backups we're keeping
+    index.backups = updatedBackups.slice(0, MAX_BACKUPS_TOTAL);
+  } else {
+    index.backups = updatedBackups;
+  }
+  
+  // Remove backups older than retention period
+  const retentionCutoff = Date.now() - (BACKUP_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  
+  const expiredBackups = index.backups.filter(b => b.timestamp < retentionCutoff);
+  expiredBackups.forEach(backup => {
+    localStorage.removeItem(`${BACKUP_PREFIX}${backup.id}`);
+  });
+  
+  index.backups = index.backups.filter(b => b.timestamp >= retentionCutoff);
+  
+  localStorage.setItem(BACKUP_INDEX, JSON.stringify(index));
 }

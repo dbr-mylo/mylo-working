@@ -55,7 +55,7 @@ export const handleError = (
   
   // Show toast notification if requested
   if (shouldToast) {
-    toast.error(finalMessage, {
+    toast[toastVariant](finalMessage, {
       description: classifiedError.suggestedAction || "See console for more details",
       duration: 5000,
     });

@@ -6,9 +6,8 @@
  */
 
 import { ClassifiedError, classifyError, ErrorCategory } from './errorClassifier';
-import { setFeatureOverride } from '../featureFlags/featureFlags';
+import { executeRecoveryStrategy, RecoveryResult } from './errorRecoveryStrategies';
 import { reportSystemError } from '../featureFlags/systemHealth';
-import { toast } from 'sonner';
 
 // Track error occurrence patterns
 interface ErrorOccurrence {
@@ -17,6 +16,7 @@ interface ErrorOccurrence {
   context: string;
   category: ErrorCategory;
   recovered: boolean;
+  recoveryResult?: RecoveryResult;
 }
 
 // Keep recent error history
@@ -58,9 +58,10 @@ export function registerErrorAndAttemptRecovery(
   
   // Check if we should attempt recovery
   if (shouldAttemptRecovery(classified, context)) {
-    const recovered = executeRecoveryStrategy(classified, context);
-    occurrence.recovered = recovered;
-    return recovered;
+    const recoveryResult = executeRecoveryStrategy(classified, context);
+    occurrence.recovered = recoveryResult.successful;
+    occurrence.recoveryResult = recoveryResult;
+    return recoveryResult.successful;
   }
   
   return false;
@@ -85,129 +86,15 @@ function shouldAttemptRecovery(
     return true;
   }
   
+  // For critical systems, attempt recovery on first error
+  if (context.includes('document-save') ||
+      context.includes('auth') ||
+      context.includes('backup')) {
+    return true;
+  }
+  
   // Check if error is recoverable according to classification
   return classified.recoverable;
-}
-
-/**
- * Execute recovery strategy based on error classification
- */
-function executeRecoveryStrategy(
-  classified: ClassifiedError,
-  context: string
-): boolean {
-  console.log(`Attempting self-healing for ${classified.category} error in ${context}`);
-  
-  switch (classified.category) {
-    case ErrorCategory.NETWORK:
-      return handleNetworkRecovery();
-    
-    case ErrorCategory.STORAGE:
-      return handleStorageRecovery();
-    
-    case ErrorCategory.RATE_LIMIT:
-      return handleRateLimitRecovery();
-    
-    case ErrorCategory.TIMEOUT:
-      return handleTimeoutRecovery();
-      
-    case ErrorCategory.VALIDATION:
-      return handleValidationRecovery();
-      
-    default:
-      return false;
-  }
-}
-
-/**
- * Handle recovery for network-related errors
- */
-function handleNetworkRecovery(): boolean {
-  // Disable features that require network
-  setFeatureOverride('real-time-collaboration', false);
-  setFeatureOverride('template-marketplace', false);
-  
-  // Enable offline backup more aggressively
-  setFeatureOverride('local-backup', true);
-  
-  toast.warning("Network issues detected", {
-    description: "Some online features have been temporarily disabled. Working in offline mode."
-  });
-  
-  return true;
-}
-
-/**
- * Handle recovery for storage-related errors
- */
-function handleStorageRecovery(): boolean {
-  // Attempt to clear some storage
-  try {
-    // Try to clear temp storage
-    localStorage.removeItem('temp_documents');
-    
-    // Reduce history size if it exists
-    const history = localStorage.getItem('document_history');
-    if (history) {
-      try {
-        const parsed = JSON.parse(history);
-        // Keep only most recent 5 items
-        if (Array.isArray(parsed) && parsed.length > 5) {
-          localStorage.setItem('document_history', JSON.stringify(parsed.slice(0, 5)));
-        }
-      } catch (e) {
-        // If parse fails, just remove the item
-        localStorage.removeItem('document_history');
-      }
-    }
-    
-    toast.warning("Storage issues resolved", {
-      description: "Some cached data has been cleared to free up space."
-    });
-    
-    return true;
-  } catch (e) {
-    console.error("Failed to recover from storage error:", e);
-    return false;
-  }
-}
-
-/**
- * Handle recovery for rate limit errors
- */
-function handleRateLimitRecovery(): boolean {
-  // Implement exponential backoff for API calls
-  const backoffDelay = Math.floor(Math.random() * 3000) + 2000; // 2-5 seconds
-  
-  toast.warning("Rate limit detected", {
-    description: `Will retry automatically after a ${Math.round(backoffDelay/1000)} second delay.`
-  });
-  
-  // Return true to indicate we're handling it
-  return true;
-}
-
-/**
- * Handle recovery for timeout errors
- */
-function handleTimeoutRecovery(): boolean {
-  // Disable heavy features
-  setFeatureOverride('revision-history', false);
-  setFeatureOverride('advanced-formatting', false);
-  
-  toast.warning("Performance issues detected", {
-    description: "Some advanced features have been temporarily disabled to improve responsiveness."
-  });
-  
-  return true;
-}
-
-/**
- * Handle recovery for validation errors
- */
-function handleValidationRecovery(): boolean {
-  // Can't do much about validation errors automatically
-  return false;
 }
 
 /**
@@ -234,12 +121,31 @@ export function getErrorAnalytics() {
   // Count errors by category
   const categoryCounts: Record<ErrorCategory, number> = {} as Record<ErrorCategory, number>;
   const contextCounts: Record<string, number> = {};
+  const strategyCounts: Record<string, { attempted: number, successful: number }> = {};
+  
   let recoveredCount = 0;
   
   for (const error of recentErrors) {
     categoryCounts[error.category] = (categoryCounts[error.category] || 0) + 1;
     contextCounts[error.context] = (contextCounts[error.context] || 0) + 1;
-    if (error.recovered) recoveredCount++;
+    
+    if (error.recovered) {
+      recoveredCount++;
+    }
+    
+    // Track recovery strategies
+    if (error.recoveryResult) {
+      const strategy = error.recoveryResult.strategy;
+      if (!strategyCounts[strategy]) {
+        strategyCounts[strategy] = { attempted: 0, successful: 0 };
+      }
+      
+      strategyCounts[strategy].attempted++;
+      
+      if (error.recoveryResult.successful) {
+        strategyCounts[strategy].successful++;
+      }
+    }
   }
   
   return {
@@ -247,6 +153,35 @@ export function getErrorAnalytics() {
     recovered: recoveredCount,
     byCategory: categoryCounts,
     byContext: contextCounts,
-    recoveryRate: recentErrors.length ? (recoveredCount / recentErrors.length) * 100 : 0
+    byStrategy: strategyCounts,
+    recoveryRate: recentErrors.length ? (recoveredCount / recentErrors.length) * 100 : 0,
+    recentErrors: recentErrors.slice(-10) // Return the 10 most recent errors
+  };
+}
+
+/**
+ * Reset recovery state - used for testing or when manually resolving issues
+ */
+export function resetRecoveryState(): void {
+  recentErrors.length = 0;
+}
+
+/**
+ * Get information about a specific error category
+ */
+export function getErrorCategoryInfo(category: ErrorCategory) {
+  const errors = recentErrors.filter(e => e.category === category);
+  const contexts = new Set(errors.map(e => e.context));
+  
+  const recoveryAttempted = errors.filter(e => e.recoveryResult).length;
+  const recoverySucceeded = errors.filter(e => e.recovered).length;
+  
+  return {
+    category,
+    occurrences: errors.length,
+    contexts: Array.from(contexts),
+    recoveryAttempted,
+    recoverySucceeded,
+    recoveryRate: recoveryAttempted ? (recoverySucceeded / recoveryAttempted) * 100 : 0
   };
 }

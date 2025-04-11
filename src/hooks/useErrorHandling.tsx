@@ -2,11 +2,12 @@
 import React, { useCallback } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
 import { getRoleSpecificErrorMessage } from "@/utils/error/roleSpecificErrors";
-import { handleError } from "@/utils/error/handleError";
+import { handleError, handleRoleAwareError } from "@/utils/error/handleError";
 import { toast } from "sonner"; 
 import { classifyError, ErrorCategory } from '@/utils/error/errorClassifier';
 import { useOnlineStatus } from './useOnlineStatus';
 import { useFeatureFlags } from './useFeatureFlags';
+import { getErrorCategoryInfo } from '@/utils/error/selfHealingSystem';
 
 /**
  * A hook to handle errors with role-specific messaging
@@ -21,39 +22,9 @@ export function useRoleAwareErrorHandling() {
     context: string,
     userMessage?: string
   ) => {
-    const roleMessage = getRoleSpecificErrorMessage(error, role, context);
-    
-    // Check if this is a network error and we're offline
-    const classifiedError = classifyError(error, context);
-    if (classifiedError.category === ErrorCategory.NETWORK && !isOnline) {
-      // Show offline-specific message
-      toast.error("You're offline", {
-        description: "This action requires an internet connection. Please try again when you're back online.",
-        duration: 5000,
-      });
-      return;
-    }
-    
-    // Check feature availability based on error context
-    if (context.includes('collaboration') && !isEnabled('real-time-collaboration')) {
-      toast.error('Collaboration unavailable', {
-        description: "Real-time collaboration is currently disabled. Changes will be saved locally only.",
-        duration: 5000,
-      });
-      return;
-    }
-
-    if (context.includes('template') && !isEnabled('template-marketplace')) {
-      toast.error('Template features unavailable', {
-        description: "Template marketplace is currently disabled due to system issues.",
-        duration: 5000,
-      });
-      return;
-    }
-    
-    // Fall back to standard error handling
-    handleError(error, context, userMessage || roleMessage);
-  }, [role, isOnline, isEnabled]);
+    // Use the enhanced role-aware error handler
+    handleRoleAwareError(error, context, role, undefined, userMessage);
+  }, [role]);
   
   /**
    * Get role-specific error message without showing a toast
@@ -62,7 +33,7 @@ export function useRoleAwareErrorHandling() {
     error: unknown,
     context: string
   ): string => {
-    return getRoleSpecificErrorMessage(error, role, context);
+    return getRoleSpecificErrorMessage(error, context, role);
   }, [role]);
   
   /**
@@ -83,10 +54,18 @@ export function useRoleAwareErrorHandling() {
     };
   }, [handleRoleAwareError]);
   
+  /**
+   * Get information about recent errors of a specific category
+   */
+  const getCategoryErrorInfo = useCallback((category: ErrorCategory) => {
+    return getErrorCategoryInfo(category);
+  }, []);
+  
   return { 
     handleRoleAwareError, 
     getRoleAwareErrorMessage,
-    withErrorHandling
+    withErrorHandling,
+    getCategoryErrorInfo
   };
 }
 
@@ -96,11 +75,13 @@ export function useRoleAwareErrorHandling() {
 export function RoleAwareError({ 
   error, 
   context,
-  feature
+  feature,
+  onRetry
 }: { 
   error: unknown; 
   context: string;
   feature?: string;
+  onRetry?: () => void;
 }) {
   const { getRoleAwareErrorMessage } = useRoleAwareErrorHandling();
   const errorMessage = getRoleAwareErrorMessage(error, context);
@@ -111,6 +92,14 @@ export function RoleAwareError({
     return (
       <div className="text-amber-600 text-sm mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
         This feature is currently unavailable due to system constraints.
+        {onRetry && (
+          <button 
+            onClick={onRetry}
+            className="ml-2 underline text-amber-800 hover:text-amber-900"
+          >
+            Try again
+          </button>
+        )}
       </div>
     );
   }
@@ -118,6 +107,14 @@ export function RoleAwareError({
   return (
     <div className="text-destructive text-sm mt-2">
       {errorMessage}
+      {onRetry && (
+        <button 
+          onClick={onRetry}
+          className="ml-2 underline text-destructive hover:text-destructive/80"
+        >
+          Retry
+        </button>
+      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { useCacheClearing } from "@/utils/roles";
 import { useIsAdmin } from "@/utils/roles";
 
 export const CacheControls = () => {
-  const { isClearing, clearAllCaches } = useCacheClearing();
+  const { clearCache, isClearing } = useCacheClearing();
   const isAdmin = useIsAdmin();
 
   if (!isAdmin) return null;
@@ -18,7 +18,7 @@ export const CacheControls = () => {
         variant="outline"
         size="sm"
         className="flex items-center gap-2 w-full justify-center"
-        onClick={clearAllCaches}
+        onClick={clearCache}
         disabled={isClearing}
       >
         <RotateCcw className={`w-4 h-4 ${isClearing ? 'animate-spin' : ''}`} />

@@ -13,12 +13,16 @@ import {
   getRoleFeatures as getRoleFeaturesInternal, 
   isFeatureEnabled as isFeatureEnabledInternal,
   getRoleUIConfig as getRoleUIConfigInternal,
-  RoleFeatureFlags,
-  isDesignerRole, 
+  RoleFeatureFlags
+} from './roles/FeatureFlags';
+
+// Import role functions from the correct location
+import {
+  isDesignerRole,
   isWriterRole,
   isAdminRole,
   isEditorRole
-} from './roles/FeatureFlags';
+} from './roles/RoleFunctions';
 
 type RoleFeatureFlagsExport = RoleFeatureFlags;
 export type { RoleFeatureFlagsExport as RoleFeatureFlags };
@@ -41,19 +45,19 @@ export const getRoleUIConfig = getRoleUIConfigInternal;
 /**
  * Check if the current role is designer
  */
-export const isDesignerRole = isDesignerRole;
+export { isDesignerRole };
 
 /**
  * Check if the current role is writer
  */
-export const isWriterRole = isWriterRole;
+export { isWriterRole };
 
 /**
  * Check if the current role is admin
  */
-export const isAdminRole = isAdminRole;
+export { isAdminRole };
 
 /**
  * @deprecated Use isWriterRole instead
  */
-export const isEditorRole = isEditorRole;
+export { isEditorRole };

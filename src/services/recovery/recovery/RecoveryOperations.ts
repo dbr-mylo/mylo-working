@@ -1,7 +1,6 @@
-
 import { Document, UserRole } from '@/lib/types';
 import { ErrorCategory, classifyError } from '@/utils/error/errorClassifier';
-import { getDocumentBackup, removeBackup } from '@/utils/backup/documentBackupSystem';
+import { getDocumentBackup, removeBackup, DocumentBackup } from '@/utils/backup/documentBackupSystem';
 import { verifyBackupIntegrity, attemptContentRecovery, verifyAndRepairBackup } from '@/utils/backup/documentIntegrity';
 
 /**

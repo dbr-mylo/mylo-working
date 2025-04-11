@@ -1,8 +1,8 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { Document, UserRole } from "@/lib/types";
-import { getDocumentBackup, hasBackup, removeBackup } from '@/utils/backup/documentBackupSystem';
+import { documentRecoveryService } from '@/services/DocumentRecoveryService';
 
 interface UseDocumentBackupRecoveryProps {
   documentId: string | null;
@@ -18,39 +18,37 @@ export function useDocumentBackupRecovery({
   
   // Check for available backups
   const checkForBackups = useCallback(() => {
-    const backupExists = documentId 
-      ? hasBackup(documentId)
-      : role 
-        ? hasBackup(null, role)
-        : false;
-        
+    // Initialize recovery service if needed
+    if (documentId || role) {
+      documentRecoveryService.initialize(
+        documentId,
+        'Document', // Use a default title until we know the actual one
+        role
+      );
+    }
+    
+    const backupExists = documentRecoveryService.hasBackup();
     setHasAvailableBackup(backupExists);
     return backupExists;
   }, [documentId, role]);
   
+  // Initial check when component mounts or deps change
+  useEffect(() => {
+    checkForBackups();
+  }, [checkForBackups]);
+  
   // Recover from backup
   const recoverFromBackup = useCallback((): Document | null => {
     try {
-      const backup = documentId 
-        ? getDocumentBackup(documentId)
-        : role
-          ? getDocumentBackup(null, role)
-          : null;
-          
+      const backup = documentRecoveryService.recoverFromBackup();
+      
       if (backup) {
         toast({
           title: "Backup recovered",
           description: "Your unsaved work has been restored from a local backup.",
         });
-
-        // Make sure backup has required properties for Document type
-        const documentWithRequiredProps: Document = {
-          ...backup,
-          // Correctly match the Document interface expected property name
-          updated_at: backup.updatedAt || new Date().toISOString()
-        };
         
-        return documentWithRequiredProps;
+        return backup;
       }
       
       return null;
@@ -68,11 +66,13 @@ export function useDocumentBackupRecovery({
   // Clear backup after successful save
   const clearBackupAfterSave = useCallback(() => {
     if (documentId) {
-      const removed = removeBackup(documentId);
+      const removed = documentRecoveryService.clearBackup();
       if (removed) {
         setHasAvailableBackup(false);
       }
+      return removed;
     }
+    return false;
   }, [documentId]);
   
   return {

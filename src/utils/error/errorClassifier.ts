@@ -1,13 +1,12 @@
+
 /**
  * Error classification system
  * 
- * This module provides utilities to classify errors into categories
- * based on error message patterns and context.
+ * This module classifies errors into categories based on their properties,
+ * messages, and context. It provides user-friendly messages and recovery
+ * suggestions.
  */
 
-/**
- * Error categories for consistent handling
- */
 export enum ErrorCategory {
   NETWORK = 'network',
   AUTHENTICATION = 'authentication',
@@ -15,7 +14,7 @@ export enum ErrorCategory {
   PERMISSION = 'permission',
   VALIDATION = 'validation',
   STORAGE = 'storage',
-  FORMAT = 'format',
+  DATABASE = 'database',
   TIMEOUT = 'timeout',
   RATE_LIMIT = 'rate_limit',
   SERVER = 'server',
@@ -27,252 +26,234 @@ export enum ErrorCategory {
 }
 
 /**
- * Classified error with additional metadata
+ * Structure for a classified error
  */
 export interface ClassifiedError {
   category: ErrorCategory;
   message: string;
+  originalError: unknown;
+  context?: string;
   suggestedAction?: string;
   recoverable: boolean;
   code?: string;
-  technicalMessage?: string; // Add this missing property for tests
+  technicalMessage?: string;
 }
 
 /**
- * Classify an error based on its properties and context
+ * Classifies an error based on its characteristics and context
  * 
- * @param error The original error
- * @param context Where the error occurred (component/function name)
- * @returns ClassifiedError with metadata
+ * @param error - The error to classify
+ * @param context - The context in which the error occurred (e.g., 'api.fetchData', 'auth.login')
+ * @returns ClassifiedError - A categorized error with user-friendly information
  */
-export function classifyError(error: unknown, context: string): ClassifiedError {
-  // Extract message from various error types
-  const errorMessage = getErrorMessage(error);
+export function classifyError(error: unknown, context: string = 'general'): ClassifiedError {
+  // Default classification
+  let category = ErrorCategory.UNKNOWN;
+  let recoverable = true;
+  let message = "Something went wrong. Please try again.";
+  let suggestedAction = "Refresh the page or try again later.";
+  let code = "";
+
+  // Extract error message if available
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorName = error instanceof Error ? error.name : '';
   
-  // Check for network-related errors
+  // Attempt to extract HTTP status code from error object
+  const status = (error as any)?.status || (error as any)?.response?.status;
+  
+  // Network errors
   if (
     errorMessage.includes('network') ||
     errorMessage.includes('fetch') ||
-    errorMessage.includes('ECONNREFUSED') ||
-    errorMessage.includes('Failed to fetch')
+    errorMessage.includes('connection') ||
+    errorMessage.includes('offline') ||
+    errorName === 'NetworkError'
   ) {
-    return {
-      category: ErrorCategory.NETWORK,
-      message: 'Network connection issue detected.',
-      suggestedAction: 'Please check your internet connection and try again.',
-      recoverable: true,
-    };
-  }
-  
-  // Check for authentication errors
-  if (
-    errorMessage.includes('auth') ||
-    errorMessage.includes('login') ||
-    errorMessage.includes('sign in') ||
-    errorMessage.includes('token') ||
-    errorMessage.includes('credential') ||
-    errorMessage.includes('expired')
+    category = ErrorCategory.NETWORK;
+    message = "We're having trouble connecting to the server.";
+    suggestedAction = "Please check your internet connection and try again.";
+  } 
+  // Authentication errors
+  else if (
+    errorMessage.toLowerCase().includes('unauthorized') ||
+    errorMessage.toLowerCase().includes('unauthenticated') ||
+    errorMessage.toLowerCase().includes('auth') ||
+    status === 401 ||
+    context.startsWith('auth.')
   ) {
-    return {
-      category: ErrorCategory.AUTHENTICATION,
-      message: 'Authentication error occurred.',
-      suggestedAction: 'Please sign in again to continue.',
-      recoverable: true,
-    };
-  }
-  
-  // Check for permission errors
-  if (
-    errorMessage.includes('permission') ||
-    errorMessage.includes('access denied') ||
-    errorMessage.includes('forbidden') ||
-    errorMessage.includes('not authorized')
+    category = ErrorCategory.AUTHENTICATION;
+    message = "Your session may have expired.";
+    suggestedAction = "Please sign in again to continue.";
+  } 
+  // Permission errors
+  else if (
+    errorMessage.toLowerCase().includes('permission') ||
+    errorMessage.toLowerCase().includes('forbidden') ||
+    status === 403
   ) {
-    return {
-      category: ErrorCategory.PERMISSION,
-      message: 'You do not have permission for this action.',
-      suggestedAction: 'Contact your administrator if you need access.',
-      recoverable: false,
-    };
-  }
-  
-  // Check for validation errors
-  if (
-    errorMessage.includes('valid') ||
-    errorMessage.includes('required') ||
-    errorMessage.includes('must be') ||
-    errorMessage.includes('expected') ||
-    errorMessage.includes('format')
+    category = ErrorCategory.PERMISSION;
+    message = "You don't have permission to perform this action.";
+    suggestedAction = "Please contact your administrator for access.";
+    recoverable = false;
+  } 
+  // Validation errors
+  else if (
+    errorMessage.toLowerCase().includes('invalid') ||
+    errorMessage.toLowerCase().includes('validation') ||
+    status === 422 ||
+    status === 400 ||
+    context.startsWith('form.')
   ) {
-    return {
-      category: ErrorCategory.VALIDATION,
-      message: 'There was a problem with the provided data.',
-      suggestedAction: 'Please check your input and try again.',
-      recoverable: true,
-    };
-  }
-  
-  // Check for storage errors
-  if (
-    errorMessage.includes('storage') ||
-    errorMessage.includes('disk') ||
-    errorMessage.includes('save') ||
-    errorMessage.includes('quota') ||
-    context.includes('storage') ||
-    context.includes('save')
+    category = ErrorCategory.VALIDATION;
+    message = "There seems to be a problem with the information provided.";
+    suggestedAction = "Please check your input and try again.";
+  } 
+  // Not found errors
+  else if (
+    errorMessage.toLowerCase().includes('not found') ||
+    status === 404
   ) {
-    return {
-      category: ErrorCategory.STORAGE,
-      message: 'Storage error occurred.',
-      suggestedAction: 'Please check available space and permissions.',
-      recoverable: true,
-    };
+    category = ErrorCategory.RESOURCE_NOT_FOUND;
+    message = "The requested resource could not be found.";
+    suggestedAction = "Please check that the item exists and you have access to it.";
   }
-  
-  // Check for timeouts
-  if (
-    errorMessage.includes('timeout') ||
-    errorMessage.includes('timed out') ||
-    errorMessage.includes('took too long')
+  // Rate limit errors
+  else if (
+    errorMessage.toLowerCase().includes('rate limit') ||
+    errorMessage.toLowerCase().includes('too many requests') ||
+    status === 429
   ) {
-    return {
-      category: ErrorCategory.TIMEOUT,
-      message: 'The operation took too long to complete.',
-      suggestedAction: 'Please try again. If the problem persists, try a smaller action.',
-      recoverable: true,
-    };
+    category = ErrorCategory.RATE_LIMIT;
+    message = "You've made too many requests. Please slow down.";
+    suggestedAction = "Please wait a moment before trying again.";
   }
-  
-  // Check for rate limiting
-  if (
-    errorMessage.includes('rate limit') ||
-    errorMessage.includes('too many requests') ||
-    errorMessage.includes('try again later')
+  // Server errors
+  else if (
+    (status && status >= 500) ||
+    errorMessage.toLowerCase().includes('server error')
   ) {
-    return {
-      category: ErrorCategory.RATE_LIMIT,
-      message: 'Rate limit reached.',
-      suggestedAction: 'Please wait a moment before trying again.',
-      recoverable: true,
-    };
+    category = ErrorCategory.SERVER;
+    message = "There was a problem with our server.";
+    suggestedAction = "Please try again later while we fix the issue.";
   }
-  
-  // Check for server errors
-  if (
-    errorMessage.includes('server') ||
-    errorMessage.includes('500') ||
-    errorMessage.includes('503') ||
-    errorMessage.includes('internal')
+  // Session errors
+  else if (
+    errorMessage.toLowerCase().includes('session') ||
+    errorMessage.toLowerCase().includes('token expired')
   ) {
-    return {
-      category: ErrorCategory.SERVER,
-      message: 'Server error occurred.',
-      suggestedAction: 'Please try again later.',
-      recoverable: false,
-    };
+    category = ErrorCategory.SESSION;
+    message = "Your session has expired.";
+    suggestedAction = "Please sign in again to continue.";
   }
-  
-  // Check for not found errors
-  if (
-    errorMessage.includes('not found') ||
-    errorMessage.includes('404') ||
-    errorMessage.includes('missing') ||
-    errorMessage.includes('does not exist')
+  // File size errors
+  else if (
+    errorMessage.toLowerCase().includes('file size') ||
+    errorMessage.toLowerCase().includes('too large')
   ) {
-    return {
-      category: ErrorCategory.RESOURCE_NOT_FOUND,
-      message: 'The requested resource was not found.',
-      suggestedAction: 'Please check if the item exists or has been moved.',
-      recoverable: false,
-    };
+    category = ErrorCategory.FILE_SIZE;
+    message = "The file is too large.";
+    suggestedAction = "Please try a smaller file.";
   }
-  
-  // Default case for unknown errors
+  // Timeout errors
+  else if (
+    errorMessage.toLowerCase().includes('timeout') ||
+    errorMessage.toLowerCase().includes('timed out')
+  ) {
+    category = ErrorCategory.TIMEOUT;
+    message = "The request took too long to complete.";
+    suggestedAction = "Please try again later or check your connection speed.";
+  }
+  // Storage errors
+  else if (
+    errorMessage.toLowerCase().includes('storage') ||
+    errorMessage.toLowerCase().includes('disk') ||
+    errorMessage.toLowerCase().includes('quota') ||
+    errorMessage.toLowerCase().includes('localStorage') ||
+    errorMessage.toLowerCase().includes('indexedDB')
+  ) {
+    category = ErrorCategory.STORAGE;
+    message = "There was a problem with storage.";
+    suggestedAction = "Please clear some browser storage and try again.";
+  }
+
+  // Context-based classification (if we haven't categorized it yet)
+  if (category === ErrorCategory.UNKNOWN) {
+    if (context.startsWith('auth')) {
+      category = ErrorCategory.AUTHENTICATION;
+      message = "There was a problem with authentication.";
+      suggestedAction = "Please try signing in again.";
+    } else if (context.startsWith('api')) {
+      category = ErrorCategory.NETWORK;
+      message = "There was a problem communicating with our service.";
+      suggestedAction = "Please try again later.";
+    } else if (context.startsWith('document') || context.includes('save')) {
+      category = ErrorCategory.STORAGE;
+      message = "There was a problem saving your document.";
+      suggestedAction = "We've saved a backup copy locally. Try again later.";
+    } else if (context.includes('database')) {
+      category = ErrorCategory.DATABASE;
+      message = "There was a problem with our database.";
+      suggestedAction = "Please try again later while we fix the issue.";
+    }
+  }
+
+  const technicalMessage = getTechnicalErrorDetails(error);
+
   return {
-    category: ErrorCategory.UNKNOWN,
-    message: 'An unexpected error occurred.',
-    suggestedAction: 'Please try again or contact support if the problem persists.',
-    recoverable: false,
+    category,
+    message,
+    originalError: error,
+    context,
+    suggestedAction,
+    recoverable,
+    code: code || String(status) || '',
+    technicalMessage
   };
 }
 
 /**
- * Get a user-friendly error message based on classification
+ * Gets a user-friendly error message based on the error and role
  * 
- * @param error The original error
- * @param context Where the error occurred
- * @param role Optional user role for customized messages
- * @returns User-friendly error message
+ * @param error - The error object
+ * @param context - The context in which the error occurred
+ * @param role - The user's role (optional)
+ * @returns A user-friendly error message
  */
 export function getUserFriendlyErrorMessage(
-  error: unknown,
-  context: string,
-  role?: string | null
+  error: unknown, 
+  context: string = 'general',
+  role: string | null = null
 ): string {
   const classified = classifyError(error, context);
   
-  // Create friendly message based on classification
-  switch (classified.category) {
-    case ErrorCategory.NETWORK:
-      return 'Connection issue detected. Please check your internet and try again.';
-      
-    case ErrorCategory.AUTHENTICATION:
-      return 'Your session may have expired. Please sign in again to continue.';
-      
-    case ErrorCategory.PERMISSION:
-      return 'You don\'t have permission to perform this action.';
-      
-    case ErrorCategory.VALIDATION:
-      return 'Please check your input - some fields may not be in the correct format.';
-      
-    case ErrorCategory.STORAGE:
-      return 'Unable to save your data. Please check your storage space.';
-      
-    case ErrorCategory.TIMEOUT:
-      return 'The operation took too long. Please try again or try with a smaller amount of data.';
-      
-    case ErrorCategory.RATE_LIMIT:
-      return 'You\'ve reached a rate limit. Please wait a moment before trying again.';
-      
-    case ErrorCategory.SERVER:
-      return 'Our server is experiencing issues. Please try again later.';
-      
-    case ErrorCategory.RESOURCE_NOT_FOUND:
-      return 'The item you requested could not be found. It may have been deleted or moved.';
-      
-    default:
-      // If we have the original error message, use it; otherwise fallback
-      return getErrorMessage(error) || 'An unexpected error occurred.';
-  }
-}
-
-/**
- * Extract a string message from various error types
- */
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'string') {
-    return error;
-  }
+  // Base message that's generally user-friendly
+  let message = classified.message;
   
-  if (error instanceof Error) {
-    return error.message;
-  }
-  
-  if (typeof error === 'object' && error !== null) {
-    if ('message' in error && typeof error.message === 'string') {
-      return error.message;
+  // Role-specific messaging
+  if (role) {
+    // For administrators, provide more technical details
+    if (role === 'admin') {
+      message = `${classified.message} (${classified.category}). Please check server logs for more details.`;
     }
-    
-    if ('error' in error && typeof error.error === 'string') {
-      return error.error;
+    // For designers, focus on template and styling errors
+    else if (role === 'designer') {
+      if (classified.category === ErrorCategory.VALIDATION) {
+        message = "There may be a conflict in the template styling. Please check your style definitions.";
+      } else if (classified.category === ErrorCategory.STORAGE) {
+        message = "There was a problem saving your template. We've created a local backup.";
+      }
     }
-    
-    if ('statusText' in error && typeof error.statusText === 'string') {
-      return error.statusText;
+    // For writers, focus on content preservation
+    else if (role === 'writer') {
+      if (classified.category === ErrorCategory.STORAGE) {
+        message = "Your document couldn't be saved to the cloud, but we've kept a local copy for you.";
+      } else if (classified.category === ErrorCategory.AUTHENTICATION) {
+        message = "Your session has expired, but don't worry—your work has been backed up locally.";
+      }
     }
   }
   
-  return 'Unknown error occurred';
+  return message;
 }
 
 /**

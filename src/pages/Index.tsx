@@ -7,6 +7,7 @@ import { WriterView } from "@/components/views/WriterView";
 import { LoadingView } from "@/components/views/LoadingView";
 import { StyleTestView } from "@/components/views/StyleTestView";
 import { Document } from "@/lib/types";
+import { DocumentRecoveryNotification } from "@/components/document/DocumentRecoveryNotification"; 
 
 const Index = () => {
   const {
@@ -26,7 +27,8 @@ const Index = () => {
     isDesignEditable,
     templateId,
     setTemplateId,
-    editorInstance
+    editorInstance,
+    currentDocumentId
   } = useIndexSetup();
   
   if (isLoading && !isStyleTestRoute) {
@@ -63,6 +65,13 @@ const Index = () => {
       initialContent={initialContent}
       templateId={templateId}
     >
+      {/* Add recovery notification at the top of the page */}
+      <DocumentRecoveryNotification 
+        documentId={currentDocumentId}
+        role={role}
+        onRecoverDocument={handleLoadDocument}
+      />
+      
       {isDesigner ? (
         <DesignerView 
           content={content}

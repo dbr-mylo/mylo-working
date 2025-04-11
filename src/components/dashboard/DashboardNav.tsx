@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/tooltip";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { NetworkStatusIndicator } from "@/components/status/NetworkStatusIndicator";
+import { Separator } from "@/components/ui/separator";
 
 interface DashboardNavProps {
   onSearch?: (query: string) => void;
@@ -40,6 +42,8 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
       </div>
       
       <div className="flex items-center gap-3">
+        <NetworkStatusIndicator className="mr-1" />
+        
         <TooltipProvider delayDuration={300}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -86,7 +90,7 @@ export const DashboardNav: React.FC<DashboardNavProps> = ({ onSearch }) => {
           </Tooltip>
         </TooltipProvider>
         
-        <div className="w-px h-6 bg-border mx-2"></div>
+        <Separator orientation="vertical" className="h-6" />
         
         <div className="flex items-center">
           {user && (

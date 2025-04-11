@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { AlertCircle, ArrowLeft, Home } from "lucide-react";
+import { AlertCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/errors";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,14 +61,14 @@ const NotFound = () => {
             <p className="text-sm text-gray-500 mb-6">
               Attempted path: <span className="font-mono">{location.pathname}</span>
             </p>
-            <div className="flex justify-center space-x-4">
-              <Button onClick={() => window.history.back()} variant="outline" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Go Back
-              </Button>
-              <Button onClick={() => navigate(getHomeRoute())} className="flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                Return Home
+            <div className="flex justify-center">
+              <Button 
+                onClick={() => navigate(getHomeRoute())} 
+                className="flex items-center gap-2 px-6"
+                size="lg"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Return to Dashboard
               </Button>
             </div>
           </div>
@@ -79,4 +79,3 @@ const NotFound = () => {
 };
 
 export default NotFound;
-

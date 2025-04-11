@@ -46,8 +46,8 @@ export function useDocumentBackupRecovery({
         // Make sure backup has required properties for Document type
         const documentWithRequiredProps: Document = {
           ...backup,
-          // Ensure the updated_at property exists and is in the correct format
-          updated_at: backup.updatedAt || backup.updated_at || new Date().toISOString()
+          // Correctly match the Document interface expected property name
+          updated_at: backup.updatedAt || new Date().toISOString()
         };
         
         return documentWithRequiredProps;

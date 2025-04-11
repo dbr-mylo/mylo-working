@@ -43,6 +43,14 @@ export interface SessionRecoveryMetrics {
   averageRecoveryTimeMs: number | null;
 }
 
+/**
+ * Session recovery state stored in localStorage
+ */
+interface RecoveryState {
+  recoveryAttempts: number;
+  circuitBreakerStatus: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+}
+
 // Local storage keys
 const RECOVERY_METRICS_KEY = 'session_recovery_metrics';
 const RECOVERY_STATE_KEY = 'session_recovery_state';
@@ -317,7 +325,7 @@ export class SessionRecoveryService {
    */
   private persistStateToStorage(): void {
     try {
-      const state = {
+      const state: RecoveryState = {
         recoveryAttempts: this.recoveryAttempts,
         circuitBreakerStatus: this.authCircuitBreaker.getStatus()
       };
@@ -333,7 +341,7 @@ export class SessionRecoveryService {
    */
   private restoreStateFromStorage(): void {
     try {
-      const state = getLocalStorage(RECOVERY_STATE_KEY);
+      const state = getLocalStorage<RecoveryState>(RECOVERY_STATE_KEY);
       
       if (state) {
         this.recoveryAttempts = state.recoveryAttempts || 0;
@@ -381,7 +389,7 @@ export class SessionRecoveryService {
     };
     
     try {
-      const storedMetrics = getLocalStorage(RECOVERY_METRICS_KEY);
+      const storedMetrics = getLocalStorage<SessionRecoveryMetrics>(RECOVERY_METRICS_KEY);
       return storedMetrics ? { ...defaultMetrics, ...storedMetrics } : defaultMetrics;
     } catch (error) {
       console.error('Failed to load recovery metrics:', error);

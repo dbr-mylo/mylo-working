@@ -8,18 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { getErrorRecoverySteps } from '@/utils/error/handleError';
 
-interface RecoveryOptionsProps {
+export interface RecoveryOptionsProps {
   onRetry?: () => void;
   error?: Error | null;
   context?: string;
   feature?: string;
+  specialized?: boolean; // Added the missing specialized prop
 }
 
 export const RecoveryOptions: React.FC<RecoveryOptionsProps> = ({ 
   onRetry, 
   error,
   context = 'unknown',
-  feature
+  feature,
+  specialized = false // Default value for the specialized prop
 }) => {
   const navigate = useNavigate();
   const { role } = useAuth();

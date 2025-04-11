@@ -1,60 +1,29 @@
 
 /**
- * Run basic application diagnostics
- * 
- * This function checks for common issues that might cause errors:
- * - Browser compatibility
- * - LocalStorage availability
- * - Network connectivity
- * - Memory usage (when available)
- * 
- * @returns Boolean indicating if diagnostics completed successfully
+ * Utility functions for running diagnostics
+ */
+
+/**
+ * Run system diagnostics to check for common issues
+ * @returns boolean indicating if diagnostics succeeded
  */
 export function runDiagnostics(): boolean {
   try {
-    console.group('Application Diagnostics');
+    console.log('Running system diagnostics...');
     
-    // Check browser compatibility
-    const userAgent = navigator.userAgent;
-    console.log('Browser:', userAgent);
-    
-    // Check localStorage availability
-    let localStorageAvailable = false;
-    try {
-      localStorage.setItem('diagnostics_test', 'test');
-      localStorageAvailable = localStorage.getItem('diagnostics_test') === 'test';
-      localStorage.removeItem('diagnostics_test');
-    } catch (e) {
-      localStorageAvailable = false;
-    }
-    console.log('LocalStorage available:', localStorageAvailable);
+    // Check localStorage access
+    const storageAvailable = checkLocalStorage();
+    console.log('  Storage check:', storageAvailable ? '✓' : '✗');
     
     // Check network connectivity
-    const online = navigator.onLine;
-    console.log('Online status:', online ? 'Connected' : 'Disconnected');
+    const networkAvailable = checkNetworkConnectivity();
+    console.log('  Network check:', networkAvailable ? '✓' : '✗');
     
-    // Check memory usage if available
-    if (window.performance) {
-      try {
-        // Some browsers (Chrome) expose memory info via performance
-        const performance = window.performance as any;
-        if (performance.memory) {
-          console.log('Memory usage:', {
-            totalJSHeapSize: Math.round(performance.memory.totalJSHeapSize / (1024 * 1024)) + 'MB',
-            usedJSHeapSize: Math.round(performance.memory.usedJSHeapSize / (1024 * 1024)) + 'MB',
-          });
-        }
-      } catch (e) {
-        console.log('Memory usage information not available');
-      }
-    }
+    // Check browser compatibility
+    const browserCompatible = checkBrowserCompatibility();
+    console.log('  Browser compatibility check:', browserCompatible ? '✓' : '✗');
     
-    // Check for unhandled promise rejections
-    const hasUnhandledRejectionHandler = 'onunhandledrejection' in window;
-    console.log('Unhandled rejection handler registered:', hasUnhandledRejectionHandler);
-    
-    console.groupEnd();
-    return true;
+    return storageAvailable && networkAvailable && browserCompatible;
   } catch (error) {
     console.error('Error running diagnostics:', error);
     return false;
@@ -62,19 +31,51 @@ export function runDiagnostics(): boolean {
 }
 
 /**
- * Get diagnostic data for reporting
- * 
- * @returns Object containing diagnostic information
+ * Check if localStorage is available
  */
-export function getDiagnosticData() {
-  return {
-    userAgent: navigator.userAgent,
-    online: navigator.onLine,
-    url: window.location.href,
-    viewport: {
-      width: window.innerWidth,
-      height: window.innerHeight
-    },
-    time: new Date().toISOString()
-  };
+function checkLocalStorage(): boolean {
+  try {
+    const testKey = '___diagnostics_test___';
+    localStorage.setItem(testKey, 'test');
+    const testValue = localStorage.getItem(testKey);
+    localStorage.removeItem(testKey);
+    return testValue === 'test';
+  } catch (error) {
+    console.error('  LocalStorage check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Check network connectivity
+ */
+function checkNetworkConnectivity(): boolean {
+  // This is a simple check, in a real app you might want to ping a server
+  return navigator.onLine;
+}
+
+/**
+ * Check browser compatibility for modern features
+ */
+function checkBrowserCompatibility(): boolean {
+  try {
+    // Check for some modern features
+    const hasLocalStorage = typeof localStorage !== 'undefined';
+    const hasSessionStorage = typeof sessionStorage !== 'undefined';
+    const hasPromises = typeof Promise !== 'undefined';
+    const hasAsync = (async () => {}).constructor.name === 'AsyncFunction';
+    const hasURLAPI = typeof URL !== 'undefined';
+    
+    // Log individual checks
+    console.log('    Local Storage available:', hasLocalStorage ? '✓' : '✗');
+    console.log('    Session Storage available:', hasSessionStorage ? '✓' : '✗');
+    console.log('    Promises supported:', hasPromises ? '✓' : '✗');
+    console.log('    Async/await supported:', hasAsync ? '✓' : '✗');
+    console.log('    URL API supported:', hasURLAPI ? '✓' : '✗');
+    
+    return hasLocalStorage && hasSessionStorage && hasPromises && hasAsync && hasURLAPI;
+  } catch (error) {
+    console.error('  Browser compatibility check failed:', error);
+    return false;
+  }
 }

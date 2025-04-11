@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserRole } from "@/lib/types";
-import { Chart } from "react-chartjs-2";
 
 /**
  * Flag usage statistics (typically would come from a backend)
@@ -111,7 +109,6 @@ export function FeatureFlagsAdminPanel() {
   };
   
   const initializeRoleVisibility = () => {
-    // Initialize default role visibility (all roles can see all flags)
     const initialRoleVisibility: Record<string, RoleVisibility> = {};
     const allFlags = getAllFeatureFlags();
     
@@ -124,7 +121,6 @@ export function FeatureFlagsAdminPanel() {
       };
     });
     
-    // Restrict some flags to admin only as an example
     if (initialRoleVisibility['template-marketplace']) {
       initialRoleVisibility['template-marketplace'].guest = false;
     }
@@ -139,7 +135,6 @@ export function FeatureFlagsAdminPanel() {
   const handleFlagToggle = (flag: string, enabled: boolean) => {
     setOverride(flag as FeatureFlagKey, enabled);
     
-    // Update local state
     setFeatureFlags(prev => ({
       ...prev,
       [flag]: enabled
@@ -151,7 +146,6 @@ export function FeatureFlagsAdminPanel() {
   const handleResetFlag = (flag: string) => {
     clearFeatureOverride(flag as FeatureFlagKey);
     
-    // Refresh flags
     loadFeatureFlags();
     
     toast.info(`Feature "${flag}" reset to default`);
@@ -170,20 +164,17 @@ export function FeatureFlagsAdminPanel() {
       return;
     }
     
-    // Simple validation for flag name
     const normalizedName = newFlagName.trim();
     if (!/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(normalizedName)) {
       toast.error('Flag name can only contain letters, numbers, hyphens and underscores');
       return;
     }
     
-    // Check for existing flag
     if (featureFlags.hasOwnProperty(normalizedName)) {
       toast.error('Flag already exists');
       return;
     }
     
-    // Initialize role visibility for the new flag
     setRoleVisibility(prev => ({
       ...prev,
       [normalizedName]: {
@@ -194,8 +185,6 @@ export function FeatureFlagsAdminPanel() {
       }
     }));
     
-    // In a real implementation, this would add the flag to the feature flags system
-    // For now, we'll just add it to our local state
     setFeatureFlags(prev => ({
       ...prev,
       [normalizedName]: false
@@ -219,11 +208,9 @@ export function FeatureFlagsAdminPanel() {
     toast.success(`${role} ${visible ? 'can now see' : 'cannot see'} "${flag}"`);
   };
   
-  // Filter flags based on search and selected role
   const filteredFlags = useMemo(() => {
     let result = Object.entries(featureFlags);
     
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(([flag]) => 
@@ -232,7 +219,6 @@ export function FeatureFlagsAdminPanel() {
       );
     }
     
-    // Filter by selected tab
     if (selectedTab === 'critical-flags') {
       const criticalFlags = getCriticalFeatures();
       result = result.filter(([flag]) => criticalFlags.includes(flag as FeatureFlagKey));
@@ -241,7 +227,6 @@ export function FeatureFlagsAdminPanel() {
       result = result.filter(([flag]) => nonCriticalFlags.includes(flag as FeatureFlagKey));
     }
     
-    // Filter by selected role
     if (selectedRole !== 'all') {
       result = result.filter(([flag]) => {
         const visibility = roleVisibility[flag];
@@ -446,7 +431,6 @@ export function FeatureFlagsAdminPanel() {
   );
 }
 
-// Component for displaying the list of flags
 function FlagsList({ 
   flags, 
   handleFlagToggle, 
@@ -549,11 +533,7 @@ function FlagsList({
   );
 }
 
-// Feature Usage Chart Component
 function FeatureUsageChart() {
-  // This would typically fetch real data from your analytics system
-  // Using mock data for demonstration
-  
   return (
     <div className="flex items-center justify-center h-full">
       <div className="text-center text-muted-foreground">
@@ -565,7 +545,6 @@ function FeatureUsageChart() {
   );
 }
 
-// Role Usage Chart Component
 function RoleUsageChart() {
   return (
     <div className="flex items-center justify-center h-full">
@@ -578,7 +557,6 @@ function RoleUsageChart() {
   );
 }
 
-// Feature Usage Table
 function FeatureUsageTable() {
   return (
     <Card>

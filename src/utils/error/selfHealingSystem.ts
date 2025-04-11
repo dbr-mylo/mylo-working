@@ -7,7 +7,7 @@
  * providing analytics on system health and error rates.
  */
 
-import { ErrorCategory } from './errorClassifier';
+import { ErrorCategory, classifyError } from './errorClassifier';
 import { getLocalStorage, setLocalStorage } from '../storage/localStorage';
 
 // Types for error tracking
@@ -41,6 +41,95 @@ const MAX_ERROR_HISTORY = 100;
 
 // Time window for considering "recent" errors (24 hours)
 const RECENT_ERROR_WINDOW = 24 * 60 * 60 * 1000;
+
+/**
+ * Register an error and attempt automatic recovery based on error classification
+ * @param error The error to handle
+ * @param context Context where the error occurred
+ * @returns Boolean indicating whether recovery was attempted
+ */
+export function registerErrorAndAttemptRecovery(error: unknown, context: string): boolean {
+  try {
+    // Classify the error
+    const classifiedError = classifyError(error, context);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    // Determine if error is likely recoverable based on historical data
+    const likelyRecoverable = isLikelyRecoverable(classifiedError.category);
+    let recoveryAttempted = false;
+    let recoverySucceeded = false;
+    
+    // Attempt recovery based on error type
+    if (likelyRecoverable) {
+      recoveryAttempted = true;
+      
+      switch (classifiedError.category) {
+        case ErrorCategory.NETWORK:
+          // Simple network recovery attempt
+          recoverySucceeded = attemptNetworkRecovery();
+          break;
+        case ErrorCategory.STORAGE:
+          // Storage error recovery attempt
+          recoverySucceeded = attemptStorageRecovery();
+          break;
+        case ErrorCategory.AUTH:
+        case ErrorCategory.AUTHENTICATION:
+          // Auth error recovery attempt
+          recoverySucceeded = false; // Auth errors require explicit handling by session recovery service
+          break;
+        default:
+          recoveryAttempted = false;
+          break;
+      }
+    }
+    
+    // Track the error occurrence
+    trackErrorOccurrence(
+      classifiedError.category,
+      errorMessage,
+      context,
+      recoveryAttempted,
+      recoverySucceeded,
+      error instanceof Error ? error.stack : undefined
+    );
+    
+    return recoveryAttempted;
+  } catch (e) {
+    console.error('Failed to register error and attempt recovery:', e);
+    return false;
+  }
+}
+
+/**
+ * Attempt to recover from a network error
+ * @returns Boolean indicating whether recovery was successful
+ */
+function attemptNetworkRecovery(): boolean {
+  try {
+    // Simple check for online status
+    return navigator.onLine;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Attempt to recover from a storage error
+ * @returns Boolean indicating whether recovery was successful
+ */
+function attemptStorageRecovery(): boolean {
+  try {
+    // Test localStorage access
+    const testKey = '___test_storage_recovery___';
+    localStorage.setItem(testKey, 'test');
+    const testValue = localStorage.getItem(testKey);
+    localStorage.removeItem(testKey);
+    
+    return testValue === 'test';
+  } catch (e) {
+    return false;
+  }
+}
 
 /**
  * Record an error occurrence in the tracking system

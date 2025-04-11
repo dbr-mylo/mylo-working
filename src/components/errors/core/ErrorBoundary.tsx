@@ -28,7 +28,7 @@ interface ErrorBoundaryState {
 export class ErrorBoundary extends React.Component<
   { 
     children: React.ReactNode;
-    fallback?: React.ReactNode;
+    fallback?: (error: Error, resetErrorBoundary: () => void) => React.ReactNode;
     onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
     context?: string;
     allowReset?: boolean;
@@ -40,7 +40,7 @@ export class ErrorBoundary extends React.Component<
   
   constructor(props: { 
     children: React.ReactNode;
-    fallback?: React.ReactNode;
+    fallback?: (error: Error, resetErrorBoundary: () => void) => React.ReactNode;
     onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
     context?: string;
     allowReset?: boolean;
@@ -163,11 +163,11 @@ export class ErrorBoundary extends React.Component<
       );
       
       // Use custom fallback if provided, otherwise use default error UI
-      if (this.props.fallback) {
+      if (this.props.fallback && this.state.error) {
         return (
           <>
-            {this.props.fallback}
-            {resetButton}
+            {this.props.fallback(this.state.error, this.handleReset)}
+            {!this.props.fallback.toString().includes('resetButton') && resetButton}
           </>
         );
       }

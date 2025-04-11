@@ -6,18 +6,28 @@ import { runDiagnostics } from "@/utils/error/diagnostics";
 import { RefreshCw, Home, Wrench, Flag } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getErrorRecoverySteps } from '@/utils/error/handleError';
 
 interface RecoveryOptionsProps {
   onRetry?: () => void;
   error?: Error | null;
+  context?: string;
+  feature?: string;
 }
 
 export const RecoveryOptions: React.FC<RecoveryOptionsProps> = ({ 
   onRetry, 
-  error 
+  error,
+  context = 'unknown',
+  feature
 }) => {
   const navigate = useNavigate();
   const { role } = useAuth();
+  
+  // Get dynamic recovery steps based on error, role, and feature
+  const recoverySteps = error 
+    ? getErrorRecoverySteps(error, context, role, feature)
+    : [];
   
   const handleRefresh = () => {
     toast.info("Refreshing application...");
@@ -48,6 +58,15 @@ export const RecoveryOptions: React.FC<RecoveryOptionsProps> = ({
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Recovery Options</h3>
+      
+      {/* Display custom recovery steps if available */}
+      {recoverySteps.length > 0 && (
+        <ul className="list-disc pl-5 mb-4 text-sm space-y-1">
+          {recoverySteps.map((step, index) => (
+            <li key={index}>{step}</li>
+          ))}
+        </ul>
+      )}
       
       <div className="grid grid-cols-2 gap-3">
         <Button 

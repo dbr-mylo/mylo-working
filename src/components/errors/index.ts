@@ -25,6 +25,9 @@ export {
 // Export enhanced error boundary
 export { EnhancedErrorBoundary } from './EnhancedErrorBoundary';
 
+// Export application-level error boundary
+export { ApplicationErrorBoundary } from './ApplicationErrorBoundary';
+
 // Export standard error boundary HOC
 export { WithErrorBoundary, withErrorBoundary } from './WithErrorBoundary';
 

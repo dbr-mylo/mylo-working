@@ -2,6 +2,7 @@
 import { toast } from "sonner";
 import { trackError } from "./analytics";
 import { getUserFriendlyErrorMessage, classifyError, ErrorCategory } from "./errorClassifier";
+import { getEnhancedErrorMessage, getEnhancedRecoverySteps } from "./getRoleAwareErrorMessage";
 
 /**
  * Handles an error with consistent logging and user notification
@@ -51,28 +52,47 @@ export const handleError = (
 };
 
 /**
- * Enhanced error handler with role-aware messaging
+ * Enhanced error handler with role-aware and feature-specific messaging
  * 
  * This function extends the basic error handler by providing
- * role-specific error messages tailored to different user roles
- * (e.g., admin, editor, designer)
+ * role-specific and feature-specific error messages
  * 
  * @param error The error to handle
  * @param context Context information about where the error occurred
  * @param role The user's role (admin, editor, designer, etc.)
- * @param userMessage Optional custom message to override the role-specific message
+ * @param feature Optional feature context (editor, template, auth, etc.)
+ * @param userMessage Optional custom message to override the generated message
  * @param shouldToast Whether to show a toast notification (default: true)
  */
 export const handleRoleAwareError = (
   error: unknown,
   context: string,
   role: string | null,
+  feature?: string,
   userMessage?: string,
   shouldToast: boolean = true
 ): void => {
-  // Get role-specific message
-  const roleMessage = getUserFriendlyErrorMessage(error, context, role);
+  // Get enhanced message
+  const enhancedMessage = getEnhancedErrorMessage(error, context, role, feature);
   
-  // Use standard error handler with role-specific message
-  handleError(error, context, userMessage || roleMessage, shouldToast);
+  // Use standard error handler with enhanced message
+  handleError(error, context, userMessage || enhancedMessage, shouldToast);
+};
+
+/**
+ * Get recovery steps for an error based on classification, role, and feature
+ * 
+ * @param error The error to get recovery steps for
+ * @param context Context information about where the error occurred
+ * @param role The user's role
+ * @param feature Optional feature context
+ * @returns Array of recovery step strings
+ */
+export const getErrorRecoverySteps = (
+  error: unknown, 
+  context: string, 
+  role: string | null | undefined,
+  feature?: string
+): string[] => {
+  return getEnhancedRecoverySteps(error, context, role, feature);
 };

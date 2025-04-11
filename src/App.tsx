@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import RegressionTestRoute from "./routes/RegressionTestRoute";
 import SmokeTestRoute from "./routes/SmokeTestRoute";
 import { TemplateManager } from "@/components/design/TemplateManager";
-import { ErrorBoundary, RoleAwareErrorFallback } from "@/components/errors";
+import { ErrorBoundary, ApplicationErrorBoundary, RoleAwareErrorFallback } from "@/components/errors";
 import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -144,7 +143,6 @@ const WriterPages = () => {
 const AppRoutes = () => {
   useSmokeTest("AppRoutes");
   
-  // Create a fallback function to match the required signature
   const appErrorFallback = (error: Error, resetErrorBoundary: () => void) => (
     <RoleAwareErrorFallback error={error} context="application" onTryAgain={resetErrorBoundary} />
   );
@@ -181,22 +179,8 @@ const AppRoutes = () => {
 function App() {
   useSmokeTest("App");
   
-  // Create a fallback function for the App error boundary
-  const appRootFallback = (error: Error, resetErrorBoundary: () => void) => (
-    <div className="p-6">
-      <h2 className="text-xl font-bold">Application Error</h2>
-      <p className="my-2">{error.message}</p>
-      <button 
-        onClick={resetErrorBoundary}
-        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-      >
-        Try to recover
-      </button>
-    </div>
-  );
-  
   return (
-    <ErrorBoundary context="App" fallback={appRootFallback}>
+    <ApplicationErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -216,7 +200,7 @@ function App() {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </ErrorBoundary>
+    </ApplicationErrorBoundary>
   );
 }
 

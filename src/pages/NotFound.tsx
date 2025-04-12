@@ -6,6 +6,7 @@ import { AlertCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/errors";
 import { useAuth } from "@/contexts/AuthContext";
+import { navigationService } from "@/services/navigation/NavigationService";
 
 const NotFound = () => {
   const location = useLocation();
@@ -35,17 +36,9 @@ const NotFound = () => {
     // Example: analytics.logEvent('404_error', { path: location.pathname });
   }, [location.pathname, from, role]);
 
-  // Determine the best place to send the user back to
+  // Determine the best place to send the user back to using the navigation service
   const getHomeRoute = () => {
-    switch (role) {
-      case "admin":
-        return "/admin";
-      case "writer":
-      case "designer":
-        return "/editor";
-      default:
-        return "/";
-    }
+    return navigationService.getDefaultRoute(role);
   };
 
   return (

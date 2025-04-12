@@ -7,8 +7,8 @@
  */
 
 import { UserRole } from '@/lib/types';
-import { isValidRoute } from './routeValidation/core';
-import { validRoutes } from './routeConfig';
+import { validRoutes, getDefaultRouteForRole, getFallbackRouteForRole } from './routeConfig';
+import { navigationService } from '@/services/navigation/NavigationService';
 
 /**
  * Gets a list of valid routes for a specific user role
@@ -40,7 +40,7 @@ export const getValidRoutesForRole = (role: UserRole | null): string[] => {
  * @returns Boolean indicating if the path is valid for the role
  */
 export const isValidNavigation = (path: string, role: UserRole | null): boolean => {
-  return isValidRoute(path, role);
+  return navigationService.validateRoute(path, role);
 };
 
 /**
@@ -49,15 +49,30 @@ export const isValidNavigation = (path: string, role: UserRole | null): boolean 
  * @returns Safe fallback path
  */
 export const getSafeFallbackRoute = (role: UserRole | null): string => {
-  switch (role) {
-    case 'admin':
-      return '/admin';
-    case 'designer':
-      return '/design';
-    case 'writer':
-    case 'editor':
-      return '/editor';
-    default:
-      return '/';
-  }
+  return getFallbackRouteForRole(role);
+};
+
+/**
+ * Gets the default route for a user role
+ * @param role User role
+ * @returns Default route for the role
+ */
+export const getDefaultRouteForUserRole = (role: UserRole | null): string => {
+  return getDefaultRouteForRole(role);
+};
+
+/**
+ * Log a navigation attempt for analytics
+ * @param from Source path
+ * @param to Destination path
+ * @param success Whether navigation was allowed
+ * @param role User role
+ */
+export const logNavigation = (
+  from: string, 
+  to: string, 
+  success: boolean, 
+  role?: UserRole | null
+): void => {
+  navigationService.logNavigationEvent(from, to, success, role);
 };

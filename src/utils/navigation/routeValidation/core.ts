@@ -1,4 +1,7 @@
-import { validRoutes, getPathDescription } from '../routeConfig';
+
+import { validRoutes } from '../routeConfig';
+import { navigationService } from '@/services/navigation/NavigationService';
+import { UserRole } from '@/lib/types';
 
 /**
  * Validates if a route is valid for the application
@@ -7,47 +10,7 @@ import { validRoutes, getPathDescription } from '../routeConfig';
  * @returns Boolean indicating if the route is valid
  */
 export const isValidRoute = (path: string, userRole?: string | null): boolean => {
-  // Check if path matches any of the valid routes
-  for (const route of validRoutes) {
-    // Handle exact matches
-    if (route.path === path) {
-      // Check role requirements if specified
-      if (route.requiredRole && userRole) {
-        return route.requiredRole.includes(userRole);
-      }
-      return true;
-    }
-    
-    // Handle routes with parameters
-    if (route.path.includes(':') && route.params) {
-      const routeParts = route.path.split('/');
-      const pathParts = path.split('/');
-      
-      // Different length means it's not matching this route pattern
-      if (routeParts.length !== pathParts.length) continue;
-      
-      let isMatch = true;
-      for (let i = 0; i < routeParts.length; i++) {
-        // If this part is a parameter, it matches anything
-        if (routeParts[i].startsWith(':')) continue;
-        // Otherwise, it must match exactly
-        if (routeParts[i] !== pathParts[i]) {
-          isMatch = false;
-          break;
-        }
-      }
-      
-      if (isMatch) {
-        // Check role requirements if specified
-        if (route.requiredRole && userRole) {
-          return route.requiredRole.includes(userRole);
-        }
-        return true;
-      }
-    }
-  }
-  
-  return false;
+  return navigationService.validateRoute(path, userRole as UserRole);
 };
 
 /**

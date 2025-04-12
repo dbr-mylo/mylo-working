@@ -2,28 +2,46 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
+import { navigationService } from "@/services/navigation/NavigationService";
+import { NavigationErrorType } from "@/utils/navigation/types";
 
+/**
+ * Route validator component that checks all navigation attempts
+ * and redirects to appropriate pages based on role permissions
+ */
 export const RouteValidator = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { role } = useAuth();
   
   React.useEffect(() => {
-    const isValid = isValidRoute(location.pathname, role);
+    const currentPath = location.pathname;
+    const isValid = navigationService.validateRoute(currentPath, role);
     
-    logNavigation(
-      location.state?.from || "unknown", 
-      location.pathname, 
+    // Log the navigation attempt
+    navigationService.logNavigationEvent(
+      location.state?.from || "direct_access", 
+      currentPath, 
       isValid,
-      role
+      role,
+      isValid ? undefined : "Route not available for role"
     );
     
-    if (!isValid && location.pathname !== "/not-found") {
-      console.warn(`Invalid route detected: ${location.pathname} for role: ${role || 'unauthenticated'}`);
+    if (!isValid && currentPath !== "/not-found") {
+      console.warn(`Invalid route detected: ${currentPath} for role: ${role || 'unauthenticated'}`);
+      
+      // Handle the unauthorized access
+      navigationService.handleNavigationError({
+        type: NavigationErrorType.UNAUTHORIZED,
+        path: currentPath,
+        message: `Route ${currentPath} not available for role ${role || 'unauthenticated'}`,
+        role
+      });
+      
+      // Redirect to not-found page with context
       navigate("/not-found", { 
         state: { 
-          from: location.pathname, 
+          from: currentPath, 
           message: "Route not available for your role" 
         } 
       });

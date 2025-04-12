@@ -5,8 +5,8 @@ import { navigationService } from "@/services/navigation/NavigationService";
 import { NavigationErrorType } from "@/utils/navigation/types";
 
 /**
- * Enhanced navigation hook that ensures all navigation is properly validated
- * with role-based access control and error handling
+ * Enhanced wrapper hook that combines useNavigate with route validation
+ * and provides improved error handling and analytics
  * 
  * @deprecated Use useNavigationHandlers instead
  */
@@ -15,30 +15,23 @@ export const useValidatedNavigation = () => {
   const { role } = useAuth();
   
   /**
-   * Safely navigate to a route with validation, error handling and analytics
+   * Navigate to a route with validation, error handling, and analytics
+   * @param path - The route to navigate to
+   * @param options - Optional navigation options
    */
   const navigateTo = (path: string, options?: { replace?: boolean; state?: any }) => {
     try {
       const currentPath = window.location.pathname;
       const isValid = navigationService.validateRoute(path, role);
       
-      // Log the navigation attempt
-      navigationService.logNavigationEvent(
-        currentPath, 
-        path, 
-        isValid, 
-        role
-      );
+      // Log the navigation attempt for analytics
+      navigationService.logNavigationEvent(currentPath, path, isValid, role);
       
       if (isValid) {
-        // Navigate to the valid route
         navigate(path, options);
         return true;
       } else {
-        // Handle invalid navigation
-        console.warn(`Invalid route access attempt: ${path} for role: ${role || 'unauthenticated'}`);
-        
-        // Handle the error
+        // Handle unauthorized access
         navigationService.handleNavigationError({
           type: NavigationErrorType.UNAUTHORIZED,
           path,
@@ -46,12 +39,11 @@ export const useValidatedNavigation = () => {
           role
         });
         
-        // Redirect to not-found with state information
         navigate("/not-found", { 
           replace: true, 
           state: { 
             from: path,
-            message: "This page is not available for your role" 
+            message: "This route is not available for your role" 
           } 
         });
         return false;
@@ -59,17 +51,14 @@ export const useValidatedNavigation = () => {
     } catch (error) {
       console.error("Navigation error:", error);
       
-      // Handle generic errors
+      // Handle general navigation error
       navigationService.handleNavigationError({
         type: NavigationErrorType.SERVER_ERROR,
         path,
-        message: "An unexpected error occurred during navigation",
+        message: "There was a problem during navigation",
         role
       });
       
-      // Fallback to a safe route based on role
-      const fallbackRoute = navigationService.getFallbackRoute(role);
-      navigate(fallbackRoute, { replace: true });
       return false;
     }
   };
@@ -86,7 +75,7 @@ export const useValidatedNavigation = () => {
    */
   const goHome = () => {
     const homePath = navigationService.getDefaultRoute(role);
-    navigate(homePath);
+    return navigateTo(homePath);
   };
   
   return {

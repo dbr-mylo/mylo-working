@@ -1,9 +1,9 @@
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { isValidRoute, logNavigation } from "@/utils/navigation/routeValidation";
 import { toast } from "sonner";
-import { getSafeFallbackRoute } from "@/utils/navigation/NavigationUtils";
+import { navigationService } from "@/services/navigation/NavigationService";
+import { NavigationErrorType } from "@/utils/navigation/types";
 
 /**
  * Hook to provide consistent navigation handlers across the application
@@ -17,42 +17,49 @@ export const useNavigationHandlers = () => {
    * Navigate to a route with validation, error handling, and analytics
    * @param path Route to navigate to
    * @param options Navigation options
+   * @returns Boolean indicating if navigation was successful
    */
-  const navigateTo = (path: string, options?: { replace?: boolean; state?: any }) => {
+  const navigateTo = (path: string, options?: { replace?: boolean; state?: any }): boolean => {
     try {
       const currentPath = window.location.pathname;
-      const isValid = isValidRoute(path, role);
+      const isValid = navigationService.validateRoute(path, role);
       
       // Log the navigation attempt for analytics
-      logNavigation(currentPath, path, isValid, role);
+      navigationService.logNavigationEvent(currentPath, path, isValid, role);
       
       if (isValid) {
         navigate(path, options);
         return true;
       } else {
-        toast.error(`Cannot navigate to ${path}`, {
-          description: "This route is not available for your role",
-          duration: 3000,
+        // Error handling for invalid navigation
+        navigationService.handleNavigationError({
+          type: NavigationErrorType.UNAUTHORIZED,
+          path,
+          message: `Cannot navigate to ${path} - permission denied`,
+          role
         });
-        console.warn(`Invalid navigation attempt to ${path} by role: ${role || 'unauthenticated'}`);
+        
+        // Redirect to not-found with context
         navigate("/not-found", { 
           replace: true, 
           state: { 
             from: path,
-            message: "Route not available for your role" 
+            message: "This route is not available for your role" 
           } 
         });
         return false;
       }
     } catch (error) {
       console.error("Navigation error:", error);
+      
+      // Show generic error toast
       toast.error("Navigation error", {
         description: "There was a problem navigating to the requested page",
         duration: 3000,
       });
       
       // Fallback to a safe route based on role
-      const fallbackRoute = getSafeFallbackRoute(role);
+      const fallbackRoute = navigationService.getFallbackRoute(role);
       navigate(fallbackRoute, { replace: true });
       return false;
     }
@@ -67,10 +74,11 @@ export const useNavigationHandlers = () => {
   
   /**
    * Navigate to homepage based on role
+   * @returns Boolean indicating if navigation was successful
    */
-  const goHome = () => {
-    const homePath = getSafeFallbackRoute(role);
-    navigate(homePath);
+  const goHome = (): boolean => {
+    const homePath = navigationService.getDefaultRoute(role);
+    return navigateTo(homePath);
   };
   
   return {

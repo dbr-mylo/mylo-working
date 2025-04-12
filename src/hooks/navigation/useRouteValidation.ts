@@ -1,8 +1,9 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { isValidRoute, canAccessTestingRoute, isTestingRoute } from "@/utils/navigation/routeValidation";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { navigationService } from "@/services/navigation/NavigationService";
+import { NavigationErrorType } from "@/utils/navigation/types";
 
 /**
  * Hook to validate routes based on user role with enhanced error handling
@@ -17,12 +18,7 @@ export const useRouteValidation = () => {
    * @returns Boolean indicating if the route is valid
    */
   const validateRoute = (path: string): boolean => {
-    // Special handling for testing routes
-    if (isTestingRoute(path)) {
-      return canAccessTestingRoute(path, role);
-    }
-    
-    return isValidRoute(path, role);
+    return navigationService.validateRoute(path, role);
   };
   
   /**
@@ -30,17 +26,27 @@ export const useRouteValidation = () => {
    * @param path Route to navigate to
    * @param options Navigation options
    */
-  const navigateWithValidation = (path: string, options?: { replace?: boolean; state?: any }) => {
+  const navigateWithValidation = (path: string, options?: { replace?: boolean; state?: any }): boolean => {
     try {
-      if (validateRoute(path)) {
+      const isValid = validateRoute(path);
+      
+      // Log the navigation attempt
+      const currentPath = window.location.pathname;
+      navigationService.logNavigationEvent(currentPath, path, isValid, role);
+      
+      if (isValid) {
         navigate(path, options);
         return true;
       } else {
-        toast.error(`Cannot navigate to ${path}`, {
-          description: "This route is not available for your role",
-          duration: 3000,
+        // Handle unauthorized access
+        navigationService.handleNavigationError({
+          type: NavigationErrorType.UNAUTHORIZED,
+          path,
+          message: `Cannot navigate to ${path} - permission denied`,
+          role
         });
-        console.warn(`Invalid navigation attempt to ${path} by role: ${role || 'unauthenticated'}`);
+        
+        // Redirect to not-found with context
         navigate("/not-found", { 
           replace: true, 
           state: { 
@@ -52,6 +58,15 @@ export const useRouteValidation = () => {
       }
     } catch (error) {
       console.error("Navigation validation error:", error);
+      
+      // Handle general error
+      navigationService.handleNavigationError({
+        type: NavigationErrorType.SERVER_ERROR,
+        path,
+        message: "An unexpected error occurred during navigation",
+        role
+      });
+      
       return false;
     }
   };
@@ -61,4 +76,3 @@ export const useRouteValidation = () => {
     navigateWithValidation
   };
 };
-

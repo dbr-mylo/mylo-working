@@ -1,9 +1,8 @@
 
 import { NavigationEvent } from './types';
 import { getPathDescription } from './routeConfig';
-
-// Store navigation events for analytics
-const navigationEvents: NavigationEvent[] = [];
+import { navigationService } from '@/services/navigation/NavigationService';
+import { UserRole } from '@/lib/types';
 
 /**
  * Log a navigation event for analytics
@@ -20,18 +19,7 @@ export const logNavigation = (
   userRole?: string | null,
   failureReason?: string
 ): void => {
-  const event: NavigationEvent = {
-    from,
-    to,
-    success,
-    timestamp: new Date().toISOString(),
-    userRole,
-    pathDescription: getPathDescription(to),
-    failureReason
-  };
-  
-  navigationEvents.push(event);
-  logNavigationEvent(event);
+  navigationService.logNavigationEvent(from, to, success, userRole as UserRole, failureReason);
 };
 
 /**
@@ -55,7 +43,7 @@ export const logNavigationEvent = (event: NavigationEvent): void => {
  * @returns Array of navigation events
  */
 export const getNavigationEvents = (): NavigationEvent[] => {
-  return [...navigationEvents];
+  return navigationService.getNavigationHistory();
 };
 
 /**

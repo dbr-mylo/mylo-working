@@ -12,6 +12,6 @@ export {
   getDefaultRouteForRole as getDefaultRoute, 
   getFallbackRouteForRole as getFallbackRoute
 } from './routeConfig';
-export { logNavigationEvent, getNavigationEvents, navigateWithValidation } from './analytics';
+export { logNavigationEvent as logNavigation, getNavigationEvents, navigateWithValidation } from './analytics';
 export { getRoutePerformanceMetrics, getRoleNavigationPatterns } from './metrics';
 export type { RouteConfig, NavigationEvent, NavigationError, NavigationErrorType } from './types';

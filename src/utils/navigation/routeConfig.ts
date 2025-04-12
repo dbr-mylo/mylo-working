@@ -6,13 +6,16 @@ import { RouteConfig, UserRole, RoleRouteMap } from './types';
  * Each key represents a group of related routes
  */
 export const routeGroups = {
-  DASHBOARD: 'dashboard',
-  CONTENT: 'content',
-  DESIGN: 'design',
-  ADMIN: 'admin',
-  USER: 'user',
-  TESTING: 'testing',
+  DASHBOARD: 'dashboard' as const,
+  CONTENT: 'content' as const,
+  DESIGN: 'design' as const,
+  ADMIN: 'admin' as const,
+  USER: 'user' as const,
+  TESTING: 'testing' as const,
 };
+
+// Define the route group type based on the values in routeGroups
+type RouteGroupType = typeof routeGroups[keyof typeof routeGroups];
 
 /**
  * Define all valid routes in the application with enhanced metadata

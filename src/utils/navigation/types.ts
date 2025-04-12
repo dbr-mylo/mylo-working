@@ -9,6 +9,11 @@
 export type UserRole = 'admin' | 'designer' | 'writer' | 'editor' | null;
 
 /**
+ * Valid route groups
+ */
+export type RouteGroup = 'dashboard' | 'content' | 'design' | 'admin' | 'user' | 'testing';
+
+/**
  * Configuration for a valid route
  */
 export interface RouteConfig {
@@ -23,7 +28,7 @@ export interface RouteConfig {
   /** Specify a fallback route if this route is inaccessible */
   fallbackRoute?: string;
   /** Route group for organizational purposes */
-  group?: 'dashboard' | 'content' | 'design' | 'admin' | 'user' | 'testing';
+  group?: RouteGroup;
 }
 
 /**
@@ -72,4 +77,3 @@ export interface NavigationError {
 export interface RoleRouteMap {
   [key: string]: string; // role -> default route
 }
-

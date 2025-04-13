@@ -1,9 +1,8 @@
 import { UserRole } from '@/lib/types';
 
 /**
- * User role
+ * Navigation types module
  */
-export type UserRole = 'admin' | 'designer' | 'writer' | 'editor' | null;
 
 /**
  * Navigation error types

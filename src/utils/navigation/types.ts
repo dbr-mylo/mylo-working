@@ -56,7 +56,7 @@ export interface RelatedRoute {
  */
 export interface RoleRouteMap {
   [key: string]: string; // Use string as index signature type
-  null: string; // Explicit null entry
+  null: string; // Explicit null entry for unauthenticated users
 }
 
 /**

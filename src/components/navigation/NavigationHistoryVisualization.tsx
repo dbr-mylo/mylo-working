@@ -284,7 +284,7 @@ const NavigationHistoryVisualization: React.FC = () => {
                           </td>
                           <td className="p-2">
                             {event.success ? (
-                              <Badge variant="success" className="bg-green-100 text-green-800">Success</Badge>
+                              <Badge variant="secondary" className="bg-green-100 text-green-800">Success</Badge>
                             ) : (
                               <Badge variant="destructive">{event.failureReason || 'Failed'}</Badge>
                             )}

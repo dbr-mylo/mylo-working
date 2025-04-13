@@ -11,6 +11,7 @@ import {
   DesignerRoute, 
   WriterRoute 
 } from "./ProtectedRoutes";
+import NavigationAwareLayout from "@/components/layout/NavigationAwareLayout";
 
 // Page imports
 import Index from "@/pages/Index";
@@ -21,6 +22,7 @@ import Dashboard from "@/pages/Dashboard";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import HelpSupportPage from "@/pages/HelpSupportPage";
+import WriterDashboard from "@/components/dashboard/WriterDashboard";
 
 // Route imports
 import RegressionTestRoute from "@/routes/RegressionTestRoute";
@@ -32,6 +34,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminOverview } from "@/components/admin/pages/AdminOverview";
 import { SystemHealthPage } from "@/components/admin/pages/SystemHealthPage";
 import { RecoveryMetricsPage } from "@/components/admin/pages/RecoveryMetricsPage";
+import NavigationHistoryVisualization from "@/components/navigation/NavigationHistoryVisualization";
 
 // Role-specific page components
 const DesignerPages = () => {
@@ -70,39 +73,50 @@ const AppRoutes = () => {
   return (
     <ErrorBoundary context="AppRoutes" fallback={appErrorFallback}>
       <RouteValidator />
-      <Routes>
-        <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/home" element={<Navigate to="/" replace />} />
-        <Route path="/dashboard" element={<Navigate to="/" replace />} />
-        <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
-        <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-        <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-        
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-        <Route path="/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
-        
-        <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
-        <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
-        
-        <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
-        
-        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-          <Route index element={<AdminOverview />} />
-          <Route path="system-health" element={<SystemHealthPage />} />
-          <Route path="recovery-metrics" element={<RecoveryMetricsPage />} />
-          <Route path="users" element={<div>User Management (Coming Soon)</div>} />
-          <Route path="security" element={<div>Security Management (Coming Soon)</div>} />
-          <Route path="settings" element={<div>Admin Settings (Coming Soon)</div>} />
-        </Route>
-        
-        <Route path="/testing/regression" element={<RegressionTestRoute />} />
-        <Route path="/testing/smoke" element={<SmokeTestRoute />} />
-        
-        <Route path="/not-found" element={<NotFound />} />
-        <Route path="*" element={<Navigate to="/not-found" />} />
-      </Routes>
+      <NavigationAwareLayout>
+        <Routes>
+          <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
+          <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+          
+          {/* Writer routes */}
+          <Route path="/writer-dashboard" element={<WriterRoute><WriterDashboard /></WriterRoute>} />
+          <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
+          
+          {/* Designer routes */}
+          <Route path="/designer-dashboard" element={<DesignerRoute><div>Designer Dashboard</div></DesignerRoute>} />
+          <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
+          <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminOverview />} />
+            <Route path="system-health" element={<SystemHealthPage />} />
+            <Route path="recovery-metrics" element={<RecoveryMetricsPage />} />
+            <Route path="users" element={<div>User Management (Coming Soon)</div>} />
+            <Route path="security" element={<div>Security Management (Coming Soon)</div>} />
+            <Route path="settings" element={<div>Admin Settings (Coming Soon)</div>} />
+          </Route>
+          
+          {/* Navigation analytics */}
+          <Route path="/navigation/history" element={<AdminRoute><NavigationHistoryVisualization /></AdminRoute>} />
+          
+          {/* Testing */}
+          <Route path="/testing/regression" element={<RegressionTestRoute />} />
+          <Route path="/testing/smoke" element={<SmokeTestRoute />} />
+          
+          <Route path="/not-found" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/not-found" />} />
+        </Routes>
+      </NavigationAwareLayout>
     </ErrorBoundary>
   );
 };

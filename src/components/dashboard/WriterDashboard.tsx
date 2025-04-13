@@ -136,7 +136,7 @@ export const WriterDashboard: React.FC = () => {
                   document={{
                     id: doc.id,
                     title: doc.title,
-                    updatedAt: new Date(doc.updatedAt),
+                    updated_at: doc.updatedAt, // Changed from updatedAt to updated_at to match Document type
                     type: "document",
                     tags: [doc.category],
                     status: doc.status

@@ -10,7 +10,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>; // Alias for login
+  signOut: () => Promise<void>; // Alias for logout
+  signUp: (email: string, password: string) => Promise<void>; // New method for registration
   setRole: (role: UserRole) => void;
+  continueAsGuestWriter: (shouldNavigate?: boolean) => void;
+  continueAsGuestDesigner: (shouldNavigate?: boolean) => void;
+  continueAsGuestAdmin: (shouldNavigate?: boolean) => void;
+  continueAsGuestEditor: (shouldNavigate?: boolean) => void;
 }
 
 const defaultAuthContext: AuthContextType = {
@@ -21,7 +28,14 @@ const defaultAuthContext: AuthContextType = {
   isAuthenticated: false,
   login: async () => {},
   logout: async () => {},
-  setRole: () => {}
+  signIn: async () => {}, // Alias for login
+  signOut: async () => {}, // Alias for logout
+  signUp: async () => {}, // Registration
+  setRole: () => {},
+  continueAsGuestWriter: () => {},
+  continueAsGuestDesigner: () => {},
+  continueAsGuestAdmin: () => {},
+  continueAsGuestEditor: () => {}
 };
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
@@ -86,6 +100,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem("userRole");
     }
   };
+
+  // Registration method
+  const signUp = async (email: string, password: string) => {
+    // For testing, just use the same logic as login
+    await login(email, password);
+  };
+
+  // Guest role methods - these set the role without requiring authentication
+  const continueAsGuestWriter = (shouldNavigate: boolean = true) => {
+    setRole("writer");
+  };
+
+  const continueAsGuestDesigner = (shouldNavigate: boolean = true) => {
+    setRole("designer");
+  };
+
+  const continueAsGuestAdmin = (shouldNavigate: boolean = true) => {
+    setRole("admin");
+  };
+
+  const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
+    setRole("editor");
+  };
   
   const value = {
     user,
@@ -95,7 +132,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     login,
     logout,
-    setRole
+    signIn: login, // Alias for login
+    signOut: logout, // Alias for logout
+    signUp,
+    setRole,
+    continueAsGuestWriter,
+    continueAsGuestDesigner,
+    continueAsGuestAdmin,
+    continueAsGuestEditor
   };
   
   return (

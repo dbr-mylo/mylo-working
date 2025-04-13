@@ -146,3 +146,51 @@ export interface RouteConfig {
     alternatives?: string[];
   };
 }
+
+/**
+ * Route group definition
+ */
+export interface RouteGroupDefinition {
+  name: string;
+  id: RouteGroup;
+  description: string;
+  priority?: number;
+  icon?: string;
+}
+
+/**
+ * Navigation metrics data
+ */
+export interface NavigationMetrics {
+  avgLoadTime: number;
+  errorRate: number;
+  mostVisited: { path: string; count: number }[];
+  pageVisits: Record<string, number>;
+  roleMetrics: Record<string, {
+    visitCount: number;
+    timeSpent: number;
+    uniquePaths: number;
+  }>;
+}
+
+/**
+ * Navigation cookie options
+ */
+export interface NavigationCookieOptions {
+  maxAge?: number;
+  path?: string;
+  secure?: boolean;
+  sameSite?: 'strict' | 'lax' | 'none';
+}
+
+/**
+ * Route test result
+ */
+export interface RouteTestResult {
+  path: string;
+  rolesTested: UserRole[];
+  passed: boolean;
+  errorType?: NavigationErrorType;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}

@@ -136,10 +136,13 @@ export const WriterDashboard: React.FC = () => {
                   document={{
                     id: doc.id,
                     title: doc.title,
-                    updated_at: doc.updatedAt, // Changed from updatedAt to updated_at to match Document type
-                    type: "document",
-                    tags: [doc.category],
-                    status: doc.status
+                    updated_at: doc.updatedAt,
+                    content: "", // Adding required property for Document type
+                    status: doc.status,
+                    meta: { // Use meta for additional properties
+                      tags: [doc.category],
+                      category: doc.category,
+                    }
                   }}
                   onClick={() => navigateTo(`/editor/${doc.id}`)}
                 />

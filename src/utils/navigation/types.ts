@@ -1,3 +1,4 @@
+
 import { routeGroups, type RouteGroupType } from './config/routeGroups';
 
 /**
@@ -49,8 +50,11 @@ export interface RelatedRoute {
 
 /**
  * Role to route mapping
+ * Using Record utility type with string index signature to allow for null value
  */
-export type RoleRouteMap = Record<UserRole, string>;
+export type RoleRouteMap = {
+  [K in UserRole]: string;
+};
 
 /**
  * Navigation validation error

@@ -54,9 +54,7 @@ export interface RelatedRoute {
  * Role to route mapping
  * Explicitly allows null key for unauthenticated users
  */
-export type RoleRouteMap = {
-  [K in UserRole | null]: string;
-};
+export type RoleRouteMap = Record<UserRole | null, string>;
 
 /**
  * Navigation validation error

@@ -19,7 +19,7 @@ export { RouteValidator } from './validation/RouteValidator';
 export { NavigationErrorHandler } from './errors/NavigationErrorHandler';
 
 // Export types
-export { 
+export type { 
   NavigationError, 
   NavigationErrorType,
   NavigationEvent,

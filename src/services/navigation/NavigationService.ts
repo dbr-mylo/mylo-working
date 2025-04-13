@@ -7,6 +7,7 @@ import {
 import { NavigationServiceCore } from './core/NavigationServiceCore';
 import { RouteValidator } from './validation/RouteValidator';
 import { NavigationErrorHandler } from './errors/NavigationErrorHandler';
+import { NavigationEvent } from '@/utils/navigation/types';
 
 /**
  * Navigation Service

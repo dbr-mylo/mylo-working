@@ -1,4 +1,3 @@
-
 /**
  * Route validation utility
  * 
@@ -6,38 +5,42 @@
  * inconsistencies or navigation issues.
  */
 
-import { validRoutes } from './routeConfig';
-import { NavigationEvent } from './types';
+import { validRoutes } from './config/routeDefinitions';
 
 /**
- * Check if the path exists in the validRoutes configuration
- * @param path Path to validate
+ * Check if a route exists in the route configuration
+ * @param path The route path to check
+ * @returns Boolean indicating if the route exists
  */
 export const doesRouteExist = (path: string): boolean => {
-  // Handle exact matches
+  // Check for exact route match
   if (validRoutes.some(route => route.path === path)) {
     return true;
   }
   
-  // Handle dynamic routes with parameters
-  const dynamicRoutes = validRoutes.filter(route => route.path.includes(':'));
+  // Check for dynamic routes with parameters
+  const pathParts = path.split('/');
   
-  for (const dynamicRoute of dynamicRoutes) {
-    const routeParts = dynamicRoute.path.split('/');
-    const pathParts = path.split('/');
+  for (const route of validRoutes) {
+    if (!route.path.includes(':')) continue;
     
+    const routeParts = route.path.split('/');
     if (routeParts.length !== pathParts.length) continue;
     
     let isMatch = true;
     for (let i = 0; i < routeParts.length; i++) {
+      // If this part is a parameter, it matches anything
       if (routeParts[i].startsWith(':')) continue;
+      // Otherwise parts must match exactly
       if (routeParts[i] !== pathParts[i]) {
         isMatch = false;
         break;
       }
     }
     
-    if (isMatch) return true;
+    if (isMatch) {
+      return true;
+    }
   }
   
   return false;

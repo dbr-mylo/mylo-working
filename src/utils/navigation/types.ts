@@ -77,3 +77,15 @@ export interface NavigationError {
 export interface RoleRouteMap {
   [key: string]: string; // role -> default route
 }
+
+/**
+ * Route validation error information
+ */
+export interface RouteValidationError {
+  path: string;
+  type: string;
+  message: string;
+  timestamp: string;
+  details?: Record<string, unknown>;
+}
+

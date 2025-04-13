@@ -1,15 +1,12 @@
+
 import { 
   UserRole,
   NavigationError, 
-  NavigationErrorType, 
-  NavigationEvent 
+  NavigationErrorType
 } from '@/utils/navigation/types';
-import { 
-  validRoutes,
-  getDefaultRouteForRole,
-  getFallbackRouteForRole
-} from '@/utils/navigation/routeConfig';
-import { toast } from 'sonner';
+import { NavigationServiceCore } from './core/NavigationServiceCore';
+import { RouteValidator } from './validation/RouteValidator';
+import { NavigationErrorHandler } from './errors/NavigationErrorHandler';
 
 /**
  * Navigation Service
@@ -19,7 +16,18 @@ import { toast } from 'sonner';
  */
 export class NavigationService {
   private static instance: NavigationService;
-  private navigationHistory: NavigationEvent[] = [];
+  private core: NavigationServiceCore;
+  private validator: RouteValidator;
+  private errorHandler: NavigationErrorHandler;
+  
+  /**
+   * Create a new NavigationService instance
+   */
+  constructor() {
+    this.core = new NavigationServiceCore();
+    this.validator = new RouteValidator();
+    this.errorHandler = new NavigationErrorHandler();
+  }
   
   /**
    * Get the singleton instance of NavigationService
@@ -38,55 +46,7 @@ export class NavigationService {
    * @returns Boolean indicating if route is valid
    */
   public validateRoute(path: string, role: UserRole): boolean {
-    // Special case for 404 page
-    if (path === '/not-found') {
-      return true;
-    }
-    
-    // Check for exact route match
-    for (const route of validRoutes) {
-      if (route.path === path) {
-        // If the route has role requirements, check them
-        if (route.requiredRole && role) {
-          return route.requiredRole.includes(role);
-        }
-        // No role requirements means anyone can access
-        return true;
-      }
-    }
-    
-    // Check for dynamic routes with parameters
-    const pathParts = path.split('/');
-    
-    for (const route of validRoutes) {
-      if (!route.path.includes(':')) continue;
-      
-      const routeParts = route.path.split('/');
-      if (routeParts.length !== pathParts.length) continue;
-      
-      let isMatch = true;
-      for (let i = 0; i < routeParts.length; i++) {
-        // If this part is a parameter, it matches anything
-        if (routeParts[i].startsWith(':')) continue;
-        // Otherwise parts must match exactly
-        if (routeParts[i] !== pathParts[i]) {
-          isMatch = false;
-          break;
-        }
-      }
-      
-      if (isMatch) {
-        // If the matched route has role requirements, check them
-        if (route.requiredRole && role) {
-          return route.requiredRole.includes(role);
-        }
-        // No role requirements means anyone can access
-        return true;
-      }
-    }
-    
-    // No match found
-    return false;
+    return this.validator.validateRoute(path, role);
   }
   
   /**
@@ -95,7 +55,7 @@ export class NavigationService {
    * @returns Default route path
    */
   public getDefaultRoute(role: UserRole): string {
-    return getDefaultRouteForRole(role);
+    return this.core.getDefaultRoute(role);
   }
   
   /**
@@ -104,7 +64,7 @@ export class NavigationService {
    * @returns Fallback route path
    */
   public getFallbackRoute(role: UserRole): string {
-    return getFallbackRouteForRole(role);
+    return this.core.getFallbackRoute(role);
   }
   
   /**
@@ -122,26 +82,7 @@ export class NavigationService {
     role?: UserRole,
     failureReason?: string
   ): void {
-    const event: NavigationEvent = {
-      from,
-      to,
-      success,
-      timestamp: new Date().toISOString(),
-      userRole: role,
-      failureReason
-    };
-    
-    this.navigationHistory.push(event);
-    
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `Navigation: ${from} → ${to} (${success ? 'success' : 'failed'}${failureReason ? `: ${failureReason}` : ''})`
-      );
-    }
-    
-    // In production, this would send to analytics service
-    // analyticsService.trackNavigation(event);
+    this.core.logNavigationEvent(from, to, success, role, failureReason);
   }
   
   /**
@@ -149,38 +90,7 @@ export class NavigationService {
    * @param error Navigation error
    */
   public handleNavigationError(error: NavigationError): void {
-    // Log the error
-    console.error('Navigation Error:', error);
-    
-    // Show toast notification with appropriate message
-    switch (error.type) {
-      case NavigationErrorType.UNAUTHORIZED:
-        toast.error("Access Denied", {
-          description: "You don't have permission to access this page",
-          duration: 3000,
-        });
-        break;
-      
-      case NavigationErrorType.NOT_FOUND:
-        toast.error("Page Not Found", {
-          description: `The page "${error.path}" does not exist`,
-          duration: 3000,
-        });
-        break;
-      
-      case NavigationErrorType.VALIDATION_ERROR:
-        toast.error("Navigation Error", {
-          description: error.message || "Invalid navigation request",
-          duration: 3000,
-        });
-        break;
-      
-      default:
-        toast.error("Navigation Error", {
-          description: "There was a problem navigating to the requested page",
-          duration: 3000,
-        });
-    }
+    this.errorHandler.handleNavigationError(error);
   }
   
   /**
@@ -188,14 +98,14 @@ export class NavigationService {
    * @returns Array of navigation events
    */
   public getNavigationHistory(): NavigationEvent[] {
-    return [...this.navigationHistory];
+    return this.core.getNavigationHistory();
   }
   
   /**
    * Clear navigation history
    */
   public clearNavigationHistory(): void {
-    this.navigationHistory = [];
+    this.core.clearNavigationHistory();
   }
 }
 

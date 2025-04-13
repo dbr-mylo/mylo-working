@@ -6,6 +6,7 @@
  */
 
 import { validRoutes } from './config/routeDefinitions';
+import { NavigationEvent } from '@/utils/navigation/types';
 
 /**
  * Check if a route exists in the route configuration

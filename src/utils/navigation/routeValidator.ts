@@ -1,210 +1,98 @@
 
-/**
- * Route validation utility
- * 
- * This module provides tools to validate route configurations and identify
- * inconsistencies or navigation issues.
- */
-
-import { validRoutes } from './config/routeDefinitions';
-import { NavigationEvent, RouteValidationError } from '@/utils/navigation/types';
+import { UserRole, RouteValidationError } from '@/utils/navigation/types';
+import { validRoutes } from './routeConfig';
 
 /**
- * Error types specific to route validation
- */
-export enum RouteValidationErrorType {
-  INVALID_PATH = 'invalid_path',
-  MALFORMED_PATH = 'malformed_path',
-  PARAMETER_MISMATCH = 'parameter_mismatch',
-  VALIDATION_FAILED = 'validation_failed'
-}
-
-/**
- * Check if a route exists in the route configuration
- * @param path The route path to check
+ * Check if a route exists in the application
+ * @param path Path to check
  * @returns Boolean indicating if the route exists
- * @throws {Error} If path is not a string
  */
 export const doesRouteExist = (path: string): boolean => {
-  // Input validation
-  if (typeof path !== 'string') {
-    throw new Error(`Invalid path: expected string but got ${typeof path}`);
-  }
-
-  if (path.trim() === '') {
-    console.warn('Empty path provided to doesRouteExist');
-    return false;
-  }
+  // Direct match
+  const exactMatch = validRoutes.some(route => route.path === path);
+  if (exactMatch) return true;
   
-  // Check for exact route match
-  if (validRoutes.some(route => route.path === path)) {
+  // Dynamic route match (with parameters)
+  const pathSegments = path.split('/');
+  
+  return validRoutes.some(route => {
+    if (!route.path.includes(':')) return false;
+    
+    const routeSegments = route.path.split('/');
+    if (routeSegments.length !== pathSegments.length) return false;
+    
+    // Compare each segment, allowing parameters to match anything
+    for (let i = 0; i < routeSegments.length; i++) {
+      if (routeSegments[i].startsWith(':')) continue; // Parameter matches anything
+      if (routeSegments[i] !== pathSegments[i]) return false;
+    }
+    
+    return true;
+  });
+};
+
+/**
+ * Check if a route is accessible for a specific user role
+ * @param path Route path
+ * @param role User role
+ * @returns Boolean indicating if the route is accessible
+ */
+export const isRouteAccessibleForRole = (path: string, role: UserRole): boolean => {
+  // Special case for error pages
+  if (path === '/not-found' || path === '/unauthorized' || path === '/error') {
     return true;
   }
   
-  // Check for dynamic routes with parameters
-  const pathParts = path.split('/');
-  
-  for (const route of validRoutes) {
-    if (!route.path.includes(':')) continue;
+  // Find matching route
+  const route = validRoutes.find(r => {
+    // Exact match
+    if (r.path === path) return true;
     
-    const routeParts = route.path.split('/');
-    if (routeParts.length !== pathParts.length) continue;
+    // Dynamic route match
+    if (!r.path.includes(':')) return false;
     
-    let isMatch = true;
-    for (let i = 0; i < routeParts.length; i++) {
-      // If this part is a parameter, it matches anything
-      if (routeParts[i].startsWith(':')) continue;
-      // Otherwise parts must match exactly
-      if (routeParts[i] !== pathParts[i]) {
-        isMatch = false;
-        break;
-      }
+    const routeSegments = r.path.split('/');
+    const pathSegments = path.split('/');
+    
+    if (routeSegments.length !== pathSegments.length) return false;
+    
+    for (let i = 0; i < routeSegments.length; i++) {
+      if (routeSegments[i].startsWith(':')) continue;
+      if (routeSegments[i] !== pathSegments[i]) return false;
     }
     
-    if (isMatch) {
-      return true;
-    }
-  }
-  
-  return false;
-};
-
-/**
- * Get information about navigation failures
- * @param events Navigation events
- * @returns Array of failed navigation events
- * @throws {Error} If events parameter is not an array
- */
-export const getNavigationFailures = (events: NavigationEvent[]): NavigationEvent[] => {
-  // Input validation
-  if (!Array.isArray(events)) {
-    throw new Error(`Invalid events: expected array but got ${typeof events}`);
-  }
-  
-  return events.filter(event => !event.success);
-};
-
-/**
- * Find patterns in failed navigations to identify systemic issues
- * @param events Navigation events
- * @returns Record mapping destination paths to failure count
- * @throws {Error} If events parameter is not an array
- */
-export const analyzeNavigationFailures = (events: NavigationEvent[]): Record<string, number> => {
-  // Input validation
-  if (!Array.isArray(events)) {
-    throw new Error(`Invalid events: expected array but got ${typeof events}`);
-  }
-
-  const failures = getNavigationFailures(events);
-  const patterns: Record<string, number> = {};
-  
-  failures.forEach(failure => {
-    if (!patterns[failure.to]) {
-      patterns[failure.to] = 0;
-    }
-    patterns[failure.to]++;
+    return true;
   });
   
-  return patterns;
+  if (!route) return false;
+  
+  // Admin can access everything
+  if (role === 'admin') return true;
+  
+  // If the route has role requirements
+  if (route.requiredRole && role) {
+    return route.requiredRole.includes(role);
+  }
+  
+  // Public routes are accessible to everyone
+  if (route.accessLevel === 'public') return true;
+  
+  // Protected routes require authentication
+  return role !== null;
 };
 
 /**
- * Check a list of navigation paths against valid routes
- * @param paths Array of paths to check
- * @returns Object containing valid and invalid paths
- * @throws {Error} If paths parameter is not an array
+ * Generate a validation error for access issues
+ * @param path Path that was requested
+ * @param role User role
+ * @returns Validation error object
  */
-export const validateNavigationPaths = (paths: string[]): { 
-  valid: string[], 
-  invalid: string[],
-  validationErrors?: Record<string, RouteValidationErrorType>
-} => {
-  // Input validation
-  if (!Array.isArray(paths)) {
-    throw new Error(`Invalid paths: expected array but got ${typeof paths}`);
-  }
-
-  const valid: string[] = [];
-  const invalid: string[] = [];
-  const validationErrors: Record<string, RouteValidationErrorType> = {};
-  
-  paths.forEach(path => {
-    try {
-      if (doesRouteExist(path)) {
-        valid.push(path);
-      } else {
-        invalid.push(path);
-        validationErrors[path] = RouteValidationErrorType.INVALID_PATH;
-      }
-    } catch (error) {
-      invalid.push(path);
-      validationErrors[path] = RouteValidationErrorType.MALFORMED_PATH;
-      console.error(`Route validation error for path "${path}":`, error);
-    }
-  });
-  
-  return { valid, invalid, validationErrors };
-};
-
-/**
- * Checks if a path matches a dynamic route pattern and extracts parameters
- * @param path The actual path to check
- * @param routePattern The route pattern to match against
- * @returns Object with match status and extracted parameters
- */
-export const extractRouteParameters = (
-  path: string, 
-  routePattern: string
-): { isMatch: boolean; params: Record<string, string> } => {
-  const params: Record<string, string> = {};
-  
-  if (!path || !routePattern) {
-    return { isMatch: false, params };
-  }
-  
-  const pathParts = path.split('/');
-  const routeParts = routePattern.split('/');
-  
-  if (pathParts.length !== routeParts.length) {
-    return { isMatch: false, params };
-  }
-  
-  let isMatch = true;
-  
-  for (let i = 0; i < routeParts.length; i++) {
-    // Extract parameter
-    if (routeParts[i].startsWith(':')) {
-      const paramName = routeParts[i].substring(1);
-      params[paramName] = pathParts[i];
-      continue;
-    }
-    
-    // Match static parts
-    if (routeParts[i] !== pathParts[i]) {
-      isMatch = false;
-      break;
-    }
-  }
-  
-  return { isMatch, params };
-};
-
-/**
- * Logs route validation errors for analytics and monitoring
- * @param path The path that failed validation
- * @param errorType The type of validation error
- * @param details Additional error details
- */
-export const logRouteValidationError = (
-  path: string,
-  errorType: RouteValidationErrorType,
-  details?: string
-): void => {
-  console.error(
-    `Route validation error [${errorType}] for path "${path}"${details ? ': ' + details : ''}`
-  );
-  
-  // In a production environment, this would send the error to an analytics or monitoring service
-  // Example: analyticsService.trackError('route_validation', { path, errorType, details });
+export const generateRouteValidationError = (path: string, role: UserRole): RouteValidationError => {
+  return {
+    path,
+    role,
+    message: `User with role ${role || 'unauthenticated'} does not have permission to access ${path}`,
+    code: 'ROUTE_ACCESS_DENIED',
+    timestamp: new Date().toISOString()
+  };
 };

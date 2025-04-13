@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { UserRole } from "@/utils/navigation/types";
+import { UserRole } from "@/utils/navigation/types"; // Import from utils/navigation/types
 
 interface AuthContextType {
   user: any | null;

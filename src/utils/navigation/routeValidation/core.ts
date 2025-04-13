@@ -1,7 +1,7 @@
 
 import { validRoutes } from '../routeConfig';
 import { navigationService } from '@/services/navigation/NavigationService';
-import { UserRole } from '@/lib/types';
+import { UserRole } from '@/utils/navigation/types';
 
 /**
  * Validates if a route is valid for the application
@@ -9,8 +9,8 @@ import { UserRole } from '@/lib/types';
  * @param userRole - The current user's role
  * @returns Boolean indicating if the route is valid
  */
-export const isValidRoute = (path: string, userRole?: string | null): boolean => {
-  return navigationService.validateRoute(path, userRole as UserRole);
+export const isValidRoute = (path: string, userRole?: UserRole): boolean => {
+  return navigationService.validateRoute(path, userRole);
 };
 
 /**
@@ -39,7 +39,7 @@ export const isDevelopmentEnvironment = (): boolean => {
  * @param userRole - The current user's role
  * @returns Boolean indicating if access is allowed
  */
-export const canAccessTestingRoute = (path: string, userRole?: string | null): boolean => {
+export const canAccessTestingRoute = (path: string, userRole?: UserRole): boolean => {
   // Always allow in development for easier debugging
   if (isDevelopmentEnvironment()) {
     return true;

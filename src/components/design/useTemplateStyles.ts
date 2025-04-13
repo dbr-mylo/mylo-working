@@ -7,7 +7,7 @@ import { templateStore } from "@/stores/templateStore";
 export const useTemplateStyles = (templateId?: string, initialStyles: string = "") => {
   const { role } = useAuth();
   const { toast } = useToast();
-  const isEditor = role === "writer" || role === "editor"; // Support both writer and editor roles
+  const isEditor = role === "writer" || role === "editor" || role === "admin"; // Support writer, editor and admin roles
   const [customStyles, setCustomStyles] = useState<string>(initialStyles);
   
   useEffect(() => {

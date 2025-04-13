@@ -76,12 +76,18 @@ export const getSidebarRoutesForParent = (parentPath: string, role: UserRole): R
  * @returns Array of route permissions with role access details
  */
 export const generateRolePermissionMatrix = (): RoutePermission[] => {
-  const allRoles: UserRole[] = ['admin', 'designer', 'writer', 'editor'];
+  const allRoles: UserRole[] = ['admin', 'designer', 'writer', 'editor', null];
   
   return validRoutes.map(route => {
     const roles: Record<UserRole, boolean> = {} as Record<UserRole, boolean>;
     
     allRoles.forEach(role => {
+      if (role === null) {
+        // Null role (unauthenticated) can only access public routes
+        roles[role] = route.accessLevel === 'public';
+        return;
+      }
+      
       // Admin has access to everything
       if (role === 'admin') {
         roles[role] = true;
@@ -96,9 +102,6 @@ export const generateRolePermissionMatrix = (): RoutePermission[] => {
         roles[role] = route.requiredRole.includes(role);
       }
     });
-    
-    // Null role (unauthenticated) can only access public routes
-    roles['null'] = route.accessLevel === 'public';
     
     return {
       path: route.path,

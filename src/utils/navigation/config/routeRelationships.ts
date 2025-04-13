@@ -1,119 +1,100 @@
 
-import { RelatedRoute, RouteConfig } from '../types';
-import { validRoutes } from './routeDefinitions';
-import { getChildRoutes, getParentRoute } from './routeUtils';
+import { RouteConfig } from "../types";
 
 /**
- * Build a complete route relationship map
- * This creates a map of relationships between routes for navigation and breadcrumbs
- * @returns Map of route paths to their related routes
+ * Get all related routes for a specific route
+ * @param route Route to get relationships for
+ * @returns Object containing different route relationships
  */
-export const buildRouteRelationshipMap = (): Record<string, RelatedRoute[]> => {
-  const relationshipMap: Record<string, RelatedRoute[]> = {};
-  
-  validRoutes.forEach(route => {
-    const relationships: RelatedRoute[] = [];
-    
-    // Add parent relationship if exists
-    const parentRoute = getParentRoute(route.path);
-    if (parentRoute) {
-      relationships.push({
-        path: parentRoute.path,
-        relationship: 'parent',
-        description: parentRoute.description
-      });
-    }
-    
-    // Add child relationships
-    const children = getChildRoutes(route.path);
-    children.forEach(child => {
-      relationships.push({
-        path: child.path,
-        relationship: 'child',
-        description: child.description
-      });
-    });
-    
-    // Add siblings (other routes with same parent)
-    if (parentRoute) {
-      const siblings = getChildRoutes(parentRoute.path);
-      siblings
-        .filter(sibling => sibling.path !== route.path)
-        .forEach(sibling => {
-          relationships.push({
-            path: sibling.path,
-            relationship: 'sibling',
-            description: sibling.description
-          });
-        });
-    }
-    
-    // Add alternatives (routes with similar purpose for different roles)
-    if (route.metadata?.alternatives) {
-      const alternatives = Array.isArray(route.metadata.alternatives) 
-        ? route.metadata.alternatives 
-        : [route.metadata.alternatives as string];
-      
-      alternatives.forEach(altPath => {
-        const altRoute = validRoutes.find(r => r.path === altPath);
-        if (altRoute) {
-          relationships.push({
-            path: altRoute.path,
-            relationship: 'alternative',
-            description: altRoute.description
-          });
-        }
-      });
-    }
-    
-    // Store the relationships
-    relationshipMap[route.path] = relationships;
-  });
-  
-  return relationshipMap;
+export const getRouteRelationships = (route: RouteConfig) => {
+  return {
+    parents: getParentRoutes(route),
+    children: getChildRoutes(route),
+    siblings: getSiblingRoutes(route),
+    alternatives: getAlternativeRoutes(route)
+  };
 };
 
 /**
- * Get related routes for a specific path
- * @param path Route path
- * @param relationshipType Optional type to filter by
- * @returns Array of related routes
+ * Get parent routes for a specific route
+ * @param route Route to get parent for
+ * @returns Array of parent routes
  */
-export const getRelatedRoutes = (
-  path: string, 
-  relationshipType?: 'parent' | 'child' | 'sibling' | 'alternative'
-): RelatedRoute[] => {
-  const allRelationships = buildRouteRelationshipMap();
-  const relationships = allRelationships[path] || [];
+export const getParentRoutes = (route: RouteConfig): RouteConfig[] => {
+  if (!route.metadata?.parentPath) return [];
   
-  if (relationshipType) {
-    return relationships.filter(rel => rel.relationship === relationshipType);
-  }
-  
-  return relationships;
+  // Implementation depends on how routes are stored
+  // For now, this is a placeholder
+  return [];
 };
 
 /**
- * Build breadcrumb trail for a route
- * @param path Current route path
- * @returns Array of routes representing breadcrumb trail
+ * Get child routes for a specific route
+ * @param route Route to get children for
+ * @returns Array of child routes
  */
-export const getBreadcrumbTrail = (path: string): RouteConfig[] => {
-  const breadcrumbs: RouteConfig[] = [];
-  let currentPath = path;
+export const getChildRoutes = (route: RouteConfig): RouteConfig[] => {
+  // Implementation depends on how routes are stored
+  // For now, this is a placeholder
+  return [];
+};
+
+/**
+ * Get sibling routes for a specific route
+ * @param route Route to get siblings for
+ * @returns Array of sibling routes
+ */
+export const getSiblingRoutes = (route: RouteConfig): RouteConfig[] => {
+  if (!route.metadata?.parentPath) return [];
   
-  // Add current route
-  const currentRoute = validRoutes.find(route => route.path === currentPath);
-  if (!currentRoute) return breadcrumbs;
+  // Implementation depends on how routes are stored
+  // For now, this is a placeholder
+  return [];
+};
+
+/**
+ * Get alternative routes for a specific route
+ * @param route Route to get alternatives for
+ * @returns Array of alternative routes
+ */
+export const getAlternativeRoutes = (route: RouteConfig): RouteConfig[] => {
+  if (!route.metadata?.alternatives || route.metadata.alternatives.length === 0) return [];
   
-  breadcrumbs.push(currentRoute);
+  // Implementation depends on how alternatives are stored
+  // For now, this is a placeholder
+  return [];
+};
+
+/**
+ * Check if two routes are related
+ * @param routeA First route
+ * @param routeB Second route
+ * @returns Boolean indicating if routes are related
+ */
+export const areRoutesRelated = (routeA: RouteConfig, routeB: RouteConfig): boolean => {
+  // Routes are related if:
+  // 1. One is a parent of the other
+  // 2. They are siblings (share same parent)
+  // 3. One is an alternative of the other
   
-  // Build trail by traversing parents
-  let parentRoute = getParentRoute(currentPath);
-  while (parentRoute) {
-    breadcrumbs.unshift(parentRoute);
-    parentRoute = getParentRoute(parentRoute.path);
+  // Check parent-child relationship
+  if (routeA.metadata?.parentPath === routeB.path || 
+      routeB.metadata?.parentPath === routeA.path) {
+    return true;
   }
   
-  return breadcrumbs;
+  // Check if siblings
+  if (routeA.metadata?.parentPath && 
+      routeB.metadata?.parentPath && 
+      routeA.metadata.parentPath === routeB.metadata.parentPath) {
+    return true;
+  }
+  
+  // Check if alternatives
+  if (routeA.metadata?.alternatives?.includes(routeB.path) || 
+      routeB.metadata?.alternatives?.includes(routeA.path)) {
+    return true;
+  }
+  
+  return false;
 };

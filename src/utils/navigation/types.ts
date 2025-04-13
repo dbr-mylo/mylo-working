@@ -1,10 +1,9 @@
-
 import { routeGroups, type RouteGroupType } from './config/routeGroups';
 
 /**
  * User role
  */
-export type UserRole = 'admin' | 'designer' | 'writer' | null;
+export type UserRole = 'admin' | 'designer' | 'writer' | 'editor' | null;
 
 /**
  * Navigation error types
@@ -27,31 +26,41 @@ export type AccessLevel = 'public' | 'protected' | 'role-specific' | 'admin-only
 export type Importance = 'critical' | 'high' | 'medium' | 'low';
 
 /**
- * Route configuration interface
+ * Route group type
  */
-export interface RouteConfig {
+export type RouteGroup = 'dashboard' | 'content' | 'design' | 'admin' | 'user' | 'testing';
+
+/**
+ * Route permission mapping
+ */
+export interface RoutePermission {
   path: string;
-  description: string;
-  requiredRole?: UserRole[];
-  defaultForRole?: UserRole[];
-  params?: string[];
-  fallbackRoute?: string;
-  parentRoute?: string;
-  group: RouteGroupType;
+  roles: Record<UserRole, boolean>;
   accessLevel: AccessLevel;
-  importance?: Importance;
-  trackAdvancedMetrics?: boolean;
-  metadata?: {
-    showInNavigation?: boolean;
-    showInSidebar?: boolean;
-    parentPath?: string;
-    icon?: string;
-    isRedirect?: boolean;
-    requiresAuth?: boolean;
-    isAuthEntry?: boolean;
-    dynamicRoute?: boolean;
-    isErrorPage?: boolean;
-  };
+}
+
+/**
+ * Related route definition
+ */
+export interface RelatedRoute {
+  path: string;
+  relationship: 'parent' | 'child' | 'sibling' | 'alternative';
+}
+
+/**
+ * Role to route mapping
+ */
+export type RoleRouteMap = Record<UserRole, string>;
+
+/**
+ * Navigation validation error
+ */
+export interface RouteValidationError {
+  path: string;
+  role: UserRole;
+  message: string;
+  code: string;
+  timestamp: string;
 }
 
 /**
@@ -100,4 +109,33 @@ export interface DeepLinkDefinition {
   query?: Record<string, string>;
   title?: string;
   description?: string;
+}
+
+/**
+ * Route configuration interface
+ */
+export interface RouteConfig {
+  path: string;
+  description: string;
+  requiredRole?: UserRole[];
+  defaultForRole?: UserRole[];
+  params?: string[];
+  fallbackRoute?: string;
+  parentRoute?: string;
+  group: RouteGroup;
+  accessLevel: AccessLevel;
+  importance?: Importance;
+  trackAdvancedMetrics?: boolean;
+  metadata?: {
+    showInNavigation?: boolean;
+    showInSidebar?: boolean;
+    parentPath?: string;
+    icon?: string;
+    isRedirect?: boolean;
+    requiresAuth?: boolean;
+    isAuthEntry?: boolean;
+    dynamicRoute?: boolean;
+    isErrorPage?: boolean;
+    alternatives?: string[];
+  };
 }

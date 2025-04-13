@@ -1,8 +1,12 @@
+
 import { UserRole } from '@/lib/types';
 
 /**
  * Navigation types module
  */
+
+// Re-export UserRole for compatibility with existing imports
+export { UserRole };
 
 /**
  * Navigation error types

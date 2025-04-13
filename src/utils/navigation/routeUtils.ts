@@ -1,39 +1,101 @@
 
+import { UserRole, RouteConfig, RoutePermission, RouteGroup } from './types';
 import { validRoutes } from './config/routeDefinitions';
 
 /**
- * Extract path parameters from a URL path
- * @param definedPath - Route path with parameters (e.g., "/user/:id")
- * @param actualPath - Actual path with values (e.g., "/user/123")
- * @returns Object with extracted parameters or null if paths don't match
+ * Check if a route exists in the application
+ * @param path Route path to check
+ * @returns Boolean indicating if the route exists
+ */
+export const routeExists = (path: string): boolean => {
+  return validRoutes.some(route => route.path === path);
+};
+
+/**
+ * Get route metadata for a specific path
+ * @param path Route path to get metadata for
+ * @returns Route configuration or null if not found
+ */
+export const getRouteConfig = (path: string): RouteConfig | null => {
+  return validRoutes.find(route => route.path === path) || null;
+};
+
+/**
+ * Get route description for a specific path
+ * @param path Route path to get description for
+ * @returns Route description or the path if not found
+ */
+export const getPathDescription = (path: string): string => {
+  const route = getRouteConfig(path);
+  return route ? route.description : path;
+};
+
+/**
+ * Get default route for a specific role
+ * @param role User role
+ * @returns Default route for the role
+ */
+export const getDefaultRouteForRole = (role: UserRole | null): string => {
+  if (!role) {
+    return "/auth";
+  }
+  
+  // Find a route with this role as defaultForRole
+  const defaultRoute = validRoutes.find(route => 
+    route.defaultForRole && route.defaultForRole.includes(role)
+  );
+  
+  // Return the default if found, otherwise fallback to home
+  return defaultRoute ? defaultRoute.path : "/";
+};
+
+/**
+ * Get fallback route for a specific role
+ * @param role User role
+ * @returns Fallback route for the role
+ */
+export const getFallbackRouteForRole = (role: UserRole | null): string => {
+  if (!role) {
+    return "/auth";
+  }
+  
+  // Use role defaults as fallback
+  return getDefaultRouteForRole(role);
+};
+
+/**
+ * Extract path parameters from a route definition and actual path
+ * @param definedPath Route definition with parameters (e.g., /user/:id)
+ * @param actualPath Actual path with values (e.g., /user/123)
+ * @returns Object with parameter values or null if paths don't match
  */
 export const extractPathParameters = (
-  definedPath: string,
+  definedPath: string, 
   actualPath: string
 ): Record<string, string> | null => {
   // Split paths into segments
   const definedSegments = definedPath.split('/').filter(Boolean);
   const actualSegments = actualPath.split('/').filter(Boolean);
   
-  // If different number of segments, paths don't match
+  // If segment counts don't match, paths don't match
   if (definedSegments.length !== actualSegments.length) {
     return null;
   }
   
   const params: Record<string, string> = {};
   
-  // Compare each segment
+  // Compare segments and extract parameters
   for (let i = 0; i < definedSegments.length; i++) {
-    const definedSeg = definedSegments[i];
-    const actualSeg = actualSegments[i];
+    const definedSegment = definedSegments[i];
+    const actualSegment = actualSegments[i];
     
-    // If this is a parameter segment (starts with :)
-    if (definedSeg.startsWith(':')) {
-      const paramName = definedSeg.slice(1); // Remove the colon
-      params[paramName] = actualSeg;
+    // Check if this is a parameter segment
+    if (definedSegment.startsWith(':')) {
+      const paramName = definedSegment.substring(1);
+      params[paramName] = actualSegment;
     } 
-    // If segments don't match and it's not a parameter
-    else if (definedSeg !== actualSeg) {
+    // If not a parameter, segments must match
+    else if (definedSegment !== actualSegment) {
       return null;
     }
   }
@@ -42,17 +104,13 @@ export const extractPathParameters = (
 };
 
 /**
- * Parse query parameters from a URL search string
- * @param search - Query string (e.g., "?name=john&age=25")
- * @returns Object with parsed query parameters
+ * Parse query parameters from URL search string
+ * @param search URL search string
+ * @returns Object with query parameters
  */
 export const parseQueryParams = (search: string): Record<string, string> => {
-  if (!search || search === '?' || search === '') {
-    return {};
-  }
-  
-  const searchParams = new URLSearchParams(search.startsWith('?') ? search.substring(1) : search);
   const params: Record<string, string> = {};
+  const searchParams = new URLSearchParams(search);
   
   searchParams.forEach((value, key) => {
     params[key] = value;
@@ -62,70 +120,79 @@ export const parseQueryParams = (search: string): Record<string, string> => {
 };
 
 /**
- * Create a deep link URL with route parameters and query parameters
- * @param path - Base path (e.g., "/user/:id")
- * @param params - Route parameters (e.g., { id: '123' })
- * @param query - Query parameters (e.g., { tab: 'profile' })
- * @returns Complete URL with parameters (e.g., "/user/123?tab=profile")
+ * Create a deep link URL from path, parameters, and query
+ * @param path Base path
+ * @param params Route parameters
+ * @param query Query parameters
+ * @returns Deep link URL
  */
 export const createDeepLink = (
   path: string,
   params: Record<string, string> = {},
   query: Record<string, string> = {}
 ): string => {
-  // Replace route parameters
-  let result = path;
+  // Replace path parameters
+  let url = path;
+  
+  // Replace path parameters (e.g., :id with actual value)
   Object.entries(params).forEach(([key, value]) => {
-    result = result.replace(`:${key}`, encodeURIComponent(value));
+    url = url.replace(`:${key}`, encodeURIComponent(value));
   });
   
-  // Add query parameters
-  const queryParams = Object.entries(query)
-    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-    .join('&');
-  
-  if (queryParams) {
-    result += `?${queryParams}`;
+  // Add query parameters if any
+  if (Object.keys(query).length > 0) {
+    const queryString = new URLSearchParams(
+      Object.entries(query)
+        .filter(([_, v]) => v !== null && v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    
+    url = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
   }
   
-  return result;
+  return url;
 };
 
 /**
- * Find route configuration that matches a specific path
- * @param path - Path to find configuration for
- * @returns Route configuration or undefined if not found
+ * Get route group for a specific path
+ * @param path Route path
+ * @returns Route group or null if not found
  */
-export const findRouteByPath = (path: string) => {
-  // First try exact match
-  let route = validRoutes.find(r => r.path === path);
-  if (route) return route;
+export const getRouteGroup = (path: string): RouteGroup | null => {
+  const route = getRouteConfig(path);
+  return route ? route.group : null;
+};
+
+/**
+ * Check if a route requires a specific role
+ * @param path Route path
+ * @param role User role to check
+ * @returns Boolean indicating if the route is available for the role
+ */
+export const isRouteAvailableForRole = (path: string, role: UserRole | null): boolean => {
+  const route = getRouteConfig(path);
   
-  // Then try matching with parameters
-  return validRoutes.find(r => {
-    if (!r.path.includes(':')) return false;
-    
-    const params = extractPathParameters(r.path, path);
-    return params !== null;
-  });
-};
-
-/**
- * Check if a path exists in the application routes
- * @param path - Path to check
- * @returns Boolean indicating if the path exists
- */
-export const routePathExists = (path: string): boolean => {
-  return validRoutes.some(route => {
-    // Exact match
-    if (route.path === path) return true;
-    
-    // Check for parametrized routes
-    if (route.path.includes(':')) {
-      return extractPathParameters(route.path, path) !== null;
+  // If route doesn't exist, it's not available
+  if (!route) {
+    return false;
+  }
+  
+  // If no role requirements, route is available to all authenticated users
+  if (!route.requiredRole) {
+    // For public routes, allow null role
+    if (route.accessLevel === 'public') {
+      return true;
     }
     
+    // For other routes, require authentication
+    return role !== null;
+  }
+  
+  // If role is required but user has no role, route is not available
+  if (!role) {
     return false;
-  });
+  }
+  
+  // Check if user role is in required roles
+  return route.requiredRole.includes(role);
 };

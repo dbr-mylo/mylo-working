@@ -1,100 +1,144 @@
 
-import { RouteConfig } from "../types";
+import { RouteConfig, RelatedRoute } from '../types';
+import { validRoutes } from './routeDefinitions';
 
 /**
- * Get all related routes for a specific route
- * @param route Route to get relationships for
- * @returns Object containing different route relationships
+ * Find the direct parent route for a given route path
+ * @param path Current route path
+ * @returns Parent path or null if no parent
  */
-export const getRouteRelationships = (route: RouteConfig) => {
+export const findParentRoute = (path: string): string | null => {
+  // If it's the root path, it has no parent
+  if (path === '/') {
+    return null;
+  }
+  
+  // Find the route configuration
+  const route = validRoutes.find(r => r.path === path);
+  if (!route) {
+    return null;
+  }
+  
+  // Check for explicit parent in metadata
+  if (route.metadata?.parentPath) {
+    return route.metadata.parentPath;
+  }
+  
+  // Check for explicit parent in route config
+  if (route.parentRoute) {
+    return route.parentRoute;
+  }
+  
+  // Try to find parent based on path hierarchy
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length <= 1) {
+    return '/';
+  }
+  
+  // Remove last segment to get potential parent path
+  segments.pop();
+  const parentPath = `/${segments.join('/')}`;
+  
+  // Verify this parent path exists
+  const parentExists = validRoutes.some(r => r.path === parentPath);
+  return parentExists ? parentPath : '/';
+};
+
+/**
+ * Find all parent routes in a hierarchy for a given path
+ * @param path Current route path
+ * @returns Array of parent routes in order from root to closest parent
+ */
+export const findParentRoutes = (path: string): Array<{ path: string; label: string }> => {
+  const result: Array<{ path: string; label: string }> = [];
+  let currentPath = path;
+  
+  while (true) {
+    const parentPath = findParentRoute(currentPath);
+    if (!parentPath) {
+      break;
+    }
+    
+    const parentRoute = validRoutes.find(r => r.path === parentPath);
+    if (!parentRoute) {
+      break;
+    }
+    
+    result.unshift({
+      path: parentPath,
+      label: parentRoute.description
+    });
+    
+    currentPath = parentPath;
+    
+    // Prevent infinite loops
+    if (result.length > 10) {
+      console.warn('Possible circular reference in route hierarchy:', path);
+      break;
+    }
+  }
+  
+  return result;
+};
+
+/**
+ * Find alternative routes for a given path
+ * @param path Current route path
+ * @returns Array of alternative routes
+ */
+export const findAlternativeRoutes = (path: string): string[] => {
+  const route = validRoutes.find(r => r.path === path);
+  if (!route || !route.metadata?.alternatives) {
+    return [];
+  }
+  
+  return route.metadata.alternatives;
+};
+
+/**
+ * Find child routes for a given path
+ * @param path Parent route path
+ * @returns Array of child routes
+ */
+export const findChildRoutes = (path: string): RouteConfig[] => {
+  return validRoutes.filter(route => 
+    (route.parentRoute === path) || 
+    (route.metadata?.parentPath === path)
+  );
+};
+
+/**
+ * Get all related routes for a path
+ * @param path Current route path
+ * @returns Object with parent, children, and alternatives
+ */
+export const getAllRelatedRoutes = (path: string): {
+  parent: string | null;
+  children: RouteConfig[];
+  alternatives: string[];
+} => {
   return {
-    parents: getParentRoutes(route),
-    children: getChildRoutes(route),
-    siblings: getSiblingRoutes(route),
-    alternatives: getAlternativeRoutes(route)
+    parent: findParentRoute(path),
+    children: findChildRoutes(path),
+    alternatives: findAlternativeRoutes(path)
   };
 };
 
 /**
- * Get parent routes for a specific route
- * @param route Route to get parent for
- * @returns Array of parent routes
+ * Generate a breadcrumb path for a route
+ * @param path Current route path
+ * @returns Array of breadcrumb items
  */
-export const getParentRoutes = (route: RouteConfig): RouteConfig[] => {
-  if (!route.metadata?.parentPath) return [];
+export const getBreadcrumbPath = (path: string): Array<{ path: string; label: string }> => {
+  const parentRoutes = findParentRoutes(path);
+  const currentRoute = validRoutes.find(r => r.path === path);
   
-  // Implementation depends on how routes are stored
-  // For now, this is a placeholder
-  return [];
-};
-
-/**
- * Get child routes for a specific route
- * @param route Route to get children for
- * @returns Array of child routes
- */
-export const getChildRoutes = (route: RouteConfig): RouteConfig[] => {
-  // Implementation depends on how routes are stored
-  // For now, this is a placeholder
-  return [];
-};
-
-/**
- * Get sibling routes for a specific route
- * @param route Route to get siblings for
- * @returns Array of sibling routes
- */
-export const getSiblingRoutes = (route: RouteConfig): RouteConfig[] => {
-  if (!route.metadata?.parentPath) return [];
-  
-  // Implementation depends on how routes are stored
-  // For now, this is a placeholder
-  return [];
-};
-
-/**
- * Get alternative routes for a specific route
- * @param route Route to get alternatives for
- * @returns Array of alternative routes
- */
-export const getAlternativeRoutes = (route: RouteConfig): RouteConfig[] => {
-  if (!route.metadata?.alternatives || route.metadata.alternatives.length === 0) return [];
-  
-  // Implementation depends on how alternatives are stored
-  // For now, this is a placeholder
-  return [];
-};
-
-/**
- * Check if two routes are related
- * @param routeA First route
- * @param routeB Second route
- * @returns Boolean indicating if routes are related
- */
-export const areRoutesRelated = (routeA: RouteConfig, routeB: RouteConfig): boolean => {
-  // Routes are related if:
-  // 1. One is a parent of the other
-  // 2. They are siblings (share same parent)
-  // 3. One is an alternative of the other
-  
-  // Check parent-child relationship
-  if (routeA.metadata?.parentPath === routeB.path || 
-      routeB.metadata?.parentPath === routeA.path) {
-    return true;
+  if (currentRoute) {
+    return [
+      ...parentRoutes,
+      { path, label: currentRoute.description }
+    ];
   }
   
-  // Check if siblings
-  if (routeA.metadata?.parentPath && 
-      routeB.metadata?.parentPath && 
-      routeA.metadata.parentPath === routeB.metadata.parentPath) {
-    return true;
-  }
-  
-  // Check if alternatives
-  if (routeA.metadata?.alternatives?.includes(routeB.path) || 
-      routeB.metadata?.alternatives?.includes(routeA.path)) {
-    return true;
-  }
-  
-  return false;
+  return parentRoutes;
 };

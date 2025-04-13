@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDeepLink, parseQueryParams } from '@/utils/navigation/routeUtils';
 import { useNavigationHandlers } from './useNavigationHandlers';
+import { toast } from "sonner";
 
 /**
  * Hook for creating and navigating to deep links
@@ -110,9 +111,15 @@ export const useDeepLinking = () => {
     
     try {
       await navigator.clipboard.writeText(link);
+      toast.success("Link copied to clipboard", {
+        description: "Share this link with others to direct them to this page"
+      });
       return true;
     } catch (error) {
       console.error('Failed to copy link:', error);
+      toast.error("Failed to copy link", {
+        description: "Please try again or copy the URL manually"
+      });
       return false;
     }
   }, [getShareableLink]);

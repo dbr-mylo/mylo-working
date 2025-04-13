@@ -53,10 +53,13 @@ export interface RelatedRoute {
 /**
  * Role to route mapping
  * Explicitly allows null key for unauthenticated users
+ * 
+ * This interface allows UserRole or null as keys in the route maps
+ * with string values representing route paths
  */
 export interface RoleRouteMap {
   [key: string]: string;
-  null: string;
+  [key: null]: string;
 }
 
 /**

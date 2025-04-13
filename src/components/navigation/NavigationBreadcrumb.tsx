@@ -1,123 +1,134 @@
 
 import React, { useMemo } from "react";
-import { useLocation, Link } from "react-router-dom";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbEllipsis,
-} from "@/components/ui/breadcrumb";
-import { Home } from "lucide-react";
-import { getPathDescription } from "@/utils/navigation/routeConfig";
+import { useLocation } from "react-router-dom";
+import { ChevronRight, Home } from "lucide-react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
+import { getRouteConfig, getPathDescription } from "@/utils/navigation/routeUtils";
+import { findParentRoutes } from "@/utils/navigation/config/routeRelationships";
 
 interface NavigationBreadcrumbProps {
   maxItems?: number;
   showHomeIcon?: boolean;
+  className?: string;
+  separator?: React.ReactNode;
 }
 
+/**
+ * NavigationBreadcrumb component that shows the current path in breadcrumb format
+ * with proper parent-child relationship handling
+ */
 export const NavigationBreadcrumb: React.FC<NavigationBreadcrumbProps> = ({
   maxItems = 4,
   showHomeIcon = true,
+  className = "",
+  separator = <ChevronRight className="h-4 w-4" />
 }) => {
   const location = useLocation();
+  const { navigateTo } = useNavigationHandlers();
   
-  // Generate breadcrumb items based on the current path
+  const currentPath = location.pathname;
+  
+  // Generate breadcrumb items based on route hierarchy
   const breadcrumbItems = useMemo(() => {
-    const pathSegments = location.pathname.split('/').filter(Boolean);
+    // Start with current path
+    const currentRoute = getRouteConfig(currentPath);
     
-    // Start with home
-    const items = [
-      { path: '/', label: 'Home' }
-    ];
-    
-    // Build up breadcrumb paths
-    let currentPath = '';
-    pathSegments.forEach(segment => {
-      currentPath += `/${segment}`;
-      const pathDescription = getPathDescription(currentPath);
-      const label = pathDescription || segment.charAt(0).toUpperCase() + segment.slice(1);
-      
-      items.push({
-        path: currentPath,
-        label
-      });
-    });
-    
-    return items;
-  }, [location.pathname]);
-  
-  // Handle truncation if there are too many breadcrumbs
-  const displayedItems = useMemo(() => {
-    if (breadcrumbItems.length <= maxItems) {
-      return breadcrumbItems;
+    if (!currentRoute) {
+      return [{ path: currentPath, label: getPathDescription(currentPath) }];
     }
     
-    // Always show the first and last items
-    const firstItem = breadcrumbItems[0];
-    const lastItems = breadcrumbItems.slice(-Math.min(maxItems - 1, 3));
+    // Get parent routes
+    const parentRoutes = findParentRoutes(currentPath);
     
-    return [firstItem, { path: '', label: '...' }, ...lastItems];
-  }, [breadcrumbItems, maxItems]);
+    // Combine parent routes with current route
+    const allRoutes = [
+      ...parentRoutes,
+      { path: currentPath, label: currentRoute.description }
+    ];
+    
+    // If too many items, trim the middle
+    if (allRoutes.length > maxItems) {
+      const startItems = Math.ceil(maxItems / 2);
+      const endItems = Math.floor(maxItems / 2) - 1; // -1 for ellipsis
+      
+      const trimmedRoutes = [
+        ...allRoutes.slice(0, startItems),
+        { path: "", label: "..." },
+        ...allRoutes.slice(allRoutes.length - endItems)
+      ];
+      
+      return trimmedRoutes;
+    }
+    
+    return allRoutes;
+  }, [currentPath, maxItems]);
   
-  if (breadcrumbItems.length <= 1) {
-    return null; // Don't render breadcrumbs if we're just at home
+  // Don't render if only one item (current page)
+  if (breadcrumbItems.length <= 1 && currentPath === "/") {
+    return null;
   }
   
   return (
-    <Breadcrumb className="py-3 px-4 bg-muted/30">
+    <Breadcrumb className={`mb-4 px-4 py-2 ${className}`}>
       <BreadcrumbList>
-        {displayedItems.map((item, index) => {
-          const isLast = index === displayedItems.length - 1;
-          
-          // Handle ellipsis
-          if (item.label === '...') {
-            return (
-              <React.Fragment key="ellipsis">
-                <BreadcrumbItem>
-                  <BreadcrumbEllipsis />
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </React.Fragment>
-            );
-          }
-          
-          // Handle home with icon
-          if (index === 0 && showHomeIcon) {
-            return (
-              <React.Fragment key={item.path}>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to={item.path}>
-                      <Home className="h-4 w-4" />
-                      <span className="sr-only">Home</span>
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
-              </React.Fragment>
-            );
-          }
-          
-          // Regular breadcrumb item
-          return (
-            <React.Fragment key={item.path}>
-              <BreadcrumbItem>
-                {isLast ? (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link to={item.path}>{item.label}</Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-              {!isLast && <BreadcrumbSeparator />}
-            </React.Fragment>
-          );
-        })}
+        {showHomeIcon && (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink 
+                asChild
+                className="hover:text-primary transition-colors"
+              >
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="p-1"
+                  onClick={() => navigateTo("/")}
+                >
+                  <Home className="h-4 w-4" />
+                </Button>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              {separator}
+            </BreadcrumbSeparator>
+          </>
+        )}
+        
+        {breadcrumbItems.map((item, index) => (
+          <React.Fragment key={item.path || `ellipsis-${index}`}>
+            <BreadcrumbItem>
+              {item.path ? (
+                <BreadcrumbLink 
+                  asChild 
+                  className={`${currentPath === item.path ? 'font-medium' : 'hover:text-primary transition-colors'}`}
+                >
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="px-2 py-1 h-auto"
+                    onClick={() => item.path && navigateTo(item.path)}
+                    disabled={currentPath === item.path}
+                  >
+                    {item.label}
+                  </Button>
+                </BreadcrumbLink>
+              ) : (
+                <span className="text-muted-foreground">{item.label}</span>
+              )}
+            </BreadcrumbItem>
+            
+            {index < breadcrumbItems.length - 1 && (
+              <BreadcrumbSeparator>
+                {separator}
+              </BreadcrumbSeparator>
+            )}
+          </React.Fragment>
+        ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
 };
+
+export default NavigationBreadcrumb;

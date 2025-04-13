@@ -86,17 +86,24 @@ export class NavigationService {
     role?: UserRole,
     failureReason?: string
   ): void {
+    // Calculate duration for analytics
+    const startTime = performance.now();
+    const now = new Date();
+    
     // Create navigation event
     const event: NavigationEvent = {
       from,
       to,
       success,
-      timestamp: new Date().toISOString(),
+      timestamp: now.toISOString(),
       userRole: role,
       failureReason,
       // Add additional analytics data
       analytics: {
-        durationMs: 0, // This would be set in a real implementation
+        durationMs: Math.round(performance.now() - startTime),
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+        dayOfWeek: now.getDay(),
+        hourOfDay: now.getHours(),
       }
     };
     
@@ -109,6 +116,60 @@ export class NavigationService {
     
     // Add to history
     navigationHistoryService.addToHistory(event);
+    
+    // Special handling for writer roles to improve writer-specific analytics
+    if (role === 'writer') {
+      this.logWriterNavigation(event);
+    }
+  }
+  
+  /**
+   * Special handling for writer navigation events to track writer-specific flows
+   * @param event Navigation event
+   */
+  private logWriterNavigation(event: NavigationEvent): void {
+    // Track writer-specific navigation patterns
+    const isContentRelated = event.to.includes('/content/') || 
+                               event.to.includes('/editor') || 
+                               event.to === '/writer-dashboard';
+                               
+    if (isContentRelated) {
+      // In a real app, this would send to a dedicated analytics service
+      console.info(`[Writer Analytics] Content interaction: ${event.to}`);
+      
+      // You could add specific writer metrics to localStorage for tracking
+      if (typeof localStorage !== 'undefined') {
+        try {
+          // Get existing writer metrics
+          const metrics = JSON.parse(localStorage.getItem('writer_navigation_metrics') || '{}');
+          
+          // Update path count
+          metrics[event.to] = (metrics[event.to] || 0) + 1;
+          
+          // Store back
+          localStorage.setItem('writer_navigation_metrics', JSON.stringify(metrics));
+        } catch (e) {
+          console.error('Error storing writer metrics:', e);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Get writer navigation metrics
+   * @returns Writer navigation metrics
+   */
+  public getWriterNavigationMetrics(): Record<string, number> {
+    if (typeof localStorage === 'undefined') {
+      return {};
+    }
+    
+    try {
+      return JSON.parse(localStorage.getItem('writer_navigation_metrics') || '{}');
+    } catch (e) {
+      console.error('Error retrieving writer metrics:', e);
+      return {};
+    }
   }
   
   /**

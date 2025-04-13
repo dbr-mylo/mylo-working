@@ -71,10 +71,23 @@ export class RoleTransitionHandler {
    * @returns Boolean indicating if a redirect is needed
    */
   public needsRedirectAfterRoleChange(currentPath: string, newRole: UserRole | null): boolean {
+    // No redirect if no role
+    if (!newRole) {
+      return false;
+    }
+
     // Check if current path is valid for the new role
-    return !navigationService.validateRoute(currentPath, newRole);
+    const isValidPath = navigationService.validateRoute(currentPath, newRole);
+
+    // If path is valid, no need to redirect
+    if (isValidPath) {
+      return false;
+    }
+
+    console.info(`Path ${currentPath} is not valid for role ${newRole}, redirect needed`);
+    return true;
   }
-  
+
   /**
    * Get suggested routes for a specific role
    * @param role User role
@@ -82,41 +95,50 @@ export class RoleTransitionHandler {
    * @returns Array of suggested routes
    */
   public getRoleSuggestedRoutes(role: UserRole | null, count: number = 5): { path: string; description: string }[] {
-    // This would typically come from a more sophisticated recommendation engine
-    // For now, we'll return some static suggestions based on role
-    
-    if (role === 'writer' || role === 'editor') {
+    if (!role) {
       return [
-        { path: '/editor', description: 'Document Editor' },
-        { path: '/writer-dashboard', description: 'Writer Dashboard' },
-        { path: '/content/drafts', description: 'My Drafts' },
-        { path: '/templates', description: 'Templates' },
-        { path: '/documents', description: 'All Documents' }
-      ].slice(0, count);
+        { path: "/auth", description: "Authentication" }
+      ];
     }
-    
-    if (role === 'designer') {
-      return [
-        { path: '/designer-dashboard', description: 'Designer Dashboard' },
-        { path: '/design/layout', description: 'Layout Editor' },
-        { path: '/design/design-settings', description: 'Design Settings' },
-        { path: '/templates', description: 'Template Management' }
-      ].slice(0, count);
+
+    // Get routes based on role
+    switch (role) {
+      case "writer":
+        return [
+          { path: "/writer-dashboard", description: "Writer Dashboard" },
+          { path: "/editor", description: "Document Editor" },
+          { path: "/content/drafts", description: "Your Drafts" },
+          { path: "/documents", description: "All Documents" },
+          { path: "/profile", description: "Your Profile" }
+        ].slice(0, count);
+        
+      case "designer":
+        return [
+          { path: "/designer-dashboard", description: "Designer Dashboard" },
+          { path: "/templates", description: "Templates" },
+          { path: "/design/layout", description: "Layout Editor" },
+          { path: "/design/design-settings", description: "Design Settings" },
+          { path: "/profile", description: "Your Profile" }
+        ].slice(0, count);
+        
+      case "admin":
+        return [
+          { path: "/admin", description: "Admin Dashboard" },
+          { path: "/admin/users", description: "User Management" },
+          { path: "/admin/system-health", description: "System Health" },
+          { path: "/admin/recovery-metrics", description: "Recovery Metrics" },
+          { path: "/profile", description: "Your Profile" }
+        ].slice(0, count);
+        
+      default:
+        return [
+          { path: "/", description: "Dashboard" },
+          { path: "/profile", description: "Your Profile" },
+          { path: "/settings", description: "Settings" },
+          { path: "/help", description: "Help & Support" },
+          { path: "/documents", description: "Documents" }
+        ].slice(0, count);
     }
-    
-    if (role === 'admin') {
-      return [
-        { path: '/admin', description: 'Admin Dashboard' },
-        { path: '/admin/system-health', description: 'System Health' },
-        { path: '/admin/recovery-metrics', description: 'Recovery Metrics' },
-        { path: '/admin/users', description: 'User Management' }
-      ].slice(0, count);
-    }
-    
-    // For unauthenticated users
-    return [
-      { path: '/auth', description: 'Login' }
-    ].slice(0, count);
   }
 }
 

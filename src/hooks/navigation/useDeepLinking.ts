@@ -31,14 +31,15 @@ export const useDeepLinking = () => {
    * @param path Base path
    * @param params Route parameters
    * @param query Query parameters
+   * @returns Boolean indicating if navigation was successful
    */
   const navigateToDeepLink = useCallback((
     path: string,
     params: Record<string, string> = {},
     query: Record<string, string> = {}
-  ): void => {
+  ): boolean => {
     const deepLink = createDeepLink(path, params, query);
-    navigateTo(deepLink);
+    return navigateTo(deepLink);
   }, [navigateTo]);
   
   /**
@@ -70,10 +71,58 @@ export const useDeepLinking = () => {
     navigate(`${window.location.pathname}${queryString ? `?${queryString}` : ''}`, { replace: true });
   }, [navigate, getCurrentQueryParams]);
   
+  /**
+   * Generate a shareable deep link URL (absolute URL)
+   * @param path Base path
+   * @param params Route parameters
+   * @param query Query parameters
+   * @returns Absolute URL for sharing
+   */
+  const getShareableLink = useCallback((
+    path: string,
+    params: Record<string, string> = {},
+    query: Record<string, string> = {}
+  ): string => {
+    const deepLink = createDeepLink(path, params, query);
+    
+    // Generate absolute URL
+    if (typeof window !== 'undefined') {
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      return `${baseUrl}${deepLink.startsWith('/') ? '' : '/'}${deepLink}`;
+    }
+    
+    return deepLink;
+  }, []);
+  
+  /**
+   * Copy a shareable deep link to clipboard
+   * @param path Base path
+   * @param params Route parameters
+   * @param query Query parameters
+   * @returns Promise resolving to boolean indicating success
+   */
+  const copyShareableLink = useCallback(async (
+    path: string,
+    params: Record<string, string> = {},
+    query: Record<string, string> = {}
+  ): Promise<boolean> => {
+    const link = getShareableLink(path, params, query);
+    
+    try {
+      await navigator.clipboard.writeText(link);
+      return true;
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      return false;
+    }
+  }, [getShareableLink]);
+  
   return {
     createLink,
     navigateToDeepLink,
     getCurrentQueryParams,
-    updateQueryParams
+    updateQueryParams,
+    getShareableLink,
+    copyShareableLink
   };
 };

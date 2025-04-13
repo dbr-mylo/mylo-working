@@ -1,38 +1,39 @@
 
-/**
- * Route utility functions
- */
+import { validRoutes } from './config/routeDefinitions';
 
 /**
- * Extract parameters from a route path
- * @param definedPath Route path with parameters (e.g., "/user/:id")
- * @param actualPath Actual path with values (e.g., "/user/123")
+ * Extract path parameters from a URL path
+ * @param definedPath - Route path with parameters (e.g., "/user/:id")
+ * @param actualPath - Actual path with values (e.g., "/user/123")
  * @returns Object with extracted parameters or null if paths don't match
  */
-export const extractPathParameters = (definedPath: string, actualPath: string): Record<string, string> | null => {
+export const extractPathParameters = (
+  definedPath: string,
+  actualPath: string
+): Record<string, string> | null => {
   // Split paths into segments
   const definedSegments = definedPath.split('/').filter(Boolean);
   const actualSegments = actualPath.split('/').filter(Boolean);
   
-  // Check if segment counts match
+  // If different number of segments, paths don't match
   if (definedSegments.length !== actualSegments.length) {
     return null;
   }
   
   const params: Record<string, string> = {};
   
-  // Compare segments and extract parameters
+  // Compare each segment
   for (let i = 0; i < definedSegments.length; i++) {
-    const definedSegment = definedSegments[i];
-    const actualSegment = actualSegments[i];
+    const definedSeg = definedSegments[i];
+    const actualSeg = actualSegments[i];
     
-    // If segment is a parameter, extract it
-    if (definedSegment.startsWith(':')) {
-      const paramName = definedSegment.substring(1);
-      params[paramName] = actualSegment;
+    // If this is a parameter segment (starts with :)
+    if (definedSeg.startsWith(':')) {
+      const paramName = definedSeg.slice(1); // Remove the colon
+      params[paramName] = actualSeg;
     } 
-    // If segments don't match and it's not a parameter, paths don't match
-    else if (definedSegment !== actualSegment) {
+    // If segments don't match and it's not a parameter
+    else if (definedSeg !== actualSeg) {
       return null;
     }
   }
@@ -41,74 +42,90 @@ export const extractPathParameters = (definedPath: string, actualPath: string): 
 };
 
 /**
- * Parse a URL query string into an object
- * @param queryString Query string (e.g., "?key=value&other=123")
- * @returns Object with query parameters
+ * Parse query parameters from a URL search string
+ * @param search - Query string (e.g., "?name=john&age=25")
+ * @returns Object with parsed query parameters
  */
-export const parseQueryParams = (queryString: string): Record<string, string> => {
-  if (!queryString || !queryString.startsWith('?')) {
+export const parseQueryParams = (search: string): Record<string, string> => {
+  if (!search || search === '?' || search === '') {
     return {};
   }
   
-  // Remove the leading ? and split by &
-  const params = queryString.substring(1).split('&');
-  const result: Record<string, string> = {};
+  const searchParams = new URLSearchParams(search.startsWith('?') ? search.substring(1) : search);
+  const params: Record<string, string> = {};
   
-  // Process each parameter
-  params.forEach(param => {
-    const [key, value] = param.split('=');
-    if (key) {
-      result[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
-    }
+  searchParams.forEach((value, key) => {
+    params[key] = value;
   });
+  
+  return params;
+};
+
+/**
+ * Create a deep link URL with route parameters and query parameters
+ * @param path - Base path (e.g., "/user/:id")
+ * @param params - Route parameters (e.g., { id: '123' })
+ * @param query - Query parameters (e.g., { tab: 'profile' })
+ * @returns Complete URL with parameters (e.g., "/user/123?tab=profile")
+ */
+export const createDeepLink = (
+  path: string,
+  params: Record<string, string> = {},
+  query: Record<string, string> = {}
+): string => {
+  // Replace route parameters
+  let result = path;
+  Object.entries(params).forEach(([key, value]) => {
+    result = result.replace(`:${key}`, encodeURIComponent(value));
+  });
+  
+  // Add query parameters
+  const queryParams = Object.entries(query)
+    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+  
+  if (queryParams) {
+    result += `?${queryParams}`;
+  }
   
   return result;
 };
 
 /**
- * Build a URL with query parameters
- * @param basePath Base URL path
- * @param params Object with query parameters
- * @returns URL with query parameters
+ * Find route configuration that matches a specific path
+ * @param path - Path to find configuration for
+ * @returns Route configuration or undefined if not found
  */
-export const buildUrlWithParams = (basePath: string, params: Record<string, string>): string => {
-  const queryParams = new URLSearchParams();
+export const findRouteByPath = (path: string) => {
+  // First try exact match
+  let route = validRoutes.find(r => r.path === path);
+  if (route) return route;
   
-  // Add parameters to query string
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      queryParams.append(key, value);
-    }
+  // Then try matching with parameters
+  return validRoutes.find(r => {
+    if (!r.path.includes(':')) return false;
+    
+    const params = extractPathParameters(r.path, path);
+    return params !== null;
   });
-  
-  const queryString = queryParams.toString();
-  
-  // Return URL with query parameters if any
-  if (queryString) {
-    return `${basePath}?${queryString}`;
-  }
-  
-  return basePath;
 };
 
 /**
- * Create a deep link to a specific location in the application
- * @param path Base path
- * @param params Route parameters
- * @param query Query parameters
- * @returns Deep link URL
+ * Check if a path exists in the application routes
+ * @param path - Path to check
+ * @returns Boolean indicating if the path exists
  */
-export const createDeepLink = (
-  path: string, 
-  params: Record<string, string> = {}, 
-  query: Record<string, string> = {}
-): string => {
-  // Replace route parameters
-  let processedPath = path;
-  Object.entries(params).forEach(([key, value]) => {
-    processedPath = processedPath.replace(`:${key}`, encodeURIComponent(value));
+export const routePathExists = (path: string): boolean => {
+  return validRoutes.some(route => {
+    // Exact match
+    if (route.path === path) return true;
+    
+    // Check for parametrized routes
+    if (route.path.includes(':')) {
+      return extractPathParameters(route.path, path) !== null;
+    }
+    
+    return false;
   });
-  
-  // Add query parameters
-  return buildUrlWithParams(processedPath, query);
 };

@@ -1,5 +1,6 @@
 
 import { UserRole } from '@/lib/types';
+import { validRoutes } from './config/routeDefinitions'; 
 
 /**
  * Extracts parameters from a route path
@@ -171,8 +172,7 @@ export const parseQueryParams = (search: string): Record<string, string> => {
  * @returns Route configuration if found
  */
 export const getRouteConfig = (path: string) => {
-  // Import from config to avoid circular dependency
-  const { validRoutes } = require('./config/routeDefinitions');
+  // Use the imported validRoutes instead of require
   return validRoutes.find(route => route.path === path);
 };
 

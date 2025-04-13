@@ -14,6 +14,11 @@ export type UserRole = 'admin' | 'designer' | 'writer' | 'editor' | null;
 export type RouteGroup = 'dashboard' | 'content' | 'design' | 'admin' | 'user' | 'testing';
 
 /**
+ * Access level for specific routes
+ */
+export type AccessLevel = 'public' | 'protected' | 'role-specific' | 'admin-only';
+
+/**
  * Configuration for a valid route
  */
 export interface RouteConfig {
@@ -29,6 +34,14 @@ export interface RouteConfig {
   fallbackRoute?: string;
   /** Route group for organizational purposes */
   group?: RouteGroup;
+  /** Importance level for analytics and monitoring */
+  importance?: 'critical' | 'high' | 'medium' | 'low';
+  /** How this route can be accessed */
+  accessLevel?: AccessLevel;
+  /** Associated feature flags that may affect this route */
+  featureFlags?: string[];
+  /** Additional metadata for analytics */
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -49,6 +62,12 @@ export interface NavigationEvent {
   pathDescription?: string;
   /** Information about why navigation failed if applicable */
   failureReason?: string;
+  /** Additional analytics data */
+  analytics?: {
+    durationMs?: number;
+    pageInteractions?: number;
+    group?: RouteGroup;
+  };
 }
 
 /**
@@ -59,6 +78,8 @@ export enum NavigationErrorType {
   NOT_FOUND = 'not_found',
   SERVER_ERROR = 'server_error',
   VALIDATION_ERROR = 'validation_error',
+  ROUTE_CONFLICT = 'route_conflict',
+  PERMISSION_DENIED = 'permission_denied',
 }
 
 /**
@@ -69,6 +90,8 @@ export interface NavigationError {
   path: string;
   message: string;
   role?: UserRole;
+  timestamp?: string;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -89,3 +112,30 @@ export interface RouteValidationError {
   details?: Record<string, unknown>;
 }
 
+/**
+ * Route relationship type for tracking related routes
+ */
+export interface RelatedRoute {
+  path: string;
+  relationship: 'parent' | 'child' | 'sibling' | 'alternative';
+  description?: string;
+}
+
+/**
+ * Route permission matrix entry
+ */
+export interface RoutePermission {
+  path: string;
+  roles: Record<UserRole, boolean>;
+  accessLevel: AccessLevel;
+}
+
+/**
+ * Route analytics configuration
+ */
+export interface RouteAnalyticsConfig {
+  trackPageview: boolean;
+  trackInteractions: boolean;
+  trackDuration: boolean;
+  customEvents?: string[];
+}

@@ -23,6 +23,7 @@ export function useAutosaveSetup({
   enabled = true,
   maxRetries = 3
 }: UseAutosaveSetupProps) {
+  // Use our fixed useOnline hook
   const isOnline = useOnline();
   const [userEnabled, setUserEnabled] = useLocalStorage('mylo-autosave-enabled', 'true');
   const [userInterval, setUserInterval] = useLocalStorage('mylo-autosave-interval', debounceTime.toString());

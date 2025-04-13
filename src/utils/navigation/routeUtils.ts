@@ -115,3 +115,78 @@ export interface RouteTransition {
   timestamp: string;
   userRole?: UserRole;
 }
+
+/**
+ * Create a deep link URL
+ * @param path Base path
+ * @param params Route parameters
+ * @param query Query parameters
+ * @returns Deep link URL
+ */
+export const createDeepLink = (
+  path: string,
+  params: Record<string, string> = {},
+  query: Record<string, string> = {}
+): string => {
+  let processedPath = path;
+  
+  // Replace path parameters
+  Object.entries(params).forEach(([key, value]) => {
+    processedPath = processedPath.replace(`:${key}`, encodeURIComponent(value));
+  });
+  
+  // Add query parameters if any
+  if (Object.keys(query).length > 0) {
+    const queryString = new URLSearchParams(
+      Object.entries(query).filter(([_, value]) => value !== undefined)
+    ).toString();
+    
+    if (queryString) {
+      processedPath = `${processedPath}${processedPath.includes('?') ? '&' : '?'}${queryString}`;
+    }
+  }
+  
+  return processedPath;
+};
+
+/**
+ * Parse query parameters from a URL search string
+ * @param search URL search string
+ * @returns Object with query parameters
+ */
+export const parseQueryParams = (search: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  const searchParams = new URLSearchParams(search);
+  
+  searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
+  
+  return params;
+};
+
+/**
+ * Get route configuration by path
+ * @param path Route path
+ * @returns Route configuration if found
+ */
+export const getRouteConfig = (path: string) => {
+  // Import from config to avoid circular dependency
+  const { validRoutes } = require('./config/routeDefinitions');
+  return validRoutes.find(route => route.path === path);
+};
+
+/**
+ * Get path description
+ * @param path Route path
+ * @returns Description of the path
+ */
+export const getPathDescription = (path: string): string => {
+  const config = getRouteConfig(path);
+  if (config) {
+    return config.description;
+  }
+  
+  // If no config is found, generate a description from the path
+  return formatPathForDisplay(path);
+};

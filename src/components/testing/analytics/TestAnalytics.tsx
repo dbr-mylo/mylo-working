@@ -4,17 +4,34 @@ import { BarChart } from "lucide-react";
 import { getRoutePerformanceMetrics } from "@/utils/navigation/routeValidation";
 import { getErrorBoundaryAnalytics } from "@/components/errors/ErrorBoundary";
 
+interface RouteMetric {
+  averageLoadTime: number;
+  errorRate: number;
+  trafficVolume: number;
+}
+
 /**
  * Analytics dashboard component showing test metrics
  */
 export const TestAnalytics: React.FC = () => {
-  const [metrics, setMetrics] = useState<Record<string, { averageLoadTime: number, errorRate: number, trafficVolume: number }>>({});
+  const [metrics, setMetrics] = useState<Record<string, RouteMetric>>({});
   const [errorData, setErrorData] = useState<any[]>([]);
   
   // Fetch metrics data
   useEffect(() => {
-    const routeMetrics = getRoutePerformanceMetrics();
-    setMetrics(routeMetrics);
+    // Get route metrics for a test path
+    const routeMetrics = getRoutePerformanceMetrics("/test");
+    
+    // Convert the metrics to the expected format
+    const formattedMetrics: Record<string, RouteMetric> = {
+      "/test": {
+        averageLoadTime: routeMetrics.avgLoadTime,
+        errorRate: routeMetrics.errorRate,
+        trafficVolume: routeMetrics.visitCount
+      }
+    };
+    
+    setMetrics(formattedMetrics);
     
     const errorMetrics = getErrorBoundaryAnalytics();
     setErrorData(errorMetrics);

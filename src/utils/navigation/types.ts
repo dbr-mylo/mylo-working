@@ -52,7 +52,7 @@ export interface RelatedRoute {
 
 /**
  * Role to route mapping
- * Using Record utility type with string index signature to allow for null value
+ * Using index signature to allow for null key
  */
 export type RoleRouteMap = {
   [K in UserRole | null]: string;

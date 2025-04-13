@@ -1,5 +1,4 @@
-
-import { routeGroups, type RouteGroupType } from './config/routeGroups';
+import { UserRole } from '@/lib/types';
 
 /**
  * User role
@@ -53,7 +52,7 @@ export interface RelatedRoute {
  * Using Record utility type with string index signature to allow for null value
  */
 export type RoleRouteMap = {
-  [K in UserRole]: string;
+  [K in UserRole | null]: string;
 };
 
 /**

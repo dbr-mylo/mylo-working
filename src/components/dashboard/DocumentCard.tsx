@@ -21,6 +21,8 @@ interface DocumentCardProps {
   showStatus?: boolean;
   status?: string;
   onToggleStatus?: (documentId: string, currentStatus: string) => void;
+  isTemplate?: boolean; // Added isTemplate prop
+  viewMode?: "grid" | "list"; // Added viewMode prop
 }
 
 export const DocumentCard = ({ 
@@ -31,7 +33,9 @@ export const DocumentCard = ({
   isDesigner = false,
   showStatus = false,
   status = 'draft',
-  onToggleStatus
+  onToggleStatus,
+  isTemplate = false, // Default to false
+  viewMode = "grid" // Default to grid
 }: DocumentCardProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -56,17 +60,29 @@ export const DocumentCard = ({
     }
   };
   
+  // Add some additional classes if in list view mode
+  const cardClassNames = `overflow-hidden hover:shadow-md transition-shadow cursor-pointer w-full ${
+    viewMode === "list" ? "flex" : ""
+  }`;
+  
   return (
     <Card 
       key={document.id} 
-      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer w-full"
+      className={cardClassNames}
       onClick={handleCardClick}
     >
       <CardHeader className="p-3">
         <div className="flex justify-between items-center gap-2">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-md break-words overflow-hidden">{document.title}</CardTitle>
+              <CardTitle className="text-md break-words overflow-hidden">
+                {document.title}
+                {isTemplate && !showStatus && (
+                  <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-700">
+                    Template
+                  </Badge>
+                )}
+              </CardTitle>
               
               {showStatus && (
                 <Badge 
@@ -135,7 +151,7 @@ export const DocumentCard = ({
                 size={buttonSize} 
                 className={buttonSize === "xs" ? "h-7 w-7 p-0 text-gray-500 hover:bg-red-100 hover:text-red-600" : "h-8 w-8 text-gray-500 hover:bg-red-100 hover:text-red-600"}
                 onClick={(e) => onDelete(e, document.id)}
-                title={`Delete ${isDesigner ? "template" : "document"}`}
+                title={`Delete ${isDesigner || isTemplate ? "template" : "document"}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

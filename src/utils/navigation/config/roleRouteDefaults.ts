@@ -9,7 +9,7 @@ export const DEFAULT_ROUTES: RoleRouteMap = {
   'designer': '/designer-dashboard',
   'writer': '/writer-dashboard',
   'editor': '/writer-dashboard',
-  'null': '/auth'
+  null: '/auth'
 };
 
 /**
@@ -20,7 +20,7 @@ export const FALLBACK_ROUTES: RoleRouteMap = {
   'designer': '/designer-dashboard',
   'writer': '/writer-dashboard',
   'editor': '/writer-dashboard',
-  'null': '/auth'
+  null: '/auth'
 };
 
 /**

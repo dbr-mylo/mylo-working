@@ -6,7 +6,7 @@ import { UserRole } from '@/lib/types';
  */
 
 // Re-export UserRole for compatibility with existing imports
-export { UserRole };
+export type { UserRole };
 
 /**
  * Navigation error types

@@ -1,7 +1,4 @@
 
-export * from './ToolbarTester';
-export * from './ManualTestChecklist';
+// Export components from the testing folder
+export * from './NavigationRegressionTester';
 export * from './MainRegressionTester';
-export * from './RoleSystemAnalysis';
-export * from './components';
-export * from './hooks';

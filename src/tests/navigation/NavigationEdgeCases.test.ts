@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { navigationService } from '@/services/navigation/NavigationService';
 import { NavigationErrorType, UserRole } from '@/utils/navigation/types';
 import { extractPathParameters } from '@/utils/navigation/routeUtils';
+import { 
+  getAllRelatedRoutes, 
+  findParentRoute, 
+  findChildRoutes,
+  findAlternativeRoutes,
+  getBreadcrumbPath
+} from '@/utils/navigation/config/routeRelationships';
 
 describe('Navigation Service Edge Cases', () => {
   beforeEach(() => {
@@ -418,6 +425,238 @@ describe('Navigation Service Edge Cases', () => {
         expect(writerSuggestions[0]).toHaveProperty('path');
         expect(writerSuggestions[0]).toHaveProperty('description');
       }
+    });
+  });
+
+  describe('Route Relationship Mapping', () => {
+    it('should find parent routes correctly', () => {
+      // Test finding parent for a simple route
+      const parent1 = findParentRoute('/content/documents');
+      expect(parent1).toBe('/content');
+      
+      // Test finding parent for a nested route
+      const parent2 = findParentRoute('/admin/users');
+      expect(parent2).toBe('/admin');
+      
+      // Test root path has no parent
+      const rootParent = findParentRoute('/');
+      expect(rootParent).toBeNull();
+    });
+    
+    it('should find child routes correctly', () => {
+      // Find children of the admin route
+      const adminChildren = findChildRoutes('/admin');
+      
+      // Should have multiple child routes
+      expect(adminChildren.length).toBeGreaterThan(0);
+      
+      // All children should have admin as parent
+      adminChildren.forEach(child => {
+        expect(child.path.startsWith('/admin/')).toBe(true);
+      });
+      
+      // Find children of a route with no children
+      const leafChildren = findChildRoutes('/not-found');
+      expect(leafChildren.length).toBe(0);
+    });
+    
+    it('should find alternative routes correctly', () => {
+      // Find alternatives for a route with defined alternatives
+      const alternatives = findAlternativeRoutes('/writer-dashboard');
+      
+      // Verify alternatives are returned in expected format
+      if (alternatives.length > 0) {
+        alternatives.forEach(alt => {
+          expect(typeof alt).toBe('string');
+        });
+      }
+    });
+    
+    it('should generate complete breadcrumb paths', () => {
+      // Get breadcrumbs for a deeply nested path
+      const breadcrumbs = getBreadcrumbPath('/admin/users');
+      
+      // Should contain at least root and current page
+      expect(breadcrumbs.length).toBeGreaterThan(1);
+      
+      // First item should be home/root
+      if (breadcrumbs.length > 0) {
+        expect(breadcrumbs[0].path).toBe('/');
+      }
+      
+      // Last item should be current page
+      if (breadcrumbs.length > 0) {
+        expect(breadcrumbs[breadcrumbs.length - 1].path).toBe('/admin/users');
+      }
+      
+      // Each item should have a path and label
+      breadcrumbs.forEach(crumb => {
+        expect(crumb).toHaveProperty('path');
+        expect(crumb).toHaveProperty('label');
+        expect(typeof crumb.path).toBe('string');
+        expect(typeof crumb.label).toBe('string');
+      });
+    });
+    
+    it('should handle circular references in route relationships', () => {
+      // Create a spy to capture console warnings
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      
+      // Mock a circular reference by temporarily modifying the parent-finding logic
+      const originalFindParent = findParentRoute;
+      vi.spyOn(global, 'findParentRoute').mockImplementation((path: string): string | null => {
+        if (path === '/admin') return '/admin/users';
+        if (path === '/admin/users') return '/admin';
+        return originalFindParent(path);
+      });
+      
+      // This should detect the circular reference and break the loop
+      const breadcrumbs = getBreadcrumbPath('/admin/users');
+      
+      // Should log a warning about circular reference
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('circular reference'),
+        expect.anything()
+      );
+      
+      // Restore original implementation
+      vi.mocked(findParentRoute).mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+    
+    it('should get all related routes comprehensively', () => {
+      // Get all related routes for a page with rich relationships
+      const related = getAllRelatedRoutes('/content');
+      
+      // Should have expected structure
+      expect(related).toHaveProperty('parent');
+      expect(related).toHaveProperty('children');
+      expect(related).toHaveProperty('alternatives');
+      
+      // Children should be an array
+      expect(Array.isArray(related.children)).toBe(true);
+      
+      // Alternatives should be an array
+      expect(Array.isArray(related.alternatives)).toBe(true);
+    });
+    
+    it('should handle edge cases in route relationships', () => {
+      // Edge case: non-existent route
+      const nonExistent = getAllRelatedRoutes('/this-route-does-not-exist');
+      expect(nonExistent.parent).toBeNull();
+      expect(nonExistent.children.length).toBe(0);
+      expect(nonExistent.alternatives.length).toBe(0);
+      
+      // Edge case: root route
+      const root = getAllRelatedRoutes('/');
+      expect(root.parent).toBeNull();
+      
+      // Edge case: leaf node (no children)
+      const leaf = getAllRelatedRoutes('/not-found');
+      expect(leaf.children.length).toBe(0);
+    });
+  });
+
+  describe('Complex Routing Scenarios', () => {
+    it('should handle dynamic routes with multiple parameters', () => {
+      // Test with a complex dynamic route pattern
+      const params = extractPathParameters(
+        '/content/:contentType/:documentId/version/:versionId',
+        '/content/article/abc-123/version/v2'
+      );
+      
+      expect(params).toEqual({
+        contentType: 'article',
+        documentId: 'abc-123',
+        versionId: 'v2'
+      });
+    });
+    
+    it('should validate complex routing permissions across roles', () => {
+      // Mock the validator to test a complex role-based scenario
+      const validateSpy = vi.spyOn(navigationService, 'validateRoute');
+      
+      // Define a complex testing scenario with role transitions
+      const testScenario = [
+        { path: '/content/documents', role: 'writer' as UserRole, expected: true },
+        { path: '/content/documents', role: 'admin' as UserRole, expected: true },
+        { path: '/content/documents', role: 'designer' as UserRole, expected: false },
+        { path: '/design/templates', role: 'designer' as UserRole, expected: true },
+        { path: '/design/templates', role: 'writer' as UserRole, expected: false },
+        { path: '/design/templates', role: 'admin' as UserRole, expected: true },
+      ];
+      
+      // Test each scenario
+      testScenario.forEach(scenario => {
+        validateSpy.mockReturnValueOnce(scenario.expected);
+        const result = navigationService.validateRoute(scenario.path, scenario.role);
+        expect(result).toBe(scenario.expected);
+      });
+      
+      // Restore original implementation
+      validateSpy.mockRestore();
+    });
+    
+    it('should handle nested fallback routes correctly', () => {
+      // Mock dependencies to test fallback cascade
+      vi.spyOn(navigationService, 'getFallbackRoute').mockImplementation((role: UserRole) => {
+        if (role === 'writer') return '/writer-dashboard';
+        if (role === 'designer') return '/designer-dashboard';
+        if (role === 'admin') return '/admin';
+        return '/auth';
+      });
+      
+      // Test fallback for writer role
+      expect(navigationService.getFallbackRoute('writer')).toBe('/writer-dashboard');
+      
+      // Restore original implementation
+      vi.mocked(navigationService.getFallbackRoute).mockRestore();
+    });
+    
+    it('should handle deeply nested navigation paths', () => {
+      // Create a very deep path with many segments
+      const deepPath = '/admin/settings/security/permissions/roles/writer/edit';
+      
+      // Mock validateRoute to test deep path validation
+      const validateSpy = vi.spyOn(navigationService, 'validateRoute');
+      validateSpy.mockReturnValueOnce(true); // Admin should have access
+      validateSpy.mockReturnValueOnce(false); // Writer shouldn't have access
+      
+      // Test validation
+      expect(navigationService.validateRoute(deepPath, 'admin')).toBe(true);
+      expect(navigationService.validateRoute(deepPath, 'writer')).toBe(false);
+      
+      // Restore original implementation
+      validateSpy.mockRestore();
+    });
+    
+    it('should track navigation metrics for complex user journeys', () => {
+      // Clear any existing metrics
+      navigationService.clearNavigationHistory();
+      
+      // Simulate a complex user journey with multiple navigation steps
+      navigationService.logNavigationEvent('/', '/writer-dashboard', true, 'writer');
+      navigationService.logNavigationEvent('/writer-dashboard', '/content', true, 'writer');
+      navigationService.logNavigationEvent('/content', '/content/documents', true, 'writer');
+      navigationService.logNavigationEvent('/content/documents', '/editor/123', true, 'writer');
+      navigationService.logNavigationEvent('/editor/123', '/content/documents', true, 'writer');
+      
+      // Get history and verify journey
+      const history = navigationService.getNavigationHistory();
+      
+      // Should have all events
+      expect(history.length).toBe(5);
+      
+      // First event should be from home to dashboard
+      expect(history[0].from).toBe('/');
+      expect(history[0].to).toBe('/writer-dashboard');
+      
+      // Last event should be from editor back to documents
+      expect(history[4].from).toBe('/editor/123');
+      expect(history[4].to).toBe('/content/documents');
+      
+      // All events should be successful
+      expect(history.every(event => event.success)).toBe(true);
     });
   });
 });

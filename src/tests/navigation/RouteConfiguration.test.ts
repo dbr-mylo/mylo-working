@@ -74,6 +74,19 @@ describe('Route Configuration - Phase 2', () => {
       // Check unauthenticated configuration
       expect(unauthConfig.authRequiredRedirect).toBe('/auth');
     });
+    
+    it('should handle invalid role inputs gracefully', () => {
+      // @ts-ignore: Testing invalid role 
+      const invalidRoleConfig = getRoleRouteConfig('invalid-role');
+      
+      // Should fallback to null route config
+      expect(invalidRoleConfig).toEqual(ROLE_ROUTE_CONFIG.null);
+      
+      // Check undefined role
+      // @ts-ignore: Testing undefined role
+      const undefinedRoleConfig = getRoleRouteConfig(undefined);
+      expect(undefinedRoleConfig).toEqual(ROLE_ROUTE_CONFIG.null);
+    });
   });
   
   describe('2. Route Definitions', () => {
@@ -121,6 +134,22 @@ describe('Route Configuration - Phase 2', () => {
         }
       }
     });
+    
+    it('should handle dynamic routes correctly', () => {
+      // Find dynamic routes
+      const dynamicRoutes = validRoutes.filter(route => route.path.includes(':'));
+      
+      // Check dynamic routes have parameter information
+      dynamicRoutes.forEach(route => {
+        // Extract parameter names
+        const paramNames = route.path.split('/')
+          .filter(segment => segment.startsWith(':'))
+          .map(segment => segment.substring(1));
+          
+        // Each dynamic route should have parameters
+        expect(paramNames.length).toBeGreaterThan(0);
+      });
+    });
   });
   
   describe('3. Route Groups', () => {
@@ -142,6 +171,23 @@ describe('Route Configuration - Phase 2', () => {
       adminRoutes.forEach(route => {
         expect(route.group).toBe(routeGroups.ADMIN);
       });
+    });
+    
+    it('should have routes in each defined group', () => {
+      // Check that each group has at least one route
+      Object.values(routeGroups).forEach(group => {
+        const groupRoutes = getRoutesByGroup(group);
+        expect(groupRoutes.length).toBeGreaterThan(0);
+      });
+    });
+    
+    it('should handle invalid groups gracefully', () => {
+      // @ts-ignore: Testing invalid group
+      const invalidGroupRoutes = getRoutesByGroup('NON_EXISTENT_GROUP');
+      
+      // Should return empty array for invalid group
+      expect(Array.isArray(invalidGroupRoutes)).toBe(true);
+      expect(invalidGroupRoutes.length).toBe(0);
     });
   });
   
@@ -217,6 +263,49 @@ describe('Route Configuration - Phase 2', () => {
         expect(route.path).toBe('/admin');
         expect(route.requiredRole).toContain('admin');
       }
+    });
+    
+    it('should handle non-existent paths gracefully', () => {
+      // Try to get a non-existent route
+      const nonExistentRoute = getRouteByPath('/this-route-does-not-exist');
+      
+      // Should return undefined for non-existent route
+      expect(nonExistentRoute).toBeUndefined();
+    });
+    
+    it('should handle empty or invalid paths', () => {
+      // Try with empty path
+      const emptyPathRoute = getRouteByPath('');
+      expect(emptyPathRoute).toBeUndefined();
+      
+      // Try with invalid path
+      const invalidPathRoute = getRouteByPath(undefined as unknown as string);
+      expect(invalidPathRoute).toBeUndefined();
+    });
+  });
+  
+  describe('5. Access Level Validation', () => {
+    it('should have valid access levels for all routes', () => {
+      // Check that all routes have valid access levels
+      const validAccessLevels: AccessLevel[] = ['public', 'protected', 'role-specific'];
+      
+      validRoutes.forEach(route => {
+        expect(validAccessLevels).toContain(route.accessLevel);
+      });
+    });
+    
+    it('should have required roles for role-specific routes', () => {
+      // Find all role-specific routes
+      const roleSpecificRoutes = validRoutes.filter(
+        route => route.accessLevel === 'role-specific'
+      );
+      
+      // Check that all role-specific routes have required roles
+      roleSpecificRoutes.forEach(route => {
+        expect(route.requiredRole).toBeDefined();
+        expect(Array.isArray(route.requiredRole)).toBe(true);
+        expect(route.requiredRole!.length).toBeGreaterThan(0);
+      });
     });
   });
 });

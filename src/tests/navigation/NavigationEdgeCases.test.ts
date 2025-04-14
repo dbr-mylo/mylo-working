@@ -56,6 +56,43 @@ describe('Navigation Service Edge Cases', () => {
       // Verify handler was called correctly
       expect(errorHandlerSpy).toHaveBeenCalledWith(serverError);
     });
+    
+    it('should handle unexpected network errors', () => {
+      // Spy on error handler
+      const errorHandlerSpy = vi.spyOn(navigationService['errorHandler'], 'handleNavigationError');
+      
+      // Create network error
+      const networkError = {
+        type: NavigationErrorType.NETWORK_ERROR,
+        path: '/dashboard',
+        message: 'Failed to fetch data',
+        retryCount: 2
+      };
+      
+      // Handle the error
+      navigationService.handleNavigationError(networkError);
+      
+      // Verify handler was called correctly
+      expect(errorHandlerSpy).toHaveBeenCalledWith(networkError);
+    });
+    
+    it('should handle invalid state errors', () => {
+      // Spy on error handler
+      const errorHandlerSpy = vi.spyOn(navigationService['errorHandler'], 'handleNavigationError');
+      
+      // Create invalid state error
+      const invalidStateError = {
+        type: NavigationErrorType.INVALID_STATE,
+        path: '/editor',
+        message: 'Invalid editor state'
+      };
+      
+      // Handle the error
+      navigationService.handleNavigationError(invalidStateError);
+      
+      // Verify handler was called correctly
+      expect(errorHandlerSpy).toHaveBeenCalledWith(invalidStateError);
+    });
   });
 
   describe('Path Parameter Extraction', () => {
@@ -88,6 +125,49 @@ describe('Navigation Service Edge Cases', () => {
       );
       expect(encodedParams).toEqual({ term: 'hello%20world' });
     });
+    
+    it('should handle multiple parameters in a single path', () => {
+      // Test multiple parameters
+      const multiParams = extractPathParameters(
+        '/products/:category/:id/details',
+        '/products/electronics/12345/details'
+      );
+      expect(multiParams).toEqual({ 
+        category: 'electronics', 
+        id: '12345' 
+      });
+      
+      // Test interleaved static and dynamic segments
+      const complexParams = extractPathParameters(
+        '/users/:userId/posts/:postId/comments/:commentId',
+        '/users/abc123/posts/xyz789/comments/456'
+      );
+      expect(complexParams).toEqual({ 
+        userId: 'abc123', 
+        postId: 'xyz789', 
+        commentId: '456' 
+      });
+    });
+    
+    it('should handle non-matching paths correctly', () => {
+      // Different number of segments
+      const nonMatchingSegments = extractPathParameters(
+        '/user/:id/profile',
+        '/user/123/profile/settings'
+      );
+      expect(nonMatchingSegments).toBeNull();
+      
+      // Different static segments
+      const nonMatchingStatic = extractPathParameters(
+        '/user/:id/profile',
+        '/admin/123/profile'
+      );
+      expect(nonMatchingStatic).toBeNull();
+      
+      // Empty path
+      const emptyPath = extractPathParameters('/user/:id', '');
+      expect(emptyPath).toBeNull();
+    });
   });
 
   describe('Role Transitions', () => {
@@ -112,6 +192,26 @@ describe('Navigation Service Edge Cases', () => {
       // Test with a route that doesn't need redirection (admin can access everything)
       const needsRedirect2 = navigationService.needsRedirect('/writer-dashboard', 'admin');
       expect(typeof needsRedirect2).toBe('boolean');
+    });
+    
+    it('should handle role escalation correctly', () => {
+      // Test escalating from designer to admin
+      const designerToAdmin = navigationService.handleRoleTransition('designer', 'admin');
+      expect(designerToAdmin).toBe('/admin');
+      
+      // Test escalating from writer to designer
+      const writerToDesigner = navigationService.handleRoleTransition('writer', 'designer');
+      expect(writerToDesigner).toBe('/designer-dashboard');
+    });
+    
+    it('should handle role deescalation correctly', () => {
+      // Test deescalating from admin to writer
+      const adminToWriter = navigationService.handleRoleTransition('admin', 'writer');
+      expect(adminToWriter).toBe('/writer-dashboard');
+      
+      // Test deescalating from designer to writer
+      const designerToWriter = navigationService.handleRoleTransition('designer', 'writer');
+      expect(designerToWriter).toBe('/writer-dashboard');
     });
   });
 
@@ -162,6 +262,44 @@ describe('Navigation Service Edge Cases', () => {
         expect.any(Error)
       );
     });
+    
+    it('should handle localStorage setItem errors gracefully', () => {
+      // Mock localStorage.setItem to throw an error
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('Storage quota exceeded');
+      });
+      
+      // Mock console.error to avoid polluting test output
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Add history event (which triggers persistence)
+      navigationService.logNavigationEvent('/', '/dashboard', true, 'admin');
+      
+      // Should log the error
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to persist navigation history'),
+        expect.any(Error)
+      );
+    });
+    
+    it('should handle corrupted localStorage data', () => {
+      // Mock localStorage.getItem to return invalid JSON
+      vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('invalid-json');
+      
+      // Mock console.error to avoid polluting test output
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Should not throw when loading corrupted data
+      expect(() => {
+        navigationService['navigationHistoryService'].loadPersistedHistory();
+      }).not.toThrow();
+      
+      // Should log the error
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to parse navigation history'),
+        expect.any(Error)
+      );
+    });
   });
 
   describe('Analytics', () => {
@@ -204,6 +342,83 @@ describe('Navigation Service Edge Cases', () => {
       // Second route should be second most frequent
       expect(frequentRoutes[1].path).toBe('/profile');
       expect(frequentRoutes[1].count).toBe(2);
+    });
+    
+    it('should handle analytics data with timestamp patterns', () => {
+      const today = new Date();
+      
+      // Log events at different times
+      navigationService.logNavigationEvent('/', '/dashboard', true, 'admin');
+      
+      // Mock navigation event with specific time properties
+      const mockEvent = {
+        from: '/',
+        to: '/dashboard',
+        success: true,
+        timestamp: today.toISOString(),
+        userRole: 'admin',
+        analytics: {
+          durationMs: 120,
+          userAgent: 'test-agent',
+          dayOfWeek: today.getDay(),
+          hourOfDay: today.getHours()
+        }
+      };
+      
+      // Add event with analytics data
+      navigationService['navigationHistoryService'].addToHistory(mockEvent);
+      
+      // Get recent history
+      const recentHistory = navigationService.getRecentNavigationHistory();
+      
+      // Verify analytics data in history
+      expect(recentHistory.some(event => 
+        event.analytics && 
+        typeof event.analytics.durationMs === 'number' &&
+        typeof event.analytics.dayOfWeek === 'number'
+      )).toBe(true);
+    });
+  });
+  
+  describe('Integration Tests', () => {
+    it('should integrate route validation with navigation history', () => {
+      // Mock route validation
+      const validateSpy = vi.spyOn(navigationService, 'validateRoute');
+      validateSpy.mockImplementation((path) => path !== '/admin');
+      
+      // Log successful navigation
+      navigationService.logNavigationEvent('/', '/dashboard', true, 'writer');
+      
+      // Log failed navigation
+      navigationService.logNavigationEvent('/dashboard', '/admin', false, 'writer', 'Access denied');
+      
+      // Get navigation history
+      const history = navigationService.getNavigationHistory();
+      
+      // Verify history contains both events
+      expect(history).toHaveLength(2);
+      
+      // Verify failed navigation is recorded correctly
+      const failedEvent = history.find(event => !event.success);
+      expect(failedEvent).toBeDefined();
+      expect(failedEvent?.from).toBe('/dashboard');
+      expect(failedEvent?.to).toBe('/admin');
+      expect(failedEvent?.failureReason).toBe('Access denied');
+      
+      // Restore original implementation
+      validateSpy.mockRestore();
+    });
+    
+    it('should integrate role transitions with navigation suggestions', () => {
+      // Get suggestions for writer role
+      const writerSuggestions = navigationService.getRoleSuggestedRoutes('writer', 3);
+      
+      // Verify suggestions are returned and formatted correctly
+      expect(Array.isArray(writerSuggestions)).toBe(true);
+      if (writerSuggestions.length > 0) {
+        expect(writerSuggestions[0]).toHaveProperty('path');
+        expect(writerSuggestions[0]).toHaveProperty('description');
+      }
     });
   });
 });

@@ -502,13 +502,17 @@ describe('Navigation Service Edge Cases', () => {
       // Create a spy to capture console warnings
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       
-      // Mock a circular reference by temporarily modifying the parent-finding logic
+      // Mock a circular reference by temporarily modifying the findParentRoute function
       const originalFindParent = findParentRoute;
-      vi.spyOn(global, 'findParentRoute').mockImplementation((path: string): string | null => {
+      const mockFindParentRoute = vi.fn((path: string): string | null => {
         if (path === '/admin') return '/admin/users';
         if (path === '/admin/users') return '/admin';
         return originalFindParent(path);
       });
+      
+      // Apply the mock
+      vi.spyOn(require('@/utils/navigation/config/routeRelationships'), 'findParentRoute')
+        .mockImplementation(mockFindParentRoute);
       
       // This should detect the circular reference and break the loop
       const breadcrumbs = getBreadcrumbPath('/admin/users');
@@ -519,8 +523,7 @@ describe('Navigation Service Edge Cases', () => {
         expect.anything()
       );
       
-      // Restore original implementation
-      vi.mocked(findParentRoute).mockRestore();
+      // Restore console warning
       consoleWarnSpy.mockRestore();
     });
     

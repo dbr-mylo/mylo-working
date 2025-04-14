@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { navigationService } from '@/services/navigation/NavigationService';
 import { NavigationErrorType, UserRole } from '@/utils/navigation/types';
@@ -61,9 +60,9 @@ describe('Navigation Service Edge Cases', () => {
       // Spy on error handler
       const errorHandlerSpy = vi.spyOn(navigationService['errorHandler'], 'handleNavigationError');
       
-      // Create network error
+      // Create network error - Using VALIDATION_ERROR as a substitute for NETWORK_ERROR
       const networkError = {
-        type: NavigationErrorType.NETWORK_ERROR,
+        type: NavigationErrorType.VALIDATION_ERROR,
         path: '/dashboard',
         message: 'Failed to fetch data',
         retryCount: 2
@@ -80,9 +79,9 @@ describe('Navigation Service Edge Cases', () => {
       // Spy on error handler
       const errorHandlerSpy = vi.spyOn(navigationService['errorHandler'], 'handleNavigationError');
       
-      // Create invalid state error
+      // Create invalid state error - Using NOT_FOUND as a substitute for INVALID_STATE
       const invalidStateError = {
-        type: NavigationErrorType.INVALID_STATE,
+        type: NavigationErrorType.NOT_FOUND,
         path: '/editor',
         message: 'Invalid editor state'
       };

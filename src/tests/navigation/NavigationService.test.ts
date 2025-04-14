@@ -1,7 +1,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { navigationService } from '@/services/navigation/NavigationService';
-import { NavigationErrorType } from '@/utils/navigation/types';
+import { NavigationErrorType, UserRole } from '@/utils/navigation/types';
 import { extractPathParameters, isActivePath, formatPathForDisplay } from '@/utils/navigation/routeUtils';
 
 describe('Navigation Service', () => {
@@ -111,7 +111,7 @@ describe('Navigation Service', () => {
         type: NavigationErrorType.UNAUTHORIZED,
         path: '/admin',
         message: 'Access denied',
-        role: 'writer'
+        role: 'writer' as UserRole // Fix here with type assertion
       };
       
       // Call the method

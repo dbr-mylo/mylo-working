@@ -3,6 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NavigationRegressionTester } from './NavigationRegressionTester';
 import { RoutingTestSuite } from './RoutingTestSuite';
+import { ParameterTestingSuite } from './parameters/ParameterTestingSuite';
 
 export const MainRegressionTester: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ export const MainRegressionTester: React.FC = () => {
         <TabsList>
           <TabsTrigger value="navigation">Navigation</TabsTrigger>
           <TabsTrigger value="routing">Advanced Routing</TabsTrigger>
+          <TabsTrigger value="parameters">Route Parameters</TabsTrigger>
           <TabsTrigger value="permissions">Permissions</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
         </TabsList>
@@ -23,6 +25,10 @@ export const MainRegressionTester: React.FC = () => {
         
         <TabsContent value="routing" className="mt-4">
           <RoutingTestSuite />
+        </TabsContent>
+        
+        <TabsContent value="parameters" className="mt-4">
+          <ParameterTestingSuite />
         </TabsContent>
         
         <TabsContent value="permissions" className="mt-4">

@@ -47,15 +47,32 @@ export const findParentRoute = (path: string): string | null => {
 /**
  * Find all parent routes in a hierarchy for a given path
  * @param path Current route path
+ * @param visited Optional array of already visited paths to detect circular references
  * @returns Array of parent routes in order from root to closest parent
  */
-export const findParentRoutes = (path: string): Array<{ path: string; label: string }> => {
+export const findParentRoutes = (path: string, visited: string[] = []): Array<{ path: string; label: string }> => {
+  // Check for circular references
+  if (visited.includes(path)) {
+    console.warn('Circular reference detected in route hierarchy:', [...visited, path].join(' -> '));
+    return [];
+  }
+  
   const result: Array<{ path: string; label: string }> = [];
   let currentPath = path;
+  
+  // Add current path to visited paths
+  const updatedVisited = [...visited, currentPath];
   
   while (true) {
     const parentPath = findParentRoute(currentPath);
     if (!parentPath) {
+      break;
+    }
+    
+    // Check for circular reference with the new parent
+    if (updatedVisited.includes(parentPath)) {
+      console.warn('Circular reference detected in route hierarchy:', 
+        [...updatedVisited, parentPath].join(' -> '));
       break;
     }
     
@@ -69,11 +86,14 @@ export const findParentRoutes = (path: string): Array<{ path: string; label: str
       label: parentRoute.description
     });
     
+    // Add this parent to visited paths
+    updatedVisited.push(parentPath);
+    
     currentPath = parentPath;
     
-    // Prevent infinite loops
+    // Prevent infinite loops as a safety measure
     if (result.length > 10) {
-      console.warn('Possible circular reference in route hierarchy:', path);
+      console.warn('Possible circular reference or excessive nesting in route hierarchy:', path);
       break;
     }
   }

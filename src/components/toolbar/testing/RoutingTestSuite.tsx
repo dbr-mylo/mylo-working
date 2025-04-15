@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { UserRole } from '@/utils/navigation/types';
 import { navigationService } from '@/services/navigation/NavigationService';
-import { findParentRoutes, getBreadcrumbPath } from '@/utils/navigation/config/routeRelationships';
+import { findParentRoutes, getBreadcrumbPath, findChildRoutes, findAlternativeRoutes } from '@/utils/navigation/config/routeRelationships';
+import { mockUtils } from '@/utils/testUtils';
 
 export const RoutingTestSuite: React.FC = () => {
   const { toast } = useToast();
@@ -24,8 +25,8 @@ export const RoutingTestSuite: React.FC = () => {
       const relationships = {
         breadcrumbs: getBreadcrumbPath(testPath),
         parentRoutes: findParentRoutes(testPath),
-        childRoutes: navigationService.getChildRoutes(testPath),
-        alternativeRoutes: navigationService.getAlternativeRoutes(testPath, testRole)
+        childRoutes: findChildRoutes(testPath),
+        alternativeRoutes: findAlternativeRoutes(testPath)
       };
       
       setResults(prev => [
@@ -89,14 +90,19 @@ export const RoutingTestSuite: React.FC = () => {
   // Test circular references
   const testCircularReferences = () => {
     try {
-      // Force a circular reference scenario for testing
-      console.warn = jest.fn(); // Mock console.warn to prevent actual warnings
+      // Create a mock console.warn function to detect circular references
+      const originalWarn = console.warn;
+      const mockWarn = mockUtils.fn();
+      console.warn = mockWarn;
       
       // Get breadcrumbs for a path that might have circular references
       const breadcrumbs = getBreadcrumbPath(testPath);
       
       // Count warnings about circular references
-      const warningCount = (console.warn as jest.Mock).mock.calls.length;
+      const warningCount = mockWarn.mock.calls.length;
+      
+      // Restore console.warn
+      console.warn = originalWarn;
       
       setResults(prev => [
         {
@@ -113,9 +119,6 @@ export const RoutingTestSuite: React.FC = () => {
         title: 'Circular reference test complete',
         description: `Found ${warningCount} potential circular references in breadcrumb generation`,
       });
-      
-      // Restore console.warn
-      (console.warn as jest.Mock).mockRestore();
     } catch (error) {
       toast({
         title: 'Error testing circular references',

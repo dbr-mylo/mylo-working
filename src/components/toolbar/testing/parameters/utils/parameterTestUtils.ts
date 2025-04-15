@@ -1,4 +1,3 @@
-
 import { navigationService } from '@/services/navigation/NavigationService';
 
 /**
@@ -33,6 +32,29 @@ export const PARAMETER_TEST_CASES = {
     pattern: '/search/:query',
     actual: '/search/react%20components',
     expected: { query: 'react%20components' }
+  },
+  edgeCases: {
+    pattern: '/user/:id/profile/:section',
+    actual: '/user/123/profile/',
+    expected: null
+  },
+  unicode: {
+    pattern: '/blog/:category/:title',
+    actual: '/blog/café/español-artículo',
+    expected: {
+      category: 'café',
+      title: 'español-artículo'
+    }
+  },
+  complexNesting: {
+    pattern: '/org/:orgId/team/:teamId/project/:projectId/task/:taskId',
+    actual: '/org/org-123/team/team-456/project/proj-789/task/task-101',
+    expected: {
+      orgId: 'org-123',
+      teamId: 'team-456',
+      projectId: 'proj-789',
+      taskId: 'task-101'
+    }
   }
 };
 
@@ -78,12 +100,17 @@ export const generateDeepLink = (
 export const validateParameters = (
   actual: Record<string, string> | null, 
   expected: Record<string, string>
-): { valid: boolean; mismatches: string[] } => {
-  if (!actual) {
-    return { valid: false, mismatches: ['Parameters could not be extracted'] };
-  }
-  
+): { valid: boolean; mismatches: string[]; warnings: string[] } => {
   const mismatches: string[] = [];
+  const warnings: string[] = [];
+  
+  if (!actual) {
+    return { 
+      valid: false, 
+      mismatches: ['Parameters could not be extracted'], 
+      warnings: [] 
+    };
+  }
   
   // Check if all expected keys exist with correct values
   Object.entries(expected).forEach(([key, value]) => {
@@ -91,6 +118,11 @@ export const validateParameters = (
       mismatches.push(`Missing expected parameter: ${key}`);
     } else if (actual[key] !== value) {
       mismatches.push(`Parameter ${key} has value "${actual[key]}" but expected "${value}"`);
+    }
+    
+    // Check for potential encoding issues
+    if (actual[key] && actual[key].includes('%')) {
+      warnings.push(`Parameter ${key} might need URL decoding`);
     }
   });
   
@@ -101,7 +133,11 @@ export const validateParameters = (
     }
   });
   
-  return { valid: mismatches.length === 0, mismatches };
+  return { 
+    valid: mismatches.length === 0, 
+    mismatches, 
+    warnings 
+  };
 };
 
 /**
@@ -112,4 +148,27 @@ export const benchmarkFunction = <T>(fn: () => T): { result: T; executionTime: n
   const result = fn();
   const end = performance.now();
   return { result, executionTime: end - start };
+};
+
+/**
+ * Run performance benchmarking
+ */
+export const runPerformanceBenchmark = (
+  testFn: () => void,
+  iterations: number = 1000
+): { averageTime: number; maxTime: number; minTime: number } => {
+  const times: number[] = [];
+  
+  for (let i = 0; i < iterations; i++) {
+    const start = performance.now();
+    testFn();
+    const end = performance.now();
+    times.push(end - start);
+  }
+  
+  return {
+    averageTime: times.reduce((a, b) => a + b, 0) / times.length,
+    maxTime: Math.max(...times),
+    minTime: Math.min(...times)
+  };
 };

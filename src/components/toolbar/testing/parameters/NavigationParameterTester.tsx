@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { benchmarkFunction } from './utils/parameterTestUtils';
-import { PathSegmentBuilder } from './components/PathSegmentBuilder';
+import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
 import { navigationService } from '@/services/navigation/NavigationService';
 
 export const NavigationParameterTester: React.FC = () => {
@@ -14,7 +14,7 @@ export const NavigationParameterTester: React.FC = () => {
   const [actualPath, setActualPath] = useState('/content/article/doc-123/version/v2');
   const [results, setResults] = useState<any[]>([]);
   const [benchmarks, setBenchmarks] = useState<{iterations: number; averageTime: number} | null>(null);
-  const [segments, setSegments] = useState([
+  const [segments, setSegments] = useState<PathSegment[]>([
     { type: 'static', name: '', value: 'content' },
     { type: 'param', name: 'contentType', value: 'article' }
   ]);
@@ -48,7 +48,11 @@ export const NavigationParameterTester: React.FC = () => {
 
   const handleSegmentUpdate = (index: number, field: string, value: string) => {
     const newSegments = [...segments];
-    (newSegments[index] as any)[field] = value;
+    if (field === 'type' && (value === 'static' || value === 'param')) {
+      newSegments[index].type = value;
+    } else if (field === 'name' || field === 'value') {
+      (newSegments[index] as any)[field] = value;
+    }
     setSegments(newSegments);
   };
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-interface PathSegment {
+export interface PathSegment {
   type: 'static' | 'param';
   name: string;
   value: string;

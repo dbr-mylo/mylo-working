@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { generateDeepLink } from './utils/parameterTestUtils';
-import { PathSegmentBuilder } from './components/PathSegmentBuilder';
+import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
 import { QueryParameterBuilder } from './components/QueryParameterBuilder';
 import { GeneratedLinkDisplay } from './components/GeneratedLinkDisplay';
 
@@ -15,7 +15,7 @@ export const DeepLinkTester: React.FC = () => {
   const [params, setParams] = useState([{ key: 'type', value: 'article' }, { key: 'id', value: '123' }]);
   const [queryParams, setQueryParams] = useState([{ key: 'mode', value: 'edit' }]);
   const [generatedLink, setGeneratedLink] = useState('');
-  const [segments, setSegments] = useState([
+  const [segments, setSegments] = useState<PathSegment[]>([
     { type: 'static', name: '', value: 'content' },
     { type: 'param', name: 'contentType', value: 'article' }
   ]);
@@ -50,7 +50,11 @@ export const DeepLinkTester: React.FC = () => {
 
   const handleSegmentUpdate = (index: number, field: string, value: string) => {
     const newSegments = [...segments];
-    (newSegments[index] as any)[field] = value;
+    if (field === 'type' && (value === 'static' || value === 'param')) {
+      newSegments[index].type = value;
+    } else if (field === 'name' || field === 'value') {
+      (newSegments[index] as any)[field] = value;
+    }
     setSegments(newSegments);
   };
 

@@ -301,7 +301,7 @@ export const EdgeCaseTestSuite: React.FC = () => {
               <div key={index} className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-medium">{result.name}</div>
-                  <Badge variant={result.passed ? "success" : "destructive"}>
+                  <Badge variant={result.passed ? "default" : "destructive"} className={result.passed ? "bg-green-500 hover:bg-green-600" : undefined}>
                     {result.passed ? "Passed" : "Failed"}
                   </Badge>
                 </div>

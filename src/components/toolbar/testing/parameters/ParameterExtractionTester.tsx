@@ -3,194 +3,211 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Copy } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PARAMETER_TEST_CASES, extractParameters, validateParameters, benchmarkFunction } from './utils/parameterTestUtils';
+import { PARAMETER_TEST_CASES, extractParameters, validateParameters } from './utils/parameterTestUtils';
+import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
 
 export const ParameterExtractionTester: React.FC = () => {
   const { toast } = useToast();
   const [pattern, setPattern] = useState('/user/:id');
   const [actualPath, setActualPath] = useState('/user/123');
-  const [expectedParams, setExpectedParams] = useState('{"id": "123"}');
   const [extractedParams, setExtractedParams] = useState<Record<string, string> | null>(null);
-  const [validation, setValidation] = useState<{ valid: boolean; mismatches: string[] }>({ valid: true, mismatches: [] });
-  const [executionTime, setExecutionTime] = useState<number | null>(null);
+  const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [segments, setSegments] = useState<PathSegment[]>([
+    { type: 'static', name: '', value: 'user' },
+    { type: 'param', name: 'id', value: '123' }
+  ]);
 
-  const runExtraction = () => {
+  useEffect(() => {
+    // Extract parameters when paths change
     try {
-      // Run extraction with performance benchmark
-      const { result, executionTime } = benchmarkFunction(() => extractParameters(pattern, actualPath));
-      setExtractedParams(result);
-      setExecutionTime(executionTime);
-      
-      // Validate against expected parameters
-      try {
-        const expected = JSON.parse(expectedParams);
-        const validation = validateParameters(result, expected);
-        setValidation(validation);
-      } catch (error) {
+      const params = extractParameters(pattern, actualPath);
+      setExtractedParams(params);
+    } catch (error) {
+      console.error('Error extracting parameters:', error);
+      setExtractedParams(null);
+    }
+  }, [pattern, actualPath]);
+
+  const handleTestCaseSelect = (testCase: keyof typeof PARAMETER_TEST_CASES) => {
+    const selectedCase = PARAMETER_TEST_CASES[testCase];
+    setPattern(selectedCase.pattern);
+    setActualPath(selectedCase.actual);
+    
+    // Update segments based on the test case
+    const newSegments: PathSegment[] = [];
+    const patternSegments = selectedCase.pattern.split('/').filter(Boolean);
+    
+    patternSegments.forEach(segment => {
+      if (segment.startsWith(':')) {
+        const paramName = segment.substring(1);
+        const paramValue = selectedCase.expected?.[paramName] || '';
+        newSegments.push({ type: 'param', name: paramName, value: paramValue });
+      } else {
+        newSegments.push({ type: 'static', name: '', value: segment });
+      }
+    });
+    
+    setSegments(newSegments);
+  };
+
+  const validateExtractedParams = () => {
+    if (!extractedParams) {
+      toast({
+        title: 'No parameters extracted',
+        description: 'Cannot validate parameters. Make sure your pattern and path match',
+        variant: 'destructive',
+      });
+      setIsValid(false);
+      return;
+    }
+
+    try {
+      // For validation, we'll create an expected object from the segments
+      const expectedParams: Record<string, string> = {};
+      segments
+        .filter(s => s.type === 'param')
+        .forEach(s => {
+          expectedParams[s.name] = s.value;
+        });
+
+      const validationResult = validateParameters(extractedParams, expectedParams);
+      setIsValid(validationResult.valid);
+
+      if (validationResult.valid) {
         toast({
-          title: 'Invalid expected parameters',
-          description: 'Expected parameters must be a valid JSON object',
+          title: 'Parameters are valid',
+          description: 'Extracted parameters match expected values',
+        });
+      } else {
+        toast({
+          title: 'Parameter validation failed',
+          description: `${validationResult.mismatches.length} mismatches found`,
           variant: 'destructive',
         });
       }
-      
-      toast({
-        title: 'Parameter extraction complete',
-        description: `Execution time: ${executionTime.toFixed(2)}ms`,
-      });
     } catch (error) {
+      console.error('Error validating parameters:', error);
       toast({
-        title: 'Error during extraction',
+        title: 'Error during validation',
         description: error instanceof Error ? error.message : 'Unknown error',
         variant: 'destructive',
       });
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied to clipboard',
-      description: 'Parameter data copied to clipboard',
-    });
-  };
-  
-  const loadTestCase = (testCaseKey: string) => {
-    const testCase = PARAMETER_TEST_CASES[testCaseKey as keyof typeof PARAMETER_TEST_CASES];
-    if (testCase) {
-      setPattern(testCase.pattern);
-      setActualPath(testCase.actual);
-      setExpectedParams(JSON.stringify(testCase.expected, null, 2));
+  const handleSegmentUpdate = (index: number, field: string, value: string) => {
+    const newSegments = [...segments];
+    
+    if (field === 'type' && (value === 'static' || value === 'param')) {
+      newSegments[index].type = value;
+    } else if (field === 'name' || field === 'value') {
+      (newSegments[index] as any)[field] = value;
     }
+    
+    setSegments(newSegments);
+  };
+
+  const buildPathFromSegments = () => {
+    let newPattern = '';
+    let newActualPath = '';
+
+    segments.forEach(segment => {
+      if (segment.type === 'static') {
+        newPattern += `/${segment.value}`;
+        newActualPath += `/${segment.value}`;
+      } else {
+        newPattern += `/:${segment.name}`;
+        newActualPath += `/${segment.value}`;
+      }
+    });
+
+    setPattern(newPattern);
+    setActualPath(newActualPath);
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex justify-between">
-          <span>Parameter Extraction Tester</span>
-          <div className="flex gap-2">
-            {validation.valid ? 
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Valid</Badge> : 
-              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Invalid</Badge>
-            }
-            {executionTime !== null && 
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">{executionTime.toFixed(2)}ms</Badge>
-            }
-          </div>
-        </CardTitle>
+        <CardTitle>Parameter Extraction Tester</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="manual">
-          <TabsList className="mb-4">
-            <TabsTrigger value="manual">Manual Input</TabsTrigger>
-            <TabsTrigger value="presets">Test Cases</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Sample Test Cases</label>
+            <div className="flex flex-wrap gap-2">
+              {Object.keys(PARAMETER_TEST_CASES).map(key => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleTestCaseSelect(key as keyof typeof PARAMETER_TEST_CASES)}
+                >
+                  {key}
+                </Button>
+              ))}
+            </div>
+          </div>
           
-          <TabsContent value="manual" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Route Pattern</label>
-              <Input 
+              <Input
                 value={pattern}
                 onChange={(e) => setPattern(e.target.value)}
                 placeholder="/user/:id"
                 className="font-mono"
               />
-              <p className="text-xs text-muted-foreground">
-                The route pattern with parameter placeholders (e.g., /user/:id/profile/:section)
-              </p>
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-medium">Actual Path</label>
-              <Input 
+              <Input
                 value={actualPath}
                 onChange={(e) => setActualPath(e.target.value)}
                 placeholder="/user/123"
                 className="font-mono"
               />
-              <p className="text-xs text-muted-foreground">
-                The actual URL path with parameter values (e.g., /user/123/profile/settings)
-              </p>
             </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Expected Parameters (JSON)</label>
-              <Input 
-                value={expectedParams}
-                onChange={(e) => setExpectedParams(e.target.value)}
-                placeholder='{"id": "123"}'
-                className="font-mono"
-              />
-              <p className="text-xs text-muted-foreground">
-                JSON object with expected parameter names and values
-              </p>
-            </div>
-            
-            <Button onClick={runExtraction}>
-              Extract Parameters
-            </Button>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="presets" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(PARAMETER_TEST_CASES).map(([key, testCase]) => (
-                <Card key={key} className="cursor-pointer hover:bg-muted/50" onClick={() => loadTestCase(key)}>
-                  <CardContent className="pt-4">
-                    <h3 className="font-medium mb-2 capitalize">{key}</h3>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="font-mono">{testCase.pattern}</p>
-                      <p className="font-mono">{testCase.actual}</p>
-                      <p className="text-xs truncate">{JSON.stringify(testCase.expected)}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+          <div className="border-t pt-6">
+            <PathSegmentBuilder
+              segments={segments}
+              onSegmentUpdate={handleSegmentUpdate}
+              onSegmentRemove={(index) => {
+                setSegments(segments.filter((_, i) => i !== index));
+              }}
+              onAddSegment={(type) => {
+                setSegments([...segments, { type, name: '', value: '' }]);
+              }}
+              onBuildPath={buildPathFromSegments}
+            />
+          </div>
           
-          <TabsContent value="results" className="space-y-4">
-            <div className="border rounded-md p-4 bg-muted/50">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">Extracted Parameters</h3>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => copyToClipboard(JSON.stringify(extractedParams, null, 2))}
-                  disabled={!extractedParams}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              <pre className="bg-background p-3 rounded-md text-sm overflow-auto max-h-40">
-                {extractedParams ? JSON.stringify(extractedParams, null, 2) : 'No parameters extracted yet'}
+          <Button onClick={validateExtractedParams} className="w-full">
+            Validate Parameters
+          </Button>
+          
+          <div className="border rounded-md p-4 bg-muted/30">
+            <h3 className="text-sm font-medium mb-2">Extracted Parameters</h3>
+            {extractedParams === null ? (
+              <p className="text-sm text-muted-foreground">No parameters extracted. Pattern and path may not match.</p>
+            ) : Object.keys(extractedParams).length === 0 ? (
+              <p className="text-sm text-muted-foreground">No parameters found in the path.</p>
+            ) : (
+              <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                {JSON.stringify(extractedParams, null, 2)}
               </pre>
-            </div>
-            
-            {validation.mismatches.length > 0 && (
-              <div className="border border-red-200 rounded-md p-4 bg-red-50">
-                <h3 className="font-medium text-red-700 mb-2">Validation Issues</h3>
-                <ul className="list-disc list-inside text-sm text-red-700">
-                  {validation.mismatches.map((mismatch, index) => (
-                    <li key={index}>{mismatch}</li>
-                  ))}
-                </ul>
-              </div>
             )}
             
-            {validation.valid && extractedParams && (
-              <div className="border border-green-200 rounded-md p-4 bg-green-50">
-                <h3 className="font-medium text-green-700">Validation Passed</h3>
-                <p className="text-sm text-green-700">Parameters match expected values</p>
+            {isValid !== null && (
+              <div className={`mt-2 p-2 rounded-md ${isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {isValid ? 'Parameters are valid!' : 'Parameters do not match expected values.'}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

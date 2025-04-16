@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ParameterExtractionTester } from './ParameterExtractionTester';
@@ -5,6 +6,7 @@ import { NavigationParameterTester } from './NavigationParameterTester';
 import { DeepLinkTester } from './DeepLinkTester';
 import { PerformanceMetrics } from './components/PerformanceMetrics';
 import { EDGE_CASE_TEST_SCENARIOS } from './utils/edgeCaseUtils';
+import { EdgeCaseTestSuite } from './components/EdgeCaseTestSuite';
 
 export const ParameterTestingSuite: React.FC = () => {
   return (
@@ -29,6 +31,7 @@ export const ParameterTestingSuite: React.FC = () => {
           <TabsTrigger value="extraction">Parameter Extraction</TabsTrigger>
           <TabsTrigger value="navigation">Navigation Parameters</TabsTrigger>
           <TabsTrigger value="deeplink">Deep Link Generation</TabsTrigger>
+          <TabsTrigger value="edgecases">Edge Cases</TabsTrigger>
         </TabsList>
         
         <TabsContent value="extraction" className="mt-4">
@@ -41,6 +44,10 @@ export const ParameterTestingSuite: React.FC = () => {
         
         <TabsContent value="deeplink" className="mt-4">
           <DeepLinkTester />
+        </TabsContent>
+        
+        <TabsContent value="edgecases" className="mt-4">
+          <EdgeCaseTestSuite />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,4 +1,3 @@
-
 import { NavigationError, NavigationErrorType, UserRole } from './types';
 import { getErrorResolutionSteps } from '@/utils/error/errorResolution';
 import { ErrorCategory } from '@/utils/error/errorClassifier';
@@ -44,10 +43,7 @@ export const getNavigationErrorRecoverySteps = (error: NavigationError): string[
   
   // Get appropriate resolution steps based on category
   const resolutionSteps = getErrorResolutionSteps(
-    new Error(error.message || 'Navigation error'),
-    'navigation',
-    error.role,
-    'navigation'
+    new Error(error.message || 'Navigation error')
   );
   
   // Add navigation-specific steps

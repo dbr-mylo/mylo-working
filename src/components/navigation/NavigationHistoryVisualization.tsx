@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useDeepLinking } from "@/hooks/navigation/useDeepLinking";
 import { Share2, Download, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * Component for visualizing navigation history and analytics
@@ -17,7 +18,7 @@ import { Share2, Download, RefreshCw } from "lucide-react";
 const NavigationHistoryVisualization: React.FC = () => {
   const [history, setHistory] = useState<NavigationEvent[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
-  const { copyShareableLink } = useDeepLinking();
+  const { createDeepLink } = useDeepLinking();
   
   // Fetch navigation history on mount and refreshKey change
   useEffect(() => {
@@ -79,7 +80,31 @@ const NavigationHistoryVisualization: React.FC = () => {
   };
   
   const handleShare = () => {
-    copyShareableLink('/navigation/history');
+    try {
+      const path = '/navigation/history';
+      const shareableLink = createDeepLink(path);
+      
+      if (!shareableLink) {
+        throw new Error('Failed to create shareable link');
+      }
+      
+      const fullUrl = `${window.location.origin}${shareableLink}`;
+      
+      navigator.clipboard.writeText(fullUrl)
+        .then(() => {
+          toast.success('Link copied to clipboard', {
+            description: 'You can now share this history view',
+            duration: 3000
+          });
+        })
+        .catch(err => {
+          console.error('Failed to copy:', err);
+          toast.error('Failed to copy link');
+        });
+    } catch (error) {
+      console.error('Error sharing link:', error);
+      toast.error('Error creating shareable link');
+    }
   };
   
   return (

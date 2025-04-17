@@ -2,6 +2,7 @@ import { NavigationError, NavigationErrorType, UserRole } from './types';
 import { getErrorResolutionSteps } from '@/utils/error/errorResolution';
 import { ErrorCategory } from '@/utils/error/errorClassifier';
 import { toast } from 'sonner';
+import { navigationalErrorToCategory } from './errorHandling';
 
 /**
  * Format a navigation error message to be user-friendly
@@ -42,9 +43,7 @@ export const getNavigationErrorRecoverySteps = (error: NavigationError): string[
   const errorCategory = navigationalErrorToCategory(error.type);
   
   // Get appropriate resolution steps based on category
-  const resolutionSteps = getErrorResolutionSteps(
-    new Error(error.message || 'Navigation error')
-  );
+  const resolutionSteps = getErrorResolutionSteps(errorCategory);
   
   // Add navigation-specific steps
   switch (error.type) {

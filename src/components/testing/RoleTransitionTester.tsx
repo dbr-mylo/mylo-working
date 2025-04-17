@@ -1,512 +1,335 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { navigationService } from '@/services/navigation/NavigationService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { UserRole } from '@/utils/navigation/types';
-import { Loader2, ShieldCheck, ShieldAlert, ArrowRightLeft, AlertCircle } from 'lucide-react';
-
-type TransitionResult = {
-  from: UserRole | null;
-  to: UserRole | null;
-  redirectPath: string;
-  timestamp: string;
-  success: boolean;
-  message?: string;
-};
-
-type AccessResult = {
-  role: UserRole | null;
-  path: string;
-  allowed: boolean;
-  timestamp: string;
-  redirectPath?: string;
-  message?: string;
-};
+import { navigationService } from '@/services/navigation/NavigationService';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 /**
- * Component for testing role transitions and access controls
+ * Component for testing role transitions and their effect on navigation
  */
 export const RoleTransitionTester: React.FC = () => {
-  const { role, setRole } = useAuth();
-  const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(role);
-  const [transitionResults, setTransitionResults] = useState<TransitionResult[]>([]);
-  const [accessResults, setAccessResults] = useState<AccessResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('transitions');
-  
-  // All available roles
-  const availableRoles: Array<UserRole | null> = ['writer', 'designer', 'admin', null];
-  
-  // Test paths for each role
-  const rolePaths: Record<string, string> = {
-    writer: '/writer-dashboard',
-    designer: '/designer-dashboard',
-    admin: '/admin',
-    null: '/auth'
+  const { role } = useAuth();
+  const [selectedSourceRole, setSelectedSourceRole] = useState<UserRole | null>(role);
+  const [selectedTargetRole, setSelectedTargetRole] = useState<UserRole | null>(null);
+  const [isRunningTest, setIsRunningTest] = useState(false);
+  const [transitionResults, setTransitionResults] = useState<Array<{
+    sourceRole: UserRole | null;
+    targetRole: UserRole | null;
+    redirectPath: string;
+    expectedPaths: string[];
+    validPaths: string[];
+    invalidPaths: string[];
+    timestamp: string;
+  }>>([]);
+
+  /**
+   * Test a role transition and record results
+   */
+  const testRoleTransition = () => {
+    if (!selectedTargetRole) {
+      toast.error("Please select a target role");
+      return;
+    }
+
+    setIsRunningTest(true);
+    
+    try {
+      // Get the redirect path for this transition
+      const redirectPath = navigationService.handleRoleTransition(selectedSourceRole, selectedTargetRole);
+      
+      // Get suggested routes for the target role
+      const suggestions = navigationService.getRoleSuggestedRoutes(selectedTargetRole);
+      const expectedPaths = suggestions.map(s => s.path);
+      
+      // Check which routes are valid for the target role
+      const validPaths: string[] = [];
+      const invalidPaths: string[] = [];
+      
+      // Test a selection of common routes
+      const commonRoutes = [
+        '/',
+        '/documents',
+        '/editor',
+        '/writer-dashboard',
+        '/designer-dashboard',
+        '/admin',
+        '/admin/users',
+        '/design/templates',
+        '/content/documents'
+      ];
+      
+      commonRoutes.forEach(route => {
+        if (navigationService.validateRoute(route, selectedTargetRole)) {
+          validPaths.push(route);
+        } else {
+          invalidPaths.push(route);
+        }
+      });
+      
+      // Add results
+      const result = {
+        sourceRole: selectedSourceRole,
+        targetRole: selectedTargetRole,
+        redirectPath,
+        expectedPaths,
+        validPaths,
+        invalidPaths,
+        timestamp: new Date().toISOString()
+      };
+      
+      setTransitionResults(prev => [result, ...prev]);
+      
+      toast.success("Role transition test completed", {
+        description: `${selectedSourceRole || 'Unauthenticated'} → ${selectedTargetRole}`
+      });
+    } catch (error) {
+      toast.error("Failed to test role transition", {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    } finally {
+      setIsRunningTest(false);
+    }
   };
 
-  // Update selected role when actual role changes
-  useEffect(() => {
-    setSelectedRole(role);
-  }, [role]);
-  
   /**
-   * Test role transition
-   */
-  const testRoleTransition = async () => {
-    if (selectedRole === role) {
-      toast.warning("Selected role is the same as current role", {
-        description: "Please select a different role for transition testing"
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    const previousRole = role;
-    
-    try {
-      // Get redirect path from navigation service
-      const redirectPath = navigationService.handleRoleTransition(previousRole, selectedRole);
-      
-      // Apply role change in auth context
-      setRole(selectedRole);
-      
-      // Log the result
-      const result: TransitionResult = {
-        from: previousRole,
-        to: selectedRole,
-        redirectPath,
-        timestamp: new Date().toISOString(),
-        success: true,
-        message: `Successfully transitioned from ${previousRole || 'unauthenticated'} to ${selectedRole || 'unauthenticated'}`
-      };
-      
-      setTransitionResults(prev => [result, ...prev]);
-      
-      // Display toast
-      toast.success("Role transition successful", {
-        description: `Changed role from ${previousRole || 'unauthenticated'} to ${selectedRole || 'unauthenticated'}`
-      });
-      
-      // Navigate to the redirect path if it's valid
-      if (redirectPath) {
-        // For testing purposes, we'll just show where it would redirect
-        toast.info(`Would redirect to: ${redirectPath}`, {
-          description: "Navigation not performed in test mode"
-        });
-      }
-    } catch (error) {
-      // Log failure
-      const result: TransitionResult = {
-        from: previousRole,
-        to: selectedRole,
-        redirectPath: '',
-        timestamp: new Date().toISOString(),
-        success: false,
-        message: error instanceof Error ? error.message : "An error occurred during role transition"
-      };
-      
-      setTransitionResults(prev => [result, ...prev]);
-      
-      // Display error
-      toast.error("Role transition failed", {
-        description: result.message
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  /**
-   * Test access control for a specific path
-   */
-  const testAccessControl = (path: string, testRole: UserRole | null) => {
-    const isValid = navigationService.validateRoute(path, testRole);
-    
-    // Log the result
-    const result: AccessResult = {
-      role: testRole,
-      path,
-      allowed: isValid,
-      timestamp: new Date().toISOString(),
-      message: isValid 
-        ? `Role ${testRole || 'unauthenticated'} can access ${path}`
-        : `Role ${testRole || 'unauthenticated'} cannot access ${path}`
-    };
-    
-    setAccessResults(prev => [result, ...prev]);
-    
-    // Display toast
-    if (isValid) {
-      toast.success("Access allowed", {
-        description: result.message
-      });
-    } else {
-      toast.error("Access denied", {
-        description: result.message
-      });
-    }
-    
-    return result;
-  };
-  
-  /**
-   * Test access for current role to all paths
-   */
-  const testCurrentRoleAccess = async () => {
-    setIsLoading(true);
-    const results: AccessResult[] = [];
-    
-    try {
-      toast.info("Testing access control for all paths...");
-      
-      // Test each path for the current role
-      for (const [roleName, path] of Object.entries(rolePaths)) {
-        const result = testAccessControl(path, role);
-        results.push(result);
-        await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for UI
-      }
-      
-      toast.success("Access control tests completed");
-    } catch (error) {
-      toast.error("Error testing access control", {
-        description: error instanceof Error ? error.message : "An unknown error occurred"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  /**
-   * Test redirection needs after role change
-   */
-  const testRedirectionNeeds = async () => {
-    if (!selectedRole) {
-      toast.warning("No role selected", {
-        description: "Please select a role to test redirection needs"
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    const results: AccessResult[] = [];
-    
-    try {
-      toast.info("Testing redirection needs...");
-      
-      // Test each path for redirection needs
-      for (const [roleName, path] of Object.entries(rolePaths)) {
-        const needsRedirect = navigationService.needsRedirect(path, selectedRole);
-        const redirectPath = needsRedirect ? navigationService.getFallbackRoute(selectedRole) : undefined;
-        
-        const result: AccessResult = {
-          role: selectedRole,
-          path,
-          allowed: !needsRedirect,
-          timestamp: new Date().toISOString(),
-          redirectPath: redirectPath,
-          message: needsRedirect 
-            ? `${selectedRole || 'Unauthenticated'} needs redirect from ${path} to ${redirectPath}`
-            : `${selectedRole || 'Unauthenticated'} can stay on ${path}`
-        };
-        
-        results.push(result);
-        setAccessResults(prev => [result, ...prev]);
-        await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for UI
-      }
-      
-      toast.success("Redirection tests completed");
-      
-      // Switch to access tab to show results
-      setActiveTab('access');
-    } catch (error) {
-      toast.error("Error testing redirections", {
-        description: error instanceof Error ? error.message : "An unknown error occurred"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  /**
-   * Test all role transitions
-   */
-  const testAllTransitions = async () => {
-    setIsLoading(true);
-    
-    try {
-      toast.info("Testing all role transitions...");
-      const currentRole = role;
-      
-      // Test transitions to all roles
-      for (const targetRole of availableRoles) {
-        if (targetRole === role) continue; // Skip current role
-        
-        const redirectPath = navigationService.handleRoleTransition(role, targetRole);
-        
-        // Apply role change in auth context but revert immediately
-        setRole(targetRole);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay to show change
-        
-        const result: TransitionResult = {
-          from: role,
-          to: targetRole,
-          redirectPath,
-          timestamp: new Date().toISOString(),
-          success: true,
-          message: `Test transition from ${role || 'unauthenticated'} to ${targetRole || 'unauthenticated'}`
-        };
-        
-        setTransitionResults(prev => [result, ...prev]);
-      }
-      
-      // Restore original role
-      setRole(currentRole);
-      
-      toast.success("All transitions tested", {
-        description: "Original role has been restored"
-      });
-      
-      // Switch to transitions tab to show results
-      setActiveTab('transitions');
-    } catch (error) {
-      toast.error("Error testing transitions", {
-        description: error instanceof Error ? error.message : "An unknown error occurred"
-      });
-      
-      // Try to restore original role in case of error
-      setRole(role);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  /**
-   * Clear all test results
+   * Clear test results
    */
   const clearResults = () => {
     setTransitionResults([]);
-    setAccessResults([]);
-    toast("Results cleared");
+    toast.info("Test results cleared");
   };
   
+  /**
+   * Run all possible role transitions
+   */
+  const runAllTransitions = async () => {
+    setIsRunningTest(true);
+    toast.info("Testing all role transitions...");
+    
+    try {
+      const roles: Array<UserRole | null> = ['admin', 'designer', 'writer', null];
+      
+      // Test all possible role combinations
+      for (const source of roles) {
+        for (const target of roles) {
+          if (source !== target) {
+            setSelectedSourceRole(source);
+            setSelectedTargetRole(target);
+            
+            // Wait a moment between tests to avoid UI freezes
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Get the redirect path for this transition
+            const redirectPath = navigationService.handleRoleTransition(source, target);
+            
+            // Get routes valid for this role
+            const validPaths: string[] = [];
+            const invalidPaths: string[] = [];
+            
+            // Test common routes
+            const commonRoutes = [
+              '/',
+              '/documents',
+              '/editor',
+              '/writer-dashboard',
+              '/designer-dashboard',
+              '/admin',
+              '/design/templates',
+              '/content/documents'
+            ];
+            
+            commonRoutes.forEach(route => {
+              if (navigationService.validateRoute(route, target)) {
+                validPaths.push(route);
+              } else {
+                invalidPaths.push(route);
+              }
+            });
+            
+            // Expected paths from navigation service
+            const suggestions = navigationService.getRoleSuggestedRoutes(target);
+            const expectedPaths = suggestions.map(s => s.path);
+            
+            // Add results
+            const result = {
+              sourceRole: source,
+              targetRole: target,
+              redirectPath,
+              expectedPaths,
+              validPaths,
+              invalidPaths,
+              timestamp: new Date().toISOString()
+            };
+            
+            setTransitionResults(prev => [result, ...prev]);
+          }
+        }
+      }
+      
+      toast.success("All role transitions tested", {
+        description: `${roles.length * (roles.length - 1)} transitions completed`
+      });
+    } catch (error) {
+      toast.error("Failed to test all transitions", {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    } finally {
+      setIsRunningTest(false);
+    }
+  };
+  
+  /**
+   * Format role for display
+   */
+  const formatRole = (role: UserRole | null): string => {
+    if (role === null) return 'Unauthenticated';
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Role Transition Tester</CardTitle>
-        <CardDescription>
-          Test role transitions, access control, and navigation behavior
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="p-4 bg-muted/30 rounded-md space-y-4">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div>
-              <div className="text-sm font-medium mb-1">Current Role:</div>
-              <Badge variant="outline" className="text-sm bg-blue-50 border-blue-200">
-                {role || 'unauthenticated'}
-              </Badge>
-            </div>
-            
-            <div className="flex-grow">
-              <div className="text-sm font-medium mb-1">Target Role:</div>
-              <Select 
-                value={selectedRole || 'null'} 
-                onValueChange={(value) => setSelectedRole(value === 'null' ? null : value as UserRole)}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableRoles.map((r) => (
-                    <SelectItem key={r || 'null'} value={r || 'null'}>
-                      {r || 'unauthenticated'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Button 
-              onClick={testRoleTransition} 
-              className="mt-auto"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <ArrowRightLeft className="h-4 w-4 mr-2" />
-              )}
-              Test Role Transition
-            </Button>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              onClick={testCurrentRoleAccess} 
-              variant="outline" 
-              size="sm" 
-              disabled={isLoading}
-            >
-              <ShieldCheck className="h-4 w-4 mr-2" />
-              Test Current Role Access
-            </Button>
-            <Button 
-              onClick={testRedirectionNeeds} 
-              variant="outline" 
-              size="sm"
-              disabled={isLoading}
-            >
-              <ShieldAlert className="h-4 w-4 mr-2" />
-              Test Redirection Needs
-            </Button>
-            <Button 
-              onClick={testAllTransitions} 
-              variant="outline" 
-              size="sm"
-              disabled={isLoading}
-            >
-              <ArrowRightLeft className="h-4 w-4 mr-2" />
-              Test All Transitions
-            </Button>
-            <Button 
-              onClick={clearResults} 
-              variant="ghost" 
-              size="sm"
-              disabled={isLoading || (transitionResults.length === 0 && accessResults.length === 0)}
-            >
-              Clear Results
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Role Transition Testing</CardTitle>
+          <CardDescription>
+            Test how navigation and routes are affected when transitioning between user roles
+          </CardDescription>
+        </CardHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="transitions">
-              Transition Results {transitionResults.length > 0 && `(${transitionResults.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="access">
-              Access Results {accessResults.length > 0 && `(${accessResults.length})`}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="transitions" className="mt-4">
-            <ScrollArea className="h-[300px]">
-              {transitionResults.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Redirect Path</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transitionResults.map((result, index) => (
-                      <TableRow key={index} className="hover:bg-gray-50">
-                        <TableCell>{result.from || 'unauthenticated'}</TableCell>
-                        <TableCell>{result.to || 'unauthenticated'}</TableCell>
-                        <TableCell className="font-mono text-xs">{result.redirectPath || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={result.success ? "default" : "destructive"} className={result.success ? "bg-green-500 hover:bg-green-600" : undefined}>
-                            {result.success ? 'Success' : 'Failed'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {new Date(result.timestamp).toLocaleTimeString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center text-muted-foreground p-6 border rounded-md">
-                  No transition tests run yet. Use the controls above to test role transitions.
-                </div>
-              )}
-            </ScrollArea>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Source Role</label>
+                <Select 
+                  value={selectedSourceRole || ''} 
+                  onValueChange={(value) => setSelectedSourceRole(value === '' ? null : value as UserRole)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unauthenticated</SelectItem>
+                    <SelectItem value="writer">Writer</SelectItem>
+                    <SelectItem value="designer">Designer</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <ArrowRight className="h-6 w-6" />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Target Role</label>
+                <Select 
+                  value={selectedTargetRole || ''} 
+                  onValueChange={(value) => setSelectedTargetRole(value === '' ? null : value as UserRole)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select target role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unauthenticated</SelectItem>
+                    <SelectItem value="writer">Writer</SelectItem>
+                    <SelectItem value="designer">Designer</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex space-x-2 pt-4">
+                <Button onClick={testRoleTransition} disabled={isRunningTest || !selectedTargetRole}>
+                  Test Transition
+                </Button>
+                <Button onClick={runAllTransitions} disabled={isRunningTest} variant="outline">
+                  Test All Combinations
+                </Button>
+                <Button onClick={clearResults} variant="ghost" disabled={isRunningTest || transitionResults.length === 0}>
+                  Clear Results
+                </Button>
+              </div>
+            </div>
             
-            {transitionResults.length > 0 && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>About Transitions</AlertTitle>
+            <div>
+              <h3 className="text-sm font-medium mb-2">Current Role</h3>
+              <Alert className="mb-4">
                 <AlertDescription>
-                  Role transitions trigger navigation events to ensure users are directed to appropriate pages
-                  based on their new permissions. The redirect paths shown are where users would be sent after
-                  a role change.
+                  Your current role is <Badge variant="outline" className="ml-1">{formatRole(role)}</Badge>
                 </AlertDescription>
               </Alert>
-            )}
-          </TabsContent>
+              
+              <h3 className="text-sm font-medium mb-2">Role Transitions</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                This tool simulates role transitions and tests how navigation paths are affected.
+              </p>
+            </div>
+          </div>
           
-          <TabsContent value="access" className="mt-4">
-            <ScrollArea className="h-[300px]">
-              {accessResults.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Path</TableHead>
-                      <TableHead>Access</TableHead>
-                      <TableHead>Redirect</TableHead>
-                      <TableHead>Time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {accessResults.map((result, index) => (
-                      <TableRow key={index} className="hover:bg-gray-50">
-                        <TableCell>{result.role || 'unauthenticated'}</TableCell>
-                        <TableCell className="font-mono text-xs">{result.path}</TableCell>
-                        <TableCell>
-                          <Badge variant={result.allowed ? "default" : "destructive"} className={result.allowed ? "bg-green-500 hover:bg-green-600" : undefined}>
-                            {result.allowed ? 'Allowed' : 'Denied'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {result.redirectPath || '-'}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {new Date(result.timestamp).toLocaleTimeString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center text-muted-foreground p-6 border rounded-md">
-                  No access control tests run yet. Use the controls above to test role-based access.
-                </div>
-              )}
-            </ScrollArea>
+          <div className="border rounded-md p-4">
+            <h3 className="text-sm font-medium mb-4">Test Results</h3>
             
-            {accessResults.length > 0 && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>About Access Control</AlertTitle>
-                <AlertDescription>
-                  Access control determines which routes a user can visit based on their role.
-                  When access is denied, users are redirected to appropriate fallback routes or
-                  error pages.
-                </AlertDescription>
-              </Alert>
+            {transitionResults.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No transition tests run yet.</p>
+            ) : (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                {transitionResults.map((result, index) => (
+                  <div key={index} className="border rounded-md p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">
+                        {formatRole(result.sourceRole)} → {formatRole(result.targetRole)}
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {new Date(result.timestamp).toLocaleTimeString()}
+                      </Badge>
+                    </div>
+                    
+                    <div>
+                      <span className="text-sm text-muted-foreground">Redirect Path:</span>
+                      <Badge variant="secondary" className="ml-2">{result.redirectPath}</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <span className="text-xs text-muted-foreground block mb-1">Valid Paths:</span>
+                        <div className="text-xs space-y-1">
+                          {result.validPaths.map((path, i) => (
+                            <div key={i} className="flex items-center">
+                              <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                              <span>{path}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <span className="text-xs text-muted-foreground block mb-1">Invalid Paths:</span>
+                        <div className="text-xs space-y-1">
+                          {result.invalidPaths.map((path, i) => (
+                            <div key={i} className="flex items-center">
+                              <AlertCircle className="h-3 w-3 mr-1 text-amber-500" />
+                              <span>{path}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

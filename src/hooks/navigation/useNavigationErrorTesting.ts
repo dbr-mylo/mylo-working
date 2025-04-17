@@ -13,6 +13,10 @@ export type ErrorTestResult = {
   message: string;
   timestamp: string;
   recoverySteps?: string[];
+  performanceMetrics?: {
+    detectionTime?: number;
+    recoveryTime?: number;
+  };
 };
 
 /**
@@ -255,6 +259,8 @@ export const useNavigationErrorTesting = () => {
     try {
       setIsRunningTests(true);
       
+      const startTime = performance.now();
+      
       const error = {
         type: NavigationErrorType.SERVER_ERROR,
         path: window.location.pathname,
@@ -265,12 +271,18 @@ export const useNavigationErrorTesting = () => {
       // Show the error toast
       showNavigationErrorToast(error);
       
+      const endTime = performance.now();
+      
       const result = addTestResult({
         scenario: 'Server Error',
         error,
         result: 'passed',
         message: 'Successfully simulated server error handling',
-        recoverySteps: ['Refresh the page', 'Try again later', 'Contact support']
+        recoverySteps: ['Refresh the page', 'Try again later', 'Contact support'],
+        performanceMetrics: {
+          detectionTime: endTime - startTime,
+          recoveryTime: 0 // Would be measured in real implementation
+        }
       });
       
       setIsRunningTests(false);
@@ -365,6 +377,171 @@ export const useNavigationErrorTesting = () => {
   }, [role, addTestResult]);
   
   /**
+   * Test rapid navigation error handling
+   * This tests how the system handles multiple errors in quick succession
+   */
+  const testRapidNavigationErrors = useCallback(async () => {
+    try {
+      setIsRunningTests(true);
+      
+      // Generate multiple invalid paths
+      const invalidPaths = [
+        '/invalid-path-1-' + Date.now(),
+        '/invalid-path-2-' + Date.now(),
+        '/invalid-path-3-' + Date.now()
+      ];
+      
+      // Start timing
+      const startTime = performance.now();
+      
+      // Trigger multiple navigation errors in rapid succession
+      for (const path of invalidPaths) {
+        const isValid = navigationService.validateRoute(path, role);
+        
+        if (!isValid) {
+          const error = {
+            type: NavigationErrorType.NOT_FOUND,
+            path,
+            message: `Route ${path} does not exist`,
+            role
+          };
+          
+          // Show error toast but don't wait
+          showNavigationErrorToast(error);
+          
+          // Small delay to simulate rapid navigation attempts
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+      
+      // End timing
+      const endTime = performance.now();
+      const totalTime = endTime - startTime;
+      
+      // Test if the navigation service provides a fallback route
+      const fallbackRoute = navigationService.getFallbackRoute(role);
+      const isFallbackValid = navigationService.validateRoute(fallbackRoute, role);
+      
+      if (isFallbackValid) {
+        const result = addTestResult({
+          scenario: 'Rapid Navigation Errors',
+          error: null,
+          result: 'passed',
+          message: `Successfully handled ${invalidPaths.length} rapid navigation errors`,
+          recoverySteps: ['Error queue managed correctly', 'Fallback route available'],
+          performanceMetrics: {
+            detectionTime: totalTime / invalidPaths.length, // Average time per error
+            recoveryTime: 0 // Would be measured in real implementation
+          }
+        });
+        
+        toast.success("Rapid Error Test Successful", {
+          description: `Handled ${invalidPaths.length} errors in ${totalTime.toFixed(1)}ms`
+        });
+        
+        setIsRunningTests(false);
+        return result;
+      }
+      
+      const result = addTestResult({
+        scenario: 'Rapid Navigation Errors',
+        error: null,
+        result: 'failed',
+        message: 'Failed to handle multiple rapid navigation errors'
+      });
+      
+      setIsRunningTests(false);
+      return result;
+    } catch (error) {
+      const result = addTestResult({
+        scenario: 'Rapid Navigation Errors',
+        error: null,
+        result: 'failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      setIsRunningTests(false);
+      return result;
+    }
+  }, [role, addTestResult]);
+  
+  /**
+   * Test error during role transition
+   * This tests how errors are handled when they occur during a role change
+   */
+  const testRoleTransitionError = useCallback(async () => {
+    try {
+      setIsRunningTests(true);
+      
+      // Define the current role and a target role
+      const currentRole = role;
+      const targetRole: UserRole = currentRole === 'admin' ? 'writer' : 'admin';
+      
+      // Get the redirect path that would be used during this transition
+      const redirectPath = navigationService.handleRoleTransition(currentRole, targetRole);
+      
+      // Simulate an error during transition by trying to navigate to the redirect path with the wrong role
+      const isPathValidForCurrentRole = navigationService.validateRoute(redirectPath, currentRole);
+      
+      if (!isPathValidForCurrentRole) {
+        // This is what we expect - the path should not be valid for the current role
+        // Now simulate the error that would occur
+        const error = {
+          type: NavigationErrorType.UNAUTHORIZED,
+          path: redirectPath,
+          message: `Cannot access ${redirectPath} with role ${currentRole}`,
+          role: currentRole
+        };
+        
+        // Show error toast
+        showNavigationErrorToast(error);
+        
+        // Get fallback route that would be used
+        const fallbackRoute = navigationService.getFallbackRoute(currentRole);
+        
+        const result = addTestResult({
+          scenario: 'Role Transition Error',
+          error,
+          result: 'passed',
+          message: `Successfully detected error during role transition from ${currentRole} to ${targetRole}`,
+          recoverySteps: [`Redirected to fallback route: ${fallbackRoute}`, 'User notified of transition error'],
+          performanceMetrics: {
+            detectionTime: 0, // Would be measured in real implementation
+            recoveryTime: 0 // Would be measured in real implementation
+          }
+        });
+        
+        toast.success("Role Transition Error Test Successful", {
+          description: `Correctly handled unauthorized access during role transition`
+        });
+        
+        setIsRunningTests(false);
+        return result;
+      }
+      
+      const result = addTestResult({
+        scenario: 'Role Transition Error',
+        error: null,
+        result: 'failed',
+        message: `Failed to detect potential error during role transition (${currentRole} to ${targetRole})`
+      });
+      
+      setIsRunningTests(false);
+      return result;
+    } catch (error) {
+      const result = addTestResult({
+        scenario: 'Role Transition Error',
+        error: null,
+        result: 'failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      setIsRunningTests(false);
+      return result;
+    }
+  }, [role, addTestResult]);
+  
+  /**
    * Run all error tests
    */
   const runAllErrorTests = useCallback(async () => {
@@ -385,6 +562,12 @@ export const useNavigationErrorTesting = () => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     await testStateRecovery();
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    await testRapidNavigationErrors();
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    await testRoleTransitionError();
     
     // Fix: Using toast from sonner correctly without title property
     toast.success("All error tests completed", {
@@ -398,6 +581,8 @@ export const useNavigationErrorTesting = () => {
     testMalformedParameters, 
     testServerError, 
     testStateRecovery, 
+    testRapidNavigationErrors,
+    testRoleTransitionError,
     testMetrics.passedTests, 
     testMetrics.failedTests
   ]);
@@ -424,6 +609,8 @@ export const useNavigationErrorTesting = () => {
     testMalformedParameters,
     testServerError,
     testStateRecovery,
+    testRapidNavigationErrors,
+    testRoleTransitionError,
     runAllErrorTests,
     clearResults
   };

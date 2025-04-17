@@ -332,9 +332,9 @@ export const useNavigationErrorTesting = () => {
             recoverySteps: ['Redirected to fallback route', 'State preserved during recovery']
           });
           
-          toast({
-            title: 'Recovery Test Successful',
-            description: `Would recover to: ${fallbackRoute}`,
+          // Fix: Using toast from sonner correctly without title property
+          toast.success("Recovery Test Successful", {
+            description: `Would recover to: ${fallbackRoute}`
           });
           
           setIsRunningTests(false);
@@ -386,8 +386,9 @@ export const useNavigationErrorTesting = () => {
     
     await testStateRecovery();
     
+    // Fix: Using toast from sonner correctly without title property
     toast.success("All error tests completed", {
-      description: `${testMetrics.passedTests} passed, ${testMetrics.failedTests} failed`,
+      description: `${testMetrics.passedTests} passed, ${testMetrics.failedTests} failed`
     });
     
     setIsRunningTests(false);

@@ -46,6 +46,7 @@ const MissingParameterTester: React.FC = () => {
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   const [isRunningTests, setIsRunningTests] = useState<boolean>(false);
 
+  // Replace "success" with appropriate variant
   const getTestResultBadge = (passed: boolean) => {
     return passed ? (
       <Badge variant="default">Pass</Badge>

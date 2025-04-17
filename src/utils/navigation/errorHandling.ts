@@ -1,8 +1,32 @@
+
 import { NavigationError, NavigationErrorType, UserRole } from './types';
 import { getErrorResolutionSteps } from '@/utils/error/errorResolution';
 import { ErrorCategory } from '@/utils/error/errorClassifier';
 import { toast } from 'sonner';
-import { navigationalErrorToCategory } from './errorHandling';
+
+/**
+ * Map navigation error types to general error categories
+ * @param errorType Navigation error type
+ * @returns Error category
+ */
+export const navigationalErrorToCategory = (errorType: NavigationErrorType): ErrorCategory => {
+  switch (errorType) {
+    case NavigationErrorType.UNAUTHORIZED:
+      return ErrorCategory.AUTHORIZATION;
+      
+    case NavigationErrorType.NOT_FOUND:
+      return ErrorCategory.RESOURCE_NOT_FOUND;
+      
+    case NavigationErrorType.VALIDATION_ERROR:
+      return ErrorCategory.VALIDATION;
+      
+    case NavigationErrorType.SERVER_ERROR:
+      return ErrorCategory.SERVER;
+      
+    default:
+      return ErrorCategory.UNKNOWN;
+  }
+};
 
 /**
  * Format a navigation error message to be user-friendly
@@ -93,28 +117,4 @@ export const showNavigationErrorToast = (error: NavigationError): void => {
       }
     } : undefined
   });
-};
-
-/**
- * Map navigation error types to general error categories
- * @param errorType Navigation error type
- * @returns Error category
- */
-export const navigationalErrorToCategory = (errorType: NavigationErrorType): ErrorCategory => {
-  switch (errorType) {
-    case NavigationErrorType.UNAUTHORIZED:
-      return ErrorCategory.AUTHORIZATION;
-      
-    case NavigationErrorType.NOT_FOUND:
-      return ErrorCategory.RESOURCE_NOT_FOUND;
-      
-    case NavigationErrorType.VALIDATION_ERROR:
-      return ErrorCategory.VALIDATION;
-      
-    case NavigationErrorType.SERVER_ERROR:
-      return ErrorCategory.SERVER;
-      
-    default:
-      return ErrorCategory.UNKNOWN;
-  }
 };

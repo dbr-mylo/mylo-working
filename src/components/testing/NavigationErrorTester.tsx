@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,11 +37,11 @@ const NavigationErrorTester: React.FC = () => {
       case NavigationErrorType.NOT_FOUND:
         return <Badge variant="destructive">Not Found</Badge>;
       case NavigationErrorType.UNAUTHORIZED:
-        return <Badge variant="warning">Unauthorized</Badge>;
+        return <Badge variant="destructive">Unauthorized</Badge>;
       case NavigationErrorType.VALIDATION_ERROR:
-        return <Badge className="bg-amber-500">Validation Error</Badge>;
+        return <Badge variant="secondary">Validation Error</Badge>;
       case NavigationErrorType.SERVER_ERROR:
-        return <Badge className="bg-red-500">Server Error</Badge>;
+        return <Badge variant="destructive">Server Error</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }

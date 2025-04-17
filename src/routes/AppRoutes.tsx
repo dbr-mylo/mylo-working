@@ -12,6 +12,7 @@ import {
   WriterRoute 
 } from "./ProtectedRoutes";
 import NavigationAwareLayout from "@/components/layout/NavigationAwareLayout";
+import TestingRoutes from "./TestingRoutes";
 
 // Page imports
 import Index from "@/pages/Index";
@@ -109,7 +110,10 @@ const AppRoutes = () => {
           {/* Navigation analytics */}
           <Route path="/navigation/history" element={<AdminRoute><NavigationHistoryVisualization /></AdminRoute>} />
           
-          {/* Testing */}
+          {/* Testing Routes */}
+          <Route path="/testing/*" element={<TestingRoutes />} />
+          
+          {/* Legacy Testing */}
           <Route path="/testing/regression" element={<RegressionTestRoute />} />
           <Route path="/testing/smoke" element={<SmokeTestRoute />} />
           

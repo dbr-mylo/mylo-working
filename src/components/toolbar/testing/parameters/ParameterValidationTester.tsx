@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -186,7 +185,7 @@ const ParameterValidationTester: React.FC = () => {
     }
     
     if (isValid) {
-      return <Badge variant="success" className="bg-green-500">Valid</Badge>;
+      return <Badge variant="default">Valid</Badge>;
     }
     
     return <Badge variant="destructive">Invalid</Badge>;

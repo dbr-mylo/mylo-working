@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -47,6 +46,14 @@ const MissingParameterTester: React.FC = () => {
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   const [isRunningTests, setIsRunningTests] = useState<boolean>(false);
 
+  const getTestResultBadge = (passed: boolean) => {
+    return passed ? (
+      <Badge variant="default">Pass</Badge>
+    ) : (
+      <Badge variant="destructive">Fail</Badge>
+    );
+  };
+
   // Run custom test
   const runCustomTest = () => {
     const result = extractAndValidateParameters(routePattern, actualPath);
@@ -59,7 +66,7 @@ const MissingParameterTester: React.FC = () => {
         params: result.params || null,
         errors: result.errors
       },
-      passed: true // Custom test is always "passed" since we don't have expected values
+      passed: true
     };
     
     setCurrentResult(testResult);
@@ -80,31 +87,26 @@ const MissingParameterTester: React.FC = () => {
     
     const result = extractAndValidateParameters(scenario.routePattern, testCase.actualPath);
     
-    // Determine if the test passed
     let passed = true;
     
-    // Check params match
     if (testCase.expectedParams === null) {
       passed = passed && !result.isValid;
     } else if (testCase.expectedParams) {
       passed = passed && result.isValid && !!result.params;
       
       if (result.params) {
-        // Check each expected param
         Object.entries(testCase.expectedParams).forEach(([key, value]) => {
           if (result.params![key] !== value) {
             passed = false;
           }
         });
         
-        // Check no extra params
         if (Object.keys(result.params).length !== Object.keys(testCase.expectedParams).length) {
           passed = false;
         }
       }
     }
     
-    // Check errors match
     if (testCase.expectedErrors) {
       passed = passed && !!result.errors && result.errors.length === testCase.expectedErrors.length;
     } else {
@@ -129,7 +131,6 @@ const MissingParameterTester: React.FC = () => {
   const runAllTests = async () => {
     setIsRunningTests(true);
     
-    // Slight delay to allow UI to update
     await new Promise(resolve => setTimeout(resolve, 10));
     
     const results: TestResult[] = [];
@@ -138,35 +139,29 @@ const MissingParameterTester: React.FC = () => {
       for (const [testCaseIndex, testCase] of scenario.testCases.entries()) {
         const result = extractAndValidateParameters(scenario.routePattern, testCase.actualPath);
         
-        // Determine if the test passed
         let passed = true;
         
-        // Check params match
         if (testCase.expectedParams === null) {
           passed = passed && !result.isValid;
         } else if (testCase.expectedParams) {
           passed = passed && result.isValid && !!result.params;
           
           if (result.params) {
-            // Check each expected param
             Object.entries(testCase.expectedParams).forEach(([key, value]) => {
               if (result.params![key] !== value) {
                 passed = false;
               }
             });
             
-            // Check no extra params
             if (Object.keys(result.params).length !== Object.keys(testCase.expectedParams).length) {
               passed = false;
             }
           }
         }
         
-        // Check errors match
         if (testCase.expectedErrors) {
           passed = passed && !!result.errors;
           if (result.errors && testCase.expectedErrors) {
-            // Simple length check for now (could be more specific)
             passed = passed && result.errors.length === testCase.expectedErrors.length;
           }
         } else {
@@ -190,7 +185,6 @@ const MissingParameterTester: React.FC = () => {
     setIsRunningTests(false);
   };
 
-  // Copy result to clipboard
   const copyResult = () => {
     if (currentResult) {
       navigator.clipboard.writeText(JSON.stringify(currentResult, null, 2));
@@ -425,11 +419,7 @@ const MissingParameterTester: React.FC = () => {
                           <div className="text-xs text-muted-foreground">{result.actualPath}</div>
                         </td>
                         <td className="px-4 py-2 text-center">
-                          {result.passed ? (
-                            <Badge variant="success" className="bg-green-500">Pass</Badge>
-                          ) : (
-                            <Badge variant="destructive">Fail</Badge>
-                          )}
+                          {getTestResultBadge(result.passed)}
                         </td>
                         <td className="px-4 py-2">
                           {result.result.isValid ? (

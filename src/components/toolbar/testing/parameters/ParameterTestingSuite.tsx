@@ -3,7 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ParameterExtractionTester } from './ParameterExtractionTester';
-import { ParameterValidationTester } from './ParameterValidationTester';
+import ParameterValidationTester from './ParameterValidationTester';
 import { OptionalParameterTester } from './OptionalParameterTester';
 
 export const ParameterTestingSuite: React.FC = () => {
@@ -40,4 +40,3 @@ export const ParameterTestingSuite: React.FC = () => {
     </div>
   );
 };
-

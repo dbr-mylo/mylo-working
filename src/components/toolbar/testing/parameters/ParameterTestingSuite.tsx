@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MissingParameterTester } from './MissingParameterTester';
+import MissingParameterTester from './MissingParameterTester';
 import { ParameterPerformanceTester } from './ParameterPerformanceTester';
 
 export const ParameterTestingSuite = () => {

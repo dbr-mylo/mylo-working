@@ -1,5 +1,6 @@
 
-import { performance } from 'perf_hooks';
+// Using browser's built-in Performance API instead of Node.js perf_hooks
+// Browser-compatible performance API
 
 export interface PerformanceTestResult {
   executionTime: number;
@@ -52,24 +53,44 @@ export const runPerformanceTest = (
   testFn: () => void,
   iterations: number = 1000
 ): PerformanceTestResult => {
+  // Use browser's built-in performance API
   const startTime = performance.now();
-  const startMemory = process.memoryUsage();
+  
+  // Browser doesn't provide direct memory measurements like Node.js
+  // We'll estimate memory usage using performance.memory if available
+  const startMemory = (performance as any).memory ? 
+    { 
+      heapUsed: (performance as any).memory.usedJSHeapSize || 0,
+      heapTotal: (performance as any).memory.totalJSHeapSize || 0 
+    } : undefined;
 
   for (let i = 0; i < iterations; i++) {
     testFn();
   }
 
   const endTime = performance.now();
-  const endMemory = process.memoryUsage();
   const totalTime = endTime - startTime;
+  
+  // Get end memory if available
+  const endMemory = (performance as any).memory ? 
+    { 
+      heapUsed: (performance as any).memory.usedJSHeapSize || 0,
+      heapTotal: (performance as any).memory.totalJSHeapSize || 0 
+    } : undefined;
 
-  return {
+  const result: PerformanceTestResult = {
     executionTime: totalTime,
-    memoryUsage: {
-      heapUsed: endMemory.heapUsed - startMemory.heapUsed,
-      heapTotal: endMemory.heapTotal
-    },
     operationsPerSecond: Math.round((iterations / totalTime) * 1000),
     averageTimePerOperation: totalTime / iterations
   };
+  
+  // Add memory usage if available (Chrome only)
+  if (startMemory && endMemory) {
+    result.memoryUsage = {
+      heapUsed: endMemory.heapUsed - startMemory.heapUsed,
+      heapTotal: endMemory.heapTotal
+    };
+  }
+
+  return result;
 };

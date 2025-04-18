@@ -10,6 +10,7 @@ import {
   extractOptionalParameters, 
   validateOptionalParameters, 
   OptionalParameterConfig,
+  ValidationResult,
   createParameterConfigFromPattern,
   buildUrlFromPattern
 } from '@/utils/navigation/parameters/optionalParameterHandler';
@@ -69,7 +70,7 @@ export const OptionalParameterTester = () => {
     const config = createParameterConfigFromPattern(pattern);
     
     // Validate parameters
-    const validation = validateOptionalParameters(extracted.params, config);
+    const validation: ValidationResult = validateOptionalParameters(extracted.params, config);
     
     // Build URL from parameters
     const builtUrl = buildUrlFromPattern(pattern, extracted.params);
@@ -356,3 +357,5 @@ export const OptionalParameterTester = () => {
     </Card>
   );
 };
+
+export default OptionalParameterTester;

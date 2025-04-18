@@ -19,6 +19,15 @@ export interface OptionalParameterResult {
   };
 }
 
+// Update the validation return type to include performance metrics
+export interface ValidationResult {
+  isValid: boolean;
+  validationErrors: string[];
+  performance?: {
+    validationTime: number;
+  };
+}
+
 /**
  * Extracts parameters from a route pattern, handling optional parameters
  */
@@ -82,7 +91,7 @@ export const extractOptionalParameters = (
 export const validateOptionalParameters = (
   params: Record<string, string>,
   config: Record<string, OptionalParameterConfig>
-): { isValid: boolean; validationErrors: string[] } => {
+): ValidationResult => {
   const startTime = performance.now();
   const validationErrors: string[] = [];
   
@@ -184,4 +193,3 @@ export const buildUrlFromPattern = (
   
   return url;
 };
-

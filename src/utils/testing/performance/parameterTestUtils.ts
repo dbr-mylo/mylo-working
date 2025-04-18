@@ -19,6 +19,12 @@ export interface ParameterTestCase {
   expectedParams: Record<string, string> | null;
 }
 
+export interface MemorySnapshot {
+  heapUsed: number;
+  heapTotal: number;
+  timestamp: number;
+}
+
 export const TEST_CASES = {
   simple: {
     name: 'Simple Path (1-2 parameters)',
@@ -46,23 +52,49 @@ export const TEST_CASES = {
       p1: '1', p2: '2', p3: '3', p4: '4', p5: '5',
       p6: '6', p7: '7', p8: '8', p9: '9', p10: '10'
     }
+  },
+  unicode: {
+    name: 'Unicode Parameters',
+    routePattern: '/blog/:category/:title',
+    actualPath: '/blog/café/español-artículo',
+    expectedParams: {
+      category: 'café',
+      title: 'español-artículo'
+    }
+  },
+  optional: {
+    name: 'Optional Parameters',
+    routePattern: '/store/:category?/:productId?',
+    actualPath: '/store/electronics/',
+    expectedParams: {
+      category: 'electronics',
+      productId: ''
+    }
   }
+};
+
+export const getMemorySnapshot = (): MemorySnapshot | null => {
+  // Check if performance.memory is available (Chrome only)
+  if ((performance as any).memory) {
+    const memory = (performance as any).memory;
+    return {
+      heapUsed: memory.usedJSHeapSize,
+      heapTotal: memory.totalJSHeapSize,
+      timestamp: performance.now()
+    };
+  }
+  return null;
 };
 
 export const runPerformanceTest = (
   testFn: () => void,
   iterations: number = 1000
 ): PerformanceTestResult => {
+  // Get initial memory snapshot
+  const startMemory = getMemorySnapshot();
+  
   // Use browser's built-in performance API
   const startTime = performance.now();
-  
-  // Browser doesn't provide direct memory measurements like Node.js
-  // We'll estimate memory usage using performance.memory if available
-  const startMemory = (performance as any).memory ? 
-    { 
-      heapUsed: (performance as any).memory.usedJSHeapSize || 0,
-      heapTotal: (performance as any).memory.totalJSHeapSize || 0 
-    } : undefined;
 
   for (let i = 0; i < iterations; i++) {
     testFn();
@@ -71,12 +103,8 @@ export const runPerformanceTest = (
   const endTime = performance.now();
   const totalTime = endTime - startTime;
   
-  // Get end memory if available
-  const endMemory = (performance as any).memory ? 
-    { 
-      heapUsed: (performance as any).memory.usedJSHeapSize || 0,
-      heapTotal: (performance as any).memory.totalJSHeapSize || 0 
-    } : undefined;
+  // Get final memory snapshot
+  const endMemory = getMemorySnapshot();
 
   const result: PerformanceTestResult = {
     executionTime: totalTime,
@@ -93,4 +121,36 @@ export const runPerformanceTest = (
   }
 
   return result;
+};
+
+export const runParameterExtraction = (
+  pattern: string,
+  path: string,
+  iterations: number = 1
+): {
+  executionTime: number;
+  parameters: Record<string, string> | null;
+} => {
+  let result: Record<string, string> | null = null;
+  const startTime = performance.now();
+  
+  try {
+    // Import the function dynamically to avoid circular dependencies
+    const { extractAndValidateParameters } = require('@/utils/navigation/testing/parameterValidationUtils');
+    
+    for (let i = 0; i < iterations; i++) {
+      const extractionResult = extractAndValidateParameters(pattern, path);
+      result = extractionResult.isValid ? extractionResult.params || null : null;
+    }
+  } catch (error) {
+    console.error('Error during parameter extraction:', error);
+    result = null;
+  }
+  
+  const endTime = performance.now();
+  
+  return {
+    executionTime: endTime - startTime,
+    parameters: result
+  };
 };

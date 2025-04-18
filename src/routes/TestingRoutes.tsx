@@ -5,6 +5,7 @@ import NavigationTestDashboard from '@/components/testing/NavigationTestDashboar
 import { AdminRoute } from './ProtectedRoutes';
 import { ParameterTestingSuite } from '@/components/toolbar/testing/parameters/ParameterTestingSuite';
 import { ToolbarTester } from '@/components/toolbar/testing/ToolbarTester';
+import NavigationParameterTestSuite from '@/components/toolbar/testing/parameters/NavigationParameterTestSuite';
 
 /**
  * Routes for testing components and tools
@@ -21,6 +22,11 @@ export const TestingRoutes = () => {
       <Route path="/parameters" element={
         <AdminRoute>
           <ParameterTestingSuite />
+        </AdminRoute>
+      } />
+      <Route path="/parameters/advanced" element={
+        <AdminRoute>
+          <NavigationParameterTestSuite />
         </AdminRoute>
       } />
       <Route path="/toolbar" element={

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ export const ParameterPreservationTester: React.FC = () => {
   const [paramName, setParamName] = useState('');
   const [paramValue, setParamValue] = useState('');
   
-  // Generate an actual path from the pattern and params
   const generatePath = () => {
     return pattern.split('/')
       .map(segment => {
@@ -46,7 +44,6 @@ export const ParameterPreservationTester: React.FC = () => {
       .join('/');
   };
   
-  // Add a new parameter to the params object
   const addParameter = () => {
     if (!paramName) return;
     
@@ -59,7 +56,6 @@ export const ParameterPreservationTester: React.FC = () => {
     setParamValue('');
   };
   
-  // Remove a parameter from the params object
   const removeParameter = (name: string) => {
     setParams(prev => {
       const newParams = { ...prev };
@@ -68,11 +64,9 @@ export const ParameterPreservationTester: React.FC = () => {
     });
   };
   
-  // Run the test
   const runTest = () => {
     const actualPath = generatePath();
     
-    // Log a simulated navigation with these parameters
     navigationService.logNavigationEvent(
       '/previous-path',
       actualPath,
@@ -80,19 +74,15 @@ export const ParameterPreservationTester: React.FC = () => {
       selectedRole
     );
     
-    // Get the most recent navigation history entry
     const historyEntries = navigationService.getRecentNavigationHistory(1);
     const latestEntry = historyEntries[0];
     
-    // Extract parameters from the path
     const extractedParams = navigationService.extractRouteParameters(pattern, actualPath);
     
-    // Compare extracted params with original params
     const paramsMatch = extractedParams 
       ? Object.entries(params).every(([key, value]) => extractedParams[key] === value)
       : false;
     
-    // Create result
     const result: PreservationTestResult = {
       routePattern: pattern,
       parameters: { ...params },
@@ -203,7 +193,7 @@ export const ParameterPreservationTester: React.FC = () => {
               {results.map((result, index) => (
                 <div key={index} className="border-b p-4 last:border-b-0">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant={result.preservedCorrectly ? "success" : "destructive"}>
+                    <Badge variant={result.preservedCorrectly ? "default" : "destructive"}>
                       {result.preservedCorrectly ? "Preserved" : "Failed"}
                     </Badge>
                     <span className="text-xs text-muted-foreground">

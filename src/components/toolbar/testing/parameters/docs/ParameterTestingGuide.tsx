@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -209,7 +208,7 @@ const rules = {
                 <section>
                   <h3 className="text-lg font-semibold mt-6">Parameter Hierarchy</h3>
                   <div className="bg-muted p-4 rounded-md mt-2">
-                    <p className="text-sm font-mono mb-2">Example: Organization → Team → Project → Task</p>
+                    <p className="text-sm font-mono mb-2">Example: Organization &gt; Team &gt; Project &gt; Task</p>
                     <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-auto text-xs">
                       {`// Route pattern
 '/org/:orgId/team/:teamId/project/:projectId/task/:taskId'

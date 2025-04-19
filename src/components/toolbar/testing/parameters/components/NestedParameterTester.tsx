@@ -182,7 +182,7 @@ export const NestedParameterTester: React.FC = () => {
                       {Object.entries(testResults.params).map(([key, value]) => (
                         <div key={key} className="flex items-center">
                           <span className="font-medium mr-2">{key}:</span>
-                          <Badge variant="outline">{value || '(empty)'}</Badge>
+                          <Badge variant="outline">{String(value) || '(empty)'}</Badge>
                         </div>
                       ))}
                     </div>

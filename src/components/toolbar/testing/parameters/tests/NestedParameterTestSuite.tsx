@@ -178,7 +178,7 @@ export const NestedParameterTestSuite: React.FC = () => {
             <Badge variant="outline">
               Total: {summary.total}
             </Badge>
-            <Badge variant="success" className="bg-green-500">
+            <Badge variant="default" className="bg-green-500">
               Passed: {summary.passed}
             </Badge>
             <Badge variant="destructive">

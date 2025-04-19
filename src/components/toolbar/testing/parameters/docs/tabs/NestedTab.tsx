@@ -2,6 +2,7 @@
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { CodeExample } from '../components/CodeExample';
 
 export const NestedTab = () => {
   return (
@@ -25,10 +26,9 @@ export const NestedTab = () => {
         
         <section>
           <h3 className="text-lg font-semibold mt-6">Parameter Hierarchy</h3>
-          <div className="bg-muted p-4 rounded-md mt-2">
-            <p className="text-sm font-mono mb-2">Example: Organization &gt; Team &gt; Project &gt; Task</p>
-            <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-auto text-xs">
-              {`// Route pattern
+          <CodeExample
+            title="Example: Organization &gt; Team &gt; Project &gt; Task"
+            code={`// Route pattern
 '/org/:orgId/team/:teamId/project/:projectId/task/:taskId'
 
 // Extracted hierarchy
@@ -38,8 +38,7 @@ export const NestedTab = () => {
   "projectId": ["teamId", "orgId"], // Parents are teamId and orgId
   "taskId": ["projectId", "teamId", "orgId"] // Parents are projectId, teamId, and orgId
 }`}
-            </pre>
-          </div>
+          />
         </section>
 
         <section>
@@ -49,9 +48,9 @@ export const NestedTab = () => {
             parent parameters are valid before validating child parameters.
           </p>
           
-          <div className="bg-muted p-4 rounded-md mt-4">
-            <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-auto text-xs">
-              {`import { extractNestedParameters, validateNestedParameters } from '@/utils/navigation/parameters/nestedParameterHandler';
+          <CodeExample
+            title="Parameter Validation with Dependencies"
+            code={`import { extractNestedParameters, validateNestedParameters } from '@/utils/navigation/parameters/nestedParameterHandler';
 
 // Extract parameters and hierarchy
 const { params, hierarchy } = extractNestedParameters(
@@ -64,8 +63,7 @@ const validationResult = validateNestedParameters(params, hierarchy, {
   orgId: new ValidationRuleBuilder().required().build(),
   teamId: new ValidationRuleBuilder().required().build()
 });`}
-            </pre>
-          </div>
+          />
         </section>
       </div>
     </ScrollArea>

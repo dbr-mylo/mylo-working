@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -136,7 +135,6 @@ export const NestedParameterTestSuite: React.FC = () => {
   
   const runTests = () => {
     const newResults = TEST_CASES.map(testCase => {
-      // Choose extraction function based on settings
       const extractFn = useMemoized ? memoizedExtractNestedParameters : extractNestedParameters;
       const validateFn = useMemoized ? memoizedValidateNestedParameters : validateNestedParameters;
       
@@ -147,15 +145,13 @@ export const NestedParameterTestSuite: React.FC = () => {
       const validationStartTime = performance.now();
       const validation = validateFn(
         extracted.params,
-        extracted.hierarchy,
+        extracted.hierarchy as Record<string, string[]>,
         testCase.validationRules
       );
       const validationTime = performance.now() - validationStartTime;
       
-      // Run comparative test if using memoized version
       let memoizedTime;
       if (useMemoized) {
-        // Run a second time to measure cached performance
         const memoizedStartTime = performance.now();
         memoizedExtractNestedParameters(testCase.pattern, testCase.path);
         memoizedValidateNestedParameters(
@@ -166,15 +162,12 @@ export const NestedParameterTestSuite: React.FC = () => {
         memoizedTime = performance.now() - memoizedStartTime;
       }
       
-      // Combine extraction and validation errors
       const allErrors = [...extracted.errors, ...validation.errors];
       
-      // Check if params match expected
       const paramsMatch = Object.entries(testCase.expectedParams).every(
         ([key, value]) => extracted.params[key] === value
       );
       
-      // Check if errors match expected (if specified)
       const errorsMatch = !testCase.expectedErrors || 
         (testCase.expectedErrors.length === allErrors.length &&
          testCase.expectedErrors.every(expected => 
@@ -199,7 +192,6 @@ export const NestedParameterTestSuite: React.FC = () => {
     
     setResults(newResults);
     
-    // Update summary
     const passed = newResults.filter(r => r.result.passed).length;
     setSummary({
       total: newResults.length,
@@ -209,7 +201,6 @@ export const NestedParameterTestSuite: React.FC = () => {
   };
   
   const runBenchmark = () => {
-    // Standard benchmark
     const standardBenchmark = benchmarkOperation(
       'standard-extract-validate',
       () => {
@@ -229,7 +220,6 @@ export const NestedParameterTestSuite: React.FC = () => {
       1000
     );
     
-    // Memoized benchmark
     const memoizedBenchmark = benchmarkOperation(
       'memoized-extract-validate',
       () => {

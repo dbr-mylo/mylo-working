@@ -381,4 +381,4 @@ export class ValidationRuleBuilder {
   }
 }
 
-export { NestedParameter };
+export type { NestedParameter };

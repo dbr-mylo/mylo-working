@@ -1,4 +1,3 @@
-
 interface NestedParameter {
   name: string;
   isOptional: boolean;
@@ -381,3 +380,5 @@ export class ValidationRuleBuilder {
     return { ...this.rule };
   }
 }
+
+export { NestedParameter };

@@ -185,7 +185,7 @@ export const NestedParameterTestSuite: React.FC = () => {
         validationTime = performance.now() - validationStartTime;
       }
       
-      const allErrors = [...extracted.errors, ...validationResult.errors];
+      const allErrors = [...extracted.errors, ...(validationResult.errors || [])];
       
       const paramsMatch = Object.entries(testCase.expectedParams).every(
         ([key, value]) => extracted.params[key] === value
@@ -224,6 +224,18 @@ export const NestedParameterTestSuite: React.FC = () => {
   };
   
   const runBenchmark = () => {
+    const convertHierarchyForValidation = (hierarchy: Record<string, string[]>): Record<string, NestedParameter> => {
+      return Object.entries(hierarchy).reduce((acc, [key, children]) => {
+        acc[key] = {
+          name: key,
+          isOptional: false,
+          children,
+          level: 0
+        };
+        return acc;
+      }, {} as Record<string, NestedParameter>);
+    };
+    
     const standardBenchmark = benchmarkOperation(
       'standard-extract-validate',
       () => {
@@ -249,19 +261,10 @@ export const NestedParameterTestSuite: React.FC = () => {
         const pattern = '/user/:id/profile/:section/settings/:settingId';
         const path = '/user/123/profile/personal/settings/display';
         const extracted = memoizedExtractNestedParameters(pattern, path);
-        const convertedHierarchy = Object.entries(extracted.hierarchy).reduce((acc, [key, children]) => {
-          acc[key] = {
-            name: key,
-            isOptional: false,
-            children,
-            level: 0
-          };
-          return acc;
-        }, {} as Record<string, NestedParameter>);
         
-        validateNestedParameters(
+        memoizedValidateNestedParameters(
           extracted.params,
-          convertedHierarchy,
+          extracted.hierarchy,
           {
             id: new ValidationRuleBuilder().string().required().build(),
             section: new ValidationRuleBuilder().string().required().build(),

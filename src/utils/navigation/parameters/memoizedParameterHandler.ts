@@ -25,8 +25,15 @@ export const memoizedExtractNestedParameters = (pattern: string, path: string): 
       acc[key] = value.children;
       return acc;
     }, {} as Record<string, string[]>),
-    errors: [...result.errors, result.missingRequired.map(p => `Missing required parameter: ${p}`)]
+    errors: [...result.errors]
   };
+  
+  // Add missing required parameters to errors array
+  if (result.missingRequired && result.missingRequired.length > 0) {
+    result.missingRequired.forEach(p => {
+      memoizedResult.errors.push(`Missing required parameter: ${p}`);
+    });
+  }
   
   extractionCache.set(cacheKey, memoizedResult);
   return memoizedResult;

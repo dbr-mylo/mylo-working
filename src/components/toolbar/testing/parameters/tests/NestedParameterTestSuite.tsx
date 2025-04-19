@@ -1,11 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { extractNestedParameters, validateNestedParameters, ValidationRuleBuilder } from '@/utils/navigation/parameters/nestedParameterHandler';
+import { 
+  extractNestedParameters, 
+  validateNestedParameters, 
+  ValidationRuleBuilder 
+} from '@/utils/navigation/parameters/nestedParameterHandler';
+import { 
+  memoizedExtractNestedParameters,
+  memoizedValidateNestedParameters 
+} from '@/utils/navigation/parameters/memoizedParameterHandler';
+import { benchmarkOperation } from '@/components/toolbar/testing/parameters/utils/performanceMonitor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Zap } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface TestCase {
   name: string;
@@ -105,24 +117,54 @@ export const NestedParameterTestSuite: React.FC = () => {
         extractionTime: number;
         validationTime?: number;
         totalTime: number;
+        memoizedTime?: number;
       }
     }
   }>>([]);
   const [summary, setSummary] = useState({ total: 0, passed: 0, failed: 0 });
+  const [useMemoized, setUseMemoized] = useState(false);
+  const [activeTab, setActiveTab] = useState('results');
+  const [benchmarkResults, setBenchmarkResults] = useState<{
+    standard: { ops: number; time: number };
+    memoized: { ops: number; time: number };
+    improvement: number;
+  }>({ 
+    standard: { ops: 0, time: 0 }, 
+    memoized: { ops: 0, time: 0 }, 
+    improvement: 0 
+  });
   
   const runTests = () => {
     const newResults = TEST_CASES.map(testCase => {
+      // Choose extraction function based on settings
+      const extractFn = useMemoized ? memoizedExtractNestedParameters : extractNestedParameters;
+      const validateFn = useMemoized ? memoizedValidateNestedParameters : validateNestedParameters;
+      
       const startTime = performance.now();
-      const extracted = extractNestedParameters(testCase.pattern, testCase.path);
+      const extracted = extractFn(testCase.pattern, testCase.path);
       const extractionTime = performance.now() - startTime;
       
       const validationStartTime = performance.now();
-      const validation = validateNestedParameters(
+      const validation = validateFn(
         extracted.params,
         extracted.hierarchy,
         testCase.validationRules
       );
       const validationTime = performance.now() - validationStartTime;
+      
+      // Run comparative test if using memoized version
+      let memoizedTime;
+      if (useMemoized) {
+        // Run a second time to measure cached performance
+        const memoizedStartTime = performance.now();
+        memoizedExtractNestedParameters(testCase.pattern, testCase.path);
+        memoizedValidateNestedParameters(
+          extracted.params,
+          extracted.hierarchy,
+          testCase.validationRules
+        );
+        memoizedTime = performance.now() - memoizedStartTime;
+      }
       
       // Combine extraction and validation errors
       const allErrors = [...extracted.errors, ...validation.errors];
@@ -148,7 +190,8 @@ export const NestedParameterTestSuite: React.FC = () => {
           performance: {
             extractionTime,
             validationTime,
-            totalTime: extractionTime + validationTime
+            totalTime: extractionTime + validationTime,
+            memoizedTime
           }
         }
       };
@@ -165,9 +208,67 @@ export const NestedParameterTestSuite: React.FC = () => {
     });
   };
   
+  const runBenchmark = () => {
+    // Standard benchmark
+    const standardBenchmark = benchmarkOperation(
+      'standard-extract-validate',
+      () => {
+        const pattern = '/user/:id/profile/:section/settings/:settingId';
+        const path = '/user/123/profile/personal/settings/display';
+        const extracted = extractNestedParameters(pattern, path);
+        validateNestedParameters(
+          extracted.params,
+          extracted.hierarchy,
+          {
+            id: new ValidationRuleBuilder().string().required().build(),
+            section: new ValidationRuleBuilder().string().required().build(),
+            settingId: new ValidationRuleBuilder().string().required().build()
+          }
+        );
+      },
+      1000
+    );
+    
+    // Memoized benchmark
+    const memoizedBenchmark = benchmarkOperation(
+      'memoized-extract-validate',
+      () => {
+        const pattern = '/user/:id/profile/:section/settings/:settingId';
+        const path = '/user/123/profile/personal/settings/display';
+        const extracted = memoizedExtractNestedParameters(pattern, path);
+        memoizedValidateNestedParameters(
+          extracted.params,
+          extracted.hierarchy,
+          {
+            id: new ValidationRuleBuilder().string().required().build(),
+            section: new ValidationRuleBuilder().string().required().build(),
+            settingId: new ValidationRuleBuilder().string().required().build()
+          }
+        );
+      },
+      1000
+    );
+    
+    const standardOps = standardBenchmark.performance.operationsPerSecond;
+    const memoizedOps = memoizedBenchmark.performance.operationsPerSecond;
+    const improvement = ((memoizedOps - standardOps) / standardOps) * 100;
+    
+    setBenchmarkResults({
+      standard: { 
+        ops: standardOps, 
+        time: standardBenchmark.performance.executionTime 
+      },
+      memoized: { 
+        ops: memoizedOps, 
+        time: memoizedBenchmark.performance.executionTime 
+      },
+      improvement
+    });
+  };
+  
   useEffect(() => {
     runTests();
-  }, []);
+  }, [useMemoized]);
   
   return (
     <Card>
@@ -188,78 +289,177 @@ export const NestedParameterTestSuite: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button onClick={runTests}>Run All Tests</Button>
-        
-        <div className="space-y-4">
-          {results.map((result, index) => (
-            <Card key={index}>
-              <CardContent className="pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium">{result.testCase.name}</h3>
-                  {result.result.passed ? (
-                    <div className="flex items-center text-green-500">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      <span>Passed</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="results">Test Results</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="results">
+            <div className="flex items-center gap-4 mb-4">
+              <Button onClick={runTests}>Run All Tests</Button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="use-memoized"
+                  checked={useMemoized}
+                  onCheckedChange={setUseMemoized}
+                />
+                <Label htmlFor="use-memoized">Use Memoized Functions</Label>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {results.map((result, index) => (
+                <Card key={index}>
+                  <CardContent className="pt-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium">{result.testCase.name}</h3>
+                      {result.result.passed ? (
+                        <div className="flex items-center text-green-500">
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          <span>Passed</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-destructive">
+                          <XCircle className="h-4 w-4 mr-1" />
+                          <span>Failed</span>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex items-center text-destructive">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      <span>Failed</span>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="font-medium mb-1">Pattern</div>
+                        <code className="bg-muted p-1 rounded text-xs">{result.testCase.pattern}</code>
+                      </div>
+                      <div>
+                        <div className="font-medium mb-1">Path</div>
+                        <code className="bg-muted p-1 rounded text-xs">{result.testCase.path}</code>
+                      </div>
                     </div>
-                  )}
+                    
+                    <div className="mt-2">
+                      <div className="font-medium mb-1">Extracted Parameters</div>
+                      <div className="bg-muted p-2 rounded">
+                        <code className="text-xs">
+                          {JSON.stringify(result.result.extracted, null, 2)}
+                        </code>
+                      </div>
+                    </div>
+                    
+                    {result.result.errors.length > 0 && (
+                      <Alert variant={result.testCase.expectedErrors ? "default" : "destructive"} className="mt-2">
+                        <AlertTitle>Errors</AlertTitle>
+                        <AlertDescription>
+                          <ul className="list-disc list-inside text-sm">
+                            {result.result.errors.map((error, i) => (
+                              <li key={i}>{error}</li>
+                            ))}
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        <span>Extraction: {result.result.performance.extractionTime.toFixed(2)}ms</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        <span>Validation: {(result.result.performance.validationTime || 0).toFixed(2)}ms</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        <span>Total: {result.result.performance.totalTime.toFixed(2)}ms</span>
+                      </div>
+                      
+                      {useMemoized && result.result.performance.memoizedTime !== undefined && (
+                        <div className="flex items-center">
+                          <Zap className="h-3 w-3 mr-1" />
+                          <span>Cached: {result.result.performance.memoizedTime.toFixed(2)}ms</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="performance">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Performance Benchmarks</h3>
+                <Button onClick={runBenchmark}>Run Benchmark</Button>
+              </div>
+              
+              {benchmarkResults.standard.ops > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Standard Implementation</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Operations/sec:</span>
+                          <span className="font-mono">{benchmarkResults.standard.ops.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Total time:</span>
+                          <span className="font-mono">{benchmarkResults.standard.time.toFixed(2)}ms</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Memoized Implementation</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Operations/sec:</span>
+                          <span className="font-mono">{benchmarkResults.memoized.ops.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Total time:</span>
+                          <span className="font-mono">{benchmarkResults.memoized.time.toFixed(2)}ms</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="font-medium mb-1">Pattern</div>
-                    <code className="bg-muted p-1 rounded text-xs">{result.testCase.pattern}</code>
-                  </div>
-                  <div>
-                    <div className="font-medium mb-1">Path</div>
-                    <code className="bg-muted p-1 rounded text-xs">{result.testCase.path}</code>
-                  </div>
-                </div>
-                
-                <div className="mt-2">
-                  <div className="font-medium mb-1">Extracted Parameters</div>
-                  <div className="bg-muted p-2 rounded">
-                    <code className="text-xs">
-                      {JSON.stringify(result.result.extracted, null, 2)}
-                    </code>
-                  </div>
-                </div>
-                
-                {result.result.errors.length > 0 && (
-                  <Alert variant={result.testCase.expectedErrors ? "default" : "destructive"} className="mt-2">
-                    <AlertTitle>Errors</AlertTitle>
-                    <AlertDescription>
-                      <ul className="list-disc list-inside text-sm">
-                        {result.result.errors.map((error, i) => (
-                          <li key={i}>{error}</li>
-                        ))}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="flex items-center space-x-3 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>Extraction: {result.result.performance.extractionTime.toFixed(2)}ms</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>Validation: {(result.result.performance.validationTime || 0).toFixed(2)}ms</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>Total: {result.result.performance.totalTime.toFixed(2)}ms</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              )}
+              
+              {benchmarkResults.improvement > 0 && (
+                <Alert>
+                  <AlertTitle className="flex items-center">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Performance Improvement
+                  </AlertTitle>
+                  <AlertDescription>
+                    Memoization provides a <strong className="text-green-500">
+                      {benchmarkResults.improvement.toFixed(2)}%
+                    </strong> performance improvement.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="bg-muted p-4 rounded-md">
+                <h4 className="font-medium mb-2">Performance Best Practices</h4>
+                <ul className="list-disc pl-6 space-y-1 text-sm text-muted-foreground">
+                  <li>Use memoized functions for routes with high traffic</li>
+                  <li>Limit the complexity of validation rules for better performance</li>
+                  <li>Consider the tradeoff between memory usage and execution speed</li>
+                  <li>Clear parameter caches when rule definitions change</li>
+                </ul>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

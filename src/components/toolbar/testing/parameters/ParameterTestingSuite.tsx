@@ -6,6 +6,8 @@ import { ParameterExtractionTester } from './ParameterExtractionTester';
 import ParameterValidationTester from './ParameterValidationTester';
 import { OptionalParameterTester } from './OptionalParameterTester';
 import { NestedParameterTester } from './components/NestedParameterTester';
+import ParameterTestingGuide from './docs/ParameterTestingGuide';
+import NestedParameterTestSuite from './tests/NestedParameterTestSuite';
 
 export const ParameterTestingSuite: React.FC = () => {
   return (
@@ -26,11 +28,13 @@ export const ParameterTestingSuite: React.FC = () => {
       </Card>
       
       <Tabs defaultValue="nested" className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4">
+        <TabsList className="grid grid-cols-2 md:grid-cols-6">
           <TabsTrigger value="nested">Nested Parameters</TabsTrigger>
           <TabsTrigger value="extraction">Parameter Extraction</TabsTrigger>
           <TabsTrigger value="validation">Parameter Validation</TabsTrigger>
           <TabsTrigger value="optional">Optional Parameters</TabsTrigger>
+          <TabsTrigger value="test-suite">Test Suite</TabsTrigger>
+          <TabsTrigger value="docs">Documentation</TabsTrigger>
         </TabsList>
         
         <TabsContent value="nested">
@@ -47,6 +51,14 @@ export const ParameterTestingSuite: React.FC = () => {
         
         <TabsContent value="optional">
           <OptionalParameterTester />
+        </TabsContent>
+        
+        <TabsContent value="test-suite">
+          <NestedParameterTestSuite />
+        </TabsContent>
+
+        <TabsContent value="docs">
+          <ParameterTestingGuide />
         </TabsContent>
       </Tabs>
     </div>

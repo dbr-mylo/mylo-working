@@ -1,17 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  extractOptionalParameters, 
-  validateOptionalParameters, 
-  ValidationResult,
-  createParameterConfigFromPattern,
-  buildUrlFromPattern
-} from '@/utils/navigation/parameters/optionalParameterHandler';
+import { extractNestedParameters, validateNestedParameters } from '@/utils/navigation/parameters/nestedParameterHandler';
 import { TestCaseManager, type SavedTestCase } from './components/TestCaseManager';
 import { TestResults, type TestResult } from './components/TestResults';
 import { ParameterTesterForm } from './components/ParameterTesterForm';
+import { ParameterHierarchyView } from './components/ParameterHierarchyView';
 
 export const OptionalParameterTester = () => {
   const [pattern, setPattern] = useState('/user/:id?/profile/:section?');
@@ -29,35 +23,31 @@ export const OptionalParameterTester = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [currentTab, setCurrentTab] = useState('tester');
   
-  // Save test cases to localStorage when they change
   React.useEffect(() => {
     localStorage.setItem('optional-parameter-test-cases', JSON.stringify(testCases));
   }, [testCases]);
   
   const runTest = () => {
-    // Extract parameters
-    const extracted = extractOptionalParameters(pattern, actualPath);
+    const extracted = extractNestedParameters(pattern, actualPath);
     
-    // Create test configuration
-    const config = createParameterConfigFromPattern(pattern);
-    
-    // Validate parameters
-    const validation: ValidationResult = validateOptionalParameters(extracted.params, config);
-    
-    // Build URL from parameters
-    const builtUrl = buildUrlFromPattern(pattern, extracted.params);
+    const validation = validateNestedParameters(
+      extracted.params,
+      extracted.hierarchy,
+      {
+        id: { type: 'number' },
+        slug: { pattern: /^[a-z0-9-]+$/ }
+      }
+    );
     
     const result: TestResult = {
       pattern,
       actualPath,
       params: extracted.params,
       missingRequired: extracted.missingRequired,
-      errors: extracted.errors,
-      builtUrl,
+      errors: [...extracted.errors, ...validation.errors],
       isValid: validation.isValid,
-      validationErrors: validation.validationErrors,
       performance: {
-        extractionTime: extracted.performance?.extractionTime || 0,
+        extractionTime: extracted.performance.extractionTime,
         validationTime: validation.performance?.validationTime
       },
       timestamp: new Date().toISOString()
@@ -94,7 +84,7 @@ export const OptionalParameterTester = () => {
       <CardHeader>
         <CardTitle>Optional Parameter Tester</CardTitle>
         <CardDescription>
-          Test handling of optional route parameters and their extraction
+          Test handling of optional route parameters and their extraction, including nested parameters
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -103,6 +93,7 @@ export const OptionalParameterTester = () => {
             <TabsTrigger value="tester">Parameter Tester</TabsTrigger>
             <TabsTrigger value="saved">Test Cases</TabsTrigger>
             <TabsTrigger value="results">Test Results</TabsTrigger>
+            <TabsTrigger value="hierarchy">Parameter Hierarchy</TabsTrigger>
           </TabsList>
           
           <TabsContent value="tester" className="space-y-4">
@@ -137,6 +128,15 @@ export const OptionalParameterTester = () => {
             {results.map((result, index) => (
               <TestResults key={index} results={[result]} />
             ))}
+          </TabsContent>
+          
+          <TabsContent value="hierarchy" className="space-y-4">
+            {pattern && (
+              <ParameterHierarchyView 
+                hierarchy={extractNestedParameters(pattern, actualPath).hierarchy}
+                params={extractNestedParameters(pattern, actualPath).params}
+              />
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

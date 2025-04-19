@@ -6,6 +6,7 @@ import { ParameterPerformanceTester } from './ParameterPerformanceTester';
 import { ParameterRouteNavigationTester } from './ParameterRouteNavigationTester';
 import { ParameterPreservationTester } from './ParameterPreservationTester';
 import MissingParameterTester from './MissingParameterTester';
+import { NestedParameterTestSuite } from './tests/NestedParameterTestSuite';
 
 export const NavigationParameterTestSuite: React.FC = () => {
   return (
@@ -25,13 +26,18 @@ export const NavigationParameterTestSuite: React.FC = () => {
         </CardContent>
       </Card>
       
-      <Tabs defaultValue="performance" className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4">
+      <Tabs defaultValue="nested" className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5">
+          <TabsTrigger value="nested">Nested Tests</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="missing">Missing Parameters</TabsTrigger>
           <TabsTrigger value="navigation">Route Navigation</TabsTrigger>
           <TabsTrigger value="preservation">Parameter Preservation</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="nested" className="mt-6">
+          <NestedParameterTestSuite />
+        </TabsContent>
         
         <TabsContent value="performance" className="mt-6">
           <ParameterPerformanceTester />

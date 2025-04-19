@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +7,7 @@ import { TestCaseManager, type SavedTestCase } from './components/TestCaseManage
 import { TestResults, type TestResult } from './components/TestResults';
 import { ParameterTesterForm } from './components/ParameterTesterForm';
 import { ParameterHierarchyView } from './components/ParameterHierarchyView';
+import { NestedParameterTester } from './components/NestedParameterTester';
 
 export const OptionalParameterTester = () => {
   const [pattern, setPattern] = useState('/user/:id?/profile/:section?');
@@ -16,7 +18,8 @@ export const OptionalParameterTester = () => {
     return saved ? JSON.parse(saved) : [
       { name: 'User Profile', pattern: '/user/:id?/profile/:section?', actualPath: '/user/123/profile' },
       { name: 'Product Detail', pattern: '/products/:category?/:productId', actualPath: '/products/electronics/123' },
-      { name: 'Blog Post', pattern: '/blog/:year?/:month?/:slug', actualPath: '/blog/2023/05/my-post' }
+      { name: 'Blog Post', pattern: '/blog/:year?/:month?/:slug', actualPath: '/blog/2023/05/my-post' },
+      { name: 'Deeply Nested', pattern: '/org/:orgId/team/:teamId?/project/:projectId/task/:taskId?', actualPath: '/org/acme/team/dev/project/website/task/header' }
     ];
   });
   const [testCaseName, setTestCaseName] = useState('');
@@ -94,6 +97,7 @@ export const OptionalParameterTester = () => {
             <TabsTrigger value="saved">Test Cases</TabsTrigger>
             <TabsTrigger value="results">Test Results</TabsTrigger>
             <TabsTrigger value="hierarchy">Parameter Hierarchy</TabsTrigger>
+            <TabsTrigger value="nested">Nested Parameters</TabsTrigger>
           </TabsList>
           
           <TabsContent value="tester" className="space-y-4">
@@ -137,6 +141,10 @@ export const OptionalParameterTester = () => {
                 params={extractNestedParameters(pattern, actualPath).params}
               />
             )}
+          </TabsContent>
+          
+          <TabsContent value="nested" className="space-y-4">
+            <NestedParameterTester />
           </TabsContent>
         </Tabs>
       </CardContent>

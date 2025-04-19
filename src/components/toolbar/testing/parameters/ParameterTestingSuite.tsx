@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ParameterExtractionTester } from './ParameterExtractionTester';
 import ParameterValidationTester from './ParameterValidationTester';
 import { OptionalParameterTester } from './OptionalParameterTester';
+import { NestedParameterTester } from './components/NestedParameterTester';
 
 export const ParameterTestingSuite: React.FC = () => {
   return (
@@ -16,14 +17,25 @@ export const ParameterTestingSuite: React.FC = () => {
             Comprehensive testing tools for URL parameter handling
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            This suite provides tools for testing parameter extraction, validation, nesting, and optional parameters.
+            Use the tabs below to access different testing tools.
+          </p>
+        </CardContent>
       </Card>
       
-      <Tabs defaultValue="extraction" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="nested" className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="nested">Nested Parameters</TabsTrigger>
           <TabsTrigger value="extraction">Parameter Extraction</TabsTrigger>
           <TabsTrigger value="validation">Parameter Validation</TabsTrigger>
           <TabsTrigger value="optional">Optional Parameters</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="nested">
+          <NestedParameterTester />
+        </TabsContent>
         
         <TabsContent value="extraction">
           <ParameterExtractionTester />
@@ -40,3 +52,5 @@ export const ParameterTestingSuite: React.FC = () => {
     </div>
   );
 };
+
+export default ParameterTestingSuite;

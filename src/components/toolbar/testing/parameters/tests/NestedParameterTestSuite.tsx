@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   extractNestedParameters, 
   validateNestedParameters, 
-  ValidationRuleBuilder 
+  ValidationRuleBuilder,
+  type NestedParameter 
 } from '@/utils/navigation/parameters/nestedParameterHandler';
 import { 
   memoizedExtractNestedParameters,
@@ -135,23 +136,25 @@ export const NestedParameterTestSuite: React.FC = () => {
   
   const runTests = () => {
     const newResults = TEST_CASES.map(testCase => {
-      const extractFn = useMemoized ? memoizedExtractNestedParameters : extractNestedParameters;
-      const validateFn = useMemoized ? memoizedValidateNestedParameters : validateNestedParameters;
-      
-      const startTime = performance.now();
-      const extracted = extractFn(testCase.pattern, testCase.path);
-      const extractionTime = performance.now() - startTime;
-      
-      const validationStartTime = performance.now();
-      const validation = validateFn(
-        extracted.params,
-        extracted.hierarchy as Record<string, string[]>,
-        testCase.validationRules
-      );
-      const validationTime = performance.now() - validationStartTime;
-      
+      let extracted;
+      let validationResult;
+      let extractionTime;
+      let validationTime;
       let memoizedTime;
+
       if (useMemoized) {
+        const startTime = performance.now();
+        extracted = memoizedExtractNestedParameters(testCase.pattern, testCase.path);
+        extractionTime = performance.now() - startTime;
+        
+        const validationStartTime = performance.now();
+        validationResult = memoizedValidateNestedParameters(
+          extracted.params,
+          extracted.hierarchy,
+          testCase.validationRules
+        );
+        validationTime = performance.now() - validationStartTime;
+        
         const memoizedStartTime = performance.now();
         memoizedExtractNestedParameters(testCase.pattern, testCase.path);
         memoizedValidateNestedParameters(
@@ -160,9 +163,29 @@ export const NestedParameterTestSuite: React.FC = () => {
           testCase.validationRules
         );
         memoizedTime = performance.now() - memoizedStartTime;
+      } else {
+        const startTime = performance.now();
+        const extractResult = extractNestedParameters(testCase.pattern, testCase.path);
+        extracted = {
+          params: extractResult.params,
+          hierarchy: Object.entries(extractResult.hierarchy).reduce((acc, [key, value]) => {
+            acc[key] = value.children;
+            return acc;
+          }, {} as Record<string, string[]>),
+          errors: extractResult.errors
+        };
+        extractionTime = performance.now() - startTime;
+        
+        const validationStartTime = performance.now();
+        validationResult = validateNestedParameters(
+          extracted.params,
+          extractResult.hierarchy,
+          testCase.validationRules
+        );
+        validationTime = performance.now() - validationStartTime;
       }
       
-      const allErrors = [...extracted.errors, ...validation.errors];
+      const allErrors = [...extracted.errors, ...validationResult.errors];
       
       const paramsMatch = Object.entries(testCase.expectedParams).every(
         ([key, value]) => extracted.params[key] === value
@@ -226,9 +249,19 @@ export const NestedParameterTestSuite: React.FC = () => {
         const pattern = '/user/:id/profile/:section/settings/:settingId';
         const path = '/user/123/profile/personal/settings/display';
         const extracted = memoizedExtractNestedParameters(pattern, path);
-        memoizedValidateNestedParameters(
+        const convertedHierarchy = Object.entries(extracted.hierarchy).reduce((acc, [key, children]) => {
+          acc[key] = {
+            name: key,
+            isOptional: false,
+            children,
+            level: 0
+          };
+          return acc;
+        }, {} as Record<string, NestedParameter>);
+        
+        validateNestedParameters(
           extracted.params,
-          extracted.hierarchy,
+          convertedHierarchy,
           {
             id: new ValidationRuleBuilder().string().required().build(),
             section: new ValidationRuleBuilder().string().required().build(),

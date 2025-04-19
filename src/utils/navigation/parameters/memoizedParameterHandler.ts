@@ -1,3 +1,4 @@
+
 import { extractNestedParameters, validateNestedParameters, type NestedParameter } from './nestedParameterHandler';
 
 interface MemoizedResult {
@@ -24,7 +25,7 @@ export const memoizedExtractNestedParameters = (pattern: string, path: string): 
       acc[key] = value.children;
       return acc;
     }, {} as Record<string, string[]>),
-    errors: result.errors
+    errors: [...result.errors, result.missingRequired.map(p => `Missing required parameter: ${p}`)]
   };
   
   extractionCache.set(cacheKey, memoizedResult);
@@ -42,7 +43,19 @@ export const memoizedValidateNestedParameters = (
     return validationCache.get(cacheKey)!;
   }
   
-  const validationResult = validateNestedParameters(params, hierarchy, rules);
+  // Convert hierarchy from Record<string, string[]> to Record<string, NestedParameter>
+  // This is necessary because validateNestedParameters expects NestedParameter objects
+  const convertedHierarchy = Object.entries(hierarchy).reduce((acc, [key, children]) => {
+    acc[key] = {
+      name: key,
+      isOptional: false, // Default to false, can't determine from the string[] format
+      children,
+      level: 0 // Default to 0, can't determine from the string[] format
+    };
+    return acc;
+  }, {} as Record<string, NestedParameter>);
+  
+  const validationResult = validateNestedParameters(params, convertedHierarchy, rules);
   validationCache.set(cacheKey, { isValid: validationResult.isValid, errors: validationResult.errors });
   return validationResult;
 };

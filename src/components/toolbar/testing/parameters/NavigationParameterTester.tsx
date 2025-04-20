@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,14 +59,12 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
         () => navigationService.extractRouteParameters(pattern, actualPath)
       );
       
-      // Add memoized performance data to the newResult
-      // We need to modify the type to match what's expected
-      newResult.performance = {
-        ...newResult.performance,
-        // These properties will be added to the object even though they're not in the type
-        memoizedExtractionTime: memoizedPerformance.executionTime,
-        memoizedOperationsPerSecond: memoizedPerformance.operationsPerSecond
-      };
+      // Store the memoized metrics as separate properties in the result
+      // instead of trying to add them to the performance object
+      newResult.performance = performance;
+      // Add these as top level properties instead of nested in performance
+      newResult.memoizedExtractionTime = memoizedPerformance.executionTime;
+      newResult.memoizedOperationsPerSecond = memoizedPerformance.operationsPerSecond;
       
       setResults(prev => [newResult, ...prev]);
       
@@ -238,12 +235,12 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
                         </div>
                       )}
                       
-                      {result.performance?.memoizedExtractionTime && (
+                      {result.memoizedExtractionTime && (
                         <div className="text-sm text-muted-foreground">
-                          <p>Memoized: {result.performance.memoizedExtractionTime.toFixed(2)}ms</p>
+                          <p>Memoized: {result.memoizedExtractionTime.toFixed(2)}ms</p>
                           <p>Improvement: {
-                            result.performance.extractionTime > 0 
-                              ? ((result.performance.extractionTime - result.performance.memoizedExtractionTime) / 
+                            result.performance?.extractionTime > 0 
+                              ? ((result.performance.extractionTime - result.memoizedExtractionTime) / 
                                   result.performance.extractionTime * 100).toFixed(1) 
                               : '0'
                           }%</p>

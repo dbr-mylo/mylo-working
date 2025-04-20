@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +14,30 @@ interface NavigationParameterTesterProps {
   onTestResult?: (result: any) => void;
 }
 
+// Define the result type to include the memoized properties
+interface TestResult {
+  timestamp: string;
+  pattern: string;
+  actualPath: string;
+  params: Record<string, string>;
+  errors: string[];
+  hierarchy: Record<string, any>;
+  isValid: boolean;
+  performance: {
+    extractionTime: number;
+    operationsPerSecond: number;
+  };
+  memoizedExtractionTime?: number;
+  memoizedOperationsPerSecond?: number;
+}
+
 export const NavigationParameterTester: React.FC<NavigationParameterTesterProps> = ({
   onTestResult
 }) => {
   const { toast } = useToast();
   const [pattern, setPattern] = useState('/content/:contentType/:documentId/version/:versionId');
   const [actualPath, setActualPath] = useState('/content/article/doc-123/version/v2');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<TestResult[]>([]);
   const [benchmarks, setBenchmarks] = useState<{iterations: number; averageTime: number} | null>(null);
   const [segments, setSegments] = useState<PathSegment[]>([
     { type: 'static', name: '', value: 'content' },
@@ -38,7 +56,7 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
         () => navigationService.extractRouteParameters(pattern, actualPath)
       );
       
-      const newResult = {
+      const newResult: TestResult = {
         timestamp: new Date().toISOString(),
         pattern,
         actualPath,
@@ -53,16 +71,12 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
       };
       
       // Also test memoized version to compare
-      // We need to modify how we call this function - removing the third argument
       const { performance: memoizedPerformance } = benchmarkOperation(
         'memoizedExtractParameters',
         () => navigationService.extractRouteParameters(pattern, actualPath)
       );
       
-      // Store the memoized metrics as separate properties in the result
-      // instead of trying to add them to the performance object
-      newResult.performance = performance;
-      // Add these as top level properties instead of nested in performance
+      // Add memoized metrics as top-level properties
       newResult.memoizedExtractionTime = memoizedPerformance.executionTime;
       newResult.memoizedOperationsPerSecond = memoizedPerformance.operationsPerSecond;
       
@@ -77,7 +91,7 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
         description: `Extracted ${result ? Object.keys(result).length : 0} parameters in ${performance.executionTime.toFixed(2)}ms`,
       });
     } catch (error) {
-      const errorResult = {
+      const errorResult: TestResult = {
         timestamp: new Date().toISOString(),
         pattern,
         actualPath,
@@ -85,7 +99,10 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
         errors: [error instanceof Error ? error.message : String(error)],
         hierarchy: {},
         isValid: false,
-        performance: { extractionTime: 0 }
+        performance: { 
+          extractionTime: 0,
+          operationsPerSecond: 0
+        }
       };
       
       setResults(prev => [errorResult, ...prev]);

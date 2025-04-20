@@ -26,3 +26,35 @@ export type ValidationRule = {
   maxLength?: number;
   required?: boolean;
 };
+
+// New types for memoization
+export interface SimplifiedHierarchy {
+  [key: string]: string[];
+}
+
+export interface CacheOptions {
+  maxSize?: number;
+  ttl?: number; // time to live in milliseconds
+}
+
+export interface CacheMetrics {
+  hits: number;
+  misses: number;
+  size: number;
+  createdAt: number;
+  lastCleanup?: number;
+}
+
+export interface CacheEntry<T> {
+  value: T;
+  timestamp: number;
+  lastAccessed: number;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  performance?: {
+    validationTime: number;
+  };
+}

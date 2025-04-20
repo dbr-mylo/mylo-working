@@ -1,44 +1,26 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { benchmarkOperation } from '@/utils/navigation/parameters/performanceMonitor'; 
-import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
-import { navigationService } from '@/services/navigation/NavigationService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-interface NavigationParameterTesterProps {
-  onTestResult?: (result: any) => void;
-}
-
-// Define the result type to include the memoized properties
-interface TestResult {
-  timestamp: string;
-  pattern: string;
-  actualPath: string;
-  params: Record<string, string>;
-  errors: string[];
-  hierarchy: Record<string, any>;
-  isValid: boolean;
-  performance: {
-    extractionTime: number;
-    operationsPerSecond: number;
-  };
-  memoizedExtractionTime?: number;
-  memoizedOperationsPerSecond?: number;
-}
+import { PathSegmentBuilder } from './components/PathSegmentBuilder';
+import { TestResultsList } from './components/TestResultsList';
+import { useNavigationTesting } from './hooks/useNavigationTesting';
+import { PathSegment, NavigationParameterTesterProps } from './types';
 
 export const NavigationParameterTester: React.FC<NavigationParameterTesterProps> = ({
   onTestResult
 }) => {
-  const { toast } = useToast();
-  const [pattern, setPattern] = useState('/content/:contentType/:documentId/version/:versionId');
-  const [actualPath, setActualPath] = useState('/content/article/doc-123/version/v2');
-  const [results, setResults] = useState<TestResult[]>([]);
-  const [benchmarks, setBenchmarks] = useState<{iterations: number; averageTime: number} | null>(null);
+  const {
+    pattern,
+    setPattern,
+    actualPath,
+    setActualPath,
+    results,
+    performExtraction
+  } = useNavigationTesting(onTestResult);
+
   const [segments, setSegments] = useState<PathSegment[]>([
     { type: 'static', name: '', value: 'content' },
     { type: 'param', name: 'contentType', value: 'article' },
@@ -48,76 +30,6 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
     { type: 'param', name: 'versionId', value: 'v2' }
   ]);
   const [iterations, setIterations] = useState(1);
-
-  const performExtraction = () => {
-    try {
-      const { result, performance } = benchmarkOperation(
-        'extractParameters',
-        () => navigationService.extractRouteParameters(pattern, actualPath)
-      );
-      
-      const newResult: TestResult = {
-        timestamp: new Date().toISOString(),
-        pattern,
-        actualPath,
-        params: result,
-        errors: [],
-        hierarchy: {},
-        isValid: true,
-        performance: {
-          extractionTime: performance.executionTime,
-          operationsPerSecond: performance.operationsPerSecond
-        }
-      };
-      
-      // Also test memoized version to compare
-      const { performance: memoizedPerformance } = benchmarkOperation(
-        'memoizedExtractParameters',
-        () => navigationService.extractRouteParameters(pattern, actualPath)
-      );
-      
-      // Add memoized metrics as top-level properties
-      newResult.memoizedExtractionTime = memoizedPerformance.executionTime;
-      newResult.memoizedOperationsPerSecond = memoizedPerformance.operationsPerSecond;
-      
-      setResults(prev => [newResult, ...prev]);
-      
-      if (onTestResult) {
-        onTestResult(newResult);
-      }
-      
-      toast({
-        title: 'Parameter extraction complete',
-        description: `Extracted ${result ? Object.keys(result).length : 0} parameters in ${performance.executionTime.toFixed(2)}ms`,
-      });
-    } catch (error) {
-      const errorResult: TestResult = {
-        timestamp: new Date().toISOString(),
-        pattern,
-        actualPath,
-        params: {},
-        errors: [error instanceof Error ? error.message : String(error)],
-        hierarchy: {},
-        isValid: false,
-        performance: { 
-          extractionTime: 0,
-          operationsPerSecond: 0
-        }
-      };
-      
-      setResults(prev => [errorResult, ...prev]);
-      
-      if (onTestResult) {
-        onTestResult(errorResult);
-      }
-      
-      toast({
-        title: 'Error during extraction',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleSegmentUpdate = (index: number, field: string, value: string) => {
     const newSegments = [...segments];
@@ -173,7 +85,9 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
               onBuildPath={buildFromSegments}
             />
             
-            <Button className="w-full" onClick={performExtraction}>Test Parameters</Button>
+            <Button className="w-full" onClick={performExtraction}>
+              Test Parameters
+            </Button>
           </TabsContent>
           
           <TabsContent value="advanced" className="space-y-4">
@@ -218,56 +132,7 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
           </TabsContent>
           
           <TabsContent value="results">
-            <div className="border rounded-md overflow-auto max-h-96">
-              {results.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  No test results yet. Run a test to see results.
-                </div>
-              ) : (
-                results.map((result, index) => (
-                  <div key={index} className="border-b p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                        {result.performance?.extractionTime?.toFixed(2) || 'N/A'}ms
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(result.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <p><strong>Pattern:</strong> {result.pattern}</p>
-                      <p><strong>Path:</strong> {result.actualPath}</p>
-                      <pre className="bg-muted p-2 rounded-md text-xs overflow-auto">
-                        {JSON.stringify(result.params, null, 2)}
-                      </pre>
-                      
-                      {result.errors?.length > 0 && (
-                        <div className="mt-2 text-red-500 text-sm">
-                          <p><strong>Errors:</strong></p>
-                          <ul className="list-disc list-inside">
-                            {result.errors.map((err: string, i: number) => (
-                              <li key={i}>{err}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {result.memoizedExtractionTime && (
-                        <div className="text-sm text-muted-foreground">
-                          <p>Memoized: {result.memoizedExtractionTime.toFixed(2)}ms</p>
-                          <p>Improvement: {
-                            result.performance?.extractionTime > 0 
-                              ? ((result.performance.extractionTime - result.memoizedExtractionTime) / 
-                                  result.performance.extractionTime * 100).toFixed(1) 
-                              : '0'
-                          }%</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            <TestResultsList results={results} />
           </TabsContent>
         </Tabs>
       </CardContent>

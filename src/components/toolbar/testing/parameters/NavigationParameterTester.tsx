@@ -54,14 +54,17 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
       };
       
       // Also test memoized version to compare
+      // We need to modify how we call this function - removing the third argument
       const { performance: memoizedPerformance } = benchmarkOperation(
         'memoizedExtractParameters',
-        () => navigationService.extractRouteParameters(pattern, actualPath, true)
+        () => navigationService.extractRouteParameters(pattern, actualPath)
       );
       
       // Add memoized performance data to the newResult
+      // We need to modify the type to match what's expected
       newResult.performance = {
         ...newResult.performance,
+        // These properties will be added to the object even though they're not in the type
         memoizedExtractionTime: memoizedPerformance.executionTime,
         memoizedOperationsPerSecond: memoizedPerformance.operationsPerSecond
       };

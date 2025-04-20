@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { benchmarkFunction } from './utils/parameterTestUtils';
+import { benchmarkParameterFunction } from './utils/parameterTestUtils';  // Updated import
 import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
 import { navigationService } from '@/services/navigation/NavigationService';
 
@@ -21,7 +21,7 @@ export const NavigationParameterTester: React.FC = () => {
 
   const performExtraction = () => {
     try {
-      const { result, executionTime } = benchmarkFunction(() => 
+      const { result, executionTime } = benchmarkParameterFunction(() => 
         navigationService.extractRouteParameters(pattern, actualPath)
       );
       
@@ -129,3 +129,5 @@ export const NavigationParameterTester: React.FC = () => {
     </Card>
   );
 };
+
+export default NavigationParameterTester;

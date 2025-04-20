@@ -1,4 +1,3 @@
-
 import { 
   extractNestedParameters, 
   validateNestedParameters 
@@ -7,7 +6,6 @@ import {
   memoizedExtractNestedParameters, 
   memoizedValidateNestedParameters 
 } from '@/utils/navigation/parameters/memoizedParameterHandler';
-import { benchmarkFunction as performanceBenchmark } from '@/utils/navigation/parameters/performanceMonitor';
 
 // Test cases for parameter extraction scenarios
 export const PARAMETER_TEST_CASES = {
@@ -123,21 +121,19 @@ export const generateDeepLink = (
   
   // Replace path parameters
   Object.entries(params).forEach(([key, value]) => {
-    path = path.replace(new RegExp(`:${key}\\??`, 'g'), value);
+    const optionalRegex = new RegExp(`:${key}\\??`, 'g');
+    path = path.replace(optionalRegex, value || '');
   });
   
   // Clean up any trailing slashes from empty optional parameters
-  path = path.replace(/\/\//g, '/');
-  if (path.length > 1 && path.endsWith('/')) {
-    path = path.slice(0, -1);
-  }
+  path = path.replace(/\/+/g, '/').replace(/\/$/, '');
+  if (path === '') path = '/';
   
   // Add query parameters if provided
   if (queryParams && Object.keys(queryParams).length > 0) {
     const queryString = Object.entries(queryParams)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
       .join('&');
-    
     path = `${path}?${queryString}`;
   }
   

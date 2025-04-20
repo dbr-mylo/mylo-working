@@ -7,7 +7,7 @@ import {
   memoizedExtractNestedParameters, 
   memoizedValidateNestedParameters 
 } from '@/utils/navigation/parameters/memoizedParameterHandler';
-import { benchmarkFunction } from '@/utils/navigation/parameters/performanceMonitor';
+import { benchmarkFunction as performanceBenchmark } from '@/utils/navigation/parameters/performanceMonitor';
 
 // Test cases for parameter extraction scenarios
 export const PARAMETER_TEST_CASES = {
@@ -89,12 +89,57 @@ export const validateParameters = (
 };
 
 /**
- * Benchmark function with performance monitoring
+ * Benchmark parameter extraction function
  */
-export const benchmarkFunction = <T>(
+export const benchmarkParameterFunction = <T>(
   fn: () => T, 
   iterations: number = 1
 ): { result: T; executionTime: number } => {
-  const { result, performance } = benchmarkFunction('parameterTest', fn, iterations);
-  return { result, executionTime: performance.executionTime };
+  const startTime = performance.now();
+  
+  let result: T = fn();
+  
+  for (let i = 1; i < iterations; i++) {
+    fn();
+  }
+  
+  const executionTime = performance.now() - startTime;
+  
+  return {
+    result,
+    executionTime
+  };
+};
+
+/**
+ * Generate a deep link from pattern and parameters
+ */
+export const generateDeepLink = (
+  pattern: string,
+  params: Record<string, string>,
+  queryParams?: Record<string, string>
+): string => {
+  let path = pattern;
+  
+  // Replace path parameters
+  Object.entries(params).forEach(([key, value]) => {
+    path = path.replace(new RegExp(`:${key}\\??`, 'g'), value);
+  });
+  
+  // Clean up any trailing slashes from empty optional parameters
+  path = path.replace(/\/\//g, '/');
+  if (path.length > 1 && path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
+  
+  // Add query parameters if provided
+  if (queryParams && Object.keys(queryParams).length > 0) {
+    const queryString = Object.entries(queryParams)
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join('&');
+    
+    path = `${path}?${queryString}`;
+  }
+  
+  return path;
 };

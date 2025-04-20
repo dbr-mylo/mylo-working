@@ -9,20 +9,24 @@ import {
 import {
   memoizedExtractNestedParameters,
   memoizedValidateNestedParameters,
-  clearParameterCaches
+  clearParameterCaches,
+  getParameterCacheMetrics
 } from '@/utils/navigation/parameters/memoizedParameterHandler';
 
 export interface ParameterTestResult {
   pattern: string;
   path: string;
   params: Record<string, string>;
+  hierarchy?: Record<string, any>;
   isValid: boolean;
   errors: string[];
+  warnings?: string[];
   performance: {
     extractionTime: number;
     validationTime?: number;
     memoizedExtractionTime?: number;
     memoizedValidationTime?: number;
+    totalTime?: number;
   };
   timestamp: number;
 }
@@ -37,11 +41,17 @@ export interface ValidationTestSetup {
 export function useParameterTesting() {
   const [results, setResults] = useState<ParameterTestResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [cacheMetrics, setCacheMetrics] = useState(getParameterCacheMetrics());
+  
+  const updateCacheMetrics = useCallback(() => {
+    setCacheMetrics(getParameterCacheMetrics());
+  }, []);
   
   const testParameterExtraction = useCallback((
     pattern: string,
     path: string,
-    validationRules?: Record<string, ReturnType<ValidationRuleBuilder['build']>>
+    validationRules?: Record<string, ReturnType<ValidationRuleBuilder['build']>>,
+    iterations: number = 1
   ) => {
     setIsLoading(true);
     
@@ -49,18 +59,20 @@ export function useParameterTesting() {
       // Benchmark regular extraction
       const { result: extractionResult, performance: extractionPerf } = benchmarkFunction(
         'extractParameters',
-        () => extractNestedParameters(pattern, path)
+        () => extractNestedParameters(pattern, path),
+        iterations
       );
       
       // Benchmark memoized extraction
       const { result: memoizedResult, performance: memoizedPerf } = benchmarkFunction(
         'memoizedExtractParameters',
-        () => memoizedExtractNestedParameters(pattern, path)
+        () => memoizedExtractNestedParameters(pattern, path),
+        iterations
       );
       
       let validationResult = { isValid: true, errors: [] };
-      let validationPerf = { executionTime: 0 };
-      let memoizedValidationPerf = { executionTime: 0 };
+      let validationPerf = { executionTime: 0, operationsPerSecond: 0 };
+      let memoizedValidationPerf = { executionTime: 0, operationsPerSecond: 0 };
       
       // If validation rules are provided, test validation as well
       if (validationRules) {
@@ -70,7 +82,8 @@ export function useParameterTesting() {
             extractionResult.params,
             extractionResult.hierarchy,
             validationRules
-          )
+          ),
+          iterations
         );
         
         validationResult = result;
@@ -83,23 +96,29 @@ export function useParameterTesting() {
             extractionResult.params,
             extractionResult.hierarchy,
             validationRules
-          )
+          ),
+          iterations
         );
         
         memoizedValidationPerf = memoizedValPerf;
       }
       
+      // Update cache metrics
+      updateCacheMetrics();
+      
       const testResult: ParameterTestResult = {
         pattern,
         path,
         params: extractionResult.params,
+        hierarchy: extractionResult.hierarchy,
         isValid: validationResult.isValid,
         errors: [...extractionResult.errors, ...(validationResult.errors || [])],
         performance: {
           extractionTime: extractionPerf.executionTime,
           validationTime: validationPerf.executionTime,
           memoizedExtractionTime: memoizedPerf.executionTime,
-          memoizedValidationTime: memoizedValidationPerf.executionTime
+          memoizedValidationTime: memoizedValidationPerf.executionTime,
+          totalTime: extractionPerf.executionTime + validationPerf.executionTime
         },
         timestamp: Date.now()
       };
@@ -126,7 +145,7 @@ export function useParameterTesting() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updateCacheMetrics]);
   
   const clearResults = useCallback(() => {
     setResults([]);
@@ -134,7 +153,8 @@ export function useParameterTesting() {
   
   const clearCaches = useCallback(() => {
     clearParameterCaches();
-  }, []);
+    updateCacheMetrics();
+  }, [updateCacheMetrics]);
   
   const createValidationRule = useCallback((setup: ValidationTestSetup) => {
     let builder: ValidationRuleBuilder;
@@ -153,9 +173,11 @@ export function useParameterTesting() {
   return {
     results,
     isLoading,
+    cacheMetrics,
     testParameterExtraction,
     clearResults,
     clearCaches,
-    createValidationRule
+    createValidationRule,
+    updateCacheMetrics
   };
 }

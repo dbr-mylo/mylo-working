@@ -8,6 +8,10 @@ import { OptionalParameterTester } from './OptionalParameterTester';
 import { NestedParameterTester } from './components/NestedParameterTester';
 import ParameterTestingGuide from './docs/ParameterTestingGuide';
 import NestedParameterTestSuite from './tests/NestedParameterTestSuite';
+import { AdvancedParameterVisualizer } from './visualization/AdvancedParameterVisualizer';
+import { ParameterPerformanceAnalytics } from './components/analytics/ParameterPerformanceAnalytics';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 export const ParameterTestingSuite: React.FC = () => {
   return (
@@ -20,10 +24,14 @@ export const ParameterTestingSuite: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            This suite provides tools for testing parameter extraction, validation, nesting, and optional parameters.
-            Use the tabs below to access different testing tools.
-          </p>
+          <Alert>
+            <InfoIcon className="h-4 w-4" />
+            <AlertTitle>Parameter Testing Suite</AlertTitle>
+            <AlertDescription>
+              This suite provides tools for testing parameter extraction, validation, nesting, and optional parameters.
+              Use the tabs below to access different testing tools.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
       

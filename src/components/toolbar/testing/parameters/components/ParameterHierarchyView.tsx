@@ -1,18 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
-interface NestedParameter {
-  name: string;
-  isOptional: boolean;
-  parent?: string;
-  children: string[];
-  level: number;
-}
+import { NestedParameter } from '@/utils/navigation/parameters/types';
 
 interface ParameterHierarchyViewProps {
   hierarchy: Record<string, NestedParameter>;
@@ -23,137 +13,106 @@ export const ParameterHierarchyView: React.FC<ParameterHierarchyViewProps> = ({
   hierarchy,
   params
 }) => {
-  const rootParams = Object.values(hierarchy).filter(param => !param.parent);
-  const [expandedParams, setExpandedParams] = useState<Set<string>>(new Set(Object.keys(hierarchy)));
-
-  const toggleExpand = (paramName: string) => {
-    setExpandedParams(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(paramName)) {
-        newSet.delete(paramName);
-      } else {
-        newSet.add(paramName);
-      }
-      return newSet;
-    });
-  };
-
-  const getParentChain = (param: NestedParameter): string[] => {
-    const chain: string[] = [];
-    let current = param;
-    
-    while (current.parent) {
-      chain.unshift(current.parent);
-      current = hierarchy[current.parent];
+  // Sort parameters by level
+  const sortedParams = Object.values(hierarchy).sort((a, b) => a.level - b.level);
+  
+  // Group by levels
+  const levelGroups: Record<number, NestedParameter[]> = {};
+  sortedParams.forEach(param => {
+    if (!levelGroups[param.level]) {
+      levelGroups[param.level] = [];
     }
-    
-    return chain;
-  };
+    levelGroups[param.level].push(param);
+  });
 
-  const renderParameter = (param: NestedParameter) => {
-    const value = params[param.name];
-    const hasChildren = param.children.length > 0;
-    const isExpanded = expandedParams.has(param.name);
-    const parentChain = getParentChain(param);
-    const missingParent = param.parent && !params[param.parent];
-    
-    return (
-      <div key={param.name} className="space-y-1">
-        <div 
-          className={cn(
-            "flex items-center space-x-2 py-1 px-1 rounded-md transition-colors",
-            hasChildren && "cursor-pointer hover:bg-accent/50"
-          )}
-          style={{ marginLeft: `${param.level * 20}px` }}
-          onClick={hasChildren ? () => toggleExpand(param.name) : undefined}
-        >
-          {hasChildren && (
-            isExpanded 
-              ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> 
-              : <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          )}
-          <div className="flex items-center space-x-2">
-            <span className="font-medium">{param.name}</span>
-            {param.isOptional ? (
-              <Badge variant="outline" className="text-xs">
-                Optional
-              </Badge>
-            ) : (
-              <Badge variant="default" className="text-xs bg-primary/80">
-                Required
-              </Badge>
-            )}
-          </div>
-          
-          {value ? (
-            <Badge variant="secondary" className="ml-2">
-              {value}
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-xs text-muted-foreground">
-              empty
-            </Badge>
-          )}
-          
-          {missingParent && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <AlertCircle className="h-4 w-4 text-destructive" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Missing required parent parameter: {param.parent}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-        
-        {parentChain.length > 0 && (
-          <div 
-            className="flex items-center text-xs text-muted-foreground"
-            style={{ marginLeft: `${param.level * 20 + 12}px` }}
-          >
-            <span>Depends on: {parentChain.join(' → ')}</span>
-          </div>
-        )}
-        
-        {isExpanded && param.children.map(childName => renderParameter(hierarchy[childName]))}
-      </div>
-    );
-  };
+  const levels = Object.keys(levelGroups).map(Number).sort((a, b) => a - b);
 
   return (
-    <Card>
-      <CardContent className="pt-4 space-y-2">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-medium">Parameter Hierarchy</h3>
-          <div className="flex space-x-2">
-            <button
-              className="text-xs text-primary"
-              onClick={() => setExpandedParams(new Set(Object.keys(hierarchy)))}
-            >
-              Expand All
-            </button>
-            <span className="text-muted-foreground">|</span>
-            <button
-              className="text-xs text-primary"
-              onClick={() => setExpandedParams(new Set())}
-            >
-              Collapse All
-            </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Parameter Hierarchy</h3>
+        <Badge variant="outline">{Object.keys(hierarchy).length} parameters</Badge>
+      </div>
+      
+      {Object.keys(hierarchy).length > 0 ? (
+        <div className="space-y-4">
+          {levels.map(level => (
+            <div key={level} className="space-y-2">
+              <h4 className="text-xs font-medium text-muted-foreground">
+                Level {level} {level === 0 ? '(Root)' : '(Nested)'}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {levelGroups[level].map(param => (
+                  <Card key={param.name} className={`border ${param.isOptional ? 'border-gray-200' : 'border-blue-200'}`}>
+                    <CardContent className="p-3">
+                      <div className="flex items-center mb-1">
+                        <span className="font-medium">{param.name}</span>
+                        {param.isOptional && (
+                          <Badge variant="outline" className="ml-2 text-xs">Optional</Badge>
+                        )}
+                      </div>
+                      
+                      {param.parent && (
+                        <div className="text-xs text-muted-foreground">
+                          Parent: {param.parent}
+                        </div>
+                      )}
+                      
+                      {param.children.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Children: {param.children.join(', ')}
+                        </div>
+                      )}
+                      
+                      <div className="mt-1 flex items-center">
+                        <span className="text-xs mr-1">Value:</span>
+                        <Badge variant="secondary">
+                          {params[param.name] || '(empty)'}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center p-6 text-muted-foreground">
+          No parameter hierarchy available
+        </div>
+      )}
+      
+      {/* Relationship map view */}
+      <div className="mt-6">
+        <h4 className="text-sm font-medium mb-3">Relationship Map</h4>
+        <div className="border rounded-md p-4">
+          <div className="flex flex-col items-start space-y-3">
+            {levels.map(level => (
+              <div key={level} className="flex items-center w-full">
+                <div className="w-24 text-xs font-medium text-muted-foreground">
+                  Level {level}:
+                </div>
+                <div className="flex-1 flex flex-wrap gap-2">
+                  {levelGroups[level].map(param => (
+                    <div 
+                      key={param.name}
+                      className={`px-2 py-1 text-xs rounded ${
+                        param.isOptional ? 
+                          'bg-gray-100 text-gray-800' : 
+                          'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {param.name}
+                      {params[param.name] ? ` = ${params[param.name]}` : ''}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="space-y-2">
-          {rootParams.length > 0 ? (
-            rootParams.map(renderParameter)
-          ) : (
-            <div className="text-center text-muted-foreground py-4">
-              No parameters detected in this route pattern
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

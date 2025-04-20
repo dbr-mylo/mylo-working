@@ -1,20 +1,13 @@
-
-import { CacheMetrics } from './types';
-
 /**
- * Enhanced performance monitoring for parameter operations
+ * Performance monitoring utilities for parameter testing
  */
+
 export interface PerformanceResult {
   operationName: string;
   executionTime: number;
   operationsPerSecond: number;
   sampleSize: number;
   timestamp: number;
-  memoryUsage?: {
-    heapUsed?: number;
-    heapTotal?: number;
-    heapUsedDelta?: number;
-  };
 }
 
 export interface PerformanceSnapshot {
@@ -25,42 +18,34 @@ export interface PerformanceSnapshot {
   endTime: number;
 }
 
-// Performance history store
+/**
+ * Store for historical performance data
+ */
 const performanceHistory: PerformanceResult[] = [];
-const MAX_HISTORY_SIZE = 1000;
-const RECENT_HISTORY_SIZE = 100;
 
 /**
- * Get a memory snapshot if available
+ * Maximum number of performance records to store
  */
-function getMemorySnapshot(): { used: number; total: number } | null {
-  if (typeof performance !== 'undefined' && 'memory' in performance) {
-    const memory = (performance as any).memory;
-    return {
-      used: memory.usedJSHeapSize,
-      total: memory.totalJSHeapSize
-    };
-  }
-  return null;
-}
+const MAX_HISTORY_SIZE = 100;
 
 /**
- * Benchmark a function's performance with memory tracking
+ * Benchmark a function's performance
+ * @param operationName Name of the operation being benchmarked
+ * @param fn Function to benchmark
+ * @param iterations Number of iterations to run
+ * @returns Performance result with timing data
  */
-export function benchmarkFunction<T>(
+export const benchmarkOperation = <T>(
   operationName: string,
   fn: () => T,
-  iterations: number = 1
-): { result: T; performance: PerformanceResult } {
-  // Get initial memory snapshot
-  const initialMemory = getMemorySnapshot();
-  
+  iterations: number = 100
+): { result: T; performance: PerformanceResult } => {
   const startTime = performance.now();
-  let result: T;
+  let result: T = null as unknown as T;
   
   for (let i = 0; i < iterations; i++) {
     if (i === iterations - 1) {
-      // Save the result of the last iteration
+      // Save the last result
       result = fn();
     } else {
       fn();
@@ -71,9 +56,6 @@ export function benchmarkFunction<T>(
   const executionTime = endTime - startTime;
   const operationsPerSecond = Math.round((iterations / executionTime) * 1000);
   
-  // Get final memory snapshot
-  const finalMemory = getMemorySnapshot();
-  
   const performanceResult: PerformanceResult = {
     operationName,
     executionTime,
@@ -82,87 +64,45 @@ export function benchmarkFunction<T>(
     timestamp: Date.now()
   };
   
-  // Add memory usage if available
-  if (initialMemory && finalMemory) {
-    performanceResult.memoryUsage = {
-      heapUsed: finalMemory.used,
-      heapTotal: finalMemory.total,
-      heapUsedDelta: finalMemory.used - initialMemory.used
-    };
-  }
-  
-  // Add to history
+  // Store in history
   addToHistory(performanceResult);
   
-  return { result: result!, performance: performanceResult };
-}
+  return { result, performance: performanceResult };
+};
 
 /**
- * Add performance result to history
+ * Add a performance result to history
  */
-function addToHistory(result: PerformanceResult): void {
+const addToHistory = (result: PerformanceResult): void => {
   performanceHistory.unshift(result);
   
-  // Maintain maximum history size
+  // Maintain maximum size
   if (performanceHistory.length > MAX_HISTORY_SIZE) {
     performanceHistory.pop();
   }
-}
+};
 
 /**
  * Get performance history for a specific operation
  */
-export function getOperationHistory(
-  operationName: string,
-  limit: number = RECENT_HISTORY_SIZE
-): PerformanceResult[] {
-  return performanceHistory
-    .filter(result => result.operationName === operationName)
-    .slice(0, limit);
-}
-
-/**
- * Get the most recent performance results
- */
-export function getRecentPerformanceHistory(
-  limit: number = RECENT_HISTORY_SIZE
-): PerformanceResult[] {
-  return performanceHistory.slice(0, limit);
-}
+export const getOperationHistory = (operationName: string): PerformanceResult[] => {
+  return performanceHistory.filter(result => result.operationName === operationName);
+};
 
 /**
  * Get all performance history
  */
-export function getAllPerformanceHistory(): PerformanceResult[] {
+export const getAllPerformanceHistory = (): PerformanceResult[] => {
   return [...performanceHistory];
-}
+};
 
 /**
- * Clear performance history
+ * Create a performance snapshot for multiple operations
  */
-export function clearPerformanceHistory(): void {
-  performanceHistory.length = 0;
-}
-
-/**
- * Create a performance snapshot for trend analysis
- */
-export function createPerformanceSnapshot(
-  operations: PerformanceResult[]
-): PerformanceSnapshot {
-  if (operations.length === 0) {
-    return {
-      results: [],
-      averageExecutionTime: 0,
-      totalOperations: 0,
-      startTime: Date.now(),
-      endTime: Date.now()
-    };
-  }
-  
+export const createPerformanceSnapshot = (operations: PerformanceResult[]): PerformanceSnapshot => {
   const totalOperations = operations.reduce((sum, op) => sum + op.sampleSize, 0);
-  const totalTime = operations.reduce((sum, op) => sum + op.executionTime, 0);
-  const averageExecutionTime = totalTime / operations.length;
+  const totalExecutionTime = operations.reduce((sum, op) => sum + op.executionTime, 0);
+  const averageExecutionTime = totalExecutionTime / operations.length;
   
   const timestamps = operations.map(op => op.timestamp);
   const startTime = Math.min(...timestamps);
@@ -175,68 +115,11 @@ export function createPerformanceSnapshot(
     startTime,
     endTime
   };
-}
+};
 
 /**
- * Compare performance between two operations
+ * Clear all performance history
  */
-export function comparePerformance(
-  operation1: string,
-  operation2: string,
-  sampleSize: number = 50
-): {
-  operation1: PerformanceSnapshot;
-  operation2: PerformanceSnapshot;
-  improvement: {
-    time: number;
-    percentage: number;
-  };
-} {
-  const history1 = getOperationHistory(operation1, sampleSize);
-  const history2 = getOperationHistory(operation2, sampleSize);
-  
-  const snapshot1 = createPerformanceSnapshot(history1);
-  const snapshot2 = createPerformanceSnapshot(history2);
-  
-  let timeDiff = snapshot1.averageExecutionTime - snapshot2.averageExecutionTime;
-  let percentage = snapshot1.averageExecutionTime > 0 
-    ? (timeDiff / snapshot1.averageExecutionTime) * 100
-    : 0;
-  
-  return {
-    operation1: snapshot1,
-    operation2: snapshot2,
-    improvement: {
-      time: timeDiff,
-      percentage
-    }
-  };
-}
-
-/**
- * Integrated monitoring for cache and performance
- */
-export function createCombinedMetrics(
-  cacheMetrics: CacheMetrics,
-  performanceResults: PerformanceResult[]
-): {
-  cacheEfficiency: number;
-  averageExecutionTime: number;
-  estimatedTimeSaved: number;
-} {
-  const totalRequests = cacheMetrics.hits + cacheMetrics.misses;
-  const cacheEfficiency = totalRequests > 0 ? (cacheMetrics.hits / totalRequests) * 100 : 0;
-  
-  const avgTime = performanceResults.length > 0
-    ? performanceResults.reduce((sum, r) => sum + r.executionTime, 0) / performanceResults.length
-    : 0;
-  
-  // Estimate time saved by cache hits
-  const estimatedTimeSaved = avgTime * cacheMetrics.hits;
-  
-  return {
-    cacheEfficiency,
-    averageExecutionTime: avgTime,
-    estimatedTimeSaved
-  };
-}
+export const clearPerformanceHistory = (): void => {
+  performanceHistory.length = 0;
+};

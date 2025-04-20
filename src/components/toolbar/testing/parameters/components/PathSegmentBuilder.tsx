@@ -3,12 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 
 export interface PathSegment {
   type: 'static' | 'param';
-  name: string;  // For params, the parameter name; for static, optional label
-  value: string; // For params, the value; for static, the path part
+  name: string;
+  value: string;
 }
 
 interface PathSegmentBuilderProps {
@@ -28,22 +28,13 @@ export const PathSegmentBuilder: React.FC<PathSegmentBuilderProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-medium">Path Builder</h3>
-        <div className="flex-1 h-px bg-border"></div>
-        <Button 
-          onClick={() => onBuildPath()} 
-          variant="secondary"
-        >
-          Build Path
-        </Button>
-      </div>
-
+      <div className="text-sm font-medium">Build URL Pattern and Path</div>
+      
       {segments.map((segment, index) => (
-        <div key={index} className="grid grid-cols-12 gap-2 items-center">
-          <div className="col-span-2">
-            <Select 
-              value={segment.type} 
+        <div key={index} className="flex items-center gap-2">
+          <div className="w-24">
+            <Select
+              value={segment.type}
               onValueChange={(value) => onSegmentUpdate(index, 'type', value)}
             >
               <SelectTrigger>
@@ -56,41 +47,29 @@ export const PathSegmentBuilder: React.FC<PathSegmentBuilderProps> = ({
             </Select>
           </div>
           
-          <div className="col-span-4">
-            {segment.type === 'param' ? (
-              <Input
-                placeholder="Parameter Name"
-                value={segment.name}
-                onChange={(e) => onSegmentUpdate(index, 'name', e.target.value)}
-              />
-            ) : (
-              <Input
-                placeholder="Path Segment"
-                value={segment.value}
-                onChange={(e) => onSegmentUpdate(index, 'value', e.target.value)}
-              />
-            )}
-          </div>
-          
           {segment.type === 'param' && (
-            <div className="col-span-4">
-              <Input
-                placeholder="Parameter Value"
-                value={segment.value}
-                onChange={(e) => onSegmentUpdate(index, 'value', e.target.value)}
-              />
-            </div>
+            <Input
+              placeholder="Parameter name"
+              value={segment.name}
+              onChange={(e) => onSegmentUpdate(index, 'name', e.target.value)}
+              className="w-1/3"
+            />
           )}
           
-          <div className={`${segment.type === 'param' ? 'col-span-2' : 'col-span-6'} flex justify-end`}>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => onSegmentRemove(index)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <Input
+            placeholder={segment.type === 'static' ? 'Segment text' : 'Parameter value'}
+            value={segment.value}
+            onChange={(e) => onSegmentUpdate(index, 'value', e.target.value)}
+            className="flex-1"
+          />
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onSegmentRemove(index)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       ))}
       
@@ -98,19 +77,49 @@ export const PathSegmentBuilder: React.FC<PathSegmentBuilderProps> = ({
         <Button
           variant="outline"
           size="sm"
+          className="w-1/2"
           onClick={() => onAddSegment('static')}
-          className="flex items-center"
         >
-          <Plus className="mr-1 h-4 w-4" /> Static
+          <Plus className="h-4 w-4 mr-1" />
+          Add Static
         </Button>
+        
         <Button
           variant="outline"
           size="sm"
+          className="w-1/2"
           onClick={() => onAddSegment('param')}
-          className="flex items-center"
         >
-          <Plus className="mr-1 h-4 w-4" /> Parameter
+          <Plus className="h-4 w-4 mr-1" />
+          Add Parameter
         </Button>
+      </div>
+      
+      <Button
+        className="w-full"
+        onClick={onBuildPath}
+      >
+        Build Path
+      </Button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="space-y-1">
+          <div className="text-xs text-muted-foreground">Pattern Preview</div>
+          <div className="p-2 border rounded bg-muted text-sm font-mono">
+            {segments.map(seg => 
+              seg.type === 'static' ? `/${seg.value}` : `/:${seg.name}`
+            ).join('')}
+          </div>
+        </div>
+        
+        <div className="space-y-1">
+          <div className="text-xs text-muted-foreground">Path Preview</div>
+          <div className="p-2 border rounded bg-muted text-sm font-mono">
+            {segments.map(seg => 
+              `/${seg.value}`
+            ).join('')}
+          </div>
+        </div>
       </div>
     </div>
   );

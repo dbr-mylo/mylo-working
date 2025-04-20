@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NavigationParameterTester } from './NavigationParameterTester';
 import { ParameterPerformanceAnalytics } from './components/analytics/ParameterPerformanceAnalytics';
 import { getParameterCacheMetrics, clearParameterCaches } from '@/utils/navigation/parameters/memoizedParameterHandler';
-import { getRecentPerformanceHistory } from '@/utils/navigation/parameters/performanceMonitor';
+import { getAllPerformanceHistory } from '@/utils/navigation/parameters/performanceMonitor';
 import { AdvancedParameterVisualizer } from './visualization/AdvancedParameterVisualizer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon } from '@/components/ui/lucide-icons';
 
 const NavigationParameterTestSuite: React.FC = () => {
   const [testResults, setTestResults] = useState<any>(null);
@@ -18,7 +17,7 @@ const NavigationParameterTestSuite: React.FC = () => {
   // Update performance history periodically
   useEffect(() => {
     const updateMetrics = () => {
-      setPerformanceHistory(getRecentPerformanceHistory(100));
+      setPerformanceHistory(getAllPerformanceHistory());
       setCacheMetrics(getParameterCacheMetrics());
     };
     
@@ -35,7 +34,7 @@ const NavigationParameterTestSuite: React.FC = () => {
   const handleTestResultUpdate = (result: any) => {
     setTestResults(result);
     // Refresh performance data
-    setPerformanceHistory(getRecentPerformanceHistory(100));
+    setPerformanceHistory(getAllPerformanceHistory());
     setCacheMetrics(getParameterCacheMetrics());
   };
   

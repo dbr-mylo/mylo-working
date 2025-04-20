@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -153,7 +152,7 @@ export function GuidedResolution({
             <div className="flex items-center space-x-2">
               <NetworkStatusIndicator showLabel size="lg" variant="prominent" />
               {!navigator.onLine && (
-                <Alert variant="info" className="mt-2">
+                <Alert variant="warning" className="mt-2">
                   <AlertTitle>You're offline</AlertTitle>
                   <AlertDescription>
                     This feature requires an internet connection.
@@ -165,7 +164,7 @@ export function GuidedResolution({
           
           {/* Tips */}
           {currentResolutionStep.tips && (
-            <Alert variant="info" className="bg-muted/50">
+            <Alert variant="warning" className="bg-muted/50">
               <Info className="h-4 w-4" />
               <AlertTitle>Tip</AlertTitle>
               <AlertDescription className="text-xs">

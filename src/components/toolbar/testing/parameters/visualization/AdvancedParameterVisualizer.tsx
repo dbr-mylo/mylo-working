@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +5,7 @@ import { ParameterHierarchyGraph } from '../components/visualization/ParameterHi
 import { ValidationErrorVisualizer } from '../components/visualization/ValidationErrorVisualizer';
 import { ParameterPerformanceAnalytics } from '../components/analytics/ParameterPerformanceAnalytics';
 import { Button } from '@/components/ui/button';
-import { ArrowPathIcon } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { clearParameterCaches } from '@/utils/navigation/parameters/memoizedParameterHandler';
 
 interface AdvancedParameterVisualizerProps {
@@ -62,7 +61,7 @@ export const AdvancedParameterVisualizer: React.FC<AdvancedParameterVisualizerPr
           size="sm"
           onClick={handleClearCaches}
         >
-          <ArrowPathIcon className="h-4 w-4 mr-2" /> Clear Caches
+          <RefreshCw className="h-4 w-4 mr-2" /> Clear Caches
         </Button>
       </CardHeader>
       <CardContent>

@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Check, Clock } from 'lucide-react';
 import { extractNestedParameters, validateNestedParameters } from '@/utils/navigation/parameters/nestedParameterHandler';
 import { memoizedExtractNestedParameters, memoizedValidateNestedParameters, clearParameterCaches } from '@/utils/navigation/parameters/memoizedParameterHandler';
-import { benchmarkFunction, getRecentPerformanceHistory } from '@/utils/navigation/parameters/performanceMonitor';
+import { benchmarkOperation as benchmarkFunction, getAllPerformanceHistory } from '@/utils/navigation/parameters/performanceMonitor';
 import { ValidationRuleBuilder } from '@/utils/navigation/parameters/ValidationRuleBuilder';
 import { PerformanceMetricsVisualization } from '../components/PerformanceMetricsVisualization';
 

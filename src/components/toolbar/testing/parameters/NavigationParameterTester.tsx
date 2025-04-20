@@ -36,8 +36,7 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
     try {
       const { result, performance } = benchmarkFunction(
         'extractParameters',
-        () => navigationService.extractRouteParameters(pattern, actualPath),
-        iterations
+        () => navigationService.extractRouteParameters(pattern, actualPath)
       );
       
       const newResult = {
@@ -57,13 +56,15 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
       // Also test memoized version to compare
       const { performance: memoizedPerformance } = benchmarkFunction(
         'memoizedExtractParameters',
-        () => navigationService.extractRouteParameters(pattern, actualPath, true),
-        iterations
+        () => navigationService.extractRouteParameters(pattern, actualPath, true)
       );
       
       // Add memoized performance data
-      newResult.performance.memoizedExtractionTime = memoizedPerformance.executionTime;
-      newResult.performance.memoizedOperationsPerSecond = memoizedPerformance.operationsPerSecond;
+      newResult.performance = {
+        ...newResult.performance,
+        memoizedExtractionTime: memoizedPerformance.executionTime,
+        memoizedOperationsPerSecond: memoizedPerformance.operationsPerSecond
+      };
       
       setResults(prev => [newResult, ...prev]);
       

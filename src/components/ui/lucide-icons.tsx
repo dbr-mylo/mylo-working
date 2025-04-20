@@ -5,8 +5,9 @@ import {
   Check, 
   AlertCircle, 
   AlertTriangle,
-  ArrowPathIcon,
-  InfoIcon,
+  ArrowUp,
+  RefreshCw,
+  Info,
   X,
   Plus,
   ArrowRight
@@ -17,8 +18,9 @@ export {
   Check,
   AlertCircle,
   AlertTriangle,
-  ArrowPathIcon,
-  InfoIcon,
+  ArrowUp as ArrowPathIcon, // Re-export as ArrowPathIcon for backward compatibility
+  RefreshCw,
+  Info as InfoIcon, // Re-export as InfoIcon for backward compatibility
   X,
   Plus,
   ArrowRight

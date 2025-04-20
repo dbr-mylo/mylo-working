@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { benchmarkFunction } from '@/utils/navigation/parameters/performanceMonitor';
+import { benchmarkOperation as benchmarkFunction } from '@/utils/navigation/parameters/performanceMonitor';
 import { 
   extractNestedParameters,
   validateNestedParameters, 

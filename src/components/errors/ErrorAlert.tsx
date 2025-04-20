@@ -11,7 +11,7 @@ interface ErrorAlertProps {
   context: string;
   title?: string;
   onRetry?: () => void;
-  severity?: "default" | "destructive" | "info";
+  severity?: "default" | "destructive" | "warning" | "success";
   feature?: string;
   showRecoveryOptions?: boolean;
   className?: string;
@@ -33,7 +33,7 @@ export function ErrorAlert({
   
   // Determine if we should adjust the severity based on error category
   const alertSeverity = severity === "default" && classifiedError.category === ErrorCategory.NETWORK
-    ? "info"
+    ? "warning" // Changed from "info" to "warning" to match valid Alert variants
     : severity;
   
   return (

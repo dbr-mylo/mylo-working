@@ -1,3 +1,4 @@
+
 /**
  * Performance monitoring utilities for parameter testing
  */
@@ -70,6 +71,9 @@ export const benchmarkOperation = <T>(
   return { result, performance: performanceResult };
 };
 
+// Alias for benchmarkOperation to maintain backwards compatibility
+export const benchmarkFunction = benchmarkOperation;
+
 /**
  * Add a performance result to history
  */
@@ -97,6 +101,13 @@ export const getAllPerformanceHistory = (): PerformanceResult[] => {
 };
 
 /**
+ * Get recent performance history, limited to specified count
+ */
+export const getRecentPerformanceHistory = (count: number = 100): PerformanceResult[] => {
+  return performanceHistory.slice(0, Math.min(count, performanceHistory.length));
+};
+
+/**
  * Create a performance snapshot for multiple operations
  */
 export const createPerformanceSnapshot = (operations: PerformanceResult[]): PerformanceSnapshot => {
@@ -114,6 +125,83 @@ export const createPerformanceSnapshot = (operations: PerformanceResult[]): Perf
     totalOperations,
     startTime,
     endTime
+  };
+};
+
+/**
+ * Compare performance between two operations
+ */
+export const comparePerformance = (
+  operation1Name: string,
+  operation2Name: string
+): {
+  operation1: { averageExecutionTime: number; samples: number };
+  operation2: { averageExecutionTime: number; samples: number };
+  improvement: { time: number; percentage: number };
+} => {
+  const op1History = getOperationHistory(operation1Name);
+  const op2History = getOperationHistory(operation2Name);
+  
+  const op1AvgTime = op1History.length > 0 
+    ? op1History.reduce((sum, item) => sum + item.executionTime, 0) / op1History.length
+    : 0;
+    
+  const op2AvgTime = op2History.length > 0
+    ? op2History.reduce((sum, item) => sum + item.executionTime, 0) / op2History.length
+    : 0;
+    
+  // Calculate improvement (negative means op2 is faster)
+  const timeDiff = op1AvgTime - op2AvgTime;
+  const percentageImprovement = op1AvgTime > 0
+    ? (timeDiff / op1AvgTime) * 100
+    : 0;
+    
+  return {
+    operation1: {
+      averageExecutionTime: op1AvgTime,
+      samples: op1History.length
+    },
+    operation2: {
+      averageExecutionTime: op2AvgTime,
+      samples: op2History.length
+    },
+    improvement: {
+      time: timeDiff,
+      percentage: percentageImprovement
+    }
+  };
+};
+
+/**
+ * Create combined metrics from cache info and performance data
+ */
+export const createCombinedMetrics = (
+  cacheInfo: { hits: number; misses: number; size: number },
+  performanceData: PerformanceResult[]
+): {
+  cacheEfficiency: number;
+  averageExecutionTime: number;
+  estimatedTimeSaved: number;
+  totalOperations: number;
+} => {
+  const totalCacheAccesses = cacheInfo.hits + cacheInfo.misses;
+  const cacheEfficiency = totalCacheAccesses > 0 
+    ? (cacheInfo.hits / totalCacheAccesses) * 100
+    : 0;
+    
+  const avgExecTime = performanceData.length > 0
+    ? performanceData.reduce((sum, item) => sum + item.executionTime, 0) / performanceData.length
+    : 0;
+    
+  const estimatedTimeSaved = cacheInfo.hits * avgExecTime;
+  
+  const totalOps = performanceData.reduce((sum, item) => sum + item.sampleSize, 0);
+  
+  return {
+    cacheEfficiency,
+    averageExecutionTime: avgExecTime,
+    estimatedTimeSaved,
+    totalOperations: totalOps
   };
 };
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -97,7 +96,7 @@ export const ParameterPerformanceAnalytics: React.FC<ParameterPerformanceAnalyti
                   <XAxis dataKey="name" />
                   <YAxis label={{ value: 'Time (ms)', angle: -90, position: 'insideLeft' }} />
                   <Tooltip
-                    formatter={(value) => [`${value.toFixed(2)}ms`, '']}
+                    formatter={(value: any) => [`${typeof value === 'number' ? value.toFixed(2) : value}ms`, '']}
                   />
                   <Legend />
                   <Bar dataKey="standard" name="Standard" fill="#3b82f6" />

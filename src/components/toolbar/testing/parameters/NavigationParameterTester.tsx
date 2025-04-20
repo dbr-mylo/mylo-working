@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { benchmarkFunction } from '@/utils/navigation/parameters/performanceMonitor'; 
+import { benchmarkOperation } from '@/utils/navigation/parameters/performanceMonitor'; 
 import { PathSegmentBuilder, PathSegment } from './components/PathSegmentBuilder';
 import { navigationService } from '@/services/navigation/NavigationService';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
 
   const performExtraction = () => {
     try {
-      const { result, performance } = benchmarkFunction(
+      const { result, performance } = benchmarkOperation(
         'extractParameters',
         () => navigationService.extractRouteParameters(pattern, actualPath)
       );
@@ -54,12 +54,12 @@ export const NavigationParameterTester: React.FC<NavigationParameterTesterProps>
       };
       
       // Also test memoized version to compare
-      const { performance: memoizedPerformance } = benchmarkFunction(
+      const { performance: memoizedPerformance } = benchmarkOperation(
         'memoizedExtractParameters',
         () => navigationService.extractRouteParameters(pattern, actualPath, true)
       );
       
-      // Add memoized performance data
+      // Add memoized performance data to the newResult
       newResult.performance = {
         ...newResult.performance,
         memoizedExtractionTime: memoizedPerformance.executionTime,

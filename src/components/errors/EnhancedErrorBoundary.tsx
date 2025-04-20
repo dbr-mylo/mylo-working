@@ -43,7 +43,7 @@ export const EnhancedErrorBoundary: React.FC<EnhancedErrorBoundaryProps> = ({
           <ErrorAlert 
             error={error} 
             context={context}
-            severity="info"
+            severity="warning"
             onRetry={resetErrorBoundary}
             title="Waiting for connection"
           />

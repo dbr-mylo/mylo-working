@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { RefreshCw, Download, Upload } from 'lucide-react';
 import { clearParameterCaches } from '@/utils/navigation/parameters/memoizedParameterHandler';
+import { TestResult as ImportedTestResult } from './types';
 
+// Define a local interface that matches the expected shape
 interface TestResult {
   params: Record<string, string>;
   hierarchy?: Record<string, any>;
@@ -26,14 +28,43 @@ interface TestResult {
   timestamp: number;
 }
 
+// Create an interface for the performance data expected by ParameterPerformanceAnalytics
+interface PerformanceData {
+  extractionTime: number;
+  validationTime?: number;
+  memoizedExtractionTime?: number;
+  memoizedValidationTime?: number;
+  timestamp: number;
+}
+
 export const NavigationParameterTestSuite: React.FC = () => {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [testHistory, setTestHistory] = useState<TestResult[]>([]);
   const [activeTab, setActiveTab] = useState('test');
   
-  const handleTestResult = (result: TestResult) => {
-    setTestResult(result);
-    setTestHistory(prevHistory => [result, ...prevHistory].slice(0, 10)); // Keep last 10 results
+  // Convert the imported TestResult to our local TestResult format
+  const handleTestResult = (result: ImportedTestResult) => {
+    // Create a compatible TestResult object
+    const compatibleResult: TestResult = {
+      params: result.params,
+      hierarchy: result.hierarchy,
+      isValid: result.isValid,
+      errors: result.errors,
+      warnings: [],
+      performance: {
+        extractionTime: result.performance.extractionTime,
+        validationTime: undefined,
+        memoizedExtractionTime: result.memoizedExtractionTime,
+        memoizedValidationTime: undefined
+      },
+      // Convert string timestamp to number if needed
+      timestamp: typeof result.timestamp === 'string' 
+        ? new Date(result.timestamp).getTime() 
+        : result.timestamp
+    };
+    
+    setTestResult(compatibleResult);
+    setTestHistory(prevHistory => [compatibleResult, ...prevHistory].slice(0, 10)); // Keep last 10 results
     
     // Switch to visualization tab after a test is run
     setActiveTab('visualization');
@@ -57,6 +88,15 @@ export const NavigationParameterTestSuite: React.FC = () => {
     linkElement.setAttribute('download', exportName);
     linkElement.click();
   };
+
+  // Convert TestResult[] to PerformanceData[] for the analytics component
+  const performanceData: PerformanceData[] = testHistory.map(result => ({
+    extractionTime: result.performance.extractionTime,
+    validationTime: result.performance.validationTime,
+    memoizedExtractionTime: result.performance.memoizedExtractionTime,
+    memoizedValidationTime: result.performance.memoizedValidationTime,
+    timestamp: result.timestamp
+  }));
 
   return (
     <div className="container mx-auto p-4">
@@ -152,7 +192,7 @@ export const NavigationParameterTestSuite: React.FC = () => {
                 <CardContent>
                   {testResult ? (
                     <ParameterPerformanceAnalytics 
-                      performanceHistory={testHistory}
+                      performanceHistory={performanceData}
                       currentExtractionTime={testResult.performance.extractionTime}
                       currentValidationTime={testResult.performance.validationTime}
                       memoizedExtractionTime={testResult.performance.memoizedExtractionTime}

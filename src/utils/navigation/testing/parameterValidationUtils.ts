@@ -10,7 +10,10 @@ import { PARAMETER_VALIDATION_SCENARIOS } from '../testing/validation/testScenar
 // Re-export the constants and types from the validation module
 export { 
   PARAMETER_VALIDATION_SCENARIOS,
-  validateParameter,
+  validateParameter
+};
+
+export type {
   ParameterValidationRule,
   ValidationResult,
   ParameterValidationScenario

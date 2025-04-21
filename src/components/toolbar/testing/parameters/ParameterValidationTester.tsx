@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,18 +19,16 @@ import {
 import { 
   validateParameter,
   ParameterValidationRule,
-  PARAMETER_VALIDATION_SCENARIOS
+  ValidationResult,
+  PARAMETER_VALIDATION_SCENARIOS,
+  ParameterValidationScenario
 } from '@/utils/navigation/testing/parameterValidationUtils';
 
 interface ValidationTest {
   paramName: string;
   inputValue: string;
   rule: ParameterValidationRule;
-  result?: {
-    isValid: boolean;
-    errorMessage?: string;
-    sanitizedValue?: string;
-  };
+  result?: ValidationResult;
 }
 
 /**
@@ -119,7 +118,7 @@ const ParameterValidationTester: React.FC = () => {
 
   // Run predefined scenario
   const runScenario = (scenarioKey: string, testCaseIndex: number = 0) => {
-    const scenario = PARAMETER_VALIDATION_SCENARIOS[scenarioKey];
+    const scenario = PARAMETER_VALIDATION_SCENARIOS[scenarioKey] as ParameterValidationScenario;
     if (!scenario) return;
     
     const testCase = scenario.testCases[testCaseIndex];
@@ -151,7 +150,8 @@ const ParameterValidationTester: React.FC = () => {
     
     const results: Record<string, any> = {};
     
-    for (const [scenarioKey, scenario] of Object.entries(PARAMETER_VALIDATION_SCENARIOS)) {
+    for (const [scenarioKey, scenarioValue] of Object.entries(PARAMETER_VALIDATION_SCENARIOS)) {
+      const scenario = scenarioValue as ParameterValidationScenario;
       for (const [testCaseIndex, testCase] of scenario.testCases.entries()) {
         const result = validateParameter('param', testCase.input, scenario.rule);
         

@@ -1,26 +1,29 @@
 
+/**
+ * Types for the NavigationParameterTester component
+ */
 export interface TestResult {
-  timestamp: string;
-  pattern: string;
-  actualPath: string;
   params: Record<string, string>;
-  errors: string[];
-  hierarchy: Record<string, any>;
+  hierarchy?: Record<string, any>;
   isValid: boolean;
+  errors: string[];
+  warnings?: string[];
   performance: {
     extractionTime: number;
-    operationsPerSecond: number;
+    validationTime?: number;
   };
+  timestamp: string | number;
   memoizedExtractionTime?: number;
-  memoizedOperationsPerSecond?: number;
-}
-
-export interface PathSegment {
-  type: 'static' | 'param';
-  name: string;
-  value: string;
+  memoizedValidationTime?: number;
 }
 
 export interface NavigationParameterTesterProps {
-  onTestResult?: (result: TestResult) => void;
+  onTestResult: (result: TestResult) => void;
+}
+
+export interface ParameterDefinition {
+  name: string;
+  type: string;
+  isRequired: boolean;
+  validation?: Record<string, any>;
 }

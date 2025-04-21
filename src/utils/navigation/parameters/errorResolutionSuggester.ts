@@ -1,127 +1,173 @@
 
-import { ValidationResult } from '../testing/validation/types';
+/**
+ * Utility for analyzing parameter errors and generating resolution suggestions
+ */
 
+// Define severity levels for parameter errors
+export type ErrorSeverity = 'critical' | 'warning' | 'info';
+
+// Structure for validation error suggestions
 export interface ErrorResolutionSuggestion {
   errorMessage: string;
+  severity: ErrorSeverity;
   suggestionText: string;
   exampleFix?: string;
-  severity: 'critical' | 'warning' | 'info';
+}
+
+// Simple validation result structure
+interface ValidationErrorResult {
+  isValid: boolean;
+  errorMessage?: string;
 }
 
 /**
- * Generate suggestions for resolving parameter validation errors
- * @param error The validation error message
- * @param paramName The parameter name
- * @param value The current parameter value
- * @returns Error resolution suggestions
+ * Analyze error message and generate appropriate severity level
  */
-export function generateErrorSuggestions(
-  error: string,
-  paramName: string,
-  value: string
-): ErrorResolutionSuggestion {
-  // Parse the error message to identify the type of error
-  if (error.includes('required')) {
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} is required. You must provide a value.`,
-      exampleFix: 'Add a non-empty value for this parameter',
-      severity: 'critical'
-    };
+export function determineErrorSeverity(errorMessage: string): ErrorSeverity {
+  const lowerMessage = errorMessage.toLowerCase();
+  
+  // Critical errors - validation failures that prevent functionality
+  if (
+    lowerMessage.includes('required') || 
+    lowerMessage.includes('missing') ||
+    lowerMessage.includes('invalid') ||
+    lowerMessage.includes('not match')
+  ) {
+    return 'critical';
   }
   
-  if (error.includes('must be numeric')) {
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} must contain only digits.`,
-      exampleFix: value ? `Try: ${value.replace(/\D/g, '') || '123'}` : '123',
-      severity: 'critical'
-    };
+  // Warnings - potential issues that don't block functionality
+  if (
+    lowerMessage.includes('recommended') ||
+    lowerMessage.includes('should be') ||
+    lowerMessage.includes('better to') ||
+    lowerMessage.includes('deprecated')
+  ) {
+    return 'warning';
   }
   
-  if (error.includes('UUID')) {
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} must be a valid UUID (e.g., 123e4567-e89b-12d3-a456-426614174000).`,
-      exampleFix: '123e4567-e89b-12d3-a456-426614174000',
-      severity: 'critical'
-    };
-  }
-  
-  if (error.includes('email')) {
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} must be a valid email address.`,
-      exampleFix: 'example@example.com',
-      severity: 'critical'
-    };
-  }
-  
-  if (error.includes('at least')) {
-    const minLengthMatch = error.match(/at least (\d+)/);
-    const minLength = minLengthMatch ? parseInt(minLengthMatch[1]) : 3;
-    
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} must be at least ${minLength} characters long.`,
-      exampleFix: value ? value.padEnd(minLength, value[0] || 'a') : 'a'.repeat(minLength),
-      severity: 'warning'
-    };
-  }
-  
-  if (error.includes('cannot exceed')) {
-    const maxLengthMatch = error.match(/cannot exceed (\d+)/);
-    const maxLength = maxLengthMatch ? parseInt(maxLengthMatch[1]) : 10;
-    
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} cannot exceed ${maxLength} characters.`,
-      exampleFix: value ? value.substring(0, maxLength) : 'a'.repeat(Math.min(3, maxLength)),
-      severity: 'warning'
-    };
-  }
-  
-  if (error.includes('pattern')) {
-    return {
-      errorMessage: error,
-      suggestionText: `Parameter ${paramName} does not match the required pattern.`,
-      severity: 'warning'
-    };
-  }
-  
-  // Default case for unrecognized errors
-  return {
-    errorMessage: error,
-    suggestionText: `Parameter ${paramName} validation failed.`,
-    severity: 'info'
-  };
+  // Info - suggestions or informational messages
+  return 'info';
 }
 
 /**
- * Generate suggestions for multiple validation errors
- * @param results Validation results
- * @param params Current parameter values
- * @returns List of error resolution suggestions
+ * Generate suggestions for fixing parameter errors
+ */
+export function generateSuggestions(
+  paramName: string,
+  errorMessage: string,
+  currentValue: string
+): ErrorResolutionSuggestion[] {
+  const severity = determineErrorSeverity(errorMessage);
+  const suggestions: ErrorResolutionSuggestion[] = [];
+  const lowerMessage = errorMessage.toLowerCase();
+  
+  // Handle required parameter errors
+  if (lowerMessage.includes('required') && (!currentValue || currentValue.trim() === '')) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} is required. Please provide a value.`,
+      exampleFix: `example-${paramName}`
+    });
+  }
+  
+  // Handle type errors
+  else if (lowerMessage.includes('must be numeric')) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} must be a number.`,
+      exampleFix: currentValue ? '123' : '0'
+    });
+  }
+  
+  // Handle UUID format errors
+  else if (lowerMessage.includes('valid uuid')) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} must be a valid UUID.`,
+      exampleFix: '123e4567-e89b-12d3-a456-426614174000'
+    });
+  }
+  
+  // Handle email format errors
+  else if (lowerMessage.includes('valid email')) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} must be a valid email address.`,
+      exampleFix: 'example@domain.com'
+    });
+  }
+  
+  // Handle length constraints
+  else if (lowerMessage.includes('at least')) {
+    const minLength = parseInt(lowerMessage.match(/at least (\d+)/)?.[1] || '3');
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} is too short. It needs at least ${minLength} characters.`,
+      exampleFix: currentValue.padEnd(minLength, 'a')
+    });
+  }
+  else if (lowerMessage.includes('cannot exceed')) {
+    const maxLength = parseInt(lowerMessage.match(/exceed (\d+)/)?.[1] || '10');
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} is too long. It must not exceed ${maxLength} characters.`,
+      exampleFix: currentValue.substring(0, maxLength)
+    });
+  }
+  
+  // Handle pattern match errors
+  else if (lowerMessage.includes('pattern')) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Parameter ${paramName} doesn't match the required pattern.`,
+      exampleFix: paramName === 'id' ? '123' : `valid-${paramName}`
+    });
+  }
+  
+  // Generic fallback suggestion
+  if (suggestions.length === 0) {
+    suggestions.push({
+      errorMessage,
+      severity,
+      suggestionText: `Please review the value for parameter ${paramName}.`,
+      exampleFix: undefined
+    });
+  }
+  
+  return suggestions;
+}
+
+/**
+ * Generate suggestions from a list of validation results
  */
 export function generateErrorSuggestionsFromResults(
-  results: ValidationResult[],
-  params: Record<string, string>
+  validationResults: ValidationErrorResult[],
+  currentValues: Record<string, string>
 ): Record<string, ErrorResolutionSuggestion[]> {
   const suggestions: Record<string, ErrorResolutionSuggestion[]> = {};
   
-  results.forEach(result => {
+  validationResults.forEach(result => {
     if (!result.isValid && result.errorMessage) {
       // Extract parameter name from error message
-      const paramMatch = result.errorMessage.match(/Parameter (\w+)/);
+      const paramMatch = result.errorMessage.match(/Parameter\s+(\w+)/i);
       if (paramMatch && paramMatch[1]) {
         const paramName = paramMatch[1];
+        const currentValue = currentValues[paramName] || '';
         
         if (!suggestions[paramName]) {
           suggestions[paramName] = [];
         }
         
         suggestions[paramName].push(
-          generateErrorSuggestions(result.errorMessage, paramName, params[paramName] || '')
+          ...generateSuggestions(paramName, result.errorMessage, currentValue)
         );
       }
     }

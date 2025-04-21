@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { RefreshCw, Download, Upload } from 'lucide-react';
 import { clearParameterCaches } from '@/utils/navigation/parameters/memoizedParameterHandler';
 import { TestResult as ImportedTestResult } from './types';
+import { toast } from 'sonner';
 
 // Define a local interface that matches the expected shape
 interface TestResult {
@@ -72,7 +73,7 @@ export const NavigationParameterTestSuite: React.FC = () => {
   
   const handleClearCaches = () => {
     clearParameterCaches();
-    // You could also add a toast notification here
+    toast.success("Parameter caches cleared");
   };
   
   const handleExportResults = () => {
@@ -87,6 +88,30 @@ export const NavigationParameterTestSuite: React.FC = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportName);
     linkElement.click();
+    
+    toast.success("Test results exported");
+  };
+
+  const handleApplySuggestion = (paramName: string, suggestedValue: string) => {
+    if (!testResult) return;
+    
+    // Create updated params with the suggestion applied
+    const updatedParams = {
+      ...testResult.params,
+      [paramName]: suggestedValue
+    };
+    
+    // Create a new test result with the updated params
+    const updatedResult: TestResult = {
+      ...testResult,
+      params: updatedParams,
+      // Reset validity - would need to be revalidated
+      isValid: false,
+      timestamp: Date.now()
+    };
+    
+    setTestResult(updatedResult);
+    toast.info(`Applied suggestion for ${paramName}: ${suggestedValue}`);
   };
 
   // Convert TestResult[] to PerformanceData[] for the analytics component
@@ -173,6 +198,7 @@ export const NavigationParameterTestSuite: React.FC = () => {
                         errors={testResult.errors}
                         warnings={testResult.warnings || []}
                         params={testResult.params}
+                        onApplySuggestion={handleApplySuggestion}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-40">
@@ -229,7 +255,7 @@ export const NavigationParameterTestSuite: React.FC = () => {
                         <div className="text-sm font-medium">
                           {testHistory.length > 0 ? `${
                             (testResult?.performance.extractionTime && testResult?.performance.memoizedExtractionTime) 
-                              ? (testResult.performance.extractionTime - testResult.performance.memoizedExtractionTime).toFixed(2)
+                              ? (testResult.performance.extractionTime - (testResult.performance.memoizedExtractionTime || 0)).toFixed(2)
                               : '0'
                           } ms per operation` : '0 ms'}
                         </div>

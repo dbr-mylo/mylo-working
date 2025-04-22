@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { GraphLegend } from './graph/GraphLegend';
 import { useGraphData } from './graph/useGraphData';
 import { useForceSimulation } from './graph/useForceSimulation';
-import type { GraphProps } from './graph/types';
+import type { GraphProps, Node, Link } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   hierarchy,

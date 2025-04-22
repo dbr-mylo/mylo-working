@@ -1,27 +1,101 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import * as d3 from 'd3';
 import { GraphLegend } from './graph/GraphLegend';
 import { useGraphData } from './graph/useGraphData';
 import { useForceSimulation } from './graph/useForceSimulation';
-import type { GraphProps, Node, Link } from './graph/types';
+import { useRenderMetrics } from './graph/useRenderMetrics';
+import { MemoizedNode } from './graph/MemoizedNode';
+import { MemoizedLink } from './graph/MemoizedLink';
+import type { GraphProps, Node, Link, SimulationConfig } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   hierarchy,
-  params
+  params,
+  width: propWidth = 600,
+  height: propHeight = 300,
+  optimizationLevel = 'medium'
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const simulationRef = useRef<d3.Simulation<Node, Link> | null>(null);
+  
+  // State to track rendered nodes and links for memoization
+  const [renderedNodes, setRenderedNodes] = useState<Node[]>([]);
+  const [renderedLinks, setRenderedLinks] = useState<Link[]>([]);
   
   // Set up dimensions
-  const width = 600;
-  const height = 300;
+  const width = propWidth;
+  const height = propHeight;
   const margin = { top: 20, right: 30, bottom: 30, left: 40 };
   
+  // Get graph data with memoization
   const { nodes, links } = useGraphData(hierarchy);
-  const createSimulation = useForceSimulation(nodes, links, width, height, margin);
   
+  // Performance tracking
+  const { 
+    metrics, 
+    startRenderTimer, 
+    endRenderTimer,
+    startSimulationTimer,
+    endSimulationTimer
+  } = useRenderMetrics(nodes.length, links.length);
+  
+  // Configure simulation based on optimization level
+  const simulationConfig: SimulationConfig = {
+    linkDistance: optimizationLevel === 'high' ? 80 : 100,
+    alphaDecay: optimizationLevel === 'high' ? 0.1 : undefined,
+    velocityDecay: optimizationLevel === 'high' ? 0.6 : 0.4
+  };
+  
+  // Create simulation with optimization settings
+  const createSimulation = useForceSimulation(
+    nodes, 
+    links, 
+    width, 
+    height, 
+    margin,
+    simulationConfig
+  );
+  
+  // Drag handlers with useCallback for stability
+  const handleDragStart = useCallback((event: any, d: Node) => {
+    if (!simulationRef.current) return;
+    
+    // Reheat the simulation when dragging starts
+    simulationRef.current.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }, []);
+  
+  const handleDrag = useCallback((event: any, d: Node) => {
+    if (!event || !d.fx) return;
+    
+    // Get mouse coordinates relative to SVG
+    const svg = svgRef.current;
+    if (!svg) return;
+    
+    const svgRect = svg.getBoundingClientRect();
+    const x = event.clientX - svgRect.left - margin.left;
+    const y = event.clientY - svgRect.top - margin.top;
+    
+    d.fx = x;
+    d.fy = y;
+  }, [margin]);
+  
+  const handleDragEnd = useCallback((event: any, d: Node) => {
+    if (!simulationRef.current) return;
+    
+    // Cool down simulation when drag ends
+    simulationRef.current.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }, []);
+  
+  // Initialize and update simulation when data changes
   useEffect(() => {
     if (!svgRef.current || Object.keys(hierarchy).length === 0) return;
+    
+    startRenderTimer();
     
     // Clear any existing SVG content
     d3.select(svgRef.current).selectAll('*').remove();
@@ -46,87 +120,47 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#999');
     
-    // Draw links
-    const link = svg.append('g')
-      .selectAll('line')
-      .data(links)
-      .enter()
-      .append('line')
-      .attr('stroke', '#ddd')
-      .attr('stroke-width', 1.5)
-      .attr('marker-end', 'url(#arrowhead)');
+    // Create containers for links and nodes
+    const linkGroup = svg.append('g').attr('class', 'links');
+    const nodeGroup = svg.append('g').attr('class', 'nodes');
     
-    // Draw nodes
-    const node = svg.append('g')
-      .selectAll('g')
-      .data(nodes)
-      .enter()
-      .append('g')
-      .call(d3.drag<SVGGElement, Node>()
-        .on('start', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on('drag', (event, d) => {
-          d.fx = event.x;
-          d.fy = event.y;
-        })
-        .on('end', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        })
-      );
-    
-    // Node circles
-    node.append('circle')
-      .attr('r', 25)
-      .attr('fill', d => d.hasValue ? (d.optional ? '#c7d2fe' : '#93c5fd') : '#fca5a5')
-      .attr('stroke', d => d.hasValue ? (d.optional ? '#9f7aea' : '#63b3ed') : '#ed8936')
-      .attr('stroke-width', 2);
-    
-    // Node labels
-    node.append('text')
-      .text(d => d.name)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('font-size', '10px')
-      .attr('font-weight', 'bold');
-    
-    // Level text
-    node.append('text')
-      .text(d => `Level: ${d.level}`)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '1.5em')
-      .attr('font-size', '8px');
-    
-    // Tooltips
-    node.append('title')
-      .text(d => `${d.name}: ${params[d.id] || '(empty)'}
-Type: ${d.optional ? 'Optional' : 'Required'}
-Value present: ${d.hasValue ? 'Yes' : 'No'}`);
+    // Start simulation timing
+    startSimulationTimer();
     
     // Create simulation
     const simulation = createSimulation();
+    simulationRef.current = simulation;
     
-    // Update positions
-    simulation.nodes(nodes).on('tick', () => {
-      link
-        .attr('x1', d => (d.source as any).x)
-        .attr('y1', d => (d.source as any).y)
-        .attr('x2', d => (d.target as any).x)
-        .attr('y2', d => (d.target as any).y);
-      
-      node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+    // Apply nodes and links to simulation
+    simulation.nodes(nodes);
+    (simulation.force('link') as d3.ForceLink<Node, Link>).links(links);
+    
+    // End simulation timing
+    endSimulationTimer();
+    
+    // Update positions on simulation tick
+    simulation.on('tick', () => {
+      // Update state for rendered components
+      setRenderedNodes([...nodes]);
+      setRenderedLinks([...links]);
     });
     
-    // Apply links to simulation
-    (simulation.force('link') as d3.ForceLink<Node, Link>)
-      .links(links);
-    
-  }, [hierarchy, params, createSimulation]);
+    // Cleanup when component unmounts
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, [hierarchy, params, width, height, margin, createSimulation, nodes, links, startRenderTimer, endRenderTimer, startSimulationTimer, endSimulationTimer]);
   
+  // Complete render timing after nodes and links are updated
+  useEffect(() => {
+    if (renderedNodes.length > 0) {
+      endRenderTimer();
+    }
+  }, [renderedNodes, endRenderTimer]);
+  
+  // Display empty state when no hierarchy data
   if (Object.keys(hierarchy).length === 0) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -141,7 +175,39 @@ Value present: ${d.hasValue ? 'Yes' : 'No'}`);
         ref={svgRef} 
         className="w-full" 
         style={{ minHeight: '300px' }}
-      />
+      >
+        {/* Dynamic rendering of links and nodes for better performance */}
+        <g transform={`translate(${margin.left}, ${margin.top})`}>
+          <g className="links">
+            {renderedLinks.map((link, i) => (
+              <MemoizedLink key={`link-${i}`} link={link} />
+            ))}
+          </g>
+          <g className="nodes">
+            {renderedNodes.map((node) => (
+              <MemoizedNode 
+                key={node.id} 
+                node={node}
+                params={params}
+                onDragStart={handleDragStart}
+                onDrag={handleDrag}
+                onDragEnd={handleDragEnd}
+              />
+            ))}
+          </g>
+        </g>
+      </svg>
+      
+      {/* Debug metrics for development (can be toggled with props) */}
+      {optimizationLevel === 'high' && (
+        <div className="absolute top-1 left-1 text-xs text-gray-500 bg-white bg-opacity-80 p-1 rounded">
+          Nodes: {metrics.nodesCount} | 
+          Links: {metrics.linksCount} | 
+          Render: {metrics.renderTime.toFixed(2)}ms | 
+          Sim: {metrics.simulationTime.toFixed(2)}ms
+        </div>
+      )}
+      
       <GraphLegend />
     </div>
   );

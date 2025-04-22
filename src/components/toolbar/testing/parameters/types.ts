@@ -11,10 +11,14 @@ export interface TestResult {
   performance: {
     extractionTime: number;
     validationTime?: number;
+    operationsPerSecond?: number;
   };
   timestamp: string | number;
   memoizedExtractionTime?: number;
   memoizedValidationTime?: number;
+  memoizedOperationsPerSecond?: number;
+  pattern?: string;
+  actualPath?: string;
 }
 
 export interface NavigationParameterTesterProps {
@@ -27,3 +31,4 @@ export interface ParameterDefinition {
   isRequired: boolean;
   validation?: Record<string, any>;
 }
+

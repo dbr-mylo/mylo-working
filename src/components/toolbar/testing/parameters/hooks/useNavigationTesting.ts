@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { benchmarkOperation } from '@/utils/navigation/parameters/performanceMonitor';
 import { navigationService } from '@/services/navigation/NavigationService';
-import { TestResult, PathSegment } from '../types';
+import { TestResult } from '../types';
 
 export const useNavigationTesting = (onTestResult?: (result: TestResult) => void) => {
   const { toast } = useToast();

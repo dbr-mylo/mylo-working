@@ -1,3 +1,4 @@
+
 import { NestedParameter } from './types';
 import { detectCyclicalDependencies } from './utils';
 
@@ -12,8 +13,6 @@ export interface RelationshipAnalysisResult {
 
 /**
  * Analyzes parameter relationships to detect issues in the hierarchy
- * @param hierarchy Parameter hierarchy to analyze
- * @returns Analysis results
  */
 export function analyzeParameterRelationships(hierarchy: Record<string, NestedParameter>): RelationshipAnalysisResult {
   // Detect cyclical dependencies
@@ -53,7 +52,6 @@ function detectRedundantParameters(hierarchy: Record<string, NestedParameter>): 
   // Find parameter groups with identical children
   Object.values(paramsByChildren).forEach(paramGroup => {
     if (paramGroup.length > 1) {
-      // Keep the first one, mark others as redundant
       redundantParams.push(...paramGroup.slice(1).map(p => 
         `${p} (similar to ${paramGroup[0]})`
       ));

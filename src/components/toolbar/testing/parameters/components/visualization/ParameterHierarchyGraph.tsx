@@ -20,66 +20,81 @@ export const ParameterHierarchyGraph: React.FC<ParameterHierarchyGraphProps> = (
     // Clear previous visualization
     d3.select(svgRef.current).selectAll("*").remove();
 
-    // Prepare data for d3 hierarchy
-    const root = prepareHierarchyData(hierarchy);
-    
-    // Set up SVG dimensions
-    const width = 800;
+    // Set up SVG dimensions with better responsiveness
+    const containerWidth = svgRef.current.parentElement?.clientWidth || 800;
+    const width = Math.min(containerWidth, 1200);
     const height = 400;
-    const margin = { top: 60, right: 120, bottom: 20, left: 120 };
+    const margin = { top: 40, right: 120, bottom: 40, left: 120 };
 
-    // Create the tree layout
-    const treeLayout = d3.tree()
-      .size([height - margin.top - margin.bottom, width - margin.right - margin.left]);
-
-    // Apply the tree layout to the hierarchy data
-    const rootNode = d3.hierarchy(root);
-    const treeData = treeLayout(rootNode);
-
-    // Create the SVG container
+    // Create the SVG container with responsive sizing
     const svg = d3.select(svgRef.current)
-      .attr("width", width)
-      .attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Add links between nodes
+    // Create hierarchical data structure
+    const root = d3.hierarchy(prepareHierarchyData(hierarchy));
+
+    // Create tree layout
+    const treeLayout = d3.tree()
+      .size([height - margin.top - margin.bottom, width - margin.right - margin.left]);
+
+    // Apply layout
+    const treeData = treeLayout(root);
+
+    // Add links with smooth curves
     svg.selectAll(".link")
       .data(treeData.links())
       .enter()
       .append("path")
       .attr("class", "link")
       .attr("fill", "none")
-      .attr("stroke", "#ccc")
+      .attr("stroke", "#e2e8f0")
       .attr("stroke-width", 1.5)
       .attr("d", d3.linkHorizontal()
         .x((d: any) => d.y)
         .y((d: any) => d.x)
       );
 
-    // Add nodes
+    // Create node groups with enhanced interactivity
     const node = svg.selectAll(".node")
       .data(treeData.descendants())
       .enter()
       .append("g")
       .attr("class", "node")
-      .attr("transform", (d: any) => `translate(${d.y},${d.x})`);
+      .attr("transform", (d: any) => `translate(${d.y},${d.x})`)
+      .attr("data-parameter", (d: any) => d.data.name);
 
-    // Add node circles
+    // Add interactive node circles
     node.append("circle")
       .attr("r", 6)
-      .style("fill", (d: any) => getNodeColor(d.data.name, d.data.isOptional, params));
+      .style("fill", (d: any) => getNodeColor(d.data.name, d.data.isOptional, params))
+      .style("stroke", "#fff")
+      .style("stroke-width", 2)
+      .on("mouseover", function(event, d: any) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("r", 8);
+      })
+      .on("mouseout", function(event, d: any) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("r", 6);
+      });
 
-    // Add node labels
+    // Add parameter labels
     node.append("text")
       .attr("dy", ".31em")
       .attr("x", (d: any) => d.children ? -10 : 10)
       .attr("text-anchor", (d: any) => d.children ? "end" : "start")
       .text((d: any) => `${d.data.name}${d.data.isOptional ? '?' : ''}`)
       .style("font-size", "12px")
-      .style("font-family", "sans-serif");
+      .style("font-family", "system-ui");
 
-    // Add parameter values as additional labels
+    // Add parameter values
     node.filter((d: any) => params[d.data.name])
       .append("text")
       .attr("dy", "1.1em")
@@ -87,60 +102,67 @@ export const ParameterHierarchyGraph: React.FC<ParameterHierarchyGraphProps> = (
       .attr("text-anchor", (d: any) => d.children ? "end" : "start")
       .text((d: any) => `= "${params[d.data.name]}"`)
       .style("font-size", "10px")
-      .style("fill", "#666")
-      .style("font-family", "sans-serif");
+      .style("fill", "#64748b")
+      .style("font-family", "system-ui");
 
-    // Add legend
-    const legend = svg.append("g")
-      .attr("transform", `translate(${width - margin.right - margin.left - 150}, -40)`);
-    
-    // Required parameter
-    legend.append("circle").attr("r", 6).attr("cx", 0).attr("cy", 0).style("fill", "#3b82f6");
-    legend.append("text").attr("x", 12).attr("y", 4).text("Required").style("font-size", "10px");
-    
-    // Optional parameter
-    legend.append("circle").attr("r", 6).attr("cx", 100).attr("cy", 0).style("fill", "#6b7280");
-    legend.append("text").attr("x", 112).attr("y", 4).text("Optional").style("font-size", "10px");
+    // Add interactive tooltips
+    node.append("title")
+      .text((d: any) => {
+        const param = d.data;
+        return `Parameter: ${param.name}
+Type: ${param.isOptional ? 'Optional' : 'Required'}
+Value: ${params[param.name] || '(empty)'}`;
+      });
 
   }, [hierarchy, params]);
 
-  // Helper function to prepare hierarchical data for d3
+  // Helper function to prepare hierarchical data
   const prepareHierarchyData = (hierarchy: Record<string, NestedParameter>) => {
-    // Find the root parameters (those without parents)
     const rootParams = Object.values(hierarchy).filter(param => !param.parent);
-    
-    // Create a root node to hold all parameters
-    const root = {
+    return {
       name: "root",
       isOptional: false,
       children: rootParams.map(param => buildSubtree(param.name, hierarchy))
     };
-    
-    return root;
   };
 
-  // Recursively build subtree for each parameter
+  // Helper function to build parameter subtrees
   const buildSubtree = (paramName: string, hierarchy: Record<string, NestedParameter>) => {
     const param = hierarchy[paramName];
-    const node = {
+    return {
       name: paramName,
       isOptional: param.isOptional,
       children: param.children.map(child => buildSubtree(child, hierarchy))
     };
-    
-    return node;
   };
 
   // Get color based on parameter properties
   const getNodeColor = (name: string, isOptional: boolean, params: Record<string, string>): string => {
-    if (name === "root") return "#e5e7eb"; // Gray for root
-    if (isOptional) return "#6b7280"; // Gray for optional
-    return params[name] ? "#3b82f6" : "#ef4444"; // Blue if value exists, red if missing
+    if (name === "root") return "#f1f5f9";
+    if (isOptional) return params[name] ? "#c7d2fe" : "#e2e8f0";
+    return params[name] ? "#93c5fd" : "#fca5a5";
   };
 
   return (
-    <div className="w-full overflow-x-auto">
-      <svg ref={svgRef} className="w-full h-[400px] border rounded"></svg>
+    <div className="relative w-full overflow-hidden">
+      <svg 
+        ref={svgRef} 
+        className="w-full h-[400px] border rounded-lg bg-white shadow-sm"
+      />
+      <div className="absolute top-2 right-2 flex gap-2 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-[#93c5fd]" />
+          <span>Required (with value)</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-[#c7d2fe]" />
+          <span>Optional (with value)</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-[#fca5a5]" />
+          <span>Required (no value)</span>
+        </div>
+      </div>
     </div>
   );
 };

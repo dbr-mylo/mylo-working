@@ -14,12 +14,6 @@ export interface ErrorResolutionSuggestion {
   exampleFix?: string;
 }
 
-// Simple validation result structure
-interface ValidationErrorResult {
-  isValid: boolean;
-  errorMessage?: string;
-}
-
 /**
  * Analyze error message and generate appropriate severity level
  */
@@ -145,11 +139,9 @@ export function generateSuggestions(
   return suggestions;
 }
 
-/**
- * Generate suggestions from a list of validation results
- */
+// Helper function to generate suggestions from validation results
 export function generateErrorSuggestionsFromResults(
-  validationResults: ValidationErrorResult[],
+  validationResults: Array<{ isValid: boolean; errorMessage?: string }>,
   currentValues: Record<string, string>
 ): Record<string, ErrorResolutionSuggestion[]> {
   const suggestions: Record<string, ErrorResolutionSuggestion[]> = {};

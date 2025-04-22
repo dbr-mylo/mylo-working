@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ValidationSummary } from '../validation/ValidationSummary';
-import { ParameterDetails } from '../validation/ParameterDetails';
-import { QuickFixSuggestions } from '../validation/QuickFixSuggestions';
 import { generateErrorSuggestionsFromResults } from '@/utils/navigation/parameters/errorResolutionSuggester';
-import { XCircle } from 'lucide-react';
 import type { ParameterDefinition } from '../../types';
+import { OverviewTab } from './tabs/OverviewTab';
+import { ParametersTab } from './tabs/ParametersTab';
+import { SuggestionsTab } from './tabs/SuggestionsTab';
 
 interface EnhancedValidationErrorVisualizerProps {
   errors: string[];
@@ -25,6 +24,7 @@ export const EnhancedValidationErrorVisualizer: React.FC<EnhancedValidationError
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   
+  // Group errors by parameter name
   const errorsByParam: Record<string, string[]> = {};
   errors.forEach(error => {
     const paramMatch = error.match(/Parameter\s+(\w+)/i);
@@ -63,7 +63,7 @@ export const EnhancedValidationErrorVisualizer: React.FC<EnhancedValidationError
         </TabsList>
         
         <TabsContent value="overview">
-          <ValidationSummary 
+          <OverviewTab
             totalParams={totalParamsCount}
             validParams={validParamsCount}
             invalidParams={invalidParamsCount}
@@ -74,38 +74,19 @@ export const EnhancedValidationErrorVisualizer: React.FC<EnhancedValidationError
         </TabsContent>
         
         <TabsContent value="parameters">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {Object.keys(params).map(paramName => (
-              <ParameterDetails
-                key={paramName}
-                paramName={paramName}
-                value={params[paramName]}
-                errors={errorsByParam[paramName] || []}
-                rule={rules[paramName]}
-              />
-            ))}
-          </div>
+          <ParametersTab
+            params={params}
+            errorsByParam={errorsByParam}
+            rules={rules}
+          />
         </TabsContent>
         
         <TabsContent value="suggestions">
-          {Object.keys(suggestions).length > 0 ? (
-            <div className="space-y-4">
-              {Object.entries(suggestions).map(([paramName, paramSuggestions]) => (
-                <QuickFixSuggestions
-                  key={paramName}
-                  paramName={paramName}
-                  currentValue={params[paramName]}
-                  suggestions={paramSuggestions}
-                  onApplySuggestion={onApplySuggestion || (() => {})}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="p-8 text-center">
-              <XCircle className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-30" />
-              <p className="text-muted-foreground">No suggestions available</p>
-            </div>
-          )}
+          <SuggestionsTab
+            suggestions={suggestions}
+            params={params}
+            onApplySuggestion={onApplySuggestion}
+          />
         </TabsContent>
       </Tabs>
     </div>

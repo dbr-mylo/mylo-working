@@ -8,7 +8,7 @@ import { MemoizedNode } from './graph/MemoizedNode';
 import { MemoizedLink } from './graph/MemoizedLink';
 import { GraphControls } from './graph/GraphControls';
 import { GraphFilter } from './graph/GraphFilter';
-import type { GraphProps, Node, Link } from './graph/types';
+import type { GraphProps, Node, Link, SimulationConfig } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   hierarchy,

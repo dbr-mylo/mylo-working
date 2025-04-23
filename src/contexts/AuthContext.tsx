@@ -106,21 +106,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await login(email, password);
   };
 
-  // Guest role methods - these set the role without requiring authentication
+  // Guest role methods with proper navigation
   const continueAsGuestWriter = (shouldNavigate: boolean = true) => {
     setRole("writer");
+    if (shouldNavigate) {
+      window.location.href = '/dashboard'; // Use direct navigation to ensure complete page refresh
+    }
   };
 
   const continueAsGuestDesigner = (shouldNavigate: boolean = true) => {
     setRole("designer");
+    if (shouldNavigate) {
+      window.location.href = '/design'; // Navigate to designer dashboard
+    }
   };
 
   const continueAsGuestAdmin = (shouldNavigate: boolean = true) => {
     setRole("admin");
+    if (shouldNavigate) {
+      window.location.href = '/admin'; // Navigate to admin dashboard
+    }
   };
 
   const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
     setRole("editor");
+    if (shouldNavigate) {
+      window.location.href = '/dashboard'; // Redirect to writer dashboard since editor is treated as writer
+    }
   };
   
   const value = {

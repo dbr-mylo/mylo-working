@@ -1,26 +1,26 @@
-
 /**
  * Role-Specific Utility Functions
  * 
- * These functions provide a centralized way to check roles and get role-specific values
- * without needing to directly access the auth context.
+ * These functions implement cumulative role inheritance where:
+ * Writer ⊂ Designer ⊂ Admin (Writer is subset of Designer is subset of Admin)
  */
 
 import { UserRole } from '@/lib/types';
 
 /**
- * Check if a role is a designer role
+ * Check if a role has writer access (includes designer and admin roles)
  */
-export const isDesignerRole = (role: UserRole | null): boolean => {
-  return role === 'designer';
+export const isWriterRole = (role: UserRole | null): boolean => {
+  // All roles equal or higher than writer have writer access
+  return role === 'writer' || role === 'editor' || isDesignerRole(role);
 };
 
 /**
- * Check if a role is a writer role (includes legacy 'editor' role)
+ * Check if a role has designer access (includes admin role)
  */
-export const isWriterRole = (role: UserRole | null): boolean => {
-  // Always consider both 'writer' and legacy 'editor' roles for backward compatibility
-  return role === 'writer' || role === 'editor';
+export const isDesignerRole = (role: UserRole | null): boolean => {
+  // Designer and admin roles have designer access
+  return role === 'designer' || isAdminRole(role);
 };
 
 /**
@@ -31,17 +31,19 @@ export const isAdminRole = (role: UserRole | null): boolean => {
 };
 
 /**
- * Check if a role is either designer or admin
+ * Check if a role has designer or admin access
+ * @deprecated Use isDesignerRole instead as it now includes admin role
  */
 export const isDesignerOrAdminRole = (role: UserRole | null): boolean => {
-  return isDesignerRole(role) || isAdminRole(role);
+  return isDesignerRole(role);
 };
 
 /**
- * Check if a role is either writer or admin
+ * Check if a role has writer or admin access
+ * @deprecated Use isWriterRole instead as it now includes admin role
  */
 export const isWriterOrAdminRole = (role: UserRole | null): boolean => {
-  return isWriterRole(role) || isAdminRole(role);
+  return isWriterRole(role);
 };
 
 /**

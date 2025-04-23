@@ -1,17 +1,17 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import * as d3 from 'd3';
+import { GraphContainer } from './graph/components/GraphContainer';
 import { GraphLegend } from './graph/GraphLegend';
 import { useGraphData } from './graph/useGraphData';
 import { useForceSimulation } from './graph/useForceSimulation';
 import { useRenderMetrics } from './graph/useRenderMetrics';
-import { MemoizedNode } from './graph/MemoizedNode';
-import { MemoizedLink } from './graph/MemoizedLink';
 import { GraphControls } from './graph/GraphControls';
 import { GraphFilter } from './graph/GraphFilter';
 import { GraphInitializer } from './graph/components/GraphInitializer';
 import { useZoomHandling } from './graph/hooks/useZoomHandling';
 import { useNodeInteractions } from './graph/hooks/useNodeInteractions';
+import { useGraphState } from './graph/hooks/useGraphState';
 import type { GraphProps, Node, Link, SimulationConfig } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
@@ -24,45 +24,31 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const simulationRef = useRef<d3.Simulation<Node, Link> | null>(null);
   
-  // State for interactivity
-  const [renderedNodes, setRenderedNodes] = useState<Node[]>([]);
-  const [renderedLinks, setRenderedLinks] = useState<Link[]>([]);
-  const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showRequired, setShowRequired] = useState(true);
-  const [showOptional, setShowOptional] = useState(true);
-  const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
-  
   // Set up dimensions and margin
   const width = propWidth;
   const height = propHeight;
   const margin = { top: 20, right: 30, bottom: 30, left: 40 };
-  
-  // Get graph data with memoization
+
+  // Custom hooks
+  const {
+    renderedNodes,
+    setRenderedNodes,
+    renderedLinks,
+    setRenderedLinks,
+    searchQuery,
+    setSearchQuery,
+    showRequired,
+    setShowRequired,
+    showOptional,
+    setShowOptional,
+    filterNodes,
+    filterLinks
+  } = useGraphState();
+
   const { nodes, links } = useGraphData(hierarchy);
-  
-  // Filter nodes based on search and toggles
-  const filteredNodes = nodes.filter(node => {
-    const matchesSearch = node.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = (node.optional ? showOptional : showRequired);
-    return matchesSearch && matchesType;
-  });
+  const filteredNodes = filterNodes(nodes);
+  const filteredLinks = filterLinks(links, filteredNodes);
 
-  const filteredLinks = links.filter(link => {
-    const sourceNode = (typeof link.source === 'string' ? link.source : link.source.id);
-    const targetNode = (typeof link.target === 'string' ? link.target : link.target.id);
-    return filteredNodes.some(n => n.id === sourceNode) && 
-           filteredNodes.some(n => n.id === targetNode);
-  });
-  
-  // Performance tracking
-  const { 
-    metrics, 
-    startRenderTimer, 
-    endRenderTimer 
-  } = useRenderMetrics(filteredNodes.length, filteredLinks.length);
-
-  // Use custom hooks
   const { handleZoomIn, handleZoomOut, handleResetPan } = useZoomHandling(svgRef);
   const { 
     handleDragStart, 
@@ -75,7 +61,13 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
     margin 
   });
 
-  // Use existing simulation setup
+  const { 
+    metrics, 
+    startRenderTimer, 
+    endRenderTimer 
+  } = useRenderMetrics(filteredNodes.length, filteredLinks.length);
+
+  // Simulation configuration
   const simulationConfig: SimulationConfig = {
     linkDistance: optimizationLevel === 'high' ? 80 : 100,
     alphaDecay: optimizationLevel === 'high' ? 0.1 : undefined,
@@ -111,33 +103,18 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
         onOptionalToggle={() => setShowOptional(!showOptional)}
       />
       
-      <svg 
-        ref={svgRef} 
-        className="w-full" 
-        style={{ minHeight: '300px' }}
-      >
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          <g className="links">
-            {renderedLinks.map((link, i) => (
-              <MemoizedLink key={`link-${i}`} link={link} />
-            ))}
-          </g>
-          <g className="nodes">
-            {renderedNodes.map((node) => (
-              <MemoizedNode 
-                key={node.id} 
-                node={node}
-                params={params}
-                onDragStart={handleDragStart}
-                onDrag={handleDrag}
-                onDragEnd={handleDragEnd}
-                onHighlight={() => handleHighlightNode(node.id)}
-                onEdit={() => handleEditNode(node.id)}
-              />
-            ))}
-          </g>
-        </g>
-      </svg>
+      <GraphContainer
+        svgRef={svgRef}
+        margin={margin}
+        renderedNodes={renderedNodes}
+        renderedLinks={renderedLinks}
+        params={params}
+        onNodeDragStart={handleDragStart}
+        onNodeDrag={handleDrag}
+        onNodeDragEnd={handleDragEnd}
+        onNodeHighlight={handleHighlightNode}
+        onNodeEdit={handleEditNode}
+      />
 
       <GraphInitializer
         svgRef={svgRef}

@@ -1,17 +1,13 @@
 
 import { useCallback } from 'react';
-import * as d3 from 'd3';
 import { Node } from '../types';
 
 interface UseNodeInteractionsProps {
-  simulationRef: React.MutableRefObject<d3.Simulation<Node, any> | null>;
   margin: { top: number; left: number; };
 }
 
-export const useNodeInteractions = ({ simulationRef, margin }: UseNodeInteractionsProps) => {
+export const useNodeInteractions = ({ margin }: UseNodeInteractionsProps) => {
   const handleDragStart = useCallback((event: any, d: Node) => {
-    if (!simulationRef.current) return;
-    simulationRef.current.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
   }, []);
@@ -31,8 +27,6 @@ export const useNodeInteractions = ({ simulationRef, margin }: UseNodeInteractio
   }, [margin]);
   
   const handleDragEnd = useCallback((event: any, d: Node) => {
-    if (!simulationRef.current) return;
-    simulationRef.current.alphaTarget(0);
     d.fx = null;
     d.fy = null;
   }, []);

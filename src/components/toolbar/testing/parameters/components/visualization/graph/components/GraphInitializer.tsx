@@ -2,20 +2,19 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 import { Node, Link } from '../types';
+import { SimulationContainer } from './SimulationContainer';
 
 interface GraphInitializerProps {
   svgRef: React.RefObject<SVGSVGElement>;
   width: number;
   height: number;
-  margin: { top: number; right: number; bottom: number; left: number; };
+  margin: { top: number; right: number; bottom: number; left: number };
   filteredNodes: Node[];
   filteredLinks: Link[];
   startRenderTimer: () => void;
   endRenderTimer: () => void;
   setRenderedNodes: (nodes: Node[]) => void;
   setRenderedLinks: (links: Link[]) => void;
-  simulationRef: React.MutableRefObject<d3.Simulation<Node, Link> | null>;
-  createSimulation: () => d3.Simulation<Node, Link>;
 }
 
 export const GraphInitializer: React.FC<GraphInitializerProps> = ({
@@ -28,14 +27,10 @@ export const GraphInitializer: React.FC<GraphInitializerProps> = ({
   startRenderTimer,
   endRenderTimer,
   setRenderedNodes,
-  setRenderedLinks,
-  simulationRef,
-  createSimulation
+  setRenderedLinks
 }) => {
   useEffect(() => {
     if (!svgRef.current) return;
-    
-    startRenderTimer();
     
     // Clear any existing SVG content
     d3.select(svgRef.current).selectAll('*').remove();
@@ -63,39 +58,19 @@ export const GraphInitializer: React.FC<GraphInitializerProps> = ({
     // Create containers for links and nodes
     svg.append('g').attr('class', 'links');
     svg.append('g').attr('class', 'nodes');
-    
-    // Create simulation
-    const simulation = createSimulation();
-    simulationRef.current = simulation;
-    
-    // Apply nodes and links to simulation
-    simulation.nodes(filteredNodes);
-    (simulation.force('link') as d3.ForceLink<Node, Link>).links(filteredLinks);
-    
-    // Update positions on simulation tick
-    simulation.on('tick', () => {
-      setRenderedNodes([...filteredNodes]);
-      setRenderedLinks([...filteredLinks]);
-    });
-    
-    return () => {
-      if (simulationRef.current) {
-        simulationRef.current.stop();
-      }
-    };
-  }, [
-    width,
-    height,
-    margin,
-    filteredNodes,
-    filteredLinks,
-    createSimulation,
-    startRenderTimer,
-    setRenderedNodes,
-    setRenderedLinks,
-    simulationRef,
-    svgRef
-  ]);
+  }, [width, height, margin, svgRef]);
 
-  return null;
+  return (
+    <SimulationContainer
+      width={width}
+      height={height}
+      margin={margin}
+      filteredNodes={filteredNodes}
+      filteredLinks={filteredLinks}
+      startRenderTimer={startRenderTimer}
+      endRenderTimer={endRenderTimer}
+      setRenderedNodes={setRenderedNodes}
+      setRenderedLinks={setRenderedLinks}
+    />
+  );
 };

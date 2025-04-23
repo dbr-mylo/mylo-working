@@ -1,10 +1,7 @@
-
 import React, { useRef } from 'react';
-import * as d3 from 'd3';
 import { GraphContainer } from './graph/components/GraphContainer';
 import { GraphLegend } from './graph/GraphLegend';
 import { useGraphData } from './graph/useGraphData';
-import { useForceSimulation } from './graph/useForceSimulation';
 import { useRenderMetrics } from './graph/useRenderMetrics';
 import { GraphControls } from './graph/GraphControls';
 import { GraphFilter } from './graph/GraphFilter';
@@ -12,7 +9,7 @@ import { GraphInitializer } from './graph/components/GraphInitializer';
 import { useZoomHandling } from './graph/hooks/useZoomHandling';
 import { useNodeInteractions } from './graph/hooks/useNodeInteractions';
 import { useGraphState } from './graph/hooks/useGraphState';
-import type { GraphProps, Node, Link, SimulationConfig } from './graph/types';
+import type { GraphProps } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   hierarchy,
@@ -22,7 +19,6 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   optimizationLevel = 'medium'
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const simulationRef = useRef<d3.Simulation<Node, Link> | null>(null);
   
   // Set up dimensions and margin
   const width = propWidth;
@@ -56,32 +52,13 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
     handleDragEnd,
     handleHighlightNode,
     handleEditNode 
-  } = useNodeInteractions({ 
-    simulationRef, 
-    margin 
-  });
+  } = useNodeInteractions({ margin });
 
   const { 
     metrics, 
     startRenderTimer, 
     endRenderTimer 
   } = useRenderMetrics(filteredNodes.length, filteredLinks.length);
-
-  // Simulation configuration
-  const simulationConfig: SimulationConfig = {
-    linkDistance: optimizationLevel === 'high' ? 80 : 100,
-    alphaDecay: optimizationLevel === 'high' ? 0.1 : undefined,
-    velocityDecay: optimizationLevel === 'high' ? 0.6 : 0.4
-  };
-  
-  const createSimulation = useForceSimulation(
-    nodes, 
-    links, 
-    width, 
-    height, 
-    margin,
-    simulationConfig
-  );
 
   // Display empty state when no hierarchy data
   if (Object.keys(hierarchy).length === 0) {
@@ -127,8 +104,6 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
         endRenderTimer={endRenderTimer}
         setRenderedNodes={setRenderedNodes}
         setRenderedLinks={setRenderedLinks}
-        simulationRef={simulationRef}
-        createSimulation={createSimulation}
       />
       
       <GraphControls

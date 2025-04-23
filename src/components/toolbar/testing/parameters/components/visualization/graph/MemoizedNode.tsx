@@ -1,6 +1,7 @@
 
 import React, { memo } from 'react';
 import { Node } from './types';
+import { NodeContextMenu } from './NodeContextMenu';
 
 interface NodeProps {
   node: Node;
@@ -8,22 +9,20 @@ interface NodeProps {
   onDragStart: (event: any, d: Node) => void;
   onDrag: (event: any, d: Node) => void;
   onDragEnd: (event: any, d: Node) => void;
+  onHighlight?: () => void;
+  onEdit?: () => void;
 }
 
-// Using memo to prevent unnecessary re-renders when other nodes change
 export const MemoizedNode = memo(({
   node,
   params,
   onDragStart,
   onDrag,
-  onDragEnd
+  onDragEnd,
+  onHighlight = () => {},
+  onEdit = () => {}
 }: NodeProps) => {
-  const nodeLabel = node.name.length > 12 ? `${node.name.substring(0, 10)}...` : node.name;
-  const hasValue = params[node.id] && params[node.id].length > 0;
-  const nodeValue = params[node.id] || '(empty)';
-  const displayValue = nodeValue.length > 15 ? `${nodeValue.substring(0, 13)}...` : nodeValue;
-  
-  return (
+  const nodeContent = (
     <g
       className="parameter-node"
       data-testid={`node-${node.id}`}
@@ -31,6 +30,7 @@ export const MemoizedNode = memo(({
       onMouseMove={(e) => onDrag(e, node)}
       onMouseUp={(e) => onDragEnd(e, node)}
       onMouseLeave={(e) => onDragEnd(e, node)}
+      transform={`translate(${node.x || 0},${node.y || 0})`}
     >
       <circle
         r={25}
@@ -45,7 +45,7 @@ export const MemoizedNode = memo(({
         fontSize="10px"
         fontWeight="bold"
       >
-        {nodeLabel}
+        {node.name.length > 12 ? `${node.name.substring(0, 10)}...` : node.name}
       </text>
       
       <text
@@ -63,14 +63,22 @@ Value present: ${node.hasValue ? 'Yes' : 'No'}`}
       </title>
     </g>
   );
+
+  return (
+    <NodeContextMenu
+      node={node}
+      onHighlight={onHighlight}
+      onEdit={onEdit}
+    >
+      {nodeContent}
+    </NodeContextMenu>
+  );
 }, (prevProps, nextProps) => {
-  // Custom comparison function to determine if re-render is needed
   const prevNode = prevProps.node;
   const nextNode = nextProps.node;
   const prevParam = prevProps.params[prevNode.id];
   const nextParam = nextProps.params[nextNode.id];
   
-  // Only re-render if position or data has changed
   return (
     prevNode.x === nextNode.x &&
     prevNode.y === nextNode.y &&

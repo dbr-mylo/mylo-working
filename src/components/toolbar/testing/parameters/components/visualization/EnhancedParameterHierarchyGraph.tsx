@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import * as d3 from 'd3';
 import { GraphLegend } from './graph/GraphLegend';
@@ -7,7 +6,9 @@ import { useForceSimulation } from './graph/useForceSimulation';
 import { useRenderMetrics } from './graph/useRenderMetrics';
 import { MemoizedNode } from './graph/MemoizedNode';
 import { MemoizedLink } from './graph/MemoizedLink';
-import type { GraphProps, Node, Link, SimulationConfig } from './graph/types';
+import { GraphControls } from './graph/GraphControls';
+import { GraphFilter } from './graph/GraphFilter';
+import type { GraphProps, Node, Link } from './graph/types';
 
 export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   hierarchy,
@@ -19,17 +20,36 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const simulationRef = useRef<d3.Simulation<Node, Link> | null>(null);
   
-  // State to track rendered nodes and links for memoization
+  // State for interactivity
   const [renderedNodes, setRenderedNodes] = useState<Node[]>([]);
   const [renderedLinks, setRenderedLinks] = useState<Link[]>([]);
+  const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showRequired, setShowRequired] = useState(true);
+  const [showOptional, setShowOptional] = useState(true);
+  const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
   
-  // Set up dimensions
+  // Set up dimensions and margin
   const width = propWidth;
   const height = propHeight;
   const margin = { top: 20, right: 30, bottom: 30, left: 40 };
   
   // Get graph data with memoization
   const { nodes, links } = useGraphData(hierarchy);
+  
+  // Filter nodes based on search and toggles
+  const filteredNodes = nodes.filter(node => {
+    const matchesSearch = node.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = (node.optional ? showOptional : showRequired);
+    return matchesSearch && matchesType;
+  });
+
+  const filteredLinks = links.filter(link => {
+    const sourceNode = (typeof link.source === 'string' ? link.source : link.source.id);
+    const targetNode = (typeof link.target === 'string' ? link.target : link.target.id);
+    return filteredNodes.some(n => n.id === sourceNode) && 
+           filteredNodes.some(n => n.id === targetNode);
+  });
   
   // Performance tracking
   const { 
@@ -38,16 +58,47 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
     endRenderTimer,
     startSimulationTimer,
     endSimulationTimer
-  } = useRenderMetrics(nodes.length, links.length);
+  } = useRenderMetrics(filteredNodes.length, filteredLinks.length);
   
-  // Configure simulation based on optimization level
+  // Zoom handlers
+  const handleZoomIn = useCallback(() => {
+    if (!svgRef.current) return;
+    d3.select(svgRef.current)
+      .transition()
+      .call(d3.zoom<SVGSVGElement, unknown>().scaleBy, 1.2);
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    if (!svgRef.current) return;
+    d3.select(svgRef.current)
+      .transition()
+      .call(d3.zoom<SVGSVGElement, unknown>().scaleBy, 0.8);
+  }, []);
+
+  const handleResetPan = useCallback(() => {
+    if (!svgRef.current) return;
+    d3.select(svgRef.current)
+      .transition()
+      .call(d3.zoom<SVGSVGElement, unknown>().transform, d3.zoomIdentity);
+  }, []);
+
+  // Node interaction handlers
+  const handleHighlightNode = useCallback((nodeId: string) => {
+    setHighlightedNode(nodeId);
+  }, []);
+
+  const handleEditNode = useCallback((nodeId: string) => {
+    // You can implement edit functionality here
+    console.log('Edit node:', nodeId);
+  }, []);
+
+  // Use existing simulation setup
   const simulationConfig: SimulationConfig = {
     linkDistance: optimizationLevel === 'high' ? 80 : 100,
     alphaDecay: optimizationLevel === 'high' ? 0.1 : undefined,
     velocityDecay: optimizationLevel === 'high' ? 0.6 : 0.4
   };
   
-  // Create simulation with optimization settings
   const createSimulation = useForceSimulation(
     nodes, 
     links, 
@@ -132,8 +183,8 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
     simulationRef.current = simulation;
     
     // Apply nodes and links to simulation
-    simulation.nodes(nodes);
-    (simulation.force('link') as d3.ForceLink<Node, Link>).links(links);
+    simulation.nodes(filteredNodes);
+    (simulation.force('link') as d3.ForceLink<Node, Link>).links(filteredLinks);
     
     // End simulation timing
     endSimulationTimer();
@@ -141,8 +192,8 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
     // Update positions on simulation tick
     simulation.on('tick', () => {
       // Update state for rendered components
-      setRenderedNodes([...nodes]);
-      setRenderedLinks([...links]);
+      setRenderedNodes([...filteredNodes]);
+      setRenderedLinks([...filteredLinks]);
     });
     
     // Cleanup when component unmounts
@@ -171,12 +222,20 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
   
   return (
     <div className="relative overflow-x-auto">
+      <GraphFilter
+        searchQuery={searchQuery}
+        showRequired={showRequired}
+        showOptional={showOptional}
+        onSearchChange={setSearchQuery}
+        onRequiredToggle={() => setShowRequired(!showRequired)}
+        onOptionalToggle={() => setShowOptional(!showOptional)}
+      />
+      
       <svg 
         ref={svgRef} 
         className="w-full" 
         style={{ minHeight: '300px' }}
       >
-        {/* Dynamic rendering of links and nodes for better performance */}
         <g transform={`translate(${margin.left}, ${margin.top})`}>
           <g className="links">
             {renderedLinks.map((link, i) => (
@@ -192,13 +251,22 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
                 onDragStart={handleDragStart}
                 onDrag={handleDrag}
                 onDragEnd={handleDragEnd}
+                onHighlight={() => handleHighlightNode(node.id)}
+                onEdit={() => handleEditNode(node.id)}
               />
             ))}
           </g>
         </g>
       </svg>
       
-      {/* Debug metrics for development (can be toggled with props) */}
+      <GraphControls
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetPan={handleResetPan}
+      />
+      
+      <GraphLegend />
+      
       {optimizationLevel === 'high' && (
         <div className="absolute top-1 left-1 text-xs text-gray-500 bg-white bg-opacity-80 p-1 rounded">
           Nodes: {metrics.nodesCount} | 
@@ -207,8 +275,6 @@ export const EnhancedParameterHierarchyGraph: React.FC<GraphProps> = ({
           Sim: {metrics.simulationTime.toFixed(2)}ms
         </div>
       )}
-      
-      <GraphLegend />
     </div>
   );
 };

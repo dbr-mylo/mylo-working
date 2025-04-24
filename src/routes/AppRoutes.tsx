@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
@@ -77,9 +76,19 @@ const AppRoutes = () => {
       <NavigationAwareLayout>
         <Routes>
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+          
+          {/* Role-specific dashboard routes */}
+          <Route path="/writer-dashboard" element={<WriterRoute><WriterDashboard /></WriterRoute>} />
+          <Route path="/designer-dashboard" element={<DesignerRoute><div>Designer Dashboard</div></DesignerRoute>} />
+          <Route path="/admin-dashboard" element={<AdminRoute><AdminLayout /></AdminRoute>} />
+          
+          {/* Redirect root to role-specific dashboard */}
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
+          
+          {/* Legacy routes redirects */}
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          
           <Route path="/documents" element={<ProtectedRoute><DocumentSelection /></ProtectedRoute>} />
           <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/editor/:documentId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -89,11 +98,9 @@ const AppRoutes = () => {
           <Route path="/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
           
           {/* Writer routes */}
-          <Route path="/writer-dashboard" element={<WriterRoute><WriterDashboard /></WriterRoute>} />
           <Route path="/content/*" element={<WriterRoute><WriterPages /></WriterRoute>} />
           
           {/* Designer routes */}
-          <Route path="/designer-dashboard" element={<DesignerRoute><div>Designer Dashboard</div></DesignerRoute>} />
           <Route path="/design/*" element={<DesignerRoute><DesignerPages /></DesignerRoute>} />
           <Route path="/templates" element={<DesignerRoute><TemplateManager /></DesignerRoute>} />
           

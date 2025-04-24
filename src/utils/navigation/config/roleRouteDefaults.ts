@@ -1,11 +1,10 @@
-
 import { UserRole } from '@/lib/types';
 
 /**
  * Default routes for each role
  */
 export const DEFAULT_ROUTES: Record<string, string> = {
-  'admin': '/admin',
+  'admin': '/admin-dashboard',
   'designer': '/designer-dashboard',
   'writer': '/writer-dashboard',
   'editor': '/writer-dashboard', // Legacy support for "editor" role
@@ -17,7 +16,7 @@ export const DEFAULT_ROUTES: Record<string, string> = {
  * Used when a navigation error occurs and we need a safe destination
  */
 export const FALLBACK_ROUTES: Record<string, string> = {
-  'admin': '/admin',
+  'admin': '/admin-dashboard',
   'designer': '/designer-dashboard',
   'writer': '/writer-dashboard',
   'editor': '/writer-dashboard', // Legacy support for "editor" role
@@ -66,11 +65,11 @@ export interface RoleRouteConfig {
 
 export const ROLE_ROUTE_CONFIG: Record<string, RoleRouteConfig> = {
   'admin': {
-    defaultRoute: '/admin',
-    fallbackRoute: '/admin',
-    homeRoute: '/admin',
+    defaultRoute: '/admin-dashboard',
+    fallbackRoute: '/admin-dashboard',
+    homeRoute: '/admin-dashboard',
     authRequiredRedirect: '/auth',
-    dashboardRoute: '/admin'
+    dashboardRoute: '/admin-dashboard'
   },
   'designer': {
     defaultRoute: '/designer-dashboard',

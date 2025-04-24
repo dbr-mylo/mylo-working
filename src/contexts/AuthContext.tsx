@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { UserRole } from "@/utils/navigation/types"; // Import from utils/navigation/types
+import { UserRole } from "@/utils/navigation/types";
+import { DEFAULT_ROUTES } from "@/utils/navigation/config/roleRouteDefaults";
 
 interface AuthContextType {
   user: any | null;
@@ -47,11 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [previousRole, setPreviousRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Simulate authentication loading
   useEffect(() => {
     const init = async () => {
       try {
-        // Check local storage for user and role
         const savedRole = localStorage.getItem("userRole") as UserRole;
         if (savedRole) {
           setRoleState(savedRole);
@@ -68,7 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
   
   const login = async (email: string, password: string) => {
-    // For testing purposes, set a role based on email
     let roleToSet: UserRole = "writer";
     
     if (email.includes("admin")) {
@@ -88,7 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("userRole");
   };
   
-  // Role setter that tracks previous role
   const setRole = (newRole: UserRole) => {
     setPreviousRole(role);
     setRoleState(newRole);
@@ -100,38 +97,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Registration method
   const signUp = async (email: string, password: string) => {
-    // For testing, just use the same logic as login
     await login(email, password);
   };
 
-  // Guest role methods with proper navigation
   const continueAsGuestWriter = (shouldNavigate: boolean = true) => {
     setRole("writer");
     if (shouldNavigate) {
-      window.location.href = '/dashboard'; // Use direct navigation to ensure complete page refresh
+      window.location.href = DEFAULT_ROUTES.writer;
     }
   };
 
   const continueAsGuestDesigner = (shouldNavigate: boolean = true) => {
     setRole("designer");
     if (shouldNavigate) {
-      window.location.href = '/design'; // Navigate to designer dashboard
+      window.location.href = DEFAULT_ROUTES.designer;
     }
   };
 
   const continueAsGuestAdmin = (shouldNavigate: boolean = true) => {
     setRole("admin");
     if (shouldNavigate) {
-      window.location.href = '/admin'; // Navigate to admin dashboard
+      window.location.href = DEFAULT_ROUTES.admin;
     }
   };
 
   const continueAsGuestEditor = (shouldNavigate: boolean = true) => {
     setRole("editor");
     if (shouldNavigate) {
-      window.location.href = '/dashboard'; // Redirect to writer dashboard since editor is treated as writer
+      window.location.href = DEFAULT_ROUTES.editor;
     }
   };
   

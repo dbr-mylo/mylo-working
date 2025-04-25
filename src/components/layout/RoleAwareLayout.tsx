@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditorNav } from "@/components/editor-nav";
@@ -44,7 +45,6 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   const renderDirectly = React.isValidElement(children) && 
     ((typeof children.type === 'function' && 
       (children.type.name === 'Dashboard' || 
-       children.type.displayName === 'Dashboard' || 
        /Dashboard/.test(String(children.type)))) ||
      children.type === 'Dashboard');
   

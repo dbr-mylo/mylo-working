@@ -42,7 +42,7 @@ export const NavigationAwareLayout: React.FC<NavigationAwareLayoutProps> = ({
         console.error("Navigation error during role transition:", error);
         // Fallback to a safe route if something goes wrong
         if (role) {
-          const fallbackRoute = navigationService.getFallbackRouteForRole(role);
+          const fallbackRoute = navigationService.getFallbackRoute(role);
           if (fallbackRoute) {
             navigateTo(fallbackRoute);
           }

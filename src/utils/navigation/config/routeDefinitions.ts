@@ -1,3 +1,4 @@
+
 import { RouteConfig, AccessLevel } from '../types';
 import { routeGroups } from './routeGroups';
 
@@ -113,7 +114,7 @@ export const validRoutes: RouteConfig[] = [
     metadata: {
       requiresAuth: false,
       isAuthEntry: true,
-      noNavigation: true
+      showInNavigation: false
     }
   },
   

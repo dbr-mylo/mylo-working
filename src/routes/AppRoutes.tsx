@@ -27,6 +27,7 @@ import WriterDashboard from "@/components/dashboard/WriterDashboard";
 // Route imports
 import RegressionTestRoute from "@/routes/RegressionTestRoute";
 import SmokeTestRoute from "@/routes/SmokeTestRoute";
+import TestingRoutes from "@/routes/TestingRoutes";
 
 // Component imports
 import { TemplateManager } from "@/components/design/TemplateManager";
@@ -77,7 +78,9 @@ const AppRoutes = () => {
         {/* Auth route with no navigation elements */}
         <Route path="/auth" element={
           <AuthRoute>
-            <Auth />
+            <NavigationAwareLayout showBreadcrumbs={false}>
+              <Auth />
+            </NavigationAwareLayout>
           </AuthRoute>
         } />
         

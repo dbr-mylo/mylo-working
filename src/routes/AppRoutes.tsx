@@ -27,7 +27,6 @@ import WriterDashboard from "@/components/dashboard/WriterDashboard";
 // Route imports
 import RegressionTestRoute from "@/routes/RegressionTestRoute";
 import SmokeTestRoute from "@/routes/SmokeTestRoute";
-import TestingRoutes from "@/routes/TestingRoutes";
 
 // Component imports
 import { TemplateManager } from "@/components/design/TemplateManager";
@@ -59,6 +58,17 @@ const WriterPages = () => {
       <Route path="/documents" element={<DocumentSelection />} />
       <Route path="/drafts" element={<div>Drafts (Coming Soon)</div>} />
       <Route path="*" element={<Navigate to="/editor" />} />
+    </Routes>
+  );
+};
+
+// Define a simple testing routes component to avoid the reference error
+const TestingRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/regression" element={<RegressionTestRoute />} />
+      <Route path="/smoke" element={<SmokeTestRoute />} />
+      <Route path="*" element={<Navigate to="/testing/regression" replace />} />
     </Routes>
   );
 };

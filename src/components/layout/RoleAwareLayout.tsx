@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditorNav } from "@/components/editor-nav";
@@ -37,14 +36,19 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   // Check if current route is auth route - don't show editor nav
   const isAuthRoute = location.pathname === "/auth";
   
-  // Check if we're rendering children directly (like for Dashboard)
-  // Instead of checking displayName, check if the element's type is called "Dashboard"
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+  
+  // Check if we're rendering children directly (e.g. for Dashboard)
   const renderDirectly = React.isValidElement(children) && 
     ((typeof children.type === 'function' && 
-      children.type.toString().includes('Dashboard')) ||
+      (children.type.name === 'Dashboard' || 
+       children.type.displayName === 'Dashboard' || 
+       /Dashboard/.test(String(children.type)))) ||
      children.type === 'Dashboard');
   
-  if (renderDirectly || isAuthRoute) {
+  if (renderDirectly) {
     return <>{children}</>;
   }
   

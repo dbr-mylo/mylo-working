@@ -31,18 +31,31 @@ export const NavigationAwareLayout: React.FC<NavigationAwareLayoutProps> = ({
   // Handle role transitions
   useEffect(() => {
     if (role !== previousRole) {
-      const destinationRoute = navigationService.handleRoleTransition(previousRole, role);
-      
-      // If a destination route is returned and we need to redirect
-      if (destinationRoute && navigationService.needsRedirect(location.pathname, role)) {
-        navigateTo(destinationRoute);
+      try {
+        const destinationRoute = navigationService.handleRoleTransition(previousRole, role);
+        
+        // If a destination route is returned and we need to redirect
+        if (destinationRoute && navigationService.needsRedirect(location.pathname, role)) {
+          navigateTo(destinationRoute);
+        }
+      } catch (error) {
+        console.error("Navigation error during role transition:", error);
+        // Fallback to a safe route if something goes wrong
+        if (role) {
+          const fallbackRoute = navigationService.getFallbackRouteForRole(role);
+          if (fallbackRoute) {
+            navigateTo(fallbackRoute);
+          }
+        }
       }
     }
   }, [role, previousRole, location.pathname, navigateTo]);
   
+  const isAuthRoute = location.pathname === "/auth";
+  
   return (
     <div className="flex flex-col min-h-screen">
-      {showBreadcrumbs && (
+      {showBreadcrumbs && !isAuthRoute && (
         <NavigationBreadcrumb 
           maxItems={breadcrumbMaxItems} 
           showHomeIcon={showHomeIcon} 

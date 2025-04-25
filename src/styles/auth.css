@@ -1,16 +1,20 @@
-
 .auth-container {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--editor-bg);
   padding: 1rem;
+  overflow-y: auto;
 }
 
 .auth-card {
   width: 100%;
   max-width: 45rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .auth-tabs-list {
@@ -22,7 +26,6 @@
   padding: 0.25rem;
 }
 
-/* New class specifically for mobile editor tabs */
 .mobile-editor-tabs {
   margin-bottom: 0;
   padding: 0;
@@ -47,7 +50,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Mobile editor specific overrides */
 .animate-fade-in .auth-tabs-list {
   margin-bottom: 0;
   padding: 0;
@@ -57,9 +59,8 @@
   padding: 0 1rem;
 }
 
-/* Special background handling for design preview tab */
 .auth-tabs-list.bg-editor-panel .auth-tab-trigger[data-state="active"] {
-  background-color: rgb(249, 250, 251); /* Use the editor panel color from tailwind config */
+  background-color: rgb(249, 250, 251);
   box-shadow: none;
 }
 

@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Outlet } from "react-router-dom";
 import { RoleAwareLayout } from "./RoleAwareLayout";
 import { NavigationBreadcrumb } from "@/components/navigation/NavigationBreadcrumb";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,7 @@ import { navigationService } from "@/services/navigation/NavigationService";
 import { useNavigationHandlers } from "@/hooks/navigation/useNavigationHandlers";
 
 interface NavigationAwareLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   showBreadcrumbs?: boolean;
   breadcrumbMaxItems?: number;
   showHomeIcon?: boolean;
@@ -50,7 +50,7 @@ export const NavigationAwareLayout: React.FC<NavigationAwareLayoutProps> = ({
       )}
       
       <RoleAwareLayout role={role}>
-        {children}
+        {children || <Outlet />}
       </RoleAwareLayout>
     </div>
   );

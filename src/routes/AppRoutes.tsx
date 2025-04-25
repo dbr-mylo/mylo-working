@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSmokeTest } from "@/hooks/useSmokeTest";
@@ -11,7 +12,6 @@ import {
   WriterRoute 
 } from "./ProtectedRoutes";
 import NavigationAwareLayout from "@/components/layout/NavigationAwareLayout";
-import TestingRoutes from "./TestingRoutes";
 
 // Page imports
 import Index from "@/pages/Index";
@@ -73,10 +73,16 @@ const AppRoutes = () => {
   return (
     <ErrorBoundary context="AppRoutes" fallback={appErrorFallback}>
       <RouteValidator />
-      <NavigationAwareLayout>
-        <Routes>
-          <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-          
+      <Routes>
+        {/* Auth route with no navigation elements */}
+        <Route path="/auth" element={
+          <AuthRoute>
+            <Auth />
+          </AuthRoute>
+        } />
+        
+        {/* All other routes with NavigationAwareLayout */}
+        <Route element={<NavigationAwareLayout />}>
           {/* Role-specific dashboard routes */}
           <Route path="/writer-dashboard" element={<WriterRoute><WriterDashboard /></WriterRoute>} />
           <Route path="/designer-dashboard" element={<DesignerRoute><div>Designer Dashboard</div></DesignerRoute>} />
@@ -126,8 +132,8 @@ const AppRoutes = () => {
           
           <Route path="/not-found" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/not-found" />} />
-        </Routes>
-      </NavigationAwareLayout>
+        </Route>
+      </Routes>
     </ErrorBoundary>
   );
 };

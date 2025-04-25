@@ -3,6 +3,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditorNav } from "@/components/editor-nav";
 import { Document, UserRole } from "@/lib/types";
+import { useLocation } from "react-router-dom";
 
 interface RoleAwareLayoutProps {
   role: UserRole | null;
@@ -30,7 +31,11 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   showRoleNavigation = true
 }) => {
   const { user } = useAuth();
+  const location = useLocation();
   const currentRole = role || "editor";
+  
+  // Check if current route is auth route - don't show editor nav
+  const isAuthRoute = location.pathname === "/auth";
   
   // Check if we're rendering children directly (like for Dashboard)
   // Instead of checking displayName, check if the element's type is called "Dashboard"
@@ -39,7 +44,7 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
       children.type.toString().includes('Dashboard')) ||
      children.type === 'Dashboard');
   
-  if (renderDirectly) {
+  if (renderDirectly || isAuthRoute) {
     return <>{children}</>;
   }
   
